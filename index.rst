@@ -1,5 +1,5 @@
-Welcome to Neuro's documentation!
-=================================
+Welcome to Taler's REST API documentation!
+==========================================
 
 We are building an anonymous, taxable payment system using modern
 cryptography.  Customers will use traditional money transfers to send

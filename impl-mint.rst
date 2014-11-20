@@ -179,7 +179,7 @@ The following tables are used for refreshing.
 ----------------
 Key Management
 ----------------
-The command line tool `neuro-mint-keyup` updates the signing key and
+The command line tool `taler-mint-keyup` updates the signing key and
 list of denominations offered by the mint.  This process requires the
 mint's master key, and should be done offline in order to protect the master key.
 
@@ -237,6 +237,6 @@ Purses
 Incoming transactions to the mint's provider result in the creation or update of `purses`, identified
 by their withdrawal key.
 
-The command line tool `neuro-mint-modpurse` allows create and add money to purses in the mint's database.
+The command line tool `taler-mint-modpurse` allows create and add money to purses in the mint's database.
 
 

@@ -449,7 +449,7 @@ deposit permission for the coin from the customer.
 ===========================
 Binary Blob Specification
 ===========================
-This section specifies the binary representation of messages used in Neuro's protocols.
+This section specifies the binary representation of messages used in Taler's protocols.
 The message formats are given in a C-style pseudocode notation.  In contrast to real C structs,
 padding is always specified explicitly, and numeric values are little endian.
 
