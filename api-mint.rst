@@ -99,17 +99,10 @@ customer's withdrawal key for the purse.
   The mint responds with a JSON object containing the following fields:
 
   * `balance`: Money left in this purse. A list of denominations (in case multiple currencies happen to be in the same purse).
-  * `blind_session_pub`: Blinding key to be used for withdrawing from this purse.
-    The field may be absent if the balance is smaller than the smallest denomination offered by the mint.
   * `expiration`: Expiration date of the purse.
   * `sig`: Signature of the mint.
 
-  For the same `balance`, the blinding key `blinding_pub` must be the same.  Otherwise the mint is faulty.
-
   **Error Responses**
-
-  :status 402 Payment Required: The balance of the purse is not sufficient
-    to withdraw any coin denomination offered by the mint.
 
   :status 400 Bad Request: The `withdraw_pub` parameter is missing or malformed.
 
@@ -121,9 +114,8 @@ customer's withdrawal key for the purse.
   Withdraw a coin with a given denomination key.
 
   :query denom: denomination key
-  :query blank: blinded coin blank
-  :blind_session_pub: blind session public key
-  :withdraw_pub: withdraw / purse public key
+  :query blank: coin's blinded public key
+  :query withdraw_pub: withdraw / purse public key
   :query sig: signature, created with the withdrawal key
 
   **Success Response**:
@@ -166,53 +158,53 @@ In order group multipe coins, the customer generates a refreshing session key.
   "Melt" coins, marking it for refreshing.  Invalidates the coins.
 
   The request body must contain a JSON object with the following fields:
-  * `melt_coins`: List of coins to refresh.
-  * `new_denoms`: List of new denominations to order.
-  * `session_pub`: Session public key
+
+  :<json array melt_coins: List of coins to refresh.
+  :<json array new_denoms: List of new denominations to order.
+  :<json string session_pub: Session public key
 
   The `melt_coins` field is a list of JSON objects with the following fields:
-  * `coin_pub`: Coin public key
-  * `coin_sig`: Signature by the coin over the session public key
-  * `denom_pub`: Denomination public key
-  * `denom_sig`: Signature over the coin public key by the denomination key
+
+  :json string coin_pub: Coin public key
+  :json string coin_sig: Signature by the coin over the session public key
+  :json string denom_pub: Denomination public key
+  :json string denom_sig: Signature over the coin public key by the denomination key
 
 
-  **Success Response**:
+  **Success Response**
 
   :status 200 OK: The request was succesful. In that case, the responst body is a json
     object with `kappa` blind session keys for each new coin.
 
-  **Error Responses**:
+  **Error Responses**
 
   :status 400 Bad Request: A request parameter is missing or malformed.
-
   :status 401 Gone: The coin `coin` has already been refreshed.
-
   :status 403 Forbidden: Either `csig` or `ssig` is invalid.
 
 .. http:post:: /refresh/commit
 
   Commit values for the cut-and-choose in the refreshing protocol.
   The request body must be a JSON object with the following fields:
-  * `session_pub`: Session to commit values for
-  * `session_sig`: Signature over the whole commitment
-  * `coin_evs`: For each new coin, `kappa` coin blanks.
-  * `transfer_pubs`: List of transfer public keys
-  * `new_encs`: For each new coin, a list of encryptions (one for each cnc instance)
-  * `secret_encs`: For each cut-and-choose instance, the linking encryption for each old coin
 
-  **Success Response**:
+  :<json string session_pub: Session to commit values for
+  :<json string session_sig: Signature over the whole commitment
+  :<json array coin_evs: For each new coin, `kappa` coin blanks.
+  :<json array transfer_pubs: List of transfer public keys
+  :<json array new_encs: For each new coin, a list of encryptions (one for each cnc instance)
+  :<json array secret_encs: For each cut-and-choose instance, the linking encryption for each old coin
+
+  **Success Response**
 
   :status 202 Accepted: The mint accepted the commitment, but still needs more commitments.
 
   The response body contains a JSON object with the following fields:
+  TODO..
 
-  **Error Response**:
+  **Error Response**
 
   :status 400 Bad Request: A request parameter is missing or malformed.
-
   :status 403 Forbidden: The signature `sig` is invalid.
-
   :status 404 Not Found: The mint does not know the blind key `blindkey` given
     in the request.
 
@@ -220,27 +212,27 @@ In order group multipe coins, the customer generates a refreshing session key.
 
   Reveal previously commited values to the bank.  Request body contains a JSON object with
   the following fields:
-  * `session_pub`: The session public key
-  * `transfer_privs`: Revealed transfer private keys
 
-  **Success Response**:
+  :<json string session_pub: The session public key
+  :<json array transfer_privs: Revealed transfer private keys
 
-  :status 200 OK: All commitments were revealed successfully.
+  **Success Response**
 
-  The mint responds with a JSON object containing the following
-  fields:
+  :status 200 OK: All commitments were revealed successfully.  The mint responds
+                  with a JSON of the following type
 
-  * `bcsig_list`: List of the mint's blind signatures on the ordered new coins.
+  :>json array bcsig_list: List of the mint's blind signatures on the ordered
+                           new coins.
 
-  :status 202 Accepted: The revealed value was accepted, but the mint
-    requires more reveals.
+  :status 202 Accepted: The revealed value was accepted, but the mint requires
+                        more reveals.
 
-  **Error Responses**:
+  **Error Responses**
 
   If the reveal is incomplete, the JSON object contains:
 
-  * `reveal_missing`: List of blinding keys with missing reveals from the customer.
-
+  :>json array reveal_missing: List of blinding keys with missing reveals from
+                               the customer.
   :status 400 Bad Request: Request parameters incomplete or malformed.
   :status 403 Forbidden: The signature `ssig` is invalid.
   :status 404 Not Found: The blinding key is not known to the mint.
@@ -254,22 +246,23 @@ In order group multipe coins, the customer generates a refreshing session key.
   :query coin: coin public key
   :query csig: signature by the coin
 
-  **Success Response**:
+  **Success Response**
 
   :status 200 OK: All commitments were revealed successfully.
 
   The mint responds with a JSON object containing the following fields:
-  * `link_secret_enc`: ...
-  * `enc_list`: List of encrypted values for the result coins.
-  * `tpk_list`: List of transfer public keys for the new coins.
-  * `bscoin_list`: List of blind signatures on the new coins.
 
-  **Error Responses**:
+  :>json string `link_secret_enc`: ...
+  :>json array enc_list: List of encrypted values for the result coins.
+  :>json array tpk_list: List of transfer public keys for the new coins.
+  :>json array bscoin_list: List of blind signatures on the new coins.
+
+  **Error Responses**
 
   :status 400 Bad Request: Request parameters incomplete or malformed.
   :status 403 Forbidden: The signature `csig` is invalid.
-  :status 404 Not Found: The coin public key is not known to the bank, or was not involved
-    in a refresh.
+  :status 404 Not Found: The coin public key is not known to the bank, or was
+                         not involved in a refresh.
 
 
 
@@ -305,15 +298,15 @@ deposit permission for the coin from the customer.
 
   The mint responds with a JSON object containing the following fields:
 
-  * `status`: The string constant `LOCK_OK`
-  * `C`: the coin's public key
-  * `t`: timestamp indicating the lock expire time
-  * `m`: transaction id for the transaction between merchant and customer
-  * `f`: the maximum amount for which the coin has to be locked
-  * `M`: the public key of the merchant
-  * `sig`: the signature made by the mint with the corresponding coin's
-           denomination key over the parameters `status`, `C`, `t`, `m`, `f`,
-           `M`
+  :>json string status: The string constant `LOCK_OK`
+  :>json string C: the coin's public key
+  :>json integer t: timestamp indicating the lock expire time
+  :>json string m: transaction id for the transaction between merchant and customer
+  :>json object f: the maximum amount for which the coin has to be locked
+  :>json string M: the public key of the merchant
+  :>json string sig: the signature made by the mint with the corresponding
+           coin's denomination key over the parameters `status`, `C`, `t`, `m`,
+           `f`, `M`
 
   The merchant can then save this JSON object as a proof that the mint has
   agreed to transfer a maximum amount equalling to the locked amount upon a
@@ -331,19 +324,20 @@ deposit permission for the coin from the customer.
   If the coin is already locked, then the response contains the existing lock
   object rendered as a JSON object with the following fields:
 
-  * `status`: the string constant `LOCKED`
-  * `C`: the coin's public key
-  * `t`: the expiration time of the existing lock
-  * `m`: the transaction ID which locked the coin
-  * `f`: the amount locked for the coin
-  * `M`: the public key of the merchant who locked the coin
-  * `csig`: the signature made by the customer with the coin's private key
-    over the parameters `t`, `m`, `f` and `M`
+  :>json string status: the string constant `LOCKED`
+  :>json string C: the coin's public key
+  :>json integer t: the expiration time of the existing lock
+  :>json string m: the transaction ID which locked the coin
+  :>json object f: the amount locked for the coin
+  :>json string M: the public key of the merchant who locked the coin
+  :>json string csig: the signature made by the customer with the coin's private
+    key over the parameters `t`, `m`, `f` and `M`
 
   If the coin has already been refreshed then the mint responds with a JSON
   object with the following fields:
 
-  * `status`: the string constant `REFRESHED`
+  :>json string status: the string constant `REFRESHED`
+
   * ... TBD
 
   :status 404: the coin is not minted by this mint, or it has been expired
@@ -363,20 +357,20 @@ deposit permission for the coin from the customer.
   merchants bank account.  The request should contain a JSON object with the
   following fields
 
-  * `C`: coin's public key
-  * `K`: denomination key with which the coin is signed
-  * `ubsig`: mint's unblinded signature of the coin
-  * `type`: the string constant `"DIRECT_DEPOSIT"` or `"INCREMENTAL_DEPOSIT"`
+  :<json string C: coin's public key
+  :<json string K: denomination key with which the coin is signed
+  :<json string ubsig: mint's unblinded signature of the coin
+  :<json string type: the string constant `"DIRECT_DEPOSIT"` or `"INCREMENTAL_DEPOSIT"`
      respectively for direct deposit or incremental deposit type of interaction
      chosen by the customer and the merchant.
-  * `m`: transaction id for the transaction between merchant and customer
-  * `f`: the maximum amount for which the coin has to be locked
-  * `M`: the public key of the merchant
-  * `H_a`: the hash of the contract made between merchant and customer
-  * `H_wire`: the hash of the merchant's payment information `wire`
-  * `csig`: the signature made by the customer with the coin's private key over
+  :<json string m: transaction id for the transaction between merchant and customer
+  :<json object f: the maximum amount for which the coin has to be locked
+  :<json string M: the public key of the merchant
+  :<json string H_a: the hash of the contract made between merchant and customer
+  :<json string H_wire: the hash of the merchant's payment information `wire`
+  :<json string csig: the signature made by the customer with the coin's private key over
      the parameters `type`, `m`, `f`, `M`, `H_a` and, `H_wire`
-  * `wire`: this should be a JSON object whose format should comply to one of the
+  :<json object `wire`: this should be a JSON object whose format should comply to one of the
      supported wire transfer formats.  See :ref:`wireformats`
 
   The deposit operation succeeds if the coin is valid for making a deposit and
@@ -388,11 +382,11 @@ deposit permission for the coin from the customer.
 
   The mint responds with a JSON object containing the following fields:
 
-  * `status`: the string constant `DEPOSIT_OK`
-  * `t`: the current timestamp
-  * `deposit_tx`: the transaction identifier of the transfer transaction made by the
+  :>json string status: the string constant `DEPOSIT_OK`
+  :>json integer t: the current timestamp
+  :>json string deposit_tx: the transaction identifier of the transfer transaction made by the
      mint to deposit money into the merchant's account
-  * `sig`: signature of the mint made over the parameters `status`, `t` and
+  :>json string sig: signature of the mint made over the parameters `status`, `t` and
      `deposit_tx`
 
   :status 202: the operation is accepted but will take a while to complete;
@@ -401,12 +395,12 @@ deposit permission for the coin from the customer.
   This happens when the mint cannot immediately execute the SEPA transaction.
   The response contains the following fields as part of a JSON object:
 
-  * `status`: the string contant `DEPOSIT_QUEUED`
-  * `t`: the current timestamp
-  * `retry`: timestamp indicating when the result of the request will be made
-             available
-  * `sig`: the signature of the mint made over the parameters `status`, `t`, and
-           `retry`
+  :>json string status: the string contant `DEPOSIT_QUEUED`
+  :>json integer t: the current timestamp
+  :>json integer retry: timestamp indicating when the result of the request will
+             be made available
+  :>json string sig: the signature of the mint made over the parameters
+           `status`, `t`, and `retry`
 
   **Failure response**
 
@@ -417,23 +411,24 @@ deposit permission for the coin from the customer.
   In case of failure due to the coin being already deposity, the response
   contains a JSON object with the following fields:
 
-  * `status`: the string constant `DEPOSITED`
-  * `C`: the coin's public key
-  * `m`: ID of the past transaction which corresponding to this deposit
-  * `f`: the amount that has been deposited from this coin
-  * `M`: the public key of the merchant to whom the deposit was earlier made
-  * `H`: the hash of the contract made between the merchant identified by `M`
+  :>json string status: the string constant `DEPOSITED`
+  :>json string C: the coin's public key
+  :>json string m: ID of the past transaction which corresponding to this deposit
+  :>json object f: the amount that has been deposited from this coin
+  :>json string M: the public key of the merchant to whom the deposit was earlier made
+  :>json string H: the hash of the contract made between the merchant identified by `M`
          and the customer
-  * `csig`: the signature made by the owner of the coin with the coin's private
+  :>json string csig: the signature made by the owner of the coin with the coin's private
             key over the parameters `m`, `f`, `M`, `H` and the string `"DEPOSIT"`
-  * `t`: the timestamp when the deposit was made
-  * `deposit_tx`: the transaction identifier of the SEPA transaction made by the
+  :>json integer t: the timestamp when the deposit was made
+  :>json string deposit_tx: the transaction identifier of the SEPA transaction made by the
     mint to deposit money into the merchant's account
 
   In case if the coin has been already refreshed, the response contains a JSON
   object with the following fields:
 
-  * `status`: the string constant `REFRESHED`
+  :>json string status: the string constant `REFRESHED`
+
   * ... TBD
 
   :status 404: the coin is not minted by this mint, or it has been expired
