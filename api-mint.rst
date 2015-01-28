@@ -153,6 +153,7 @@ The new coins are linkable from all old coins.
 
 In order group multipe coins, the customer generates a refreshing session key.
 
+.. _refresh:
 .. http:post:: /refresh/melt
 
   "Melt" coins, marking it for refreshing.  Invalidates the coins.
@@ -168,7 +169,12 @@ In order group multipe coins, the customer generates a refreshing session key.
   :json string coin_pub: Coin public key
   :json string coin_sig: Signature by the coin over the session public key
   :json string denom_pub: Denomination public key
-  :json string denom_sig: Signature over the coin public key by the denomination key
+  :json string denom_sig: Signature over the coin public key by the denomination
+                          key
+  :json obj retract_perm (optional): If the coin was claimed as a refund, this
+    field should contain the retract permission obtained from the merchant,
+    otherwise it should not be present.  For details about the object type, see
+    :ref:`Merchant API:retract<retract>`.
 
 
   **Success Response**
