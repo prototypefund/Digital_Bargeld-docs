@@ -163,60 +163,48 @@ In order group multipe coins, the customer generates a refreshing session key.
 
 .. http:post:: /refresh/melt
 
-  "Melt" coins, marking it for refreshing.  Invalidates the coins.
+  "Melt" coins.  Invalidates the coins and prepares for minting of fresh coins.
 
   The request body must contain a JSON object with the following fields:
-  * `melt_coins`: List of coins to refresh.
-  * `new_denoms`: List of new denominations to order.
+  * `new_denoms`: List of `n` new denominations to order.  The sum of the values of these denominations must be smaller than the total value of the `melt_coins` minus applicable fees.
   * `session_pub`: Session public key
+  * `session_sig`: Signature over the whole commitment with the session private key
+  * `coin_evs`: For each of the `n` new coins, `kappa` blinded coins (2-dimensional array).
+  * `transfer_pubs`: List of `m` transfer public keys
+  * `new_encs`: For each of the `n` new coins, a list of encryptions (one for each cnc (?) instance)
+  * `secret_encs`: For each of the `kappa` cut-and-choose instances, the linking encryption for each of the `m` old coins
+  * `melt_coins`: List of `m` old coins to melt.
 
   The `melt_coins` field is a list of JSON objects with the following fields:
   * `coin_pub`: Coin public key
-  * `coin_sig`: Signature by the coin over the session public key
-  * `denom_pub`: Denomination public key
-  * `denom_sig`: Signature over the coin public key by the denomination key
+  * `coin_sig`: Signature by the coin over the session public key indicating that this coin should be melted (and with which amount)
+  * `denom_pub`: Denomination public key of the coin
+  * `denom_sig`: Signature over the coin public key by the denomination key (demonstrating the coin has value)
+  * `value`: Amount of the value of the coin that should be melted as part of this refresh operation
 
 
   **Success Response**:
 
-  :status 200 OK: The request was succesful. In that case, the responst body is a json
-    object with `kappa` blind session keys for each new coin.
+    :status 200 OK: The request was succesful. The response body contains a JSON object with the following fields:
+  * `noreveal_index`: Which of the `kappa` indices does the client not have to reveal.
+  * `mint_sig`: Signature of the mint affirming the successful melt and confirming the `noreveal_index`
+
 
   **Error Responses**:
 
   :status 400 Bad Request: A request parameter is missing or malformed.
 
-  :status 401 Gone: The coin `coin` has already been refreshed.
+  :status 401 Gone: A coin `coin` has insufficient funds.  Request body contains a JSON object with
+  the following fields:
 
-  :status 403 Forbidden: Either `csig` or `ssig` is invalid.
+  * `fixme`: Details showing that `coin` has insufficient funds to satisfy the request.
 
-.. http:post:: /refresh/commit
+  :status 403 Forbidden: Either a `coin_sig` or the `session_sig` is invalid.
 
-  Commit values for the cut-and-choose in the refreshing protocol.
-  The request body must be a JSON object with the following fields:
-  * `session_pub`: Session to commit values for
-  * `session_sig`: Signature over the whole commitment
-  * `coin_evs`: For each new coin, `kappa` coin blanks.
-  * `transfer_pubs`: List of transfer public keys
-  * `new_encs`: For each new coin, a list of encryptions (one for each cnc instance)
-  * `secret_encs`: For each cut-and-choose instance, the linking encryption for each old coin
+  :status 404 Not Found: The mint does not know one of the denomination keys `denom_pub` given in the request.
 
-  **Success Response**:
 
-  :status 202 Accepted: The mint accepted the commitment, but still needs more commitments.
-
-  The response body contains a JSON object with the following fields:
-
-  **Error Response**:
-
-  :status 400 Bad Request: A request parameter is missing or malformed.
-
-  :status 403 Forbidden: The signature `sig` is invalid.
-
-  :status 404 Not Found: The mint does not know the blind key `blindkey` given
-    in the request.
-
-.. http:post:: /refresh/reveal
+     .. http:post:: /refresh/reveal
 
   Reveal previously commited values to the bank.  Request body contains a JSON object with
   the following fields:
@@ -232,20 +220,22 @@ In order group multipe coins, the customer generates a refreshing session key.
 
   * `bcsig_list`: List of the mint's blind signatures on the ordered new coins.
 
-  :status 202 Accepted: The revealed value was accepted, but the mint
-    requires more reveals.
-
   **Error Responses**:
 
   If the reveal is incomplete, the JSON object contains:
 
-  * `reveal_missing`: List of blinding keys with missing reveals from the customer.
 
   :status 400 Bad Request: Request parameters incomplete or malformed.
   :status 403 Forbidden: The signature `ssig` is invalid.
   :status 404 Not Found: The blinding key is not known to the mint.
   :status 409 Conflict: The revealed value was inconsistent with the commitment.
+
+     * `original_info`: signed information from /refresh/melt that conflicts with the current /refresh/reveal request.
+
   :status 410 Gone: A conflict occured, the money is gone.
+
+     * `conflict_info`: proof of previous attempt by the client to cheat
+
 
 .. http:get:: /refresh/link
 
@@ -636,5 +626,3 @@ The `encrypted` block denotes an encrypted message.
     struct PublicKey tpks[n];
     struct RefreshEnc encs[n];
   };
-
-
