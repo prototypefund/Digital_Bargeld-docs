@@ -292,130 +292,125 @@ Deposit operations are requested by a merchant during a transaction. For the dep
 Refreshing
 ------------------
 
-Refreshing creates `n` new coins from `m` old coins, where the sum of denominations of the new coins must be smaller than the sum of the old coins' denominations plus melting (refresh) and withdrawl fees charged by the mint.  The refreshing API can be used by wallets to ensure that partially spent coins are refreshed, making transactions with the refreshed coins unlinkabe to previous transactions (by anyone except the wallet itself).
+Refreshing creates `n` new coins from `m` old coins, where the sum of denominations of the new coins must be smaller than the sum of the old coins' denominations plus melting (refresh) and withdrawl fees charged by the mint.  The refreshing API can be used by wallets to melt partially spent coins, making transactions with the freshly minted coins unlinkabe to previous transactions (by anyone except the wallet itself).
 
-However, the new coins are linkable from the private keys of all old coins using the /refresh/link request.  While /refresh/link must be implemented by the mint to achieve certain security properties, wallets do not really ever need it during normal operation.
-
-  .. note::
-
-     This section still needs to be updated to reflect the latest implementation (where two requests were combined into one).
+However, the new coins are linkable from the private keys of all old coins using the /refresh/link request.  While /refresh/link must be implemented by the mint to achieve certain security properties (taxability), wallets do not really ever need that part of the API during normal operation.
 
 .. _refresh:
 .. http:post:: /refresh/melt
 
-  "Melt" coins.  Invalidates the coins and prepares for minting of fresh coins.
+  "Melt" coins.  Invalidates the coins and prepares for minting of fresh coins.  Taler uses a global parameter `kappa` (currently always 3) for the cut-and-choose component of the protocol (this request is the commitment for the cut-and-choose).  Thus, various arguments are given `kappa`-times in this step.
 
   The request body must contain a JSON object with the following fields:
 
-  :<json int kappa: dimension `kappa` for the cut-and-choose protocol
-  :<json array new_denoms: List of `n` new denominations to order.
-  :<json string session_pub: Session public key
-  :<json string session_sig: Signature_ over the whole commitment
-  :<json array coin_evs: For each of the `n` new coin, `kappa` coin blanks.
-  :<json array transfer_pubs: List of `m` transfer public keys
-  :<json array new_encs: For each of the `n` new coins, a list of encryptions (one for each cnc instance)
-  :<json array secret_encs: For each of the `kappa` cut-and-choose instances, the linking encryption for each of the `m` old coins
+  :<json array new_denoms: List of `n` new denominations to order. Each entry must be a base32_ encoded RSA public key corresponding to the coin to be minted.
   :<json array melt_coins: List of `m` coins to melt.
+  :<json array coin_evs: For each of the `n` new coins, `kappa` coin blanks (2D array)
+  :<json array transfer_pubs: For each of the `m` old coins, `kappa` transfer public keys (2D-array of ephemeral ECDHE keys)
+  :<json array secret_encs: For each of the `m` old coins, `kappa` link encryptions with an ECDHE-encrypted SHA-512 hash code.  The ECDHE encryption is done using the private key of the respective old coin and the corresponding transfer public key.  Note that the SHA-512 hash code must be the same across all coins, but different across all of the `kappa` dimensions.  Given the private key of a single old coin, it is thus possible to decrypt the respective `secret_encs` and obtain the SHA-512 hash that was used to symetrically encrypt the `link_encs` of all of the new coins.
+  :<json array link_encs: For each of the `n` new coins, `kappa` (symmetric) encryptions of the ECDSA/ECDHE-private key of the new coins and the corresponding blinding factor, encrypted using the corresponding SHA-512 hash that is encrypted in `secret_encs`.
 
-  The `melt_coins` field is a list of JSON objects with the following fields:
+  For details about the HKDF used to derive the symmetric encryption keys from ECDHE and the symmetric encryption (AES+Twofish) used, please refer to the implementation in `libtalerutil`. The `melt_coins` field is a list of JSON objects with the following fields:
 
-  :<json string coin_pub: Coin public key
-  :<json string coin_sig: Signature_ by the coin over the session public key
-  :<json string denom_pub: Denomination public key
-  :<json string denom_sig: Signature over the coin public key by the denomination
+  :<jsonarr string coin_pub: Coin public key (uniquely identifies the coin)
+  :<jsonarr string denom_pub: Denomination public key (allows the mint to determine total coin value)
+  :<jsonarr string denom_sig: Signature_ over the coin public key by the denomination
+  :<jsonarr string confirm_sig: Signature_ by the coin over the session public key
      key
-  :<json object value: Amount_ of the value of the coin that should be melted as part of this refresh operation
+  :<jsonarr object value_with_fee: Amount_ of the value of the coin that should be melted as part of this refresh operation, including melting fee.
 
-  **Success Response**
+  Errors such as failing to do proper arithmetic when it comes to calculating the total of the coin values and fees are simply reported as bad requests.  This includes issues such as melting the same coin twice in the same session, which is simply not allowed.  However, theoretically it is possible to melt a coin twice, as long as the `value_with_fee` of the two melting operations is not larger than the total remaining value of the coin before the melting operations. Nevertheless, this is not really useful.
+
+  **Success Response: OK**
 
   :status 200 OK: The request was succesful. The response body contains a JSON object with the following fields:
+  :resheader Content-Type: application/json
   :<json int noreveal_index: Which of the `kappa` indices does the client not have to reveal.
-  :<json base32 mint_sig: Signature_ of the mint affirming the successful melt and confirming the `noreveal_index`
+  :<json base32 mint_sig: Signature_ with purpose `TALER_SIGNATURE_MINT_CONFIRM_MELT` whereby the mint affirms the successful melt and confirming the `noreveal_index`
 
+  **Error Response: Invalid signature**:
 
-  **Error Responses**
+  :status 401 Unauthorized: One of the signatures is invalid.
+  :resheader Content-Type: application/json
+  :>json string error: the value is "invalid signature"
+  :>json string paramter: the value is "confirm_sig" or "denom_sig", depending on which signature was deemed invalid by the mint
 
-  :status 401 Gone: The coin has insufficient value remaining.
+  **Error Response: Precondition failed**:
 
-  :<json fixme fixme: Details showing that `coin` has insufficient funds to satisfy the request.
+  :status 403 Forbidden: The operation is not allowed as (at least) one of the coins has insufficient funds.
+  :resheader Content-Type: application/json
+  :>json string error: the value is "insufficient funds"
+  :>json array history: the transaction list of the respective coin that failed to have sufficient funds left.  The format is the same as for insufficient fund reports during /deposit.  Note that only the transaction history for one bogus coin is given, even if multiple coins would have failed the check.
 
-  :status 403 Forbidden: Either a `coin_sig` or the `session_sig` is invalid.
+  **Failure response: Unknown denomination key**
 
-  :status 404 Not Found: The mint does not know one of the denomination keys `denom_pub` given in the request.
-
-  :status 409 Conflict: A coin `coin` has insufficient funds.  Request body contains a JSON object with
-  the following fields:
-
-     :<fixme: Details showing that `coin` has insufficient funds to satisfy the request.
-
-  :status 412 Precondition failed: The client's choice of `kappa` is outside of the acceptable range.
+  :status 404: the mint does not recognize the denomination key as belonging to the mint, or it has expired
+  :resheader Content-Type: application/json
+  :>json string error: the value is "unknown entity referenced"
+  :>json string paramter: the value is "denom_pub"
 
 .. http:post:: /refresh/reveal
 
-  Reveal previously commited values to the bank.  Request body contains a JSON object with
-  the following fields:
+  Reveal previously commited values to the mint, except for the values corresponding to the `noreveal_index` returned by the /mint/melt step.  Request body contains a JSON object with the following fields:
 
-  :<json string session_pub: The session public key
-  :<json array transfer_privs: Revealed transfer private keys
+  :<json base32 session_hash: Hash over most of the arguments to the /mint/melt step.  Used to identify the corresponding melt operation.  For details on which elements must be hashed in which order, please consult the mint code itself.
+  :<json array transfer_privs: 2D array of `kappa - 1` times number of melted coins ECDHE transfer private keys.  The mint will use those to decrypt the transfer secrets, check that they match across all coins, and then decrypt the private keys of the coins to be generated and check all this against the commitments.
 
-  **Success Response**
+  **Success Response: OK**
 
-  :status 200 OK: All commitments were revealed successfully.  The mint responds
-                  with a JSON of the following type
+  :status 200 OK: The transfer private keys matched the commitment and the original request was well-formed.  The mint responds with a JSON of the following type:
+  :resheader Content-Type: application/json
+  :>json array ev_sigs: List of the mint's blind (RSA) signatures on the new coins.
 
-  :>json array bcsig_list: List of the mint's blind signatures on the ordered
-                           new coins.
+  **Failure Response: Conflict**
 
-  :status 403 Forbidden: The signature `ssig` is invalid.
-  :status 404 Not Found: The blinding key is not known to the mint.
-  :status 409 Conflict: The revealed value was inconsistent with the commitment.
+  :status 409 Conflict: There is a problem between the original commitment and the revealed private keys.
+  :resheader Content-Type: application/json
+  :>json string error: the value is "commitment violation"
+  :>json int offset: offset of in the array of `kappa` commitments where the error was detected
+  :>json int index: index of in the with respect to the melted coin where the error was detected
+  :>json string object: name of the entity that failed the check (i.e. "transfer key")
 
-     * `original_info`: signed information from /refresh/melt that conflicts with the current /refresh/reveal request.
+  .. note::
 
-  :status 410 Gone: A conflict occured, the money is gone.
-
-     * `conflict_info`: proof of previous attempt by the client to cheat
-
+     Further proof of the violation will need to be added to this response in the future. (#3712)
 
 .. http:get:: /refresh/link
 
-  Link an old key to the refreshed coin.
+  Link the old public key of a melted coin to the coin(s) that were minted during the refresh operation.
 
-  :query coin: coin public key
-  :query csig: signature by the coin
+  :query coin_pub: melted coin's public key
 
   **Success Response**
 
   :status 200 OK: All commitments were revealed successfully.
+  :>json base32 transfer_pub: transfer public key corresponding to the `coin_pub`, used to (ECDHE) decrypt the `secret_enc` in combination with the private key of `coin_pub`.
+  :>json base32 secret_enc: ECDHE-encrypted link secret that, once decrypted, can be used to decrypt/unblind the `new_coins`.
+  :>json array new_coins: array with (encrypted/blinded) information for each of the coins minted in the refresh operation.
 
-  The mint responds with a JSON object containing the following fields:
+  The `new_coins` array contains the following fields:
 
-  :>json string `link_secret_enc`: ...
-  :>json array enc_list: List of encrypted values for the result coins.
-  :>json array tpk_list: List of transfer public keys for the new coins.
-  :>json array bscoin_list: List of blind signatures on the new coins.
+  :>jsonarr base32 link_enc: Encrypted private key and blinding factor information of the fresh coin
+  :>jsonarr base32 denom_pub: Public key of the minted coin (still blind).
+  :>jsonarr base32 ev_sig: Mint's signature over the minted coin (still blind).
 
-  **Error Responses**
+  **Error Response: Unknown key**:
 
-  :status 403 Forbidden: The signature `csig` is invalid.
-  :status 404 Not Found: The coin public key is not known to the bank, or was
-                         not involved in a refresh.
-
+  :status 404 Not Found: The mint has no linkage data for the given public key, as the coin has not (yet) been involved in a refresh operation.
+  :resheader Content-Type: application/json
+  :>json string error: "unknown entity referenced"
+  :>json string parameter: will be "coin_pub"
 
 
 --------------------
 Locking
 --------------------
 
-Locking operations can be used by a merchant to ensure that a coin
-remains exclusively reserved for the particular merchant (and thus
-cannot be double-spent) for a certain period of time.  For locking
-operation, the merchant has to obtain a lock permission for a coin
-from the coin's owner.
+Locking operations can be used by a merchant to ensure that a coin remains exclusively reserved for the particular merchant (and thus cannot be double-spent) for a certain period of time.  For locking operation, the merchant has to obtain a lock permission for a coin from the coin's owner.
 
   .. note::
 
-     Locking is currently not implemented (#3625), this documentation is thus rather preliminary.
+     Locking is currently not implemented (#3625), this documentation is thus rather preliminary and subject to change.
 
 .. http:GET:: /lock
 
@@ -492,8 +487,16 @@ from the coin's owner.
   In these failures, the response contains an error string describing the reason
   why the request has failed.
 
-.. _restract:
-.. http:POST:: /retract
+--------------------
+Refunds
+--------------------
+
+  .. note::
+
+     Refunds are currently not implemented (#3641), this documentation is thus rather preliminary and subject to change.
+
+.. _refund:
+.. http:POST:: /refund
 
   Undo deposit of the given coin, restoring its value.  The request
   should contain a JSON object with the following fields:
