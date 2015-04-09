@@ -160,6 +160,7 @@ In order group multipe coins, the customer generates a refreshing session key.
 
   The request body must contain a JSON object with the following fields:
 
+  :<json int kappa: dimension `kappa` for the cut-and-choose protocol
   :<json array new_denoms: List of `n` new denominations to order.
   :<json string session_pub: Session public key
   :<json string session_sig: Signature over the whole commitment
@@ -189,37 +190,17 @@ In order group multipe coins, the customer generates a refreshing session key.
 
   :status 400 Bad Request: A request parameter is missing or malformed.
 
-  :status 401 Gone: A coin `coin` has insufficient funds.  Request body contains a JSON object with
-  the following fields:
-
-  :<fixme: Details showing that `coin` has insufficient funds to satisfy the request.
-
   :status 403 Forbidden: Either a `coin_sig` or the `session_sig` is invalid.
 
   :status 404 Not Found: The mint does not know one of the denomination keys `denom_pub` given in the request.
 
+  :status 409 Conflict: A coin `coin` has insufficient funds.  Request body contains a JSON object with
+  the following fields:
 
-     .. http:post:: /refresh/reveal
+     :<fixme: Details showing that `coin` has insufficient funds to satisfy the request.
 
-.. http:post:: /refresh/commit
+  :status 412 Precondition failed: The client's choice of `kappa` is outside of the acceptable range.
 
-  Commit values for the cut-and-choose in the refreshing protocol.
-  The request body must be a JSON object with the following fields:
-
-
-  **Success Response**
-
-  :status 202 Accepted: The mint accepted the commitment, but still needs more commitments.
-
-  The response body contains a JSON object with the following fields:
-  TODO..
-
-  **Error Response**
-
-  :status 400 Bad Request: A request parameter is missing or malformed.
-  :status 403 Forbidden: The signature `sig` is invalid.
-  :status 404 Not Found: The mint does not know the blind key `blindkey` given
-    in the request.
 
 .. http:post:: /refresh/reveal
 
