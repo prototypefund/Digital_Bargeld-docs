@@ -525,44 +525,140 @@ Binary Blob Specification
 
      This section still needs to be updated to reflect the latest implementation.  See "taler_signatures.h" instead in the meantime.
 
-This section specifies the binary representation of messages used in Taler's protocols. The message formats are given in a C-style pseudocode notation.  In contrast to real C structs, padding is always specified explicitly, and numeric values are in network byte order (big endian).
+This section specifies the binary representation of messages used in Taler's protocols. The message formats are given in a C-style pseudocode notation.  Padding is always specified explicitly, and numeric values are in network byte order (big endian).
+
+------------------------
+Amounts
+------------------------
+
+Amounts of currency are always expressed in terms of a base value, a fractional value and the denomination of the currency:
 
 .. sourcecode:: c
 
-  struct PublicKey {
-    uint8_t v[32];
+  struct TALER_AmountNBO {
+    uint64_t value;
+    uint32_t fraction;
+    uint8_t currency_code[12];
   };
 
-  struct PrivateKey {
-    uint8_t d[32];
+
+------------------------
+Time
+------------------------
+
+In signed messages, time is represented using 64-bit big-endian values, denoting microseconds since the UNIX Epoch.  `UINT64_MAX` represents "never" (distant future, eternity).
+
+.. sourcecode:: c
+
+  struct GNUNET_TIME_AbsoluteNBO {
+    uint64_t timestamp_us;
   };
 
-  struct Timestamp {
-    uint64_t val_us;
-  };
+------------------------
+Cryptographic primitives
+------------------------
 
-  struct Signature {
-    uint8_t rs[64];
-  };
+All elliptic curve operations are on Curve25519.  Public and private keys are thus 32 bytes, and signatures 64 bytes.  For hashing (including HKDFs), Taler uses 512-bit hash codes (64 bytes).
 
-In our notation, the type of a field can depend on the value of another field.
-For the following message, the length of the `payload` array must match the value
-of the `size` field.
+.. sourcecode:: c
+
+   struct GNUNET_HashCode {
+     uint8_t hash[64];
+   };
+
+   struct TALER_ReservePublicKeyP {
+     uint8_t eddsa_pub[32];
+   };
+
+   struct TALER_ReservePrivateKeyP {
+     uint8_t eddsa_priv[32];
+   };
+
+   struct TALER_ReserveSignatureP {
+     uint8_t eddsa_signature[64];
+   };
+
+   struct TALER_MerchantPublicKeyP {
+     uint8_t eddsa_pub[32];
+   };
+
+   struct TALER_MerchantPrivateKeyP {
+     uint8_t eddsa_priv[32];
+   };
+
+   struct TALER_TransferPublicKeyP {
+     uint8_t ecdsa_pub[32];
+   };
+
+   struct TALER_TransferPrivateKeyP {
+     uint8_t ecdhe_priv[32];
+   };
+
+   struct TALER_MintPublicKeyP {
+     uint8_t eddsa_pub[32];
+   };
+
+   struct TALER_MintPrivateKeyP {
+     uint8_t eddsa_priv[32];
+   };
+
+   struct TALER_MintSignatureP {
+     uint8_t eddsa_signature[64];
+   };
+
+   struct TALER_MasterPublicKeyP {
+     uint8_t eddsa_pub[32];
+   };
+
+   struct TALER_MasterPrivateKeyP {
+     uint8_t eddsa_priv[32];
+   };
+
+   struct TALER_MasterSignatureP {
+     uint8_t eddsa_signature[64];
+   };
+
+   union TALER_CoinSpendPublicKeyP {
+     uint8_t ecdsa_pub[32];
+     uint8_t ecdhe_pub[32];
+   };
+
+   union TALER_CoinSpendPrivateKeyP {
+     uint8_t ecdsa_priv[32];
+     uint8_t ecdhe_priv[32];
+   };
+
+   struct TALER_CoinSpendSignatureP {
+     uint8_t ecdsa_signature[64];
+   };
+
+   struct TALER_TransferSecretP {
+     uint8_t key[sizeof (struct GNUNET_HashCode)];
+   };
+
+   struct TALER_LinkSecretP {
+     uint8_t key[sizeof (struct GNUNET_HashCode)];
+   };
+
+   struct TALER_EncryptedLinkSecretP {
+     uint8_t enc[sizeof (struct TALER_LinkSecretP)];
+   };
+
+------------------------
+Signatures
+------------------------
+
+EdDSA and ECDSA signatures are always made over (the hash of) a block of the same generic format, the `struct SignedData` given below.  In our notation, the type of a field can depend on the value of another field. For the following message, the length of the `payload` array must match the value of the `size` field:
 
 .. sourcecode:: c
 
   struct SignedData {
     uint32_t size;
     uint32_t purpose;
-    uint8_t payload[size];
+    uint8_t payload[size - sizeof (struct SignedData)];
   };
 
-  struct Denomination {
-    uint32_t value;
-    uint32_t fraction;
-    uint8_t currency_code[4];
-  };
-
+The `purpose` field in `struct SignedData` is used to express the context in which the signature is made, ensuring that a signature cannot be lifted from one part of the protocol to another.  The various `purpose` constants are defined in `taler_signatures.h`.  The `size` field prevents padding attacks.
 
 In the subsequent messages, we use the following notation
 
@@ -572,141 +668,93 @@ In the subsequent messages, we use the following notation
     FIELDS
   } msg;
 
-for signed data (contained in `FIELDS`) with the given purpose.  The `size` field of the
-corresponding `struct SignedData` is determined by the size of `FIELDS`.
+for signed data (contained in `FIELDS`) with the given purpose.  The `size` field of the corresponding `struct SignedData` is determined by the size of `FIELDS`.
 
 .. sourcecode:: c
 
-  struct CoinIssue {
-    // signed by the master key
-    signed (purpose = COIN_ISSUE) {
-      struct PublicKey key;
-      struct Timestamp stamp_expire_withdraw;
-      struct Timestamp stamp_expire_deposit;
-      struct Timestamp stamp_start;
-      uint32_t kappa;
-      uint32_t padding;
-      struct Denomination denom;
-    };
+  struct TALER_WithdrawRequestPS {
+    signed (purpose = TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW) {
+      struct TALER_ReservePublicKeyP reserve_pub;
+      struct TALER_AmountNBO amount_with_fee;
+      struct TALER_AmountNBO withdraw_fee;
+      struct GNUNET_HashCode h_denomination_pub;
+      struct GNUNET_HashCode h_coin_envelope;
+    }
   };
 
-  struct CoinIssueList {
-    // signed by the master key
-    signed (purpose = COIN_ISSUE_LIST) {
-      uint32_t n;
-      struct Timestamp stamp_issue;
-      struct CoinIssue coins[n];
-      struct PublicKey mint_signing_key;
-    };
+  struct TALER_DepositRequestPS {
+    signed (purpose = TALER_SIGNATURE_WALLET_COIN_DEPOSIT) {
+      struct GNUNET_HashCode h_contract;
+      struct GNUNET_HashCode h_wire;
+      struct GNUNET_TIME_AbsoluteNBO timestamp;
+      struct GNUNET_TIME_AbsoluteNBO refund_deadline;
+      uint64_t transaction_id;
+      struct TALER_AmountNBO amount_with_fee;
+      struct TALER_AmountNBO deposit_fee;
+      struct TALER_MerchantPublicKeyP merchant;
+      union TALER_CoinSpendPublicKeyP coin_pub;
+    }
   };
 
-  struct ReserveInformation {
-    // signed with the mint signing key
-    signed (purpose = PURSE_INFO) {
-      struct PublicKey big_r;
-      struct Timestamp stamp_expire_purse;
-      struct Denomination balance;
-      struct Timestamp purse_expiration;
-    };
+  struct TALER_DepositConfirmationPS {
+    signed (purpose = TALER_SIGNATURE_MINT_CONFIRM_DEPOSIT) {
+      struct GNUNET_HashCode h_contract;
+      struct GNUNET_HashCode h_wire;
+      uint64_t transaction_id GNUNET_PACKED;
+      struct GNUNET_TIME_AbsoluteNBO timestamp;
+      struct GNUNET_TIME_AbsoluteNBO refund_deadline;
+      struct TALER_AmountNBO amount_without_fee;
+      union TALER_CoinSpendPublicKeyP coin_pub;
+      struct TALER_MerchantPublicKeyP merchant;
+    }
   };
 
-  struct BlindBlankCoin {
-    TODO todo;
+  struct TALER_RefreshMeltCoinAffirmationPS {
+    signed (purpose = TALER_SIGNATURE_WALLET_COIN_MELT) {
+      struct GNUNET_HashCode session_hash;
+      struct TALER_AmountNBO amount_with_fee;
+      struct TALER_AmountNBO melt_fee;
+      union TALER_CoinSpendPublicKeyP coin_pub;
+    }
   };
 
-  struct BlindSignedCoin {
-    TODO todo;
+  struct TALER_RefreshMeltConfirmationPS {
+    signed (purpose = TALER_SIGNATURE_MINT_CONFIRM_MELT) {
+      struct GNUNET_HashCode session_hash;
+      uint16_t noreveal_index;
+    }
   };
 
-  struct SignedCoin {
-    TODO todo;
+  struct TALER_MintSigningKeyValidityPS {
+    struct TALER_MasterSignatureP signature;
+    signed (purpose = TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY) {
+      struct TALER_MasterPublicKeyP master_public_key;
+      struct GNUNET_TIME_AbsoluteNBO start;
+      struct GNUNET_TIME_AbsoluteNBO expire;
+      struct GNUNET_TIME_AbsoluteNBO end;
+      struct TALER_MintPublicKeyP signkey_pub;
+    }
   };
 
-  struct WithdrawRequest {
-    // signed with the withdrawal key
-    signed (purpose = WITHDRAW_REQUEST) {
-      struct PublicKey denom_key;
-      struct PublicKey big_r;
-      struct BlindBlankCoin blank;
-    };
+  struct TALER_MintKeySetPS {
+    signed (purpose=TALER_SIGNATURE_MINT_KEY_SET) {
+      struct GNUNET_TIME_AbsoluteNBO list_issue_date;
+      struct GNUNET_HashCode hc; /* FIXME: #3739 */
+    }
   };
 
-  struct MeltRequest {
-    // signed with the coin key
-    signed (purpose = MELT_COIN) {
-      // signed with the session key
-      signed (purpose = MELT_SESSION) {
-        SignedCoin coin;
-        PublicKey session;
-      };
-    };
-  };
-
-  struct OrderRequest {
-    // signed with the session key
-    signed (purpose = REFRESH_REQUEST) {
-      struct PublicKey denom_key;
-      struct PublicKey session;
-    };
-  };
-
-
-In the following message, `n` is the number of coins
-melted by the customer, and `KAPPA` is a security parameter determined
-by the new coin's denomination.
-
-.. sourcecode:: c
-
-  struct OrderResponse {
-    signed (purpose = ORDER_RESPONSE) {
-      Denomination rest_balance;
-      struct {
-        PublicKey big_r;
-        PublicKey old_coin;
-      } challenges[KAPPA * n];
-    };
-  };
-
-  struct BlindFactor {
-    TODO todo;
-  };
-
-The `encrypted` block denotes an encrypted message.
-
-.. sourcecode:: c
-
-  struct RefreshEnc {
-    encrypted {
-      struct BlindFactor bf;
-      struct PrivateKey tsk;
-      struct PrivateKey csk;
-    };
-  };
-
-  struct CommitRequest {
-    signed (purpose = REFRESH_COMMIT) {
-      struct PublicKey tpk;
-      struct BlindBlankCoin blank;
-      struct RefreshEnc enc;
-    };
-  };
-
-  struct RevealRequest {
-    // FIXME: does this need to be signed?
-    struct PublicKey big_r;
-    struct BlindFactor bf;
-    struct PrivateKey csk;
-  };
-
-  struct LinkRequest {
-    signed (purpose = REFRESH_LINK) {
-      struct PublicKey coin;
-    };
-  };
-
-  struct LinkResponse {
-    uint16_t n;
-    struct BlindSignedCoin coins[n];
-    struct PublicKey tpks[n];
-    struct RefreshEnc encs[n];
+  struct TALER_DenominationKeyValidityPS {
+    struct TALER_MasterSignatureP signature;
+    signed (purpose = TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY) {
+      struct TALER_MasterPublicKeyP master;
+      struct GNUNET_TIME_AbsoluteNBO start;
+      struct GNUNET_TIME_AbsoluteNBO expire_withdraw;
+      struct GNUNET_TIME_AbsoluteNBO expire_spend;
+      struct GNUNET_TIME_AbsoluteNBO expire_legal;
+      struct TALER_AmountNBO value;
+      struct TALER_AmountNBO fee_withdraw;
+      struct TALER_AmountNBO fee_deposit;
+      struct TALER_AmountNBO fee_refresh;
+      struct GNUNET_HashCode denom_hash;
+    }
   };
