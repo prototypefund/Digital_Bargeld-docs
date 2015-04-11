@@ -512,7 +512,7 @@ Binary Blob Specification
 
   .. note::
 
-     This section still needs to be updated to reflect the latest implementation.  See "taler_signatures.h" instead in the meantime.
+     This section largely corresponds to the definitions in taler_signatures.h.  You may also want to refer to this code, as it offers additional details on each of the members of the structs.
 
 This section specifies the binary representation of messages used in Taler's protocols. The message formats are given in a C-style pseudocode notation.  Padding is always specified explicitly, and numeric values are in network byte order (big endian).
 
