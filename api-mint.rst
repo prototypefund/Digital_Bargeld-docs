@@ -364,16 +364,27 @@ However, the new coins are linkable from the private keys of all old coins using
 
   **Failure Response: Conflict**
 
-  :status 409 Conflict: There is a problem between the original commitment and the revealed private keys.
+  :status 409 Conflict: There is a problem between the original commitment and the revealed private keys.  The returned information is proof of the missmatch (and thus rather verbose, as it includes most of the original /refresh/melt request), but of course expected to be primarily used for diagnostics.
   :resheader Content-Type: application/json
   :>json string error: the value is "commitment violation"
   :>json int offset: offset of in the array of `kappa` commitments where the error was detected
   :>json int index: index of in the with respect to the melted coin where the error was detected
   :>json string object: name of the entity that failed the check (i.e. "transfer key")
+  :>json array oldcoin_infos: array with information for each melted coin
+  :>json array newcoin_infos: array with RSA denomination public keys of the coins the original refresh request asked to be minted
+  :>json array link_infos: 2D array with `kappa` entries in the first dimension and the same length as the `oldcoin_infos` in the 2nd dimension containing as elements objects with the linkage information
+  :>json array commit_infos: 2D array with `kappa` entries in the first dimension and the same length as `newcoin_infos` in the 2nd dimension containing as elements objects with the commitment information
 
-  .. note::
+  The linkage information from `link_infos` consists of:
 
-     Further proof of the violation will need to be added to this response in the future. (#3712)
+  :>jsonarr base32 transfer_pub: the transfer public key (ECDHE key)
+  :>jsonarr base32 shared_secret_enc: the encrypted shared secret
+
+  The commit information from `commit_infos` consists of:
+
+  :>jsonarr base32 coin_ev: the coin envelope (information to sign blindly)
+  :>jsonarr base32 coin_priv_enc: the encrypted private key of the coin
+  :>jsonarr base32 blinding_key_enc: the encrypted blinding key
 
 .. http:get:: /refresh/link
 
