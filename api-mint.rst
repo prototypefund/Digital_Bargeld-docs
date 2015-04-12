@@ -101,15 +101,11 @@ This API is used by wallets and merchants to obtain global information about the
 
   :status 200 OK: This request should virtually always be successful.
   :resheader Content-Type: application/json
-  :>json object keys: JSON object described in more detail below (might be inlined once we resolve #3739)
-  :>json base32 eddsa_sig: EdDSA signature_ (binary-only) over the JSON object using the current signing key (which is part of `keys`).  FIXME: What is exactly signed here is currently a hack (#3739) and will change in the future.
-
-  The `keys` JSON object consists of:
-
   :>json base32 master_public_key: EdDSA master public key of the mint, used to sign entries in `denoms` and `signkeys`
   :>json list denoms: A JSON list of denomination descriptions.  Described below in detail.
   :>json date list_issue_date: The date when the denomination keys were last updated.
   :>json list signkeys: A JSON list of the mint's signing keys.  Described below in detail.
+  :>json base32 eddsa_sig: EdDSA signature_ (complete with purpose) over the SHA-512 hash of the concatenation of all SHA-512 hashes of the RSA denomination public keys in `denoms` (in the same order as they were in `denoms`).  Note that for hashing, the binary format of the RSA public keys is used, and not their base32_ encoding.  Wallets cannot do much with this signature by itself; it is only useful when multiple clients need to establish that the mint is cheating (with respect to end-user anonymity) by giving disjoint denomination keys to different users.  If a mint were to do this, this signature allows the clients to demonstrate to the public that the mint is dishonest.
 
   A denomination description in the `denoms` list is a JSON object with the following fields:
 
