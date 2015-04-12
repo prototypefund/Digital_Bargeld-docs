@@ -2,36 +2,61 @@
 The Mint Reference Implementation
 ===================================
 
+----------------------
+The Configuration File
+----------------------
+
+The section `[mint]` contains various global options for the mint:
+
+* `master_public_key`: Must specify the mint's master public key.
+* `wireformat`: The wireformat supported by the mint (i.e. "SEPA")
+* `currency`: The currency supported by the mint (i.e. "EUR")
 
 
---------------------
-Key update
---------------------
-New denomination and signing keys can be uploaded to the mint
-via the HTTP interface.  It is, of course, only possible to upload keys signed
-by the mint's master key.
+^^^^^^^^^^^^^^^^^^^^^^
+Key Management Options
+^^^^^^^^^^^^^^^^^^^^^^
 
-As an additional constraint, it is only possible to upload new keys while the
-mint still has one valid signing key (otherwise, MitM-attacks would be possible).
+The command line tool `taler-mint-keyup` updates the signing key and list of denominations offered by the mint.  This process requires the mint's master key, and should be done offline in order to protect the master key.  For this, `taler-mint-keyup` uses additional configuration options.
 
-Alternative:  Transfer key is signed by the master key.
+The section `[mint_keys]` containts the following entries:
 
-.. http:GET:: /admin/keyup/public
+* `signkey_duration`: How long should one signing key be used?
+* `lookahead_sign`:  For how far into the future should keys be issued?  This determines the frequency
+  of offline signing with the master key.
+* `lookahead_provide`: How far into the future should the mint provide keys?  This determines the attack
+window on keys.
 
-  Transmit the public part of the new key in plain-text.
 
-  :query denom_info: Public part of the denomination issue
-  :query transfer_pub: Public key used by the party doing the key transfer
+Sections specifying denomination (coin) information start with "coin_".  By convention, the name continues with "$CURRENCY_[$SUBUNIT]_$VALUE", i.e. "[coin_eur_ct_10] for a 10 cent piece.  However, only the "coin_" prefix is mandatory.  Each "coin_"-section must then have the following options:
 
-.. http:GET:: /admin/keyup/private
+* `value`: How much is the coin worth, the format is CURRENCY:VALUE.FRACTION.  For example, a 10 cent piece is "EUR:0.10".
+* `duration_withdraw`: How long can a coin of this type be withdrawn?  This limits the losses incured by the mint when a denomination key is compromised.
+* `duration_overlap`: What is the overlap of the withdrawal timespan for this coin type?
+* `duration_spend`: How long is a coin of the given type valid?  Smaller values result in lower storage costs for the mint.
+* `fee_withdraw`: What does it cost to withdraw this coin? Specified using the same format as `value`.
+* `fee_deposit`: What does it cost to deposit this coin? Specified using the same format as `value`.
+* `fee_refresh`: What does it cost to refresh this coin? Specified using the same format as `value`.
+* `rsa_keysize`: How many bits should the RSA modulus (product of the two primes) have for this type of coin.
 
-  Transmit the private part of the new text, encrypted with the shared secret derived from the
-  ephemeral public key and the sender's private key.
+
+------------------
+Reserve management
+------------------
+
+Incoming transactions to the mint's provider result in the creation or update of reserves, identified by their withdrawal key.
+
+The command line tool `taler-mint-modpurse` allows create and add money to reserves in the mint's database.
 
 
 -------------------
 Database Scheme
 -------------------
+
+  .. note::
+
+     This documentation is outdated (no bug number yet either).
+
 
 .. sourcecode:: postgres
 
@@ -176,67 +201,12 @@ The following tables are used for refreshing.
   );
 
 
-----------------
-Key Management
-----------------
-The command line tool `taler-mint-keyup` updates the signing key and
-list of denominations offered by the mint.  This process requires the
-mint's master key, and should be done offline in order to protect the master key.
-
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Configuring keys and coin types
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The denominations and key expirations for the mint are specified in a configuration file.
-
-The section `[mint_keys]` containts the following entries:
-
-* `signkey_duration`: How long should one signing key be used?
-* `lookahead_sign`:  For how far into the future should keys be issued?  This determines the frequency
-  of offline signing with the master key.
-* `lookahead_provide`: How far into the future should the mint provide keys?  This determines the attack
-  window on keys.
-* `coin_types`: Space-separated list of coin aliases that the mint should provide.  The coin aliases
-  are used as the key configuration sections regarding the coin type.
-
-The configuration refers to each denomination type by an alphanumeric alias.  This alias is used to identify
-the same denomination in different sections.  Configuration values are assigned as `<ALIAS> = <VALUE>`
-in the respective section.
-
-* `[mint_denom_duration_withdraw]`: How long can a coin of this type be withdrawn?
-  This limits the losses incured by the mint when a denomination key is compromised.
-* `[mint_denom_duration_overlap]`: What is the overlap of the withdrawal timespan for
-  a coin type?
-* `[mint_denom_duration_spend]`: How long is a coin of the given type valid?  Smaller
-  values result in lower storage costs for the mint.
-* `[mint_denom_value]`: What is the value of the coin? Given as `T : A / B`, where `T` is the currency
-  identifier, `A` and `B` are integers denoting the value (`A` is the numerator, `B` is the denominator).
-* `[mint_denom_fee_withdraw]`: What does it cost to withdraw this coin? Given as `T : A / B`, where `T` is the currency
-  identifier, `A` and `B` are integers denoting the value (`A` is the numerator, `B` is the denominator).
-* `[mint_denom_fee_refresh]`: What does it cost to refresh this coin? Given as `T : A / B`, where `T` is the currency
-  identifier, `A` and `B` are integers denoting the value (`A` is the numerator, `B` is the denominator).
-* `[mint_denom_fee_deposit]`: What does it cost to refresh this coin? Given as `T : A / B`, where `T` is the currency
-  identifier, `A` and `B` are integers denoting the value (`A` is the numerator, `B` is the denominator).
-* `[mint_denom_kappa]`: How easy should cheating be for the customer when refreshing?
-
-^^^^^^^^^^^^^^^^^^^
+------------------
 Key Storage Format
-^^^^^^^^^^^^^^^^^^^
-The mint's key directory contains the two subdirectories `signkeys` and `coinkeys`.
+------------------
 
-The file `master.pub` stores the mint's master public key.
+The mint's key directory contains the two subdirectories `signkeys` and `coinkeys`.
 
 The directory `signkeys` contains signkey files, where the name is the start date of the respective key.
 
-The `coinkeys` directory additionaly contains a subdirectory for each coin type alias.  These contain
-coinkey files, where the name is again the start timestamp of the respective key.
-
-
--------
-Purses
--------
-Incoming transactions to the mint's provider result in the creation or update of `purses`, identified
-by their withdrawal key.
-
-The command line tool `taler-mint-modpurse` allows create and add money to purses in the mint's database.
-
-
+The `coinkeys` directory additionaly contains a subdirectory for each coin type alias.  These contain coinkey files, where the name is again the start timestamp of the respective key.

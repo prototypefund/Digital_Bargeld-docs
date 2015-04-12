@@ -513,6 +513,66 @@ Refunds
 
 
 
+------------------------------
+Administrative API: Key update
+------------------------------
+
+  .. note::
+
+     This is not yet implemented (no bug number yet, as we are not sure we will implement this; for now, adding new files to the directory and sending a signal to the mint process seems to work fine).
+
+New denomination and signing keys can be uploaded to the mint via the
+HTTP interface.  It is, of course, only possible to upload keys signed
+by the mint's master key.  Furthermore, this API should probably only
+be used via loopback, as we want to protect the private keys from
+interception.
+
+.. http:POST:: /admin/add/denomination_key
+
+  Upload a new denomination key.
+
+  :>json object denom_info: Public part of the denomination key
+  :>json base32 denom_priv: Private RSA key
+
+.. http:POST:: /admin/add/sign_key
+
+  Upload a new signing key.
+
+  :>json object sign_info: Public part of the signing key
+  :>json base32 sign_priv: Private EdDSA key
+
+
+-------------------------------------
+Administrative API: Bank transactions
+-------------------------------------
+
+  .. note::
+
+     This is not yet implemented (no bug number yet either).
+
+.. http:POST:: /admin/add/incoming
+
+  Notify mint of an incoming transaction (filling a reserve)
+
+  :>json base32 reserve_pub: Reserve public key
+  :>json object amount: Amount transferred to the reserve
+  :>json integer transaction: Transaction identifier
+  :>json base32 h_sepa: Hash of SEPA transaction details
+
+
+.. http:POST:: /admin/add/outgoing
+
+  Notify mint about the completion of an outgoing transaction (satisfying a /deposit request).  This will (in the future) allow merchants to obtain details about the /deposit requests they send to the mint.
+
+  :>json base32 coin_pub: Coin public key
+  :>json object amount: Amount transferred to the merchant
+  :>json string transaction: Transaction identifier on the SEPA form
+  :>json base32 h_sepa: Hash of SEPA transaction details (as originally specified by the merchant)
+
+
+
+
+
 ===========================
 Binary Blob Specification
 ===========================
