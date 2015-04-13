@@ -46,7 +46,7 @@ Reserve management
 
 Incoming transactions to the mint's provider result in the creation or update of reserves, identified by their withdrawal key.
 
-The command line tool `taler-mint-modpurse` allows create and add money to reserves in the mint's database.
+The command line tool `taler-mint-reservemod` allows create and add money to reserves in the mint's database.
 
 
 -------------------
