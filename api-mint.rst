@@ -570,7 +570,103 @@ Administrative API: Bank transactions
   :>json base32 h_sepa: Hash of SEPA transaction details (as originally specified by the merchant)
 
 
+------------
+The Test API
+------------
 
+The test API is not there to test the mint, but to allow
+clients of the mint (merchant and wallet implementations)
+to test if their implemenation of the cryptography is
+binary-compatible with the implementation of the mint.
+
+.. http:POST:: /test/base32
+
+  Test hashing and Crockford base32_ encoding.
+
+  :reqheader Content-Type: application/json
+  :<json base32 input: some base32_-encoded value
+  :status 200: the operation succeeded
+  :resheader Content-Type: application/json
+  :>json base32 output: base32_-encoded hash of the input value
+
+.. http:POST:: /test/encrypt
+
+  Test symmetric encryption.
+
+  :reqheader Content-Type: application/json
+  :<json base32 input: some base32_-encoded value
+  :<json base32 key_hash: some base32_-encoded hash that is used to derive the symmetric key and initialization vector for the encryption using the HKDF with "skey" and "iv" as the salt.
+  :status 200: the operation succeeded
+  :resheader Content-Type: application/json
+  :>json base32 output: the encrypted value
+
+.. http:POST:: /test/hkdf
+
+  Test Hash Key Deriviation Function.
+
+  :reqheader Content-Type: application/json
+  :<json base32 input: some base32_-encoded value
+  :status 200: the operation succeeded
+  :resheader Content-Type: application/json
+  :>json base32 output: the HKDF of the input using "salty" as salt
+
+.. http:POST:: /test/ecdhe
+
+  Test ECDHE.
+
+  :reqheader Content-Type: application/json
+  :<json base32 ecdhe_pub: ECDHE public key
+  :<json base32 ecdhe_priv: ECDHE private key
+  :status 200: the operation succeeded
+  :resheader Content-Type: application/json
+  :>json base32 ecdh_hash: ECDH result from the two keys
+
+.. http:POST:: /test/ecdsa
+
+  Test ECDSA.  We do not (yet) test that the client correctly implemented RFC 6979.
+
+  :reqheader Content-Type: application/json
+  :<json base32 ecdsa_pub: ECDSA public key
+  :<json base32 ecdsa_sig: ECDSA signature using purpose TALER_SIGNATURE_CLIENT_TEST_ECDSA
+  :status 200: the signature was valid
+  :resheader Content-Type: application/json
+  :>json base32 ecdsa_pub: Another ECDSA public key
+  :>json base32 ecdsa_sig: ECDSA signature using purpose TALER_SIGNATURE_MINT_TEST_ECDSA
+
+.. http:POST:: /test/ecdsa
+
+  Test EdDSA.
+
+  :reqheader Content-Type: application/json
+  :<json base32 eddsa_pub: EdDSA public key
+  :<json base32 eddsa_sig: EdDSA signature using purpose TALER_SIGNATURE_CLIENT_TEST_EDDSA
+  :status 200: the signature was valid
+  :resheader Content-Type: application/json
+  :>json base32 eddsa_pub: Another EdDSA public key
+  :>json base32 eddsa_sig: EdDSA signature using purpose TALER_SIGNATURE_MINT_TEST_EDDSA
+
+.. http:POST:: /test/rsa
+
+  Test RSA.
+
+  :reqheader Content-Type: application/json
+  :<json base32 blind_ev: Blinded value to sign.
+  :status 200: operation was successful
+  :resheader Content-Type: application/json
+  :>json base32 rsa_pub: Some RSA public key
+  :>json base32 rsa_blind_sig: Blind RSA signature over the `blind_ev` using the private key corresponding to `rsa_pub`
+
+.. http:POST:: /test/transfer
+
+  Test Transfer decryption.
+
+  :reqheader Content-Type: application/json
+  :<json base32 secret_enc: Encrypted transfer secret
+  :<json base32 trans_priv: Private transfer key
+  :<json base32 coin_pub: Public key of a coin
+  :status 200: the operation succeeded
+  :resheader Content-Type: application/json
+  :>json base32 secret: Decrypted transfer secret
 
 
 ===========================
@@ -795,7 +891,7 @@ for signed data (contained in `FIELDS`) with the given purpose.  The `size` fiel
   struct TALER_MintKeySetPS {
     signed (purpose=TALER_SIGNATURE_MINT_KEY_SET) {
       struct GNUNET_TIME_AbsoluteNBO list_issue_date;
-      struct GNUNET_HashCode hc; /* FIXME: #3739 */
+      struct GNUNET_HashCode hc;
     }
   };
 
