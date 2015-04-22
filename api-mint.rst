@@ -188,7 +188,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
   :reqheader Content-Type: application/json
   :<json base32 denom_pub: denomination public key (RSA), specifying the type of coin the client would like the mint to create.
   :<json base32 coin_ev: coin's blinded public key, should be (blindly) signed by the mint's denomination private key
-  :<json base32 reserve_pub: public (EdDSA) key of the reserve that the coin should be withdrawn from (the total amount deducted will be the coin's value plus the withdrawl fee as specified with the denomination information)
+  :<json base32 reserve_pub: public (EdDSA) key of the reserve that the coin should be withdrawn from (the total amount deducted will be the coin's value plus the withdrawal fee as specified with the denomination information)
   :<json object reserve_sig: EdDSA signature_ (binary-only) of purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` created with the reserves's public key
 
   **Success Response: OK**:
@@ -288,7 +288,7 @@ Deposit operations are requested by a merchant during a transaction. For the dep
 Refreshing
 ------------------
 
-Refreshing creates `n` new coins from `m` old coins, where the sum of denominations of the new coins must be smaller than the sum of the old coins' denominations plus melting (refresh) and withdrawl fees charged by the mint.  The refreshing API can be used by wallets to melt partially spent coins, making transactions with the freshly minted coins unlinkabe to previous transactions (by anyone except the wallet itself).
+Refreshing creates `n` new coins from `m` old coins, where the sum of denominations of the new coins must be smaller than the sum of the old coins' denominations plus melting (refresh) and withdrawal fees charged by the mint.  The refreshing API can be used by wallets to melt partially spent coins, making transactions with the freshly minted coins unlinkabe to previous transactions (by anyone except the wallet itself).
 
 However, the new coins are linkable from the private keys of all old coins using the /refresh/link request.  While /refresh/link must be implemented by the mint to achieve certain security properties (taxability), wallets do not really ever need that part of the API during normal operation.
 
