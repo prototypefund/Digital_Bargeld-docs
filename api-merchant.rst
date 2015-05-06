@@ -242,6 +242,6 @@ The following are the API made available by the merchant:
 
    **Failure Response**
 
-   :status 400: Request not understood or incomplete
-   :status 403: The contract's retraction period has expired
-   :status 404: Invalid / unknown contract
+   :status 400 Bad Request: Request not understood or incomplete
+   :status 403 Forbidden: The contract's retraction period has expired
+   :status 404 Not Found: Invalid / unknown contract
