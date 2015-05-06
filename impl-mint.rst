@@ -28,7 +28,7 @@ The section `[mint_keys]` containts the following entries:
 window on keys.
 
 
-Sections specifying denomination (coin) information start with "coin_".  By convention, the name continues with "$CURRENCY_[$SUBUNIT]_$VALUE", i.e. "[coin_eur_ct_10] for a 10 cent piece.  However, only the "coin_" prefix is mandatory.  Each "coin_"-section must then have the following options:
+Sections specifying denomination (coin) information start with "coin\_".  By convention, the name continues with "$CURRENCY_[$SUBUNIT]_$VALUE", i.e. "[coin_eur_ct_10] for a 10 cent piece.  However, only the "coin\_" prefix is mandatory.  Each "coin\_"-section must then have the following options:
 
 * `value`: How much is the coin worth, the format is CURRENCY:VALUE.FRACTION.  For example, a 10 cent piece is "EUR:0.10".
 * `duration_withdraw`: How long can a coin of this type be withdrawn?  This limits the losses incured by the mint when a denomination key is compromised.

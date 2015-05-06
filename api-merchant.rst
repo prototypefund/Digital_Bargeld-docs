@@ -64,7 +64,7 @@ Incremental Deposits
   .. note::
 
      Incremental deposits are currently not implemented.
-   
+
 Incremental deposits allow the merchant to charge the customer
 incrementally without interacting with the mint each time.  This is
 useful for metered services, such as cab fares.  The idea here is that
@@ -115,23 +115,23 @@ The RESTful API
 
 The following are the API made available by the merchant:
 
-.. https:GET:: /taler/key
-	       
-   Allows the customer to obtain the merchant's public EdDSA key over a "secure" channel.
+.. http:GET:: /taler/key
+
+   Allows the customer to obtain the merchant's public EdDSA key. Should only be used over a "secure" channel (i.e. at least HTTPS).
 
    **Success Response**
-   
+
    :status 200 OK: The request was successful.
 
    The merchant responds with a JSON object containing the following fields:
 
-   :>json base32 merchant_pub: Base32_-encoded EdDSA public key of the merchant.
+   :>json base32 merchant_pub: base32-encoded EdDSA public key of the merchant.
 
    **Failure response**
 
    :status 404: Taler not supported.
 
-			    
+
 .. http:GET:: /taler/contract
 .. http:POST:: /taler/contract
 
@@ -154,7 +154,7 @@ The following are the API made available by the merchant:
    :>json integer transaction_id: A string representing the transaction identifier.
    :>json timestamp expiry: The timestamp after which this contract expires.
    :>json string legal_system: String describing the legal system under which the contract is made.
-   :>json string tos_url: Link to the terms of service of the merchant in UTF-8 text.  
+   :>json string tos_url: Link to the terms of service of the merchant in UTF-8 text.
    :>json base32 H_tos: Hash of the terms of service as provided at `tos_url`.
    :>json object total_amount: Price of the offer.
    :>json object retract_fee: Fee the merchant will retain if the customer retracts from the contract (optional, assumed to be zero if absent).
@@ -176,7 +176,7 @@ The following are the API made available by the merchant:
    :>jsonarr string link: Link to further information about the item.  Optional and not formally part of the contract, but might be used by the customer to find the product's purchasing address again easily in the future.
 
    Additional fields may be provided, but are never officially part of the contract and may be ignored by the Wallet.
-      
+
    **Failure response**
 
    :status 400: Request not understood.
@@ -186,14 +186,14 @@ The following are the API made available by the merchant:
 
 .. http:POST:: /taler/pay
 
-   Agree with a previously obtained contract and pay the merchant by signing the contract with coins.  
+   Agree with a previously obtained contract and pay the merchant by signing the contract with coins.
 
    :<json base32 H_contract: The hash of the contract.
    :<json integer transaction_id: The transaction identifier obtained from the contract.
    :<json array coins: Array of coins used for the payment.
 
    The `coins` are a JSON array where each object contains the following fields:
-			     
+
    :<jsonarr base32 coin_pub: The coin's public key.
    :<jsonarr base32 mint_pub: The public key of the mint from where the coin is obtained.
    :<jsonarr base32 denom_pub: Denomination key with which the coin is signed.
@@ -207,7 +207,7 @@ The following are the API made available by the merchant:
    :status 200 OK: The deposit permission is successful.
    :status 302 Found: The deposit permission is successful, the interaction continues elsewhere.
 
-   :resheader X-Taler-Merchant-Confirmation: Base32_-encoded EdDSA Signature of the merchant confirming the successful deposit operation.
+   :resheader X-Taler-Merchant-Confirmation: Base32-encoded EdDSA Signature of the merchant confirming the successful deposit operation.
 
    Other details depend on the merchant's Web portal organization, the browser will simply render the data returned for the user as usual.
 
@@ -218,7 +218,7 @@ The following are the API made available by the merchant:
    :status 4XX: The deposit operation has failed because the coin has previously been deposited or it has been already refreshed; the request should not be repeated again.  The response body contains the failure response objects from the :ref:`Mint API:deposit<deposit>`.
    :status 404: The merchant does not entertain this type of interaction.  Try another one.
 
-		
+
 .. _retract:
 .. http:POST:: /taler/retract
 
@@ -234,7 +234,7 @@ The following are the API made available by the merchant:
 
    :status 200 OK: The contract has been successfully retracted.
 
-   The response contains a JSON object with the following fields: 
+   The response contains a JSON object with the following fields:
 
    :>json base32 merchant_sig: The EdDSA signature of the merchant over its public key and the transaction ID. (FIXME: Specify exact purpose.)
 
@@ -245,5 +245,3 @@ The following are the API made available by the merchant:
    :status 400: Request not understood or incomplete
    :status 403: The contract's retraction period has expired
    :status 404: Invalid / unknown contract
-
-
