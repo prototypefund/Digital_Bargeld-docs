@@ -129,7 +129,7 @@ The following are the API made available by the merchant:
 
    **Failure response**
 
-   :status 404: Taler not supported.
+   :status 404 Not Found: Taler not supported.
 
 
 .. http:GET:: /taler/contract
@@ -179,8 +179,8 @@ The following are the API made available by the merchant:
 
    **Failure response**
 
-   :status 400: Request not understood.
-   :status 404: No products or services given in the request were found.
+   :status 400 Bad Request: Request not understood.
+   :status 404 Not Found: No products or services given in the request were found.
 
    It is also possible to receive other error status codes depending on the merchant's implementation.
 
@@ -213,10 +213,10 @@ The following are the API made available by the merchant:
 
    **Failure Response**
 
-   :status 400: Request not understood.
-   :status 403: The request does not match the contract that was provided.  The request should not be repeated.
-   :status 4XX: The deposit operation has failed because the coin has previously been deposited or it has been already refreshed; the request should not be repeated again.  The response body contains the failure response objects from the :ref:`Mint API:deposit<deposit>`.
-   :status 404: The merchant does not entertain this type of interaction.  Try another one.
+   :status 400 Bad Request: Request not understood.
+   :status 403 Forbidden: The request does not match the contract that was provided.  The request should not be repeated.
+   :status 499 TBD: The deposit operation has failed because the coin has previously been deposited or it has been already refreshed; the request should not be repeated again.  The response body contains the failure response objects from the :ref:`Mint API:deposit<deposit>`.
+   :status 404 Not Found: The merchant does not entertain this type of interaction.  Try another one.
 
 
 .. _retract:
