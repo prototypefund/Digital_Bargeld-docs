@@ -26,18 +26,18 @@ This section describes how certain types of values are represented throughout th
 
   .. _public\ key:
 
-  * **Public key**: ECDSA, EdDSA and ECDHE public keys are always points on Curve25519 and represented using the Ed25519 standard compact format (256 bits), converted to Crockford Base32_.
+  * **Public key**: EdDSA and ECDHE public keys are always points on Curve25519 and represented using the Ed25519 standard compact format (256 bits), converted to Crockford Base32_.
 
   .. _Signature:
 
-  * **Signatures**: EdDSA and ECDSA signatures are be transmitted in two forms in the protocol.  As 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only), or as JSON objects with following fields (replace `eddsa` with `ecdsa` for ECDSA signatures):
+  * **Signatures**: EdDSA signatures are be transmitted in two forms in the protocol.  As 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only), or as JSON objects with following fields:
 
     * `purpose`: a unique number to state the context in which the signature is to be used in
     * `size`: the number of bytes that were hashed (using SHA-512) to create the signature; note that signatures are always done over a packed, binary representation of the data and not the JSON representations.
     * `eddsa_sig`: 64-byte base32_ binary encoding of the R and S values
     * `eddsa_val`: base32_ binary encoding of the full signed data (including again `purpose` and `size`)
 
-    RSA signatures are always simply base32_ encoded. The specific signature scheme in use (blind signature, ECDSA, EdDSA) depends on the context.
+    RSA signatures are always simply base32_ encoded. The specific signature scheme in use (blind signature, EdDSA) depends on the context.
 
   .. _Amount:
 
@@ -237,14 +237,14 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :<json object `wire`: the merchant's account details. This must be a JSON object whose format must correspond to one of the supported wire transfer formats of the mint.  See :ref:`wireformats`
   :<json base32 H_wire: SHA-512 hash of the merchant's payment details from `wire` (yes, strictly speaking redundant, but useful to detect inconsistencies)
   :<json base32 H_contract: SHA-512 hash of the contact of the merchant with the customer (further details are never disclosed to the mint)
-  :<json base32 coin_pub: coin's public key (ECDHE and ECDSA)
+  :<json base32 coin_pub: coin's public key (ECDHE and EdDSA)
   :<json base32 denom_pub: denomination (RSA) key with which the coin is signed
   :<json base32 ub_sig: mint's unblinded RSA signature_ of the coin
   :<json date timestamp: timestamp when the contract was finalized, must match approximately the current time of the mint
   :<json int transaction_id: 64-bit transaction id for the transaction between merchant and customer
   :<json base32 merchant_pub: the EdDSA public key of the merchant (used to identify the merchant for refund requests)
   :<json date refund_deadline: date until which the merchant can issue a refund to the customer via the mint (can be zero if refunds are not allowed)
-  :<json base32 coin_sig: the ECDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's private key.
+  :<json base32 coin_sig: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's private key.
 
   The deposit operation succeeds if the coin is valid for making a deposit and has enough residual value that has not already been deposited, refreshed or locked.
 
@@ -304,7 +304,7 @@ However, the new coins are linkable from the private keys of all old coins using
   :<json array coin_evs: For each of the `n` new coins, `kappa` coin blanks (2D array)
   :<json array transfer_pubs: For each of the `m` old coins, `kappa` transfer public keys (2D-array of ephemeral ECDHE keys)
   :<json array secret_encs: For each of the `m` old coins, `kappa` link encryptions with an ECDHE-encrypted SHA-512 hash code.  The ECDHE encryption is done using the private key of the respective old coin and the corresponding transfer public key.  Note that the SHA-512 hash code must be the same across all coins, but different across all of the `kappa` dimensions.  Given the private key of a single old coin, it is thus possible to decrypt the respective `secret_encs` and obtain the SHA-512 hash that was used to symetrically encrypt the `link_encs` of all of the new coins.
-  :<json array link_encs: For each of the `n` new coins, `kappa` (symmetric) encryptions of the ECDSA/ECDHE-private key of the new coins and the corresponding blinding factor, encrypted using the corresponding SHA-512 hash that is encrypted in `secret_encs`.
+  :<json array link_encs: For each of the `n` new coins, `kappa` (symmetric) encryptions of the EdDSA/ECDHE-private key of the new coins and the corresponding blinding factor, encrypted using the corresponding SHA-512 hash that is encrypted in `secret_encs`.
 
   For details about the HKDF used to derive the symmetric encryption keys from ECDHE and the symmetric encryption (AES+Twofish) used, please refer to the implementation in `libtalerutil`. The `melt_coins` field is a list of JSON objects with the following fields:
 
@@ -621,19 +621,7 @@ binary-compatible with the implementation of the mint.
   :resheader Content-Type: application/json
   :>json base32 ecdh_hash: ECDH result from the two keys
 
-.. http:POST:: /test/ecdsa
-
-  Test ECDSA.  We do not (yet) test that the client correctly implemented RFC 6979.
-
-  :reqheader Content-Type: application/json
-  :<json base32 ecdsa_pub: ECDSA public key
-  :<json base32 ecdsa_sig: ECDSA signature using purpose TALER_SIGNATURE_CLIENT_TEST_ECDSA
-  :status 200: the signature was valid
-  :resheader Content-Type: application/json
-  :>json base32 ecdsa_pub: Another ECDSA public key
-  :>json base32 ecdsa_sig: ECDSA signature using purpose TALER_SIGNATURE_MINT_TEST_ECDSA
-
-.. http:POST:: /test/ecdsa
+.. http:POST:: /test/eddsa
 
   Test EdDSA.
 
@@ -739,7 +727,7 @@ All elliptic curve operations are on Curve25519.  Public and private keys are th
    };
 
    struct TALER_TransferPublicKeyP {
-     uint8_t ecdsa_pub[32];
+     uint8_t ecdhe_pub[32];
    };
 
    struct TALER_TransferPrivateKeyP {
@@ -771,17 +759,17 @@ All elliptic curve operations are on Curve25519.  Public and private keys are th
    };
 
    union TALER_CoinSpendPublicKeyP {
-     uint8_t ecdsa_pub[32];
+     uint8_t eddsa_pub[32];
      uint8_t ecdhe_pub[32];
    };
 
    union TALER_CoinSpendPrivateKeyP {
-     uint8_t ecdsa_priv[32];
+     uint8_t eddsa_priv[32];
      uint8_t ecdhe_priv[32];
    };
 
    struct TALER_CoinSpendSignatureP {
-     uint8_t ecdsa_signature[64];
+     uint8_t eddsa_signature[64];
    };
 
    struct TALER_TransferSecretP {
@@ -800,7 +788,7 @@ All elliptic curve operations are on Curve25519.  Public and private keys are th
 Signatures
 ------------------------
 
-EdDSA and ECDSA signatures are always made over (the hash of) a block of the same generic format, the `struct SignedData` given below.  In our notation, the type of a field can depend on the value of another field. For the following message, the length of the `payload` array must match the value of the `size` field:
+EdDSA signatures are always made over (the hash of) a block of the same generic format, the `struct SignedData` given below.  In our notation, the type of a field can depend on the value of another field. For the following message, the length of the `payload` array must match the value of the `size` field:
 
 .. sourcecode:: c
 
