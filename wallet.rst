@@ -118,7 +118,7 @@ Some simple tests written in `C` are placed into our wallte's source tree, so
   .. sourcecode:: bash
 
      cd wallet/wallet_button/emscripten/hello_world/
-     source final_build-${X} # with ${X} being the prefix of some ${X}.c
+     source final_build-${X}.sh # with ${X} being the prefix of some ${X}.c in this directory
 
 Your environment has now two functions, ``assmb`` and ``linkit``, where the former will just assemble
 the test ``${X}.c`` (leaving a file named ``${X}.o`` inspectable by ``llvm-nm`` or ``llvm-objdump``) and
