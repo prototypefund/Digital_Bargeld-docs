@@ -38,6 +38,7 @@ Implementation:
   :maxdepth: 2
 
   impl-mint
+  wallet
 
 Supported Wire Transfer Formats:
 
