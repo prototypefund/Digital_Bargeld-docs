@@ -390,12 +390,13 @@ However, the new coins are linkable from the private keys of all old coins using
 
   **Success Response**
 
-  :status 200 OK: All commitments were revealed successfully.
-  :>json base32 transfer_pub: transfer public key corresponding to the `coin_pub`, used to (ECDHE) decrypt the `secret_enc` in combination with the private key of `coin_pub`.
-  :>json base32 secret_enc: ECDHE-encrypted link secret that, once decrypted, can be used to decrypt/unblind the `new_coins`.
-  :>json array new_coins: array with (encrypted/blinded) information for each of the coins minted in the refresh operation.
+  :status 200 OK: All commitments were revealed successfully.  The mint returns an array (which typically only has one element in it) where each element contains information about a melting session that the coin was used in.
 
-  The `new_coins` array contains the following fields:
+  :>jsonarr base32 transfer_pub: transfer public key corresponding to the `coin_pub`, used to (ECDHE) decrypt the `secret_enc` in combination with the private key of `coin_pub`.
+  :>jsonarr base32 secret_enc: ECDHE-encrypted link secret that, once decrypted, can be used to decrypt/unblind the `new_coins`.
+  :>jsonarr array new_coins: array with (encrypted/blinded) information for each of the coins minted in the refresh operation.
+
+  The `new_coins` array contains the following fields (for each element):
 
   :>jsonarr base32 link_enc: Encrypted private key and blinding factor information of the fresh coin
   :>jsonarr base32 denom_pub: Public key of the minted coin (still blind).
