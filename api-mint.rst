@@ -171,7 +171,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
   :>jsonarr string type: either the string "WITHDRAW" or the string "DEPOSIT"
   :>jsonarr object amount: the amount_ that was withdrawn or deposited
   :>jsonarr object wire: a JSON object with the wiring details (specific to the banking system in use), present in case the `type` was "DEPOSIT"
-  :>jsonarr base32 signature: signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` made with the reserve's public key over the original "WITHDRAW" request, present if the `type` was "WITHDRAW"
+  :>jsonarr object signature: signature_ (full object with all details) made with purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` made with the reserve's public key over the original "WITHDRAW" request, present if the `type` was "WITHDRAW"
 
   **Error Response: Unknown reserve**
 
