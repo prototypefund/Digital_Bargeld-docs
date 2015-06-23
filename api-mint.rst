@@ -585,10 +585,10 @@ binary-compatible with the implementation of the mint.
   Test hashing and Crockford base32_ encoding.
 
   :reqheader Content-Type: application/json
-  :<json base32 input: some base32_-encoded value
+  :<json base32 input: a (JSON stringified) object having a filed named `input` whose value is some base32_-encoded value
   :status 200: the operation succeeded
   :resheader Content-Type: application/json
-  :>json base32 output: base32_-encoded hash of the input value
+  :>json base32 output: a (JSON stringified) object having a filed named `output` whose value is the base32_-encoded hash of the input value
 
 .. http:POST:: /test/encrypt
 
