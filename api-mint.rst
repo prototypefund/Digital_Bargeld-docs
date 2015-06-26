@@ -628,7 +628,7 @@ binary-compatible with the implementation of the mint.
 
   :reqheader Content-Type: application/json
   :<json base32 eddsa_pub: EdDSA public key
-  :<json base32 eddsa_sig: EdDSA signature using purpose TALER_SIGNATURE_CLIENT_TEST_EDDSA
+  :<json base32 eddsa_sig: EdDSA signature using purpose TALER_SIGNATURE_CLIENT_TEST_EDDSA. Note: the signed payload must be empty, we sign just the purpose here.
   :status 200: the signature was valid
   :resheader Content-Type: application/json
   :>json base32 eddsa_pub: Another EdDSA public key
