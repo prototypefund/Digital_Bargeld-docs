@@ -634,16 +634,24 @@ binary-compatible with the implementation of the mint.
   :>json base32 eddsa_pub: Another EdDSA public key
   :>json base32 eddsa_sig: EdDSA signature using purpose TALER_SIGNATURE_MINT_TEST_EDDSA
 
-.. http:POST:: /test/rsa
+.. http:GET:: /test/rsa/get
 
-  Test RSA.
+  Obtain the RSA public key used for signing in /test/rsa/sign.
+
+  :status 200: operation was successful
+  :resheader Content-Type: application/json
+  :>json base32 rsa_pub: The RSA public key the client should use when blinding a value for the /test/rsa/sign API.
+
+.. http:POST:: /test/rsa/sign
+
+  Test RSA blind signatures.
 
   :reqheader Content-Type: application/json
   :<json base32 blind_ev: Blinded value to sign.
   :status 200: operation was successful
   :resheader Content-Type: application/json
-  :>json base32 rsa_pub: Some RSA public key
-  :>json base32 rsa_blind_sig: Blind RSA signature over the `blind_ev` using the private key corresponding to `rsa_pub`
+  :>json base32 rsa_blind_sig: Blind RSA signature over the `blind_ev` using the private key corresponding to the RSA public key returned by /test/rsa/get.
+
 
 .. http:POST:: /test/transfer
 
