@@ -547,28 +547,65 @@ interception.
 Administrative API: Bank transactions
 -------------------------------------
 
-  .. note::
-
-     This is not yet implemented (no bug number yet either).
-
 .. http:POST:: /admin/add/incoming
 
   Notify mint of an incoming transaction (filling a reserve)
 
   :>json base32 reserve_pub: Reserve public key
   :>json object amount: Amount transferred to the reserve
-  :>json integer transaction: Transaction identifier
-  :>json base32 h_sepa: Hash of SEPA transaction details
+  :>json date execution_date: When was the transaction executed
+  :>json object wire: Wire details
+
+  **Success response**
+
+  :status 200: the operation succeeded
+
+  The mint responds with a JSON object containing the following fields:
+
+  :>json string status: The string constant `NEW` or `DUP` to indicate
+     whether the transaction was truly added to the DB
+                        or whether it already existed in the DB
+
+  **Failure response**
+
+  :status 403: the client is not permitted to add incoming transactions
+
+  The mint responds with a JSON object containing the following fields:
+
+  :>json string error: the error message (`permission denied`)
+  :>json string hint: hint as to why permission was denied
 
 
 .. http:POST:: /admin/add/outgoing
 
   Notify mint about the completion of an outgoing transaction (satisfying a /deposit request).  This will (in the future) allow merchants to obtain details about the /deposit requests they send to the mint.
 
+  .. note::
+
+     This is not yet implemented (no bug number yet either).
+
   :>json base32 coin_pub: Coin public key
   :>json object amount: Amount transferred to the merchant
-  :>json string transaction: Transaction identifier on the SEPA form
-  :>json base32 h_sepa: Hash of SEPA transaction details (as originally specified by the merchant)
+  :>json string transaction: Transaction identifier in the wire details
+  :>json base32 wire: Wire transaction details (as originally specified by the merchant)
+  **Success response**
+
+  :status 200: the operation succeeded
+
+  The mint responds with a JSON object containing the following fields:
+
+  :>json string status: The string constant `NEW` or `DUP` to indicate
+     whether the transaction was truly added to the DB
+                        or whether it already existed in the DB
+
+  **Failure response**
+
+  :status 403: the client is not permitted to add outgoing transactions
+
+  The mint responds with a JSON object containing the following fields:
+
+  :>json string error: the error message (`permission denied`)
+  :>json string hint: hint as to why permission was denied
 
 
 ------------
