@@ -22,7 +22,7 @@ This section describes how certain types of values are represented throughout th
   .. _Timestamp:
 
   * **Timestamps**:
-    Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`, where `x` is the decimal representation of the number of milliseconds past the Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in JSON simply as a normal slash, but distinguishes the timestamp from a normal string literal.  We use the type "date" in the documentation below.
+    Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`, where `x` is the decimal representation of the number of seconds past the Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in JSON simply as a normal slash, but distinguishes the timestamp from a normal string literal.  We use the type "date" in the documentation below.  Additionally, the special strings "\\/never\\/" and "\\/forever\\/" are recognized to represent the end of time.
 
   .. _public\ key:
 
@@ -253,7 +253,7 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :status 200: the operation succeeded, the mint confirms that no double-spending took place.
   :resheader Content-Type: application/json
   :>json string status: the string constant `DEPOSIT_OK`
-  :>json object sig: signature_ (JSON object) with purpose `TALER_SIGNATURE_MINT_CONFIRM_DEPOSIT` using a current signing key of the mint affirming the successful deposit and that the mint will transfer the funds after the refund deadline (or as soon as possible if the refund deadline is zero).
+  :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_CONFIRM_DEPOSIT` using a current signing key of the mint affirming the successful deposit and that the mint will transfer the funds after the refund deadline (or as soon as possible if the refund deadline is zero).
 
   **Failure response: Double spending**
 
@@ -280,7 +280,14 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :status 404: the mint does not recognize the denomination key as belonging to the mint, or it has expired
   :resheader Content-Type: application/json
   :>json string error: the value is "unknown entity referenced"
-  :>json string paramter: the value is "denom_pub"
+:>json string paramter: the value is "denom_pub"
+
+  **Failure response: Unsupported or invalid wire format**
+
+  :status 404: the mint does not recognize the wire format (unknown type or format check fails)
+  :resheader Content-Type: application/json
+  :>json string error: the value is "unknown entity referenced"
+  :>json string paramter: the value is "wire"
 
 
 
