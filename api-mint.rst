@@ -106,6 +106,7 @@ This API is used by wallets and merchants to obtain global information about the
   :>json date list_issue_date: The date when the denomination keys were last updated.
   :>json list signkeys: A JSON list of the mint's signing keys.  Described below in detail.
   :>json base32 eddsa_sig: compact EdDSA signature_ (binary-only) over the SHA-512 hash of the concatenation of all SHA-512 hashes of the RSA denomination public keys in `denoms` (in the same order as they were in `denoms`).  Note that for hashing, the binary format of the RSA public keys is used, and not their base32_ encoding.  Wallets cannot do much with this signature by itself; it is only useful when multiple clients need to establish that the mint is cheating (with respect to end-user anonymity) by giving disjoint denomination keys to different users.  If a mint were to do this, this signature allows the clients to demonstrate to the public that the mint is dishonest.
+  :>json base32 eddsa_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
 
   A denomination description in the `denoms` list is a JSON object with the following fields:
 
@@ -254,6 +255,7 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :resheader Content-Type: application/json
   :>json string status: the string constant `DEPOSIT_OK`
   :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_CONFIRM_DEPOSIT` using a current signing key of the mint affirming the successful deposit and that the mint will transfer the funds after the refund deadline (or as soon as possible if the refund deadline is zero).
+  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
 
   **Failure response: Double spending**
 
@@ -329,7 +331,8 @@ However, the new coins are linkable from the private keys of all old coins using
   :status 200 OK: The request was succesful. The response body contains a JSON object with the following fields:
   :resheader Content-Type: application/json
   :<json int noreveal_index: Which of the `kappa` indices does the client not have to reveal.
-  :<json base32 mint_sig: Signature_ with purpose `TALER_SIGNATURE_MINT_CONFIRM_MELT` whereby the mint affirms the successful melt and confirming the `noreveal_index`
+  :<json base32 mint_sig: binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_MELT` whereby the mint affirms the successful melt and confirming the `noreveal_index`
+  :<json base32 mint_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
 
   **Error Response: Invalid signature**:
 
