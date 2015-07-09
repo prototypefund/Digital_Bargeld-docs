@@ -282,7 +282,7 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :status 404: the mint does not recognize the denomination key as belonging to the mint, or it has expired
   :resheader Content-Type: application/json
   :>json string error: the value is "unknown entity referenced"
-:>json string paramter: the value is "denom_pub"
+  :>json string paramter: the value is "denom_pub"
 
   **Failure response: Unsupported or invalid wire format**
 
