@@ -190,7 +190,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
   :<json base32 denom_pub: denomination public key (RSA), specifying the type of coin the client would like the mint to create.
   :<json base32 coin_ev: coin's blinded public key, should be (blindly) signed by the mint's denomination private key
   :<json base32 reserve_pub: public (EdDSA) key of the reserve that the coin should be withdrawn from (the total amount deducted will be the coin's value plus the withdrawal fee as specified with the denomination information)
-  :<json object reserve_sig: EdDSA signature_ (binary-only) of purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` created with the reserves's public key
+  :<json object reserve_sig: EdDSA signature_ (binary-only) of purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` created with the reserves's private key
 
   **Success Response: OK**:
 
