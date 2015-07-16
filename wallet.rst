@@ -139,10 +139,10 @@ In order to compile it, issue
 
   .. sourcecode:: bash
 
-     cd wallet/wallet_button/emscripten/lib_primitive
+     cd wallet/wallet_button/emscripten/lib_wrapper
      ./final-build.sh
 
-the build script will build and copy the generated JavaScript inside ``wallet/wallet_button/firefox_src/content/lib/``, so that
+the build script will build and copy the generated ``lib_wrapper.js`` inside ``wallet/wallet_button/firefox_src/content/lib/``, so that
 the extension's code can properly import it.
 
 Some simple tests written in `C` are placed into our wallte's source tree, so
