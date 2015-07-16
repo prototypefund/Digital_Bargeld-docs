@@ -48,10 +48,10 @@ Web and installed by just visiting its URI.
 Emscripten
 ^^^^^^^^^^
 
-Since the wallet makes extensive use of cryptographic primitives, it relies on a library called ``libgnunetutils_taler_wallet``
-from the `gnunet <https://gnunet.org>`_ project. Moreover, since that library depends on `libgpg-error`, `libgcrypt` and `libunistring`,
-and the non markup part of the extension is JavaScript, a language-to-language compiler such as `Emscripten <http://emscripten.org>`_ has
-been used to port `C` sources to JavaScript.
+Since the wallet makes extensive use of cryptographic primitives and of come coins' manipulating primitives, it relies on two fundamental libraries:
+``libgnunetutils_taler_wallet`` and ``libtalerutil_wallet``; being the former from the `gnunet <https://gnunet.org>`_ project, and the latter from `taler <https://taler.net>`_
+project itself. Moreover, since those libraries depend on `libgpg-error`, `libgcrypt` and `libunistring`, and the non markup part of the extension is JavaScript,
+a language-to-language compiler such as `Emscripten <http://emscripten.org>`_ has been used to port `C` sources to JavaScript.
 
   .. note::
      
@@ -70,12 +70,17 @@ been used to port `C` sources to JavaScript.
      git://git.gnupg.org/libgcrypt.git # code downloaded in 'libgcrypt/'
      git://git.savannah.gnu.org/libunistring.git # code downloaded in 'libunistring/'
      svn co https://gnunet.org/svn/gnunet # code downloaded in 'gnunet/'
+     git clone https://git.taler.net/mint.git  # code downloaded in 'mint/'
 
 Before delving into the proper compilation, let's assume that the wallet `git master` has been cloned into
 some direcory called ``wallet``.
+
 In ``wallet/wallet_button/emscripten/${component}``, where ``${component}`` ranges over ``libgpg-error``, ``libgcrypt``,
-``libunistring`` and ``gnunet``, there is a shell script called ``myconf-${component}.sh`` that will take care of
-configuring and building any component.
+``libunistring``, there is a shell script called ``myconf-${component}.sh`` that will take care of configuring and building
+the referred components.
+
+As for `gnunet`, let ``${g_component}`` and ``${t_component}`` be respectively ``gnunet`` and ``taler``; the scripts we need
+are ``wallet/wallet_button/emscripten/lib${g_component}util_taler_wallet.sh``.
 
 To install emscripten, refer to the `official documentation <http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#sdk-download-and-install>`_.
 It is worth noting that all our tests have been run using the `emscripten SDK`, though any other alternative method of setting up emscripten should work.
@@ -87,26 +92,41 @@ At the time of this writing the following versions have been used for each compo
 * libunistring  0.9.5 (commit 4b0cfb0e39796400149767bdeb6097927895635a)
 * gnunet 0.10.1 (commit r35923)
 * emscripten 1.33.2
+* taler mint Pre-alpha (commit 28f9f7b54077d0105fa5f97ab0c97d80262dcfee)
 
-To configure and build any component, it suffices to copy the provided script into any tree of the targeted component,
+To configure and build  any component, it suffices to copy the provided script into any tree of the targeted component.
+For `libgpg-error`, `libgcrypt` and `libunistring`, do
 
   .. sourcecode:: bash
 
      cp wallet/wallet_button/emscripten/${component}/myconf-${component}.sh ${component}/
 
-Then to generate the native configure script,
+As for ``libgnunetutils_taler_wallet`` and ``libtalerutil_wallet``, do
 
+  .. sourcecode:: bash
+
+     cp wallet/wallet_button/emscripten/myconf-libgnunetutil_taler_wallet.sh gnunet/
+     cp wallet/wallet_button/emscripten/myconf-libtalerutil_wallet.sh mint/
+
+
+
+Then to generate the native configure script, for `lib-gpgerror` `libgcrypt` and `libunistring`
 
   .. sourcecode:: bash
 
      cd ${component}
      ./autogen.sh
 
-Finally, run the provided script (any final file will be placed under ``/tmp``)
+whereas for `gnunet` and `taler`, do
 
   .. sourcecode:: bash
 
-     ./myconf-${component}.sh
+     cd ${component}
+     ./bootstrap.sh
+
+
+Finally, run the provided script (any final file will be placed under ``/tmp/emscripten``) that we
+just copied under any component's tree.
 
 At this point, you have the header files and the static library for each component compiled in the `LLVM` intermediate
 form. To see some final JavaScript, it is needed to compile a `C` program, though that is not the only way (once again,
