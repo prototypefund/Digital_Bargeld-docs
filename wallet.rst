@@ -87,13 +87,14 @@ It is worth noting that all our tests have been run using the `emscripten SDK`, 
 
 At the time of this writing the following versions have been used for each component
 
-* libgcrypt  1.7 (commit a36ee7501f68ad7ebcfe31f9659430b9d2c3ddd1)
+* emscripten 1.33.2
 * libgpg-error  1.19 (commit 4171d61a97d9628532db84b590a9c135f360fa90)
+* libgcrypt  1.7 (commit a36ee7501f68ad7ebcfe31f9659430b9d2c3ddd1)
 * libunistring  0.9.5 (commit 4b0cfb0e39796400149767bdeb6097927895635a)
 * gnunet 0.10.1 (commit r35923)
-* emscripten 1.33.2
-* taler mint Pre-alpha (commit 28f9f7b54077d0105fa5f97ab0c97d80262dcfee)
+* taler `mint` Pre-alpha (commit 28f9f7b54077d0105fa5f97ab0c97d80262dcfee)
 
+Please note that the order in which each component is listed must reflect the order in which each of them is compiled.
 To configure and build  any component, it suffices to copy the provided script into any tree of the targeted component.
 For `libgpg-error`, `libgcrypt` and `libunistring`, do
 
