@@ -132,7 +132,18 @@ just copied under any component's tree.
 At this point, you have the header files and the static library for each component compiled in the `LLVM` intermediate
 form. To see some final JavaScript, it is needed to compile a `C` program, though that is not the only way (once again,
 refer to the official `emscripten's documentation <http://kripken.github.io/emscripten-site/docs/compiling/Building-Projects.html#building-projects>`_),
-against the libraries we have just built.
+against the libraries we have just built. In `taler`'s case, this task is accomplished by a `C` source file called
+``wrap.c``, that is located at ``wallet/wallet_button/emscripten``. Its main purpose is to save JavaScript land from manipulating
+`C` structures to pass to `libgnunetutil_taler_wallet`'s and `libtalerutil_wallet`'s primitives, and to provide some handy functions.
+In order to compile it, issue
+
+  .. sourcecode:: bash
+
+     cd wallet/wallet_button/emscripten/lib_primitive
+     ./final-build.sh
+
+the build script will build and copy the generated JavaScript inside ``wallet/wallet_button/firefox_src/content/lib/``, so that
+the extension's code can properly import it.
 
 Some simple tests written in `C` are placed into our wallte's source tree, so
 
