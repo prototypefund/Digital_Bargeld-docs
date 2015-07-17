@@ -150,17 +150,52 @@ Some simple tests written in `C` are placed into our wallte's source tree, so
   .. sourcecode:: bash
 
      cd wallet/wallet_button/emscripten/hello_world/
-     source final_build-${X}.sh # with ${X} being the prefix of some ${X}.c in this directory
+     source final_build-${X}.sh # with ${X} being either 'fancy' or 'time'
 
 Your environment has now two functions, ``assmb`` and ``linkit``, where the former will just assemble
 the test ``${X}.c`` (leaving a file named ``${X}.o`` inspectable by ``llvm-nm`` or ``llvm-objdump``) and
 the latter will link the final JavaScript called ``${X}.js``.
 
-Thus, to see the final product, issue
+Thus, to see some output, issue
 
 
   .. sourcecode:: bash
 
      assmb
      linkit
-     nodejs ${X}.js # some pretty output will show up!
+     nodejs ${X}.js
+
+
+The same directory offers a more "playful" example, called ``time_glue.c``. Its purpose is to be compiled
+as a JavaScript "library" (it actually lacks a `main()` function) that could be imported by a Web browser
+which can, in turn, call the functions provided by this library. So after sourcing ``final_build-time_glue.sh``,
+the assembling and linking phases (accomplished in the same way as the previous examples) will yield a HTML
+which embraces the JavaScript translation of ``time_glue.c``, called ``time_glue.html``.
+
+  .. note::
+
+     The following steps have been tested exclusively on Mozilla Firefox (39)
+
+
+In order to import the library into the browser and call its functions,
+
+1. open ``time_glue.html``
+2. open the JavaScript shell environment (`CTRL+K`)
+3. import the function which retrieves the current time in binary format (by allocating
+   a proper structure and returning its pointer): at the prompt, issue ``var time =
+   window.Module.cwrap('get_absolute_time', 'number');``
+4. import the function which convert such a binary format in a human readable string,
+   ``var pretty = window.Module.cwrap('get_fancy_time_dealloc', 'string', ['number']);``.
+   the `_dealloc` part is due to our choice to make this example easier by avoiding the
+   passing of whole C structures as parameters (though doable with emscripted code, that
+   adds more complexity than expectable for an example); thus instead of calling a further
+   function with the sole aim of deallocating the time holding structure from emscripten's
+   heap, we chose to do so from this function.
+5. import the "printer", ``var printTime = window.Module.cwrap('print_time', 'void', ['string']);``
+6. Normally call the imported functions:
+  .. sourcecode:: JavaScript
+
+     var timeRaw = time();
+     var timeString = pretty(timeRaw);
+     printTime(timePretty);
+     // this last command should give some ouput on the black canvas
