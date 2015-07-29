@@ -721,6 +721,11 @@ Binary Blob Specification
 
      This section largely corresponds to the definitions in taler_signatures.h.  You may also want to refer to this code, as it offers additional details on each of the members of the structs.
 
+  .. note::
+
+     Due to the way of handling `big` numbers by some platforms (such that `JavaScript`, for exapmle), wherever the following specification mentions a 64-bit value, the actual implementations
+     are strongly advised to rely on arithmetic up to 53 bits.
+
 This section specifies the binary representation of messages used in Taler's protocols. The message formats are given in a C-style pseudocode notation.  Padding is always specified explicitly, and numeric values are in network byte order (big endian).
 
 ------------------------
