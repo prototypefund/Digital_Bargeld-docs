@@ -346,6 +346,10 @@ However, the new coins are linkable from the private keys of all old coins using
   :status 403 Forbidden: The operation is not allowed as (at least) one of the coins has insufficient funds.
   :resheader Content-Type: application/json
   :>json string error: the value is "insufficient funds"
+  :>json base32 coin_pub: public key of a melted coin that had insufficient funds
+  :>json amount original_value: original (total) value of the coin
+  :>json amount residual_value: remaining value of the coin
+  :>json amount requested_value: amount of the coin's value that was to be melted
   :>json array history: the transaction list of the respective coin that failed to have sufficient funds left.  The format is the same as for insufficient fund reports during /deposit.  Note that only the transaction history for one bogus coin is given, even if multiple coins would have failed the check.
 
   **Failure response: Unknown denomination key**
