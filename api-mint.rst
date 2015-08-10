@@ -238,7 +238,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
   :<json base32 denom_pub: denomination public key (RSA), specifying the type of coin the client would like the mint to create.
   :<json base32 coin_ev: coin's blinded public key, should be (blindly) signed by the mint's denomination private key
   :<json base32 reserve_pub: public (EdDSA) key of the reserve that the coin should be withdrawn from (the total amount deducted will be the coin's value plus the withdrawal fee as specified with the denomination information)
-  :<json object reserve_sig: EdDSA signature_ (binary-only) of purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` created with the reserves's public key
+  :<json object reserve_sig: EdDSA signature_ (binary-only) of purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` created with the reserves's private key
 
   **Success Response: OK**:
 
@@ -330,7 +330,7 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :status 404: the mint does not recognize the denomination key as belonging to the mint, or it has expired
   :resheader Content-Type: application/json
   :>json string error: the value is "unknown entity referenced"
-:>json string paramter: the value is "denom_pub"
+  :>json string paramter: the value is "denom_pub"
 
   **Failure response: Unsupported or invalid wire format**
 
@@ -394,6 +394,10 @@ However, the new coins are linkable from the private keys of all old coins using
   :status 403 Forbidden: The operation is not allowed as (at least) one of the coins has insufficient funds.
   :resheader Content-Type: application/json
   :>json string error: the value is "insufficient funds"
+  :>json base32 coin_pub: public key of a melted coin that had insufficient funds
+  :>json amount original_value: original (total) value of the coin
+  :>json amount residual_value: remaining value of the coin
+  :>json amount requested_value: amount of the coin's value that was to be melted
   :>json array history: the transaction list of the respective coin that failed to have sufficient funds left.  The format is the same as for insufficient fund reports during /deposit.  Note that only the transaction history for one bogus coin is given, even if multiple coins would have failed the check.
 
   **Failure response: Unknown denomination key**
@@ -768,6 +772,11 @@ Binary Blob Specification
   .. note::
 
      This section largely corresponds to the definitions in taler_signatures.h.  You may also want to refer to this code, as it offers additional details on each of the members of the structs.
+
+  .. note::
+
+     Due to the way of handling `big` numbers by some platforms (such as `JavaScript`, for example), wherever the following specification mentions a 64-bit value, the actual implementations
+     are strongly advised to rely on arithmetic up to 53 bits.
 
 This section specifies the binary representation of messages used in Taler's protocols. The message formats are given in a C-style pseudocode notation.  Padding is always specified explicitly, and numeric values are in network byte order (big endian).
 

@@ -48,10 +48,10 @@ Web and installed by just visiting its URI.
 Emscripten
 ^^^^^^^^^^
 
-Since the wallet makes extensive use of cryptographic primitives, it relies on a library called ``libgnunetutils_taler_wallet``
-from the `gnunet <https://gnunet.org>`_ project. Moreover, since that library depends on `libgpg-error`, `libgcrypt` and `libunistring`,
-and the non markup part of the extension is JavaScript, a language-to-language compiler such as `Emscripten <http://emscripten.org>`_ has
-been used to port `C` sources to JavaScript.
+Since the wallet makes extensive use of cryptographic primitives and of come coins' manipulating primitives, it relies on two fundamental libraries:
+``libgnunetutils_taler_wallet`` and ``libtalerutil_wallet``; being the former from the `gnunet <https://gnunet.org>`_ project, and the latter from `taler <https://taler.net>`_
+project itself. Moreover, since those libraries depend on `libgpg-error`, `libgcrypt` and `libunistring`, and the non markup part of the extension is JavaScript,
+a language-to-language compiler such as `Emscripten <http://emscripten.org>`_ has been used to port `C` sources to JavaScript.
 
   .. note::
      
@@ -70,65 +70,132 @@ been used to port `C` sources to JavaScript.
      git://git.gnupg.org/libgcrypt.git # code downloaded in 'libgcrypt/'
      git://git.savannah.gnu.org/libunistring.git # code downloaded in 'libunistring/'
      svn co https://gnunet.org/svn/gnunet # code downloaded in 'gnunet/'
+     git clone https://git.taler.net/mint.git  # code downloaded in 'mint/'
 
 Before delving into the proper compilation, let's assume that the wallet `git master` has been cloned into
 some direcory called ``wallet``.
+
 In ``wallet/wallet_button/emscripten/${component}``, where ``${component}`` ranges over ``libgpg-error``, ``libgcrypt``,
-``libunistring`` and ``gnunet``, there is a shell script called ``myconf-${component}.sh`` that will take care of
-configuring and building any component.
+``libunistring``, there is a shell script called ``myconf-${component}.sh`` that will take care of configuring and building
+the referred components.
+
+As for `gnunet`, let ``${g_component}`` and ``${t_component}`` be respectively ``gnunet`` and ``taler``; the scripts we need
+are ``wallet/wallet_button/emscripten/lib${g_component}util_taler_wallet.sh``.
 
 To install emscripten, refer to the `official documentation <http://kripken.github.io/emscripten-site/docs/getting_started/downloads.html#sdk-download-and-install>`_.
 It is worth noting that all our tests have been run using the `emscripten SDK`, though any other alternative method of setting up emscripten should work.
 
 At the time of this writing the following versions have been used for each component
 
-* libgcrypt  1.7 (commit a36ee7501f68ad7ebcfe31f9659430b9d2c3ddd1)
+* emscripten 1.33.2
 * libgpg-error  1.19 (commit 4171d61a97d9628532db84b590a9c135f360fa90)
+* libgcrypt  1.7 (commit a36ee7501f68ad7ebcfe31f9659430b9d2c3ddd1)
 * libunistring  0.9.5 (commit 4b0cfb0e39796400149767bdeb6097927895635a)
 * gnunet 0.10.1 (commit r35923)
-* emscripten 1.33.2
+* taler `mint` Pre-alpha (commit 28f9f7b54077d0105fa5f97ab0c97d80262dcfee)
 
-To configure and build any component, it suffices to copy the provided script into any tree of the targeted component,
+Please note that the order in which each component is listed must reflect the order in which each of them is compiled.
+To configure and build  any component, it suffices to copy the provided script into any tree of the targeted component.
+For `libgpg-error`, `libgcrypt` and `libunistring`, do
 
   .. sourcecode:: bash
 
      cp wallet/wallet_button/emscripten/${component}/myconf-${component}.sh ${component}/
 
-Then to generate the native configure script,
+As for ``libgnunetutils_taler_wallet`` and ``libtalerutil_wallet``, do
 
+  .. sourcecode:: bash
+
+     cp wallet/wallet_button/emscripten/myconf-libgnunetutil_taler_wallet.sh gnunet/
+     cp wallet/wallet_button/emscripten/myconf-libtalerutil_wallet.sh mint/
+
+
+
+Then to generate the native configure script, for `lib-gpgerror` `libgcrypt` and `libunistring`
 
   .. sourcecode:: bash
 
      cd ${component}
      ./autogen.sh
 
-Finally, run the provided script (any final file will be placed under ``/tmp``)
+whereas for `gnunet` and `taler`, do
 
   .. sourcecode:: bash
 
-     ./myconf-${component}.sh
+     cd ${component}
+     ./bootstrap.sh
+
+
+Finally, run the provided script (any final file will be placed under ``/tmp/emscripten``) that we
+just copied under any component's tree.
 
 At this point, you have the header files and the static library for each component compiled in the `LLVM` intermediate
 form. To see some final JavaScript, it is needed to compile a `C` program, though that is not the only way (once again,
 refer to the official `emscripten's documentation <http://kripken.github.io/emscripten-site/docs/compiling/Building-Projects.html#building-projects>`_),
-against the libraries we have just built.
+against the libraries we have just built. In `taler`'s case, this task is accomplished by a `C` source file called
+``wrap.c``, that is located at ``wallet/wallet_button/emscripten``. Its main purpose is to save JavaScript land from manipulating
+`C` structures to pass to `libgnunetutil_taler_wallet`'s and `libtalerutil_wallet`'s primitives, and to provide some handy functions.
+In order to compile it, issue
+
+  .. sourcecode:: bash
+
+     cd wallet/wallet_button/emscripten/lib_wrapper
+     ./final-build.sh
+
+the build script will build and copy the generated ``lib_wrapper.js`` inside ``wallet/wallet_button/firefox_src/content/lib/``, so that
+the extension's code can properly import it.
 
 Some simple tests written in `C` are placed into our wallte's source tree, so
 
   .. sourcecode:: bash
 
      cd wallet/wallet_button/emscripten/hello_world/
-     source final_build-${X}.sh # with ${X} being the prefix of some ${X}.c in this directory
+     source final_build-${X}.sh # with ${X} being either 'fancy' or 'time'
 
 Your environment has now two functions, ``assmb`` and ``linkit``, where the former will just assemble
 the test ``${X}.c`` (leaving a file named ``${X}.o`` inspectable by ``llvm-nm`` or ``llvm-objdump``) and
 the latter will link the final JavaScript called ``${X}.js``.
 
-Thus, to see the final product, issue
+Thus, to see some output, issue
 
 
   .. sourcecode:: bash
 
      assmb
      linkit
-     nodejs ${X}.js # some pretty output will show up!
+     nodejs ${X}.js
+
+
+The same directory offers a more "playful" example, called ``time_glue.c``. Its purpose is to be compiled
+as a JavaScript "library" (it actually lacks a `main()` function) that could be imported by a Web browser
+which can, in turn, call the functions provided by this library. So after sourcing ``final_build-time_glue.sh``,
+the assembling and linking phases (accomplished in the same way as the previous examples) will yield a HTML
+which embraces the JavaScript translation of ``time_glue.c``, called ``time_glue.html``.
+
+  .. note::
+
+     The following steps have been tested exclusively on Mozilla Firefox (39)
+
+
+In order to import the library into the browser and call its functions,
+
+1. open ``time_glue.html``
+2. open the JavaScript shell environment (`CTRL+K`)
+3. import the function which retrieves the current time in binary format (by allocating
+   a proper structure and returning its pointer): at the prompt, issue ``var time =
+   window.Module.cwrap('get_absolute_time', 'number');``
+4. import the function which convert such a binary format in a human readable string,
+   ``var pretty = window.Module.cwrap('get_fancy_time_dealloc', 'string', ['number']);``.
+   the `_dealloc` part is due to our choice to make this example easier by avoiding the
+   passing of whole C structures as parameters (though doable with emscripted code, that
+   adds more complexity than expectable for an example); thus instead of calling a further
+   function with the sole aim of deallocating the time holding structure from emscripten's
+   heap, we chose to do so from this function.
+5. import the "printer", ``var printTime = window.Module.cwrap('print_time', 'void', ['string']);``
+6. Normally call the imported functions:
+  .. sourcecode:: JavaScript
+
+     var timeRaw = time();
+     var timeString = pretty(timeRaw);
+     printTime(timePretty);
+     // this last command should give some ouput on the black canvas
