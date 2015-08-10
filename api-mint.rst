@@ -140,6 +140,10 @@ from auditors, and the auditor keys should be hard-coded into the wallet as they
     Both the individual denominations *and* the denomination list is signed,
     allowing customers to prove that they received an inconsistent list.
 
+-----------------------------------
+Obtaining wire-transfer information
+-----------------------------------
+
 .. http:get:: /wire
 
   Returns a list of payment methods supported by the mint.  The idea is that wallets may use this information to instruct users on how to perform wire transfers to top up their wallets.
