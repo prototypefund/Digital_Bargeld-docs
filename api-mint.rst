@@ -90,6 +90,9 @@ Obtaining Mint Keys
 -------------------
 
 This API is used by wallets and merchants to obtain global information about the mint, such as online signing keys, available denominations and the fee structure.
+This is typically the first call any mint client makes, as it returns information required to process all of the other interactions with the mint.  The returned
+information is secured by (1) signature(s) from the mint, especially the long-term offline signing key of the mint (which clients should cache); (2) signature(s)
+from auditors, and the auditor keys should be hard-coded into the wallet as they are the trust anchors for Taler; (3) possibly by using HTTPS.
 
 
 .. http:get:: /keys
@@ -136,6 +139,51 @@ This API is used by wallets and merchants to obtain global information about the
 
     Both the individual denominations *and* the denomination list is signed,
     allowing customers to prove that they received an inconsistent list.
+
+.. http:get:: /wire
+
+  Returns a list of payment methods supported by the mint.  The idea is that wallets may use this information to instruct users on how to perform wire transfers to top up their wallets.
+
+  **Success response: OK**
+
+  :status 200: This request should virtually always be successful.
+  :resheader Content-Type: application/json
+  :>json array methods: a JSON array of strings with supported payment methods, i.e. "sepa". Further information about the respective payment method is then available under /wire/METHOD, i.e. /wire/sepa if the payment method was "sepa".
+  :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_PAYMENT_METHODS` signing over the hash over the 0-terminated strings representing the payment methods in the same order as given in methods.
+  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
+
+.. http:get:: /wire/test
+
+  The "test" payment method is for testing the system without using
+  real-world currencies or actual wire transfers.  If the mint operates
+  in "test" mode, this request provides a redirect to an address where
+  the user can initiate a fake wire transfer for testing.
+
+  **Success Response: OK**
+
+  :status 302: Redirect to the webpage where fake wire transfers can be made.
+
+  **Failure Response: Not implemented**
+
+  :status 501: This wire transfer method is not supported by this mint.
+
+.. http:get:: /wire/sepa
+
+  Provides instructions for how to transfer funds to the mint using the SEPA transfers.
+
+  **Success Response: OK**
+
+  :status 200: This request should virtually always be successful.
+  :resheader Content-Type: application/json
+  :>json string receiver_name: Legal name of the mint operator who is receiving the funds
+  :>json string iban: IBAN account number for the mint
+  :>json string bic: BIC of the bank of the mint
+  :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_PAYMENT_METHOD_SEPA` signing over the hash over the 0-terminated strings representing the receiver's name, IBAN and the BIC.
+  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
+
+  **Failure Response: Not implemented**
+
+  :status 501: This wire transfer method is not supported by this mint.
 
 
 ------------------
