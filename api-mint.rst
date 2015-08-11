@@ -90,6 +90,9 @@ Obtaining Mint Keys
 -------------------
 
 This API is used by wallets and merchants to obtain global information about the mint, such as online signing keys, available denominations and the fee structure.
+This is typically the first call any mint client makes, as it returns information required to process all of the other interactions with the mint.  The returned
+information is secured by (1) signature(s) from the mint, especially the long-term offline signing key of the mint (which clients should cache); (2) signature(s)
+from auditors, and the auditor keys should be hard-coded into the wallet as they are the trust anchors for Taler; (3) possibly by using HTTPS.
 
 
 .. http:get:: /keys
@@ -136,6 +139,55 @@ This API is used by wallets and merchants to obtain global information about the
 
     Both the individual denominations *and* the denomination list is signed,
     allowing customers to prove that they received an inconsistent list.
+
+-----------------------------------
+Obtaining wire-transfer information
+-----------------------------------
+
+.. http:get:: /wire
+
+  Returns a list of payment methods supported by the mint.  The idea is that wallets may use this information to instruct users on how to perform wire transfers to top up their wallets.
+
+  **Success response: OK**
+
+  :status 200: This request should virtually always be successful.
+  :resheader Content-Type: application/json
+  :>json array methods: a JSON array of strings with supported payment methods, i.e. "sepa". Further information about the respective payment method is then available under /wire/METHOD, i.e. /wire/sepa if the payment method was "sepa".
+  :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_PAYMENT_METHODS` signing over the hash over the 0-terminated strings representing the payment methods in the same order as given in methods.
+  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
+
+.. http:get:: /wire/test
+
+  The "test" payment method is for testing the system without using
+  real-world currencies or actual wire transfers.  If the mint operates
+  in "test" mode, this request provides a redirect to an address where
+  the user can initiate a fake wire transfer for testing.
+
+  **Success Response: OK**
+
+  :status 302: Redirect to the webpage where fake wire transfers can be made.
+
+  **Failure Response: Not implemented**
+
+  :status 501: This wire transfer method is not supported by this mint.
+
+.. http:get:: /wire/sepa
+
+  Provides instructions for how to transfer funds to the mint using the SEPA transfers.
+
+  **Success Response: OK**
+
+  :status 200: This request should virtually always be successful.
+  :resheader Content-Type: application/json
+  :>json string receiver_name: Legal name of the mint operator who is receiving the funds
+  :>json string iban: IBAN account number for the mint
+  :>json string bic: BIC of the bank of the mint
+  :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_PAYMENT_METHOD_SEPA` signing over the hash over the 0-terminated strings representing the receiver's name, IBAN and the BIC.
+  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
+
+  **Failure Response: Not implemented**
+
+  :status 501: This wire transfer method is not supported by this mint.
 
 
 ------------------
@@ -346,6 +398,10 @@ However, the new coins are linkable from the private keys of all old coins using
   :status 403 Forbidden: The operation is not allowed as (at least) one of the coins has insufficient funds.
   :resheader Content-Type: application/json
   :>json string error: the value is "insufficient funds"
+  :>json base32 coin_pub: public key of a melted coin that had insufficient funds
+  :>json amount original_value: original (total) value of the coin
+  :>json amount residual_value: remaining value of the coin
+  :>json amount requested_value: amount of the coin's value that was to be melted
   :>json array history: the transaction list of the respective coin that failed to have sufficient funds left.  The format is the same as for insufficient fund reports during /deposit.  Note that only the transaction history for one bogus coin is given, even if multiple coins would have failed the check.
 
   **Failure response: Unknown denomination key**
@@ -720,6 +776,11 @@ Binary Blob Specification
   .. note::
 
      This section largely corresponds to the definitions in taler_signatures.h.  You may also want to refer to this code, as it offers additional details on each of the members of the structs.
+
+  .. note::
+
+     Due to the way of handling `big` numbers by some platforms (such as `JavaScript`, for example), wherever the following specification mentions a 64-bit value, the actual implementations
+     are strongly advised to rely on arithmetic up to 53 bits.
 
 This section specifies the binary representation of messages used in Taler's protocols. The message formats are given in a C-style pseudocode notation.  Padding is always specified explicitly, and numeric values are in network byte order (big endian).
 
