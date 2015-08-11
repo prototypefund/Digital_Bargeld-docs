@@ -922,7 +922,6 @@ for signed data (contained in `FIELDS`) with the given purpose.  The `size` fiel
   };
 
   struct TALER_MintSigningKeyValidityPS {
-    struct TALER_MasterSignatureP signature;
     signed (purpose = TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY) {
       struct TALER_MasterPublicKeyP master_public_key;
       struct GNUNET_TIME_AbsoluteNBO start;
@@ -940,7 +939,6 @@ for signed data (contained in `FIELDS`) with the given purpose.  The `size` fiel
   };
 
   struct TALER_DenominationKeyValidityPS {
-    struct TALER_MasterSignatureP signature;
     signed (purpose = TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY) {
       struct TALER_MasterPublicKeyP master;
       struct GNUNET_TIME_AbsoluteNBO start;
@@ -954,3 +952,17 @@ for signed data (contained in `FIELDS`) with the given purpose.  The `size` fiel
       struct GNUNET_HashCode denom_hash;
     }
   };
+
+  struct TALER_MasterWireSepaDetailsPS {
+    signed (purpose = TALER_SIGNATURE_MASTER_SEPA_DETAILS) {
+      struct GNUNET_HashCode h_sepa_details;
+    }
+  };
+
+  struct TALER_MintWireSupportMethodsPS {
+    signed (purpose = TALER_SIGNATURE_MINT_WIRE_TYPES) {
+      struct GNUNET_HashCode h_wire_types;
+    }
+  };
+
+

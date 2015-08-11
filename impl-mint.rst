@@ -14,6 +14,16 @@ The section `[mint]` contains various global options for the mint:
 
 
 ^^^^^^^^^^^^^^^^^^^^^^
+SEPA accounts
+^^^^^^^^^^^^^^^^^^^^^^
+
+The command line tool `taler-mint-sepa` is used to create a file with
+the JSON response to /wire/sepa requests using the mint's offline
+master key.  This file needs to be created and added to the configuration under SEPA_RESPONSE_FILE in section [mint-wire-sepa] when the 
+`wireformat` option in the configuration file allows SEPA transactions.
+
+
+^^^^^^^^^^^^^^^^^^^^^^
 Key Management Options
 ^^^^^^^^^^^^^^^^^^^^^^
 
