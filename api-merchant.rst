@@ -75,6 +75,12 @@ from scripted languages like, for example, PHP. Thus the typical work-cycle of a
   3. Send this JSON to the backend.
   4. Forward the response to the user.
 
+.. note::
+the fact that wallets never reach the backends directly allows the
+merchants to place their backends in areas with security configurations
+particularly addressed to them. Again, the merchant can demand the backend
+management to some other body of his trust.
+
 +++++++++
 Encodings
 +++++++++
@@ -84,9 +90,27 @@ of the `contract`'s and `deposit permission`'s blobs
 
   .. _contract:
 
-  * **contract**: TBDef
+  * **contract**:
+The following structure is mainly addressed to the wallet, that is
+in charge of verifying and dissecting it. It is not of any interest
+to the frontend developer, except that forwarding the JSON that encloses
+it. However, refer to the `gnunet <https://gnunet.org>`_'s documentation
+for those fields prepended with `GNUNET_`.
 
-  .. _deposit\ permission:
+.. sourcecode:: c
+ 
+ struct Contract
+ {
+   struct GNUNET_CRYPTO_EddsaSignature sig; // signature of the contract itself: from 'purpose' field down below.
+   struct GNUNET_CRYPTO_EccSignaturePurpose purpose; // contract's purpose, indicating TALER_SIGNATURE_MERCHANT_CONTRACT.
+   char m[13]; // contract's id.
+   struct GNUNET_TIME_AbsoluteNBO t; // the contract's generation time.
+   struct TALER_AmountNBO amount; // the good's price.
+   struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
+   char a[]; // a human-readable description of this deal, or product.
+ };
+
+ .. _deposit\ permission:
 
   * **deposit permission**: TBDef
 
@@ -180,10 +204,20 @@ frontend got from the backend.
    :status 500 Internal Server Error. In most cases, some error occurred while the backend was
    generating the contract. For example, it failed to store it into its database.
 
-.. http:POST:: /taler/pay
+.. http:post:: /taler/pay
 
    Send the deposit permission to the merchant.
-   TBDef
+
+   :reqheader Content-Type: application/json
+   :<json base32 dep_perm: the signed deposit permission (link to the blob above)
+   :<json base32 eddsa_pub: the public key of the customer.
+
+
+  **Success Response: OK**
+  :status 200 OK: the payment has been received.
+
+
+  **Failure Response: TBD **
 
 ----------------
 Frontend-Backend
@@ -207,5 +241,19 @@ The following API are made available by the merchant's backend to the merchant's
    frontend implementation.
    :<json unsigned\ 32 cid: the identification number of this contract, dependent on the
    frontend implementation.
-   :<json object price: the :ref:`amount-ref` representing the price of this item.
+   :<json object price: the amount (crosslink to amount's definition on mint's page) representing the price of this item.
  
+  **Success Response: OK**:
+
+  :status 200 OK: The backend has successfully created the certificate
+  :resheader Content-Type: application/json
+  :<json base32 contract: the encoding of the blob (which blob? link above.) representing the contract.
+  :<json base32 sig: signature of this contract with purpose TALER_SIGNATURE_MERCHANT_CONTRACT. 
+  :<json base32 eddsa_pub: EdDSA key of the merchant.
+
+   **Failure Response**
+
+  :status 400 Bad Request: Request not understood.
+     the JSON by the frontend.
+     :status 500 Internal Server Error. In most cases, some error occurred while the backend was
+     generating the contract. For example, it failed to store it into its database.
