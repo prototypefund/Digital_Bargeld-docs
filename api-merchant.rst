@@ -108,11 +108,21 @@ for those fields prepended with `GNUNET_`.
    struct TALER_AmountNBO amount; // the good's price.
    struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
    char a[]; // a human-readable description of this deal, or product.
- };
+ }
 
  .. _deposit\ permission:
 
-  * **deposit permission**: TBDef
+.. sourcecode:: c
+
+ struct DepositPermission
+ {
+  struct TALER_CoinPublicInfo; // Crafted by the wallet, contains all the information needed by the mint to validate the deposit. Again, not directly in the interest of the frontend.
+ char m[13]; // contract's id.
+ struct TALER_Amount amount; // the good's price.
+ GNUNET_HashCode a; // hash code of Contract.a.
+ struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
+ GNUNET_CRYPTO_EddsaPublicKey merch_pub; // merchant's public key. 
+ }
 
 ---------------
 Wallet-Frontend
@@ -122,7 +132,7 @@ Wallet-Frontend
 Messagging protocol
 +++++++++++++++++++
 Due to that dual mean of reaching acknowledgement, and to avoid signaling loops,
-there are defines two protocols according to the initiator. The signals are to be
+we define two protocols according to the initiator. The signals are to be
 implemented in JavaScript events dispatched on the HTML element `body`.
 
 Thus, when the merchant wants to notify the availability of a Taler-style payment
@@ -216,8 +226,15 @@ frontend got from the backend.
   **Success Response: OK**
   :status 200 OK: the payment has been received.
 
-
   **Failure Response: TBD **
+
+ **Error Response: Invalid signature**:
+
+  :status 401 Unauthorized: One of the signatures is invalid.
+  :resheader Content-Type: application/json
+  :>json string error: the value is "invalid signature"
+  :>json string paramter: the value is "coin_sig", "ub_sig" (TODO define this) or "wallet_sig", depending on which signature was deemed invalid by the mint
+
 
 ----------------
 Frontend-Backend
@@ -257,3 +274,9 @@ The following API are made available by the merchant's backend to the merchant's
      the JSON by the frontend.
      :status 500 Internal Server Error. In most cases, some error occurred while the backend was
      generating the contract. For example, it failed to store it into its database.
+
+.. http:post:: /pay
+
+   :reqheader Content-Type: application/json
+   :<json base32 dep_perm: the signed deposit permission (link to the blob above)
+   :<json base32 eddsa_pub: the public key of the customer.
