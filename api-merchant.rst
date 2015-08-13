@@ -280,3 +280,38 @@ The following API are made available by the merchant's backend to the merchant's
    :reqheader Content-Type: application/json
    :<json base32 dep_perm: the signed deposit permission (link to the blob above)
    :<json base32 eddsa_pub: the public key of the customer.
+
+  **Failure Response: TBD **
+
+  **Error Response: Invalid signature**:
+
+  :status 401 Unauthorized: One of the signatures is invalid.
+  :resheader Content-Type: application/json
+  :>json string error: the value is "invalid signature"
+  :>json string paramter: the value is "coin_sig", "ub_sig" (TODO define this) or "wallet_sig", depending on which signature was deemed invalid by the mint
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
