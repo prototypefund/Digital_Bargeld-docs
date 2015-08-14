@@ -173,7 +173,7 @@ Obtaining wire-transfer information
 
 .. http:get:: /wire/sepa
 
-  Provides instructions for how to transfer funds to the mint using the SEPA transfers.
+  Provides instructions for how to transfer funds to the mint using the SEPA transfers.  Always signed using the mint's long-term offline master public key.
 
   **Success Response: OK**
 
@@ -183,7 +183,6 @@ Obtaining wire-transfer information
   :>json string iban: IBAN account number for the mint
   :>json string bic: BIC of the bank of the mint
   :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_PAYMENT_METHOD_SEPA` signing over the hash over the 0-terminated strings representing the receiver's name, IBAN and the BIC.
-  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
 
   **Failure Response: Not implemented**
 
@@ -422,7 +421,7 @@ However, the new coins are linkable from the private keys of all old coins using
 
   :status 200 OK: The transfer private keys matched the commitment and the original request was well-formed.  The mint responds with a JSON of the following type:
   :resheader Content-Type: application/json
-  :>json array ev_sigs: List of the mint's blind (RSA) signatures on the new coins.
+  :>json array ev_sigs: List of the mint's blind (RSA) signatures on the new coins.  Each element in the array is another JSON object which contains the signature in the "ev_sig" field.
 
   **Failure Response: Conflict**
 
