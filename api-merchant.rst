@@ -186,6 +186,62 @@ The following are the API made available by the merchant's frontend to the walle
    display a catalog of payment options.  Upon selecting "Taler", the system
    would trigger the interaction with the Wallet by loading "/taler/contract",
    providing the necessary contract details to the Wallet as a JSON object.
+   
+   Note that this operation should be triggered whenever a customer goes to a
+   'checkout'-like page having chosen Taler as the payment mean. Again, since
+   the response to this connection must be handled by the extension, a way for
+   the merchant to make the user make this connection and call in cause some
+   function belonging to the extension is mandatory.
+   
+   That translates to defining a JavaScript function hooked to the 'checkout'
+   button that will make the connection and dispatch a custom event (named `taler-contract`)
+   which the wallet is ready to to pickup.
+
+   It is worth showing a simple code sample.
+
+.. sourcecode:: js
+
+  function checkout(form){
+    for(var cnt=0; cnt < form.group1.length; cnt++){
+      var choice = form.group1[cnt];
+        if(choice.checked){
+          if(choice.value == "Taler"){
+            var cert = new XMLHttpRequest();
+            // request certificate 
+            cert.open("POST", "/taler/certificate", true);
+            cert.onload = function (e) {
+              if (cert.readyState == 4) {
+                if (cert.status == 200){
+                // display certificate (i.e. it sends the JSON string to the (XUL) extension)
+                sendContract(cert.responseText);
+                }
+              else alert("No certificate gotten, status " + cert.status);
+            }
+          };
+          cert.onerror = function (e){
+            alert(cert.statusText);
+          };
+          cert.send(null);
+        }
+        else alert(choice.value + ": NOT available ");
+      }
+    }
+  };
+
+  function sendContract(jsonContract){
+  
+    var cevent = new CustomEvent('taler-contract', { 'detail' : jsonContract });
+    document.body.dispatchEvent(cevent);
+  };
+
+  In this example, the function `checkout` is the one attached to the 'checkout' button
+  (or some merchant-dependent triggering mechanism). This function issues the required POST
+  and hooks the function `sendContract` as the handler of the successful case (i.e. response code
+  is 200).
+  The hook then simply dispatches on the page's `body` element the 'taler-contract' event,
+  by passing the gotten JSON as a further argument,  which the wallet is waiting for.
+  
+
 
   **Success Response**
 
