@@ -76,10 +76,11 @@ from scripted languages like, for example, PHP. Thus the typical work-cycle of a
   4. Forward the response to the user.
 
 .. note::
-the fact that wallets never reach the backends directly allows the
-merchants to place their backends in areas with security configurations
-particularly addressed to them. Again, the merchant can demand the backend
-management to some other body of his trust.
+
+  the fact that wallets never reach the backends directly allows the
+  merchants to place their backends in areas with security configurations
+  particularly addressed to them. Again, the merchant can demand the backend
+  management to some other body of his trust.
 
 +++++++++
 Encodings
@@ -110,18 +111,18 @@ for those fields prepended with `GNUNET_`.
    char a[]; // a human-readable description of this deal, or product.
  }
 
- .. _deposit\ permission:
+.. _deposit permission:
 
 .. sourcecode:: c
 
  struct DepositPermission
  {
-  struct TALER_CoinPublicInfo; // Crafted by the wallet, contains all the information needed by the mint to validate the deposit. Again, not directly in the interest of the frontend.
- char m[13]; // contract's id.
- struct TALER_Amount amount; // the good's price.
- GNUNET_HashCode a; // hash code of Contract.a.
- struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
- GNUNET_CRYPTO_EddsaPublicKey merch_pub; // merchant's public key. 
+   struct TALER_CoinPublicInfo; // Crafted by the wallet, contains all the information needed by the mint to validate the deposit. Again, not directly in the interest of the frontend.
+  char m[13]; // contract's id.
+  struct TALER_Amount amount; // the good's price.
+  GNUNET_HashCode a; // hash code of Contract.a.
+  struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
+  GNUNET_CRYPTO_EddsaPublicKey merch_pub; // merchant's public key. 
  }
 
 ---------------
@@ -159,7 +160,7 @@ The RESTful API
 
 The following are the API made available by the merchant's frontend to the wallet:
 
-.. http:GET:: /taler/key
+.. http:get:: /taler/key
 
    Allows the customer to obtain the merchant's public EdDSA key. Should only be used over a "secure" channel (i.e. at least HTTPS).
 
@@ -175,7 +176,7 @@ The following are the API made available by the merchant's frontend to the walle
 
    :status 404 Not Found: Taler not supported.
 
-.. http:GET:: /taler/contract
+.. http:get:: /taler/contract
 
    Ask the merchant to prepare a contract.  It takes no parameter and is up to
    the merchant's implementation to identify which product or service the customer
@@ -186,41 +187,35 @@ The following are the API made available by the merchant's frontend to the walle
    would trigger the interaction with the Wallet by loading "/taler/contract",
    providing the necessary contract details to the Wallet as a JSON object.
 
-   **Success Response**
+  **Success Response**
 
-   :status 200 OK: The request was successful.
+  :status 200 OK: The request was successful.
 
-   The merchant responds with a JSON object containing the following fields:
+  The merchant responds with a JSON object containing the following fields:
 
-   :>json base32 contract: the encoding of the contract_'s blob.
-   :>json base32 sig: the contract as signed by the merchant.
-   :>json base32 eddsa_pub: merchant's public EdDSA key.
+  :>json base32 contract: the encoding of the contract_'s blob.
+  :>json base32 sig: the contract as signed by the merchant.
+  :>json base32 eddsa_pub: merchant's public EdDSA key.
    
-.. note::
+  The contract is sent as a unique blob since it costs one operation to encrypt it,
+  and one to decrypt and verify respectively. As of now, the encryption is not part
+  of the protocol.
 
-The contract is sent as a unique blob since it costs one operation to encrypt it,
-and one to decrypt and verify respectively. As of now, the encryption is not part
-of the protocol.
+  **Failure Response**
 
-   **Failure Response**
+  In most cases, the response gotten by the wallet will just be the forwarded response
+  that the frontend got from the backend.
 
-.. note::
-
-In most cases, the response gotten by the wallet will be the forwarded response that the
-frontend got from the backend.
-
-   :status 400 Bad Request: Request not understood. Possibly due to some error in formatting
-   the JSON by the frontend.
-   :status 500 Internal Server Error. In most cases, some error occurred while the backend was
-   generating the contract. For example, it failed to store it into its database.
+  :status 400 Bad Request: Request not understood. Possibly due to some error in formatting the JSON by the frontend.
+  :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
 
 .. http:post:: /taler/pay
 
-   Send the deposit permission to the merchant.
+  Send the deposit permission to the merchant.
 
-   :reqheader Content-Type: application/json
-   :<json base32 dep_perm: the signed deposit permission (link to the blob above)
-   :<json base32 eddsa_pub: the public key of the customer.
+  :reqheader Content-Type: application/json
+  :<json base32 dep_perm: the signed deposit permission (link to the blob above)
+  :<json base32 eddsa_pub: the public key of the customer.
 
 
   **Success Response: OK**
@@ -228,7 +223,7 @@ frontend got from the backend.
 
   **Failure Response: TBD **
 
- **Error Response: Invalid signature**:
+  **Error Response: Invalid signature**
 
   :status 401 Unauthorized: One of the signatures is invalid.
   :resheader Content-Type: application/json
@@ -249,18 +244,17 @@ The following API are made available by the merchant's backend to the merchant's
 
 .. http:post:: /contract
    
-   Ask the backend to generate a certificate on the basis of the given JSON.
+  Ask the backend to generate a certificate on the basis of the given JSON.
 
-   :reqheader Content-Type: application/json
-
-   :<json string desc: a human readable description of this deal.
-   :<json unsigned\ 32 product: the identification number of this product, dependent on the
-   frontend implementation.
-   :<json unsigned\ 32 cid: the identification number of this contract, dependent on the
-   frontend implementation.
-   :<json object price: the amount (crosslink to amount's definition on mint's page) representing the price of this item.
+  :reqheader Content-Type: application/json
+  :<json string desc: a human readable description of this deal.
+  :<json unsigned\ 32 product: the identification number of this product, dependent on the
+  frontend implementation.
+  :<json unsigned\ 32 cid: the identification number of this contract, dependent on the
+  frontend implementation.
+  :<json object price: the amount (crosslink to amount's definition on mint's page) representing the price of this item.
  
-  **Success Response: OK**:
+  **Success Response**
 
   :status 200 OK: The backend has successfully created the certificate
   :resheader Content-Type: application/json
@@ -268,18 +262,16 @@ The following API are made available by the merchant's backend to the merchant's
   :<json base32 sig: signature of this contract with purpose TALER_SIGNATURE_MERCHANT_CONTRACT. 
   :<json base32 eddsa_pub: EdDSA key of the merchant.
 
-   **Failure Response**
+  **Failure Response**
 
-  :status 400 Bad Request: Request not understood.
-     the JSON by the frontend.
-     :status 500 Internal Server Error. In most cases, some error occurred while the backend was
-     generating the contract. For example, it failed to store it into its database.
+  :status 400 Bad Request: Request not understood. The JSON was invalid.
+  :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
 
 .. http:post:: /pay
 
-   :reqheader Content-Type: application/json
-   :<json base32 dep_perm: the signed deposit permission (link to the blob above)
-   :<json base32 eddsa_pub: the public key of the customer.
+  :reqheader Content-Type: application/json
+  :<json base32 dep_perm: the signed deposit permission (link to the blob above)
+  :<json base32 eddsa_pub: the public key of the customer.
 
   **Failure Response: TBD **
 
@@ -289,29 +281,3 @@ The following API are made available by the merchant's backend to the merchant's
   :resheader Content-Type: application/json
   :>json string error: the value is "invalid signature"
   :>json string paramter: the value is "coin_sig", "ub_sig" (TODO define this) or "wallet_sig", depending on which signature was deemed invalid by the mint
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
