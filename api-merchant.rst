@@ -1,121 +1,166 @@
-=====================
-The Merchant JSON API
-=====================
+================
+The Merchant API
+================
 
-The Merchant JSON API serves as a protocol interface for the
+The Merchant API serves as a protocol interface for the
 interactions between a customer and an HTTP-based RESTful merchant.
 The protocol allows the customer and the merchant to agree upon a
 contract and for the customer to spend coins according to the contract
 proposed by the merchant.
 
 It is assumed that the customer has a secure (and possibly
-customer-anonymizing) channel to the merchant, and in particular that
-the customer knows the merchant's public key.  Futhermore, it is
+customer-anonymizing) channel to the merchant.  Futhermore, it is
 assumed that the merchant's server does not repudiate on contractual
 offers it has made.  If necessary, the merchant should be able to
 assure this by limiting the time for which the offer is valid.
 
---------
-Overview
---------
+-----------------------
+Architecture's Overview
+-----------------------
 
-The Merchant HTTP protocol allows for several different types of
-interactions with the Wallet (HTTP client), described in more detail
-in the following sections.
+In our settlement, the "merchant" is divided in two independent applications
+having different objectives. We consider a `frontend` and a `backend`. Please
+note, that for any existing merchant, which is presumed to have its
+own web portal (which represents the `frontent`, in our terminology), this
+architecture will only require for him to comply with not more than three JSON based
+communications with the `backend`.
+This design choice was dictated by the need of allowing cooperation between a
+dynamic frontend, more suited for serving interactive web content, and a standalone
+C application intended to implement all the cryptographic routines.
+That way, a merchant willing to integrate Taler-style payments in his business,
+can completely reuse his website in cooperation with the backend provided by Taler.
 
++++++++++++++++++++++++++++++
+Wallet-Frontend communication
++++++++++++++++++++++++++++++
 
-+++++++++++++++
-Direct Deposits
-+++++++++++++++
+The Taler's virtual wallet is designed to notify the user when a certain webpage
+is offering Taler as a payment option. It does so by simply changing the color of
+the wallet's button in the user's browser. In the other direction, the website
+may want to make the Taler payment option visible `only if` the user has the Taler
+wallet active in his browser. So the notification is mutual:
 
-For a direct deposit, an interested customer obtains a *contract* from
-the merchant specifying an amount that needs to be paid for the
-merchant's services or products.  Details about the services or
-products and the merchant's payment details are provided in the
-contract, together with other terms such as how long the offer is
-valid.
+* the website notifies the wallet (`s -> w`), so it can change its color
+* the wallet notifies the website (`w -> s`), so it can show Taler as a
+  suitable payment mean
 
-After receiving the contract, the customer can either accept or reject
-with the contract.  If the customer rejects the contract, the customer
-simply aborts the protocol.  If the customer chooses to accept the
-deal, he sends the merchant a ``deposit permission``, which is the
-digital payment of the sum mentioned in the contract, tied to the
-contract details. Thus, by sending the deposit permission, the
-customer both formally accepts the contract and pays at the same time.
-This way, the customer has proof tying the payment to the particular
-contract, and thus the wallet stores the contract offer (signed by the
-merchant) and the deposit permissions as proof for later disputes.
+Furthermore, there are two scenarios according to which the mutual signaling would
+succeed; let `p` be the page where the merchant wants to show a Taler-style payment
+option and, accordingly, the wallet is supposed to change its color:
 
-The merchant then submits this deposit permission to the mint to
-verify its validity and claim the amount.  The mint may return an
-error message proving that the payment is fraudulent, in which case
-the merchant aborts the transaction (but may be polite in forwarding
-the proof to the customer).  If the mint confirms (with its signature)
-that the payment was correct, the merchant files the mint's response
-(to have proof in case the mint operator tries to defraud) and
-delivers the promised services or products to the customer.  The
-merchant also returns a signed message to the customer indicating that
-the payment was successful.
+* the user has the wallet active at the moment of visiting `p`.
+* the user activates its wallet (regardless of whether he installs it or simply
+  enables it) `after` it downloads page `p`.
 
-++++++++++++++++++++
-Incremental Deposits
-++++++++++++++++++++
+In the first case, the messagging sequence is `s -> w` and `w -> s`. In the
+second case, the first attempt (`s -> w`) will get no reply but as soon as the
+wallet becomes active, it issues a `w -> s`, and it will get a `s -> w` back.
 
-  .. note::
+Besides this messagging issue, the wallet and the frontend have to communicate
+also for finalizing a purchase. According to Taler design and terminology, that
+communication must ensure the generation of a `contract` by the merchant, whenever
+the user wants to buy a good, and the generation of a `deposit permission` by the
+wallet in case the user validates the contract and wants to proceed with the actual
+payment.
 
-     Incremental deposits are currently not implemented.
+++++++++++++++++++++++++++++++
+Frontend-Backend communication
+++++++++++++++++++++++++++++++
+This cooperation is mainly intended to help the frontend to obtain contracts and deposit permissions.
+In particular, it wants to put the cryptographic facility and the bit-level memory management aside
+from scripted languages like, for example, PHP. Thus the typical work-cycle of a frontend is to
+  
+  1. Gather information from the user.
+  2. Format this information in JSON accordingly with the operation being served.
+  3. Send this JSON to the backend.
+  4. Forward the response to the user.
 
-Incremental deposits allow the merchant to charge the customer
-incrementally without interacting with the mint each time.  This is
-useful for metered services, such as cab fares.  The idea here is that
-the merchant first gets an exclusive lock on a certain amount of the
-customer's coins.  With this lock in place, the merchant can accept
-deposit permissions from the customer without checking with the mint
-for each payment.  The merchant merely has to "claim" the total coins
-he receives before the lock expires.
+.. note::
 
-For incremental deposits, the customer asks merchant to make an
-``offer`` for the subscription by specifying the maximum amount the
-merchant may charge during the interaction and a desired locking
-period.  The customer conveys his acceptance of the offer by sending a
-``lock permission`` to the merchant.  The merchant asks the mint to
-verify the lock permission, and if verified successfully, the customer
-then obtains a subscription from the merchant.  With this in place,
-the customer and merchant can interact with the usual deposit
-permissions without involving the mint each time.
+  the fact that wallets never reach the backends directly allows the
+  merchants to place their backends in areas with security configurations
+  particularly addressed to them. Again, the merchant can demand the backend
+  management to some other body of his trust.
 
-++++++++++++++
-Microdonations
-++++++++++++++
++++++++++
+Encodings
++++++++++
 
-  .. note::
+The used encoding are the same described in :ref:`encodings-ref`, with the addition
+of the `contract`'s and `deposit permission`'s blobs
 
-     Microdonations are currently not implemented.
+  .. _contract:
 
-+++++++
-Refunds
-+++++++
+  * **contract**:
+The following structure is mainly addressed to the wallet, that is
+in charge of verifying and dissecting it. It is not of any interest
+to the frontend developer, except that forwarding the JSON that encloses
+it. However, refer to the `gnunet <https://gnunet.org>`_'s documentation
+for those fields prepended with `GNUNET_`.
 
-  .. note::
+.. sourcecode:: c
+ 
+ struct Contract
+ {
+   struct GNUNET_CRYPTO_EddsaSignature sig; // signature of the contract itself: from 'purpose' field down below.
+   struct GNUNET_CRYPTO_EccSignaturePurpose purpose; // contract's purpose, indicating TALER_SIGNATURE_MERCHANT_CONTRACT.
+   char m[13]; // contract's id.
+   struct GNUNET_TIME_AbsoluteNBO t; // the contract's generation time.
+   struct TALER_AmountNBO amount; // the good's price.
+   struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
+   char a[]; // a human-readable description of this deal, or product.
+ }
 
-     Refunds are currently not implemented.
+.. _deposit permission:
 
-In some markets, it is common for merchants to provide a retraction
-period where the customer can evaluate the products and return them
-for a refund.  To facilitate such interactions, Taler allows merchants
-to provide a retraction period in the contract.  During the retraction
-period a customer can retract a previously made contract with the
-merchant and obtain a ``retract permission`` from the merchant.  The
-customer, before the end of the retraction period, can submit the
-retract permission to the mint to obtain a refund.
+.. sourcecode:: c
+
+ struct DepositPermission
+ {
+   struct TALER_CoinPublicInfo; // Crafted by the wallet, contains all the information needed by the mint to validate the deposit. Again, not directly in the interest of the frontend.
+  char m[13]; // contract's id.
+  struct TALER_Amount amount; // the good's price.
+  GNUNET_HashCode a; // hash code of Contract.a.
+  struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
+  GNUNET_CRYPTO_EddsaPublicKey merch_pub; // merchant's public key. 
+ }
 
 ---------------
+Wallet-Frontend
+---------------
+
++++++++++++++++++++
+Messagging protocol
++++++++++++++++++++
+Due to that dual mean of reaching acknowledgement, and to avoid signaling loops,
+we define two protocols according to the initiator. The signals are to be
+implemented in JavaScript events dispatched on the HTML element `body`.
+
+Thus, when the merchant wants to notify the availability of a Taler-style payment
+option (for example on a "checkout" page), it sends the following event:
+
+  .. js:data:: taler-payment-mfirst
+
+and the wallet will reply with a 
+
+  .. js:data:: taler-wallet-mfirst
+
+The other direction, the wallet sends a 
+
+  .. js:data:: taler-wallet-wfirst
+
+and the merchant must reply with a 
+
+  .. js:data:: taler-payment-wfirst
+
+
++++++++++++++++
 The RESTful API
----------------
++++++++++++++++
 
-The following are the API made available by the merchant:
+The following are the API made available by the merchant's frontend to the wallet:
 
-.. http:GET:: /taler/key
+.. http:get:: /taler/key
 
    Allows the customer to obtain the merchant's public EdDSA key. Should only be used over a "secure" channel (i.e. at least HTTPS).
 
@@ -131,117 +176,164 @@ The following are the API made available by the merchant:
 
    :status 404 Not Found: Taler not supported.
 
+.. http:get:: /taler/contract
 
-.. http:GET:: /taler/contract
-.. http:POST:: /taler/contract
-
-   Ask the merchant to prepare a contract.  The request parameters are specific
-   to the merchant's implementation, however, they are recommended to contain
-   information required for the merchant to identify which product or service
-   the customer is interested in.  For example, a common implementation might
+   Ask the merchant to prepare a contract.  It takes no parameter and is up to
+   the merchant's implementation to identify which product or service the customer
+   is interested in.  For example, a common implementation might
    use a cookie to identify the customer's shopping cart.  After the customer
    has filled the shopping cart and selected "confirm", the merchant might
    display a catalog of payment options.  Upon selecting "Taler", the system
    would trigger the interaction with the Wallet by loading "/taler/contract",
    providing the necessary contract details to the Wallet as a JSON object.
+   
+   Note that this operation should be triggered whenever a customer goes to a
+   'checkout'-like page having chosen Taler as the payment mean. Again, since
+   the response to this connection must be handled by the extension, a way for
+   the merchant to make the user make this connection and call in cause some
+   function belonging to the extension is mandatory.
+   
+   That translates to defining a JavaScript function hooked to the 'checkout'
+   button that will make the connection and dispatch a custom event (named `taler-contract`)
+   which the wallet is ready to to pickup.
 
-   **Success Response**
+   It is worth showing a simple code sample.
 
-   :status 200 OK: The request was successful.
+.. sourcecode:: js
 
-   The merchant responds with a JSON object containing the following fields:
+  function checkout(form){
+    for(var cnt=0; cnt < form.group1.length; cnt++){
+      var choice = form.group1[cnt];
+        if(choice.checked){
+          if(choice.value == "Taler"){
+            var cert = new XMLHttpRequest();
+            // request certificate 
+            cert.open("POST", "/taler/certificate", true);
+            cert.onload = function (e) {
+              if (cert.readyState == 4) {
+                if (cert.status == 200){
+                // display certificate (i.e. it sends the JSON string to the (XUL) extension)
+                sendContract(cert.responseText);
+                }
+              else alert("No certificate gotten, status " + cert.status);
+            }
+          };
+          cert.onerror = function (e){
+            alert(cert.statusText);
+          };
+          cert.send(null);
+        }
+        else alert(choice.value + ": NOT available ");
+      }
+    }
+  };
 
-   :>json integer transaction_id: A string representing the transaction identifier.
-   :>json timestamp expiry: The timestamp after which this contract expires.
-   :>json string legal_system: String describing the legal system under which the contract is made.
-   :>json string tos_url: Link to the terms of service of the merchant in UTF-8 text.
-   :>json base32 H_tos: Hash of the terms of service as provided at `tos_url`.
-   :>json object total_amount: Price of the offer.
-   :>json object retract_fee: Fee the merchant will retain if the customer retracts from the contract (optional, assumed to be zero if absent).
-   :>json object TAX_amount: Amount of taxes of type "TAX" included in the offer.  "TAX" is specified by the tax regime, i.e. "vat" or "sales".  If multiple types of taxes are applicable, multiple fields may be present.  If no taxes are applicable, the fields may be omitted.
-   :>json array mints: List of master (EdDSA) public keys of mints accepted by the merchant for payment.
-   :>json array auditors: List of auditor (EdDSA) public keys accepted by the merchant as acceptable to accredit *additional* mints.
-   :>json timestamp retraction_period: Until when the customer can retract from this contract, and thus get a refund on the coins spent.  Note that until the retraction period is over, the mint may withhold the contract's money from being transferred to the merchant.
-   :>json array terms: An array with the deliverables from the contract.
-   :>json base32 H_wire: The hash of a JSON object containing the merchant's payment information.  See :ref:`wireformats`.
-   :>json base32 m_pub: Public EdDSA key of the merchant.
-   :>json base32 H_contract: Hash over all preceeding fields (FIXME: need to specify details).
-   :>json base32 m_sig: Signature of the merchant over `H_contract`.
+  function sendContract(jsonContract){
+  
+    var cevent = new CustomEvent('taler-contract', { 'detail' : jsonContract });
+    document.body.dispatchEvent(cevent);
+  };
 
-   The `terms` must contain at least the following fields:
-   :>jsonarr string description-LANG: Human-readable description of the item in language LANG.  Must be present in at least one language.
-   :>jsonarr integer quantity: Number of items to be delivered (can be omitted if quantity is one).
-   :>jsonarr object total_amount: Total price for these items (optional if contract does not allow disclosure of prices for individual items).
-   :>jsonarr object TAX_amount: Amount of tax of type "TAX" included in `total_amount` (optional, multiple possible).
-   :>jsonarr string link: Link to further information about the item.  Optional and not formally part of the contract, but might be used by the customer to find the product's purchasing address again easily in the future.
-
-   Additional fields may be provided, but are never officially part of the contract and may be ignored by the Wallet.
-
-   **Failure response**
-
-   :status 400 Bad Request: Request not understood.
-   :status 404 Not Found: No products or services given in the request were found.
-
-   It is also possible to receive other error status codes depending on the merchant's implementation.
-
-.. http:POST:: /taler/pay
-
-   Agree with a previously obtained contract and pay the merchant by signing the contract with coins.
-
-   :<json base32 H_contract: The hash of the contract.
-   :<json integer transaction_id: The transaction identifier obtained from the contract.
-   :<json array coins: Array of coins used for the payment.
-
-   The `coins` are a JSON array where each object contains the following fields:
-
-   :<jsonarr base32 coin_pub: The coin's public key.
-   :<jsonarr base32 mint_pub: The public key of the mint from where the coin is obtained.
-   :<jsonarr base32 denom_pub: Denomination key with which the coin is signed.
-   :<jsonarr base32 ub_sig: Mint's unblinded signature of the coin
-   :<jsonarr string type: the string constant `"DIRECT_DEPOSIT"` or `"INCREMENTAL_DEPOSIT"` respectively for direct deposit or incremental deposit type of interaction.
-   :<jsonarr object amount: The amount to be deposited as a Denomination object.  Its value should be less than or equal to the coin's face value.  Additionally, for direct deposit type of interactions, the total amount of all coins must be equal to the amount stated in the contract.
-   :<jsonarr base32 coin_sig: The signature with the coin's private key over the parameters `type`, `transaction_id`, `amount`, `H_contract` and, `H_wire`.
-
-   **Success Response**
-
-   :status 200 OK: The deposit permission is successful.
-   :status 302 Found: The deposit permission is successful, the interaction continues elsewhere.
-
-   :resheader X-Taler-Merchant-Confirmation: Base32-encoded EdDSA Signature of the merchant confirming the successful deposit operation.
-
-   Other details depend on the merchant's Web portal organization, the browser will simply render the data returned for the user as usual.
-
-   **Failure Response**
-
-   :status 400 Bad Request: Request not understood.
-   :status 403 Forbidden: The request does not match the contract that was provided.  The request should not be repeated.
-   :status 499 TBD: The deposit operation has failed because the coin has previously been deposited or it has been already refreshed; the request should not be repeated again.  The response body contains the failure response objects from the :ref:`Mint API:deposit<deposit>`.
-   :status 404 Not Found: The merchant does not entertain this type of interaction.  Try another one.
+  In this example, the function `checkout` is the one attached to the 'checkout' button
+  (or some merchant-dependent triggering mechanism). This function issues the required POST
+  and hooks the function `sendContract` as the handler of the successful case (i.e. response code
+  is 200).
+  The hook then simply dispatches on the page's `body` element the 'taler-contract' event,
+  by passing the gotten JSON as a further argument,  which the wallet is waiting for.
+  
 
 
-.. _retract:
-.. http:POST:: /taler/retract
+  **Success Response**
 
-   Retract a previously made contract with the merchant.  This API may not be supported by merchants that do not offer refunds.  The request should contain a JSON object with the following fields:
+  :status 200 OK: The request was successful.
 
-   :<json integer transaction_id: The transaction identifier of the contract to retract.
-   :<json base32 merchant_pub: The public key of the merchant.
-   :<json array coin_sigs: Signature over the fields `transaction_id` and `merchant_pub` with the private key of the coins used to previously sign the contract.
+  The merchant responds with a JSON object containing the following fields:
 
-   The merchant may require additional information to be provided for the retraction, as per its terms of service.
+  :>json base32 contract: the encoding of the contract_'s blob.
+  :>json base32 sig: the contract as signed by the merchant.
+  :>json base32 eddsa_pub: merchant's public EdDSA key.
+   
+  The contract is sent as a unique blob since it costs one operation to encrypt it,
+  and one to decrypt and verify respectively. As of now, the encryption is not part
+  of the protocol.
 
-   **Success Response**
+  **Failure Response**
 
-   :status 200 OK: The contract has been successfully retracted.
+  In most cases, the response gotten by the wallet will just be the forwarded response
+  that the frontend got from the backend.
 
-   The response contains a JSON object with the following fields:
+  :status 400 Bad Request: Request not understood. Possibly due to some error in formatting the JSON by the frontend.
+  :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
 
-   :>json base32 merchant_sig: The EdDSA signature of the merchant over its public key and the transaction ID. (FIXME: Specify exact purpose.)
+.. http:post:: /taler/pay
 
-   The customer then has to send this object as part of the refresh request to claim the refund (See: :ref:`Mint API:refresh<refresh>`)
+  Send the deposit permission to the merchant.
 
-   **Failure Response**
+  :reqheader Content-Type: application/json
+  :<json base32 dep_perm: the signed deposit permission (link to the blob above)
+  :<json base32 eddsa_pub: the public key of the customer.
 
-   :status 400 Bad Request: Request not understood or incomplete
-   :status 403 Forbidden: The contract's retraction period has expired
-   :status 404 Not Found: Invalid / unknown contract
+
+  **Success Response: OK**
+  :status 200 OK: the payment has been received.
+
+  **Failure Response: TBD **
+
+  **Error Response: Invalid signature**
+
+  :status 401 Unauthorized: One of the signatures is invalid.
+  :resheader Content-Type: application/json
+  :>json string error: the value is "invalid signature"
+  :>json string paramter: the value is "coin_sig", "ub_sig" (TODO define this) or "wallet_sig", depending on which signature was deemed invalid by the mint
+
+
+----------------
+Frontend-Backend
+----------------
+
++++++++++++++++
+The RESTful API
++++++++++++++++
+
+The following API are made available by the merchant's backend to the merchant's frontend.
+
+
+.. http:post:: /contract
+   
+  Ask the backend to generate a certificate on the basis of the given JSON.
+
+  :reqheader Content-Type: application/json
+  :<json string desc: a human readable description of this deal.
+  :<json unsigned\ 32 product: the identification number of this product, dependent on the
+  frontend implementation.
+  :<json unsigned\ 32 cid: the identification number of this contract, dependent on the
+  frontend implementation.
+  :<json object price: the amount (crosslink to amount's definition on mint's page) representing the price of this item.
+ 
+  **Success Response**
+
+  :status 200 OK: The backend has successfully created the certificate
+  :resheader Content-Type: application/json
+  :<json base32 contract: the encoding of the blob (which blob? link above.) representing the contract.
+  :<json base32 sig: signature of this contract with purpose TALER_SIGNATURE_MERCHANT_CONTRACT. 
+  :<json base32 eddsa_pub: EdDSA key of the merchant.
+
+  **Failure Response**
+
+  :status 400 Bad Request: Request not understood. The JSON was invalid.
+  :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
+
+.. http:post:: /pay
+
+  :reqheader Content-Type: application/json
+  :<json base32 dep_perm: the signed deposit permission (link to the blob above)
+  :<json base32 eddsa_pub: the public key of the customer.
+
+  **Failure Response: TBD **
+
+  **Error Response: Invalid signature**:
+
+  :status 401 Unauthorized: One of the signatures is invalid.
+  :resheader Content-Type: application/json
+  :>json string error: the value is "invalid signature"
+  :>json string paramter: the value is "coin_sig", "ub_sig" (TODO define this) or "wallet_sig", depending on which signature was deemed invalid by the mint

@@ -6,6 +6,8 @@ The Mint RESTful JSON API
 General
 -------
 
+.. _encodings-ref:
+
 ++++++++++++++++
 Common encodings
 ++++++++++++++++
