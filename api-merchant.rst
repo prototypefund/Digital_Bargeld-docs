@@ -199,47 +199,47 @@ The following are the API made available by the merchant's frontend to the walle
 
    It is worth showing a simple code sample.
 
-.. sourcecode:: js
+  .. sourcecode:: js
 
-  function checkout(form){
-    for(var cnt=0; cnt < form.group1.length; cnt++){
-      var choice = form.group1[cnt];
-        if(choice.checked){
-          if(choice.value == "Taler"){
-            var cert = new XMLHttpRequest();
-            // request certificate 
-            cert.open("POST", "/taler/certificate", true);
-            cert.onload = function (e) {
-              if (cert.readyState == 4) {
-                if (cert.status == 200){
-                // display certificate (i.e. it sends the JSON string to the (XUL) extension)
-                sendContract(cert.responseText);
-                }
-              else alert("No certificate gotten, status " + cert.status);
-            }
-          };
-          cert.onerror = function (e){
-            alert(cert.statusText);
-          };
-          cert.send(null);
+    function checkout(form){
+      for(var cnt=0; cnt < form.group1.length; cnt++){
+        var choice = form.group1[cnt];
+          if(choice.checked){
+            if(choice.value == "Taler"){
+              var cert = new XMLHttpRequest();
+              // request certificate 
+              cert.open("POST", "/taler/certificate", true);
+              cert.onload = function (e) {
+                if (cert.readyState == 4) {
+                  if (cert.status == 200){
+                  // display certificate (i.e. it sends the JSON string to the (XUL) extension)
+                    sendContract(cert.responseText);
+                  }
+                else alert("No certificate gotten, status " + cert.status);
+              }
+            };
+            cert.onerror = function (e){
+              alert(cert.statusText);
+            };
+            cert.send(null);
+          }
+          else alert(choice.value + ": NOT available ");
         }
-        else alert(choice.value + ": NOT available ");
       }
-    }
-  };
+    };
 
-  function sendContract(jsonContract){
-  
-    var cevent = new CustomEvent('taler-contract', { 'detail' : jsonContract });
-    document.body.dispatchEvent(cevent);
-  };
+    function sendContract(jsonContract){
+      var cevent = new CustomEvent('taler-contract', { 'detail' : jsonContract });
+      document.body.dispatchEvent(cevent);
+    };
 
-  In this example, the function `checkout` is the one attached to the 'checkout' button
-  (or some merchant-dependent triggering mechanism). This function issues the required POST
-  and hooks the function `sendContract` as the handler of the successful case (i.e. response code
-  is 200).
-  The hook then simply dispatches on the page's `body` element the 'taler-contract' event,
-  by passing the gotten JSON as a further argument,  which the wallet is waiting for.
+  In this example, the function `checkout` is the one attached to the
+  'checkout' button (or some merchant-dependent triggering
+  mechanism). This function issues the required POST and hooks the
+  function `sendContract` as the handler of the successful case
+  (i.e. response code is 200).  The hook then simply dispatches on the
+  page's `body` element the 'taler-contract' event, by passing the
+  gotten JSON as a further argument, which the wallet is waiting for.
   
 
 
