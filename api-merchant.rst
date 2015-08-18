@@ -207,15 +207,15 @@ The following are the API made available by the merchant's frontend to the walle
           if(choice.checked){
             if(choice.value == "Taler"){
               var cert = new XMLHttpRequest();
-              // request certificate 
-              cert.open("POST", "/taler/certificate", true);
+              // request contract 
+              cert.open("POST", "/taler/contract", true);
               cert.onload = function (e) {
                 if (cert.readyState == 4) {
                   if (cert.status == 200){
-                  // display certificate (i.e. it sends the JSON string to the (XUL) extension)
+                  // display contract (i.e. it sends the JSON string to the (XUL) extension)
                     sendContract(cert.responseText);
                   }
-                else alert("No certificate gotten, status " + cert.status);
+                else alert("No contract gotten, status " + cert.status);
               }
             };
             cert.onerror = function (e){
@@ -300,7 +300,7 @@ The following API are made available by the merchant's backend to the merchant's
 
 .. http:post:: /contract
    
-  Ask the backend to generate a certificate on the basis of the given JSON.
+  Ask the backend to generate a contract on the basis of the given JSON.
 
   :reqheader Content-Type: application/json
   :<json string desc: a human readable description of this deal.
@@ -310,7 +310,7 @@ The following API are made available by the merchant's backend to the merchant's
  
   **Success Response**
 
-  :status 200 OK: The backend has successfully created the certificate
+  :status 200 OK: The backend has successfully created the contract
   :resheader Content-Type: application/json
   :<json base32 contract: the encoding of the blob (which blob? link above.) representing the contract.
   :<json base32 sig: signature of this contract with purpose TALER_SIGNATURE_MERCHANT_CONTRACT. 
