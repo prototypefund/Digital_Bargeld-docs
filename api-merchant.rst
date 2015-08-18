@@ -304,10 +304,8 @@ The following API are made available by the merchant's backend to the merchant's
 
   :reqheader Content-Type: application/json
   :<json string desc: a human readable description of this deal.
-  :<json unsigned\ 32 product: the identification number of this product, dependent on the
-  frontend implementation.
-  :<json unsigned\ 32 cid: the identification number of this contract, dependent on the
-  frontend implementation.
+  :<json unsigned\ 32 product: the identification number of this product, dependent on the frontend implementation.
+  :<json unsigned\ 32 cid: the identification number of this contract, dependent on the frontend implementation.
   :<json object price: the amount (crosslink to amount's definition on mint's page) representing the price of this item.
  
   **Success Response**
