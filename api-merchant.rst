@@ -113,6 +113,8 @@ for those fields prepended with `GNUNET_`.
 
 .. _deposit permission:
 
+  * **deposit permission**:
+
 .. sourcecode:: c
 
  struct DepositPermission
@@ -140,6 +142,20 @@ Thus, when the merchant wants to notify the availability of a Taler-style paymen
 option (for example on a "checkout" page), it sends the following event:
 
   .. js:data:: taler-payment-mfirst
+
+.. note::
+   this event must be sent from a callback for the `onload` event of the `BODY` element,
+   otherwise the extension would have not time to register a listener for this event.
+   For example:
+
+.. sourcecode:: html
+
+   <body onload="function(){
+     // set up the listener for 'taler-wallet-mfirst'
+     // ...
+     let eve = new Event('taler-payment-first');
+     document.body.dispatchEvent(eve);
+     };"> ... </body>
 
 and the wallet will reply with a 
 
