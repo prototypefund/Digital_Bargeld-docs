@@ -54,7 +54,7 @@ This section describes how certain types of values are represented throughout th
 General errors
 ++++++++++++++
 
-Certain response formats are common for all requests. They are documented here instead of with each individual request.
+Certain response formats are common for all requests. They are documented here instead of with each individual request.  Furthermore, we note that clients may theoretically fail to receive any response.  In this case, the client should verify that the Internet connection is working properly, and then proceed to handle the error as if an internal error (500) had been returned.
 
 .. http:any:: /*
 
@@ -62,7 +62,7 @@ Certain response formats are common for all requests. They are documented here i
 
   When encountering an internal error, the mint may respond to any request with an internal server error.
 
-  :status 500 Internal server error: This always indicates some serious internal operational error of the mint (i.e. a program bug, database problems, etc.) and must not be used for client-side problems.  When facing an internal server error, clients should retry their request after some delay (say after 5, 15 and 60 minutes) and if the error persists report the details to the user.  However, as internal server errors are always reported to the mint operator, a good operator should naturally be able to address them in a timely fashion.  When generating an internal server error, the mint responds with a JSON object containing the following fields:
+  :status 500 Internal server error: This always indicates some serious internal operational error of the mint (i.e. a program bug, database problems, etc.) and must not be used for client-side problems.  When facing an internal server error, clients should retry their request after some delay (recommended after 1s, twice more at randomized times within 1 minute, then the user should be informed and another three retries should be scheduled within the next 24h). If the error persists, a report should ultimately be made to the auditor. (The auditor API for this is not yet specified.)  However, as internal server errors are always reported to the mint operator, a good operator should naturally be able to address them in a timely fashion, especially within 24h.  When generating an internal server error, the mint responds with a JSON object containing the following fields:
 
   :resheader Content-Type: application/json
   :>json error: a string with the value "internal error"
@@ -1026,5 +1026,3 @@ for signed data (contained in `FIELDS`) with the given purpose.  The `size` fiel
       struct GNUNET_HashCode h_wire_types;
     }
   };
-
-
