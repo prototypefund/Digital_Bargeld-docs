@@ -256,7 +256,11 @@ The following are the API made available by the merchant's frontend to the walle
   (i.e. response code is 200).  The hook then simply dispatches on the
   page's `body` element the 'taler-contract' event, by passing the
   gotten JSON as a further argument, which the wallet is waiting for.
-  
+
+.. note::
+   Merchants should remind their customers to enable cookies acceptance while
+   browsing on the shop, otherwise it could get difficult to associate purchase's
+   metadata to its intended certificate.
 
 
   **Success Response**
