@@ -300,7 +300,7 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :<json date refund_deadline: date until which the merchant can issue a refund to the customer via the mint (can be zero if refunds are not allowed)
   :<json base32 coin_sig: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's private key.
 
-  The deposit operation succeeds if the coin is valid for making a deposit and has enough residual value that has not already been deposited, refreshed or locked.
+  The deposit operation succeeds if the coin is valid for making a deposit and has enough residual value that has not already been deposited or melted.
 
   **Success response: OK**
 
@@ -312,14 +312,14 @@ Deposit operations are requested by a merchant during a transaction. For the dep
 
   **Failure response: Double spending**
 
-  :status 403: the deposit operation has failed because the coin has insufficient (unlocked) residual value; the request should not be repeated again with this coin.
+  :status 403: the deposit operation has failed because the coin has insufficient residual value; the request should not be repeated again with this coin.
   :resheader Content-Type: application/json
   :>json string error: the string "insufficient funds"
   :>json object history: a JSON array with the transaction history for the coin
 
   The transaction history contains entries of the following format:
 
-  :>jsonarr string type: either "deposit" or "melt" (in the future, also "lock")
+  :>jsonarr string type: either "deposit" or "melt"
   :>jsonarr object amount: the total amount_ of the coin's value absorbed by this transaction
   :>jsonarr object signature: the signature_ (JSON object) of purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or `TALER_SIGNATURE_WALLET_COIN_MELT` with the details of the transaction that drained the coin's value
 
@@ -476,91 +476,6 @@ However, the new coins are linkable from the private keys of all old coins using
   :>json string error: "unknown entity referenced"
   :>json string parameter: will be "coin_pub"
 
-
---------------------
-Locking
---------------------
-
-Locking operations can be used by a merchant to ensure that a coin remains exclusively reserved for the particular merchant (and thus cannot be double-spent) for a certain period of time.  For locking operation, the merchant has to obtain a lock permission for a coin from the coin's owner.
-
-  .. note::
-
-     Locking is currently not implemented (#3625), this documentation is thus rather preliminary and subject to change.
-
-.. http:GET:: /lock
-
-  Lock the given coin which is identified by the coin's public key.
-
-  :query C: coin's public key
-  :query K: denomination key with which the coin is signed
-  :query ubsig: mint's unblinded signature of the coin
-  :query t: timestamp_ indicating the lock expire time
-  :query m: transaction id for the transaction between merchant and customer
-  :query f: the maximum amount_ for which the coin has to be locked
-  :query M: the public key of the merchant
-  :query csig: the signature made by the customer with the coin's private key over
-               the parameters `t`, `m`, `f`, `M` and the string `"LOCK"`
-
-  The locking operation may succeed if the coin is not already locked or a
-  previous lock for the coin has already expired.
-
-  **Success response**
-
-  :status 200: the operation succeeded
-
-  The mint responds with a JSON object containing the following fields:
-
-  :>json string status: The string constant `LOCK_OK`
-  :>json string C: the coin's public key
-  :>json integer t: timestamp_ indicating the lock expire time
-  :>json string m: transaction id for the transaction between merchant and customer
-  :>json object f: the maximum amount_ for which the coin has to be locked
-  :>json string M: the public key of the merchant
-  :>json string sig: the signature made by the mint with the corresponding
-           coin's denomination key over the parameters `status`, `C`, `t`, `m`,
-           `f`, `M`
-
-  The merchant can then save this JSON object as a proof that the mint has
-  agreed to transfer a maximum amount equalling to the locked amount upon a
-  successful deposit request (see /deposit).
-
-  **Failure response**
-
-  :status 403: the locking operation has failed because the coin is already
-               locked or already refreshed and the same request should not be
-               repeated as it will always fail.
-
-  In this case the response contains a proof that the given coin is already
-  locked ordeposited.
-
-  If the coin is already locked, then the response contains the existing lock
-  object rendered as a JSON object with the following fields:
-
-  :>json string status: the string constant `LOCKED`
-  :>json string C: the coin's public key
-  :>json integer t: the expiration time of the existing lock
-  :>json string m: the transaction ID which locked the coin
-  :>json object f: the amount_ locked for the coin
-  :>json string M: the public key of the merchant who locked the coin
-  :>json string csig: the signature made by the customer with the coin's private
-    key over the parameters `t`, `m`, `f` and `M`
-
-  If the coin has already been refreshed then the mint responds with a JSON
-  object with the following fields:
-
-  :>json string status: the string constant `REFRESHED`
-
-  * ... TBD
-
-  :status 404: the coin is not minted by this mint, or it has been expired
-  :status 501: the request or one of the query parameters are not valid and the
-               response body will contain an error string explaining why they are
-               invalid
-  :status 503: the mint is currently unavailable; the request can be retried after
-               the delay indicated in the Retry-After response header
-
-  In these failures, the response contains an error string describing the reason
-  why the request has failed.
 
 --------------------
 Refunds
