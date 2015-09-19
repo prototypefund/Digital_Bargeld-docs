@@ -217,7 +217,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
      Eventually the mint will need to advertise a policy for how long it will keep transaction histories for inactive or even fully drained reserves.  So we will need some additional handler (similar to `/keys`) to advertise those terms of service.
 
 
-.. http:get:: /withdraw/status
+.. http:get:: /reserve/status
 
   Request information about a reserve, including the blinding key that is necessary to withdraw a coin.
 
@@ -248,7 +248,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
   :>json string parameter: the value is always "withdraw_pub"
 
 
-.. http:post:: /withdraw/sign
+.. http:post:: /reserve/withdraw
 
   Withdraw a coin of the specified denomination.  Note that the client should commit all of the request details (including the private key of the coin and the blinding factor) to disk before (!) issuing this request, so that it can recover the information if necessary in case of transient failures (power outage, network outage, etc.).
 
@@ -270,7 +270,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
   :resheader Content-Type: application/json
   :>json string error: the value is "Insufficient funds"
   :>json object balance: a JSON object with the current amount_ left in the reserve
-  :>json array history: a JSON list with the history of the reserve's activity, in the same format as returned by /withdraw/status.
+  :>json array history: a JSON list with the history of the reserve's activity, in the same format as returned by /reserve/status.
 
   **Error Response: Invalid signature**:
 
