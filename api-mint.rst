@@ -141,12 +141,12 @@ from auditors, and the auditor keys should be hard-coded into the wallet as they
   An entry in the `auditors` list is a JSON object with the following fields:
 
   :>jsonarr base32 auditor_pub: The auditor's EdDSA signing public key.
-  :>jsonarr base32 auditor_sig: A signature_ (binary-only) with purpose `TALER_SIGNATURE_AUDITOR_MINT_KEYS` over the mint's public key and the denomination keys. To verify the signature, the information from `denomination_keys` must be combined with the information from `denoms`.
   :>jsonarr array denomination_keys: An array of denomination keys the auditor affirms with its signature. Note that the message only includes the hash of the public key, while the signature is actually over the expanded information including expiration times and fees.  The exact format is described below.
 
   An entry in the `denomination_keys` list is a JSON object with the following field:
 
   :>jsonarr base32 denom_pub_h: hash of the public RSA key used to sign coins of the respective denomination.  Note that the auditor's signature covers more than just the hash, but this other information is already provided in `denoms` and thus not repeated here.
+  :>jsonarr base32 auditor_sig: A signature_ (binary-only) with purpose `TALER_SIGNATURE_AUDITOR_MINT_KEYS` over the mint's public key and the denomination key information. To verify the signature, the `denom_pub_h` must be resolved with the information from `denoms`.
 
   The same auditor may appear multiple times in the array (i.e. for different subsets of denomination keys) and the same denomination key hash may be listed multiple times for the same or different auditors.  The wallet or merchant just should check that the denomination keys they use are in the set for at least one of the auditors that they accept.
 
