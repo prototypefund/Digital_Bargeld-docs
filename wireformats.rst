@@ -31,7 +31,7 @@ contain a JSON object with the following fields:
   * `type`: the string constant `"SEPA"`
   * `IBAN`: the International Bank Account Number (IBAN) of the account of the beneficiary
   * `name`: the name of the beneficiary
-  * `BIC`: the Bank Identification Code (BIC) code of the beneficiary's bank
+  * `bic`: the Bank Identification Code (BIC) code of the beneficiary's bank
   * `edate`: the date given as a timestamp indicating when the transfer should be executed
   * `r`: random nounce (used to make brute-forcing the hash harder)
 
