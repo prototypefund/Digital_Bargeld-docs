@@ -87,29 +87,30 @@ Encodings
 +++++++++
 
 The used encoding are the same described in :ref:`encodings-ref`, with the addition
-of the `contract`'s and `deposit permission`'s blobs
+of the `contract`'s and `deposit permission`'s blobs.
 
   .. _contract:
 
-  * **contract**:
-The following structure is mainly addressed to the wallet, that is
-in charge of verifying and dissecting it. It is not of any interest
-to the frontend developer, except that forwarding the JSON that encloses
-it. However, refer to the `gnunet <https://gnunet.org>`_'s documentation
-for those fields prepended with `GNUNET_`.
+  * **contract**: 
+    The following structure is mainly addressed to the
+    wallet, that is in charge of verifying and dissecting it. It is
+    not of any interest to the frontend developer, except that
+    forwarding the JSON that encloses it. However, refer to the
+    `gnunet <https://gnunet.org>`_'s documentation for those fields
+    prepended with `GNUNET_`.
 
-.. sourcecode:: c
+    .. sourcecode:: c
  
- struct Contract
- {
-   struct GNUNET_CRYPTO_EddsaSignature sig; // signature of the contract itself: from 'purpose' field down below.
-   struct GNUNET_CRYPTO_EccSignaturePurpose purpose; // contract's purpose, indicating TALER_SIGNATURE_MERCHANT_CONTRACT.
-   char m[13]; // contract's id.
-   struct GNUNET_TIME_AbsoluteNBO t; // the contract's generation time.
-   struct TALER_AmountNBO amount; // the good's price.
-   struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
-   char a[]; // a human-readable description of this deal, or product.
- }
+      struct Contract
+      {
+        struct GNUNET_CRYPTO_EddsaSignature sig; // signature of the contract itself: from 'purpose' field down below.
+        struct GNUNET_CRYPTO_EccSignaturePurpose purpose; // contract's purpose, indicating TALER_SIGNATURE_MERCHANT_CONTRACT.
+        char m[13]; // contract's id. // FIXME: this should be a uint64_t!
+        struct GNUNET_TIME_AbsoluteNBO t; // the contract's generation time.
+        struct TALER_AmountNBO amount; // the good's price.
+        struct GNUNET_HashCode h_wire; // merchant's bank account details, hashed with a nounce.
+        char a[]; // a human-readable description of this deal, or product. // FIXME: this should be the hash of the JSON!
+      }
 
 .. _deposit permission:
 
@@ -215,7 +216,7 @@ The following are the API made available by the merchant's frontend to the walle
 
    It is worth showing a simple code sample.
 
-  .. sourcecode:: js
+   .. sourcecode:: js
 
     function checkout(form){
       for(var cnt=0; cnt < form.group1.length; cnt++){
@@ -249,18 +250,18 @@ The following are the API made available by the merchant's frontend to the walle
       document.body.dispatchEvent(cevent);
     };
 
-  In this example, the function `checkout` is the one attached to the
-  'checkout' button (or some merchant-dependent triggering
-  mechanism). This function issues the required POST and hooks the
-  function `sendContract` as the handler of the successful case
-  (i.e. response code is 200).  The hook then simply dispatches on the
-  page's `body` element the 'taler-contract' event, by passing the
-  gotten JSON as a further argument, which the wallet is waiting for.
+   In this example, the function `checkout` is the one attached to the
+   'checkout' button (or some merchant-dependent triggering
+   mechanism). This function issues the required POST and hooks the
+   function `sendContract` as the handler of the successful case
+   (i.e. response code is 200).  The hook then simply dispatches on the
+   page's `body` element the 'taler-contract' event, by passing the
+   gotten JSON as a further argument, which the wallet is waiting for.
 
-.. note::
-   Merchants should remind their customers to enable cookies acceptance while
-   browsing on the shop, otherwise it could get difficult to associate purchase's
-   metadata to its intended certificate.
+   .. note::
+      Merchants should remind their customers to enable cookies acceptance while
+      browsing on the shop, otherwise it could get difficult to associate purchase's
+      metadata to its intended certificate.
 
 
   **Success Response**
@@ -297,7 +298,7 @@ The following are the API made available by the merchant's frontend to the walle
   **Success Response: OK**
   :status 200 OK: the payment has been received.
 
-  **Failure Response: TBD **
+  **Failure Response: TBD**
 
   **Error Response: Invalid signature**
 
@@ -347,7 +348,7 @@ The following API are made available by the merchant's backend to the merchant's
   :<json base32 dep_perm: the signed deposit permission (link to the blob above)
   :<json base32 eddsa_pub: the public key of the customer.
 
-  **Failure Response: TBD **
+  **Failure Response: TBD**
 
   **Error Response: Invalid signature**:
 

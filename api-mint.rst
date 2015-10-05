@@ -559,7 +559,7 @@ Administrative API: Bank transactions
 
   :>json string status: The string constant `NEW` or `DUP` to indicate
      whether the transaction was truly added to the DB
-                        or whether it already existed in the DB
+     or whether it already existed in the DB
 
   **Failure response**
 
@@ -583,6 +583,8 @@ Administrative API: Bank transactions
   :>json object amount: Amount transferred to the merchant
   :>json string transaction: Transaction identifier in the wire details
   :>json base32 wire: Wire transaction details (as originally specified by the merchant)
+
+
   **Success response**
 
   :status 200: the operation succeeded
@@ -591,7 +593,7 @@ Administrative API: Bank transactions
 
   :>json string status: The string constant `NEW` or `DUP` to indicate
      whether the transaction was truly added to the DB
-                        or whether it already existed in the DB
+     or whether it already existed in the DB
 
   **Failure response**
 
