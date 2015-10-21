@@ -832,6 +832,8 @@ All elliptic curve operations are on Curve25519.  Public and private keys are th
      uint8_t enc[sizeof (struct TALER_LinkSecretP)];
    };
 
+.. _Signatures:
+
 ------------------------
 Signatures
 ------------------------

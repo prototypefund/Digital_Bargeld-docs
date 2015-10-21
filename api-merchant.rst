@@ -86,7 +86,7 @@ from scripted languages like, for example, PHP. Thus the typical work-cycle of a
 Encodings
 +++++++++
 
-The used encodings are the same described in :ref:`encodings-ref`.
+Data such as dates, binary blobs, and other useful formats, are encoded as described in :ref:`encodings-ref`.
 
 Contract
 --------
@@ -182,11 +182,11 @@ The following are the API made available by the merchant's frontend to the walle
 
   A `contract` is a JSON object having the following structure:
 
-  :>json object amount: an `Amount` indicating the total price for this deal. Note that, in tha act of paying, the mint will subtract from this amount the total cost of deposit fee due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
-  :>json object max fee: `Amount` indicating the maximum deposit fee accepted by the merchant
+  :>json object amount: an :ref:`amount <Amount>` indicating the total price for this deal. Note that, in tha act of paying, the mint will subtract from this amount the total cost of deposit fee due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
+  :>json object max fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant
   :>json int trans_id: an identification number for this deal
   :>json array details: a collection of `product` objects (described below), for each different item purchased within this deal.
-  :>json base32 H_wire: the hash of the merchant's wire details, see :ref:`wireformats`
+  :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`
   :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract
   :>json `date` timestamp: this contract's generation time
   :>json `date` refund: the maximum time until which the merchant can reimburse the wallet in case of a problem, or some request
@@ -288,15 +288,15 @@ gotten JSON as a further argument, which the wallet is waiting for.
   accounts for only `one` coin.
 
   :reqheader Content-Type: application/json
-  :<json amount f: the amount this coin is paying, including this coin's deposit fee
-  :<json base32 H_wire: the hashed wire details of this merchant. The wallet takes this value as-is from the contract
+  :<json amount f: the :ref:`amount <Amount>` this coin is paying, including this coin's deposit fee
+  :<json base32 H_wire: the hashed `wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
   :<json base32 H_contract: the base32 encoding of the field `h_contract_details` of `contract`_. The wallet can choose whether to take this value from the gotten contract (field `h_contract`), or regenerating one starting from the values it gets within the contract
   :<json base32 coin_pub: the coin's public key
   :<json base32 denom_pub: the denomination's (RSA public) key
   :<json base32 ub_sig: the mint's signature over this coin's public key
   :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
   :<json date refund_deadline: same value held in the contract's `refund` field
-  :<json base32 coin_sig: the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See (missinglink) `Signatures` section on the mint's specifications.
+  :<json base32 coin_sig: the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See the :ref:`dedicated section <Signatures>` on the mint's specifications.
   :<json string mint: the chosen mint's base URL
 
   **Success Response:**
@@ -308,7 +308,7 @@ gotten JSON as a further argument, which the wallet is waiting for.
 
   **Failure Responses:**
 
-  The error codes are a replication of what the mint sent to the merchant's backend when attempting to pay. So refer to the mint page (missinlink) to see their codes and specifications
+  The error codes and data sent to the wallet are a mere copy of those gotten from the mint when attempting to pay. The section about :ref:`deposit <deposit>` explains them in detail.
 
 ----------------
 Frontend-Backend
