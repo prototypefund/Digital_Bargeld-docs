@@ -96,13 +96,13 @@ as described in
 the `libjansson documentation <https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
 The signature's purpose is set to TALER_SIGNATURE_MERCHANT_CONTRACT.
 
-    .. sourcecode:: c
+.. sourcecode:: c
  
- struct Contract
- {
-   struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-   struct GNUNET_HashCode h_contract_details;
- }
+   struct Contract
+   {
+     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+     struct GNUNET_HashCode h_contract_details;
+   }
 
 ---------------
 Wallet-Frontend
