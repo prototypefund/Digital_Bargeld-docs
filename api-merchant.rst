@@ -86,45 +86,24 @@ from scripted languages like, for example, PHP. Thus the typical work-cycle of a
 Encodings
 +++++++++
 
-The used encoding are the same described in :ref:`encodings-ref`, with the addition
-of the `contract`'s and `deposit permission`'s blobs
+The used encodings are the same described in :ref:`encodings-ref`.
 
-  .. _contract:
+.. _contract:
 
-  * **contract**:
-The following structure is mainly addressed to the wallet, that is
-in charge of verifying and dissecting it. It is not of any interest
-to the frontend developer, except that forwarding the JSON that encloses
-it. However, refer to the `gnunet <https://gnunet.org>`_'s documentation
-for those fields prepended with `GNUNET_`.
+Contract
+--------
+The following structure is a container for the hashcode coming from the encoding of
+the contract's JSON obtained by using the flags JSON_COMPACT | JSON_PRESERVE_ORDER,
+as described in
+the `libjansson documentation <https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
+The signature's purpose is set to TALER_SIGNATURE_MERCHANT_CONTRACT.
 
 .. sourcecode:: c
  
  struct Contract
  {
-   struct GNUNET_CRYPTO_EddsaSignature sig; // signature of the contract itself: from 'purpose' field down below.
-   struct GNUNET_CRYPTO_EccSignaturePurpose purpose; // contract's purpose, indicating TALER_SIGNATURE_MERCHANT_CONTRACT.
-   char m[13]; // contract's id.
-   struct GNUNET_TIME_AbsoluteNBO t; // the contract's generation time.
-   struct TALER_AmountNBO amount; // the good's price.
-   struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
-   char a[]; // a human-readable description of this deal, or product.
- }
-
-.. _deposit permission:
-
-  * **deposit permission**:
-
-.. sourcecode:: c
-
- struct DepositPermission
- {
-   struct TALER_CoinPublicInfo; // Crafted by the wallet, contains all the information needed by the mint to validate the deposit. Again, not directly in the interest of the frontend.
-  char m[13]; // contract's id.
-  struct TALER_Amount amount; // the good's price.
-  GNUNET_HashCode a; // hash code of Contract.a.
-  struct GNUNET_HashCode h_wire; // merchant's bank account details hashed with a nounce.
-  GNUNET_CRYPTO_EddsaPublicKey merch_pub; // merchant's public key. 
+   struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+   struct GNUNET_HashCode h_contract_details;
  }
 
 ---------------
@@ -134,7 +113,7 @@ Wallet-Frontend
 +++++++++++++++++++
 Messagging protocol
 +++++++++++++++++++
-Due to that dual mean of reaching acknowledgement, and to avoid signaling loops,
+In order to reach mutual acknowledgement, and to avoid signaling loops,
 we define two protocols according to the initiator. The signals are to be
 implemented in JavaScript events dispatched on the HTML element `body`.
 
@@ -194,88 +173,49 @@ The following are the API made available by the merchant's frontend to the walle
 
 .. http:get:: /taler/contract
 
-   Ask the merchant to prepare a contract.  It takes no parameter and is up to
-   the merchant's implementation to identify which product or service the customer
-   is interested in.  For example, a common implementation might
-   use a cookie to identify the customer's shopping cart.  After the customer
-   has filled the shopping cart and selected "confirm", the merchant might
-   display a catalog of payment options.  Upon selecting "Taler", the system
-   would trigger the interaction with the Wallet by loading "/taler/contract",
-   providing the necessary contract details to the Wallet as a JSON object.
-   
-   Note that this operation should be triggered whenever a customer goes to a
-   'checkout'-like page having chosen Taler as the payment mean. Again, since
-   the response to this connection must be handled by the extension, a way for
-   the merchant to make the user make this connection and call in cause some
-   function belonging to the extension is mandatory.
-   
-   That translates to defining a JavaScript function hooked to the 'checkout'
-   button that will make the connection and dispatch a custom event (named `taler-contract`)
-   which the wallet is ready to to pickup.
-
-   It is worth showing a simple code sample.
-
-  .. sourcecode:: js
-
-    function checkout(form){
-      for(var cnt=0; cnt < form.group1.length; cnt++){
-        var choice = form.group1[cnt];
-          if(choice.checked){
-            if(choice.value == "Taler"){
-              var cert = new XMLHttpRequest();
-              // request contract 
-              cert.open("POST", "/taler/contract", true);
-              cert.onload = function (e) {
-                if (cert.readyState == 4) {
-                  if (cert.status == 200){
-                  // display contract (i.e. it sends the JSON string to the (XUL) extension)
-                    sendContract(cert.responseText);
-                  }
-                else alert("No contract gotten, status " + cert.status);
-              }
-            };
-            cert.onerror = function (e){
-              alert(cert.statusText);
-            };
-            cert.send(null);
-          }
-          else alert(choice.value + ": NOT available ");
-        }
-      }
-    };
-
-    function sendContract(jsonContract){
-      var cevent = new CustomEvent('taler-contract', { 'detail' : jsonContract });
-      document.body.dispatchEvent(cevent);
-    };
-
-  In this example, the function `checkout` is the one attached to the
-  'checkout' button (or some merchant-dependent triggering
-  mechanism). This function issues the required POST and hooks the
-  function `sendContract` as the handler of the successful case
-  (i.e. response code is 200).  The hook then simply dispatches on the
-  page's `body` element the 'taler-contract' event, by passing the
-  gotten JSON as a further argument, which the wallet is waiting for.
-
-.. note::
-   Merchants should remind their customers to enable cookies acceptance while
-   browsing on the shop, otherwise it could get difficult to associate purchase's
-   metadata to its intended certificate.
-
+  Ask the merchant to send a contract for the current deal
 
   **Success Response**
 
   :status 200 OK: The request was successful.
+  :resheader Content-Type: application/json
+  :>json base32 contract: a JSON object being the contract for this deal, descibed below.
+  :>json base32 sig: the signature of the binary described in :ref:`contract`.
+  :>json base32 h_contract: the base32 encoding of the field `h_contract_details` of `contract`_
 
-  The merchant responds with a JSON object containing the following fields:
+  A `contract` is a JSON object having the following structure:
 
-  :>json base32 contract: the encoding of the contract_'s blob.
-  :>json base32 sig: the contract as signed by the merchant.
-  :>json base32 eddsa_pub: merchant's public EdDSA key.
-   
-  The contract is sent as a unique blob since it costs one operation to encrypt it,
-  and one to decrypt and verify respectively. As of now, the encryption is not part
-  of the protocol.
+  :>json object amount: an `Amount` indicating the total price for this deal. Note that, in tha act of paying, the mint will subtract from this amount the total cost of deposit fee due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
+  :>json object max fee: `Amount` indicating the maximum deposit fee accepted by the merchant
+  :>json int trans_id: an identification number for this deal
+  :>json array details: a collection of `product` objects (described below), for each different item purchased within this deal.
+  :>json base32 H_wire: the hash of the merchant's wire details, see :ref:`wireformats`
+  :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract
+  :>json `date` timestamp: this contract's generation time
+  :>json `date` refund: the maximum time until which the merchant can reimburse the wallet in case of a problem, or some request
+  :>json array mints: a JSON array of `mint` objects, specifying to the wallet which mints the merchant is willing to deal with
+
+  The `product` object focuses on one buyable good from this merchant. It has the following structure:
+
+  :>json object items: this object contains a human-readable `description` of the good, the `quantity` of goods to deliver to the customer, and the `price` of the single good; the italics denotes the name of this object's fields
+  :>json int product_id: some identification number for this good, mainly useful to the merchant but also useful when ambiguities may arise, like in courts
+  :>json array taxes: a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
+  :>json string delivery date: human-readable date indicating when this good should be delivered
+  :>json string delivery location: where to send this good. This field's value is a label defined inside a a collection of `L-names` provided inside `product`
+  :>json object merchant: the set of values describing this `merchant`, defined below
+  :>json object L-names: it has a field named `LNAMEx` indicating a human-readable geographical address, for each `LNAMEx` used throughout `product`
+
+  The `merchant` object:
+
+  :>json string address: an LNAME
+  :>json string name: the merchant's name, possibly having legal relevance
+  :>json object jurisdiction: the minimal set of values that denotes a geographical jurisdiction. That information is strictly dependant on the jusrisdiction's Country, and it can comprehend at most the following fields: `country`, `city`, `state`, `region`, `province`, `ZIP code`. Each field, except `ZIP code` which requires an `int` type, can be represented by the type `string`.
+
+
+
+
+
+
 
   **Failure Response**
 
@@ -284,6 +224,71 @@ The following are the API made available by the merchant's frontend to the walle
 
   :status 400 Bad Request: Request not understood. Possibly due to some error in formatting the JSON by the frontend.
   :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
+
+It's up to the merchant's implementation to identify which product or service the customer
+is interested in.  For example, a common implementation might
+use a cookie to identify the customer's shopping cart.  After the customer
+has filled the shopping cart and selected "confirm", the merchant might
+display a catalog of payment options.  Upon confirming "Taler" as the payment
+option, the merchant must send the contract to the Wallet.
+
+So the "button" which allows the user to confirm his payment option has two main
+tasks: it request "/taler/contract" to the merchant, and secondly it forwards the
+received contract to the wallet.
+
+In terms of JavaScript, that translates to defining a JavaScript function hooked to
+that button, that will "POST /taler/contract" and send the result back to the wallet
+through an event called `taler-contract`. Upon receiving that event, the wallet
+will manage the contract visualization.
+
+It is worth showing a simple code sample.
+
+.. sourcecode:: js
+
+   function checkout(form){
+     for(var cnt=0; cnt < form.group1.length; cnt++){
+       var choice = form.group1[cnt];
+         if(choice.checked){
+           if(choice.value == "Taler"){
+             var cert = new XMLHttpRequest();
+             // request contract 
+             cert.open("POST", "/taler/contract", true);
+             cert.onload = function (e) {
+               if (cert.readyState == 4) {
+                 if (cert.status == 200){
+                 // display contract (i.e. it sends the JSON string to the (XUL) extension)
+                   sendContract(cert.responseText);
+                 }
+               else alert("No contract gotten, status " + cert.status);
+             }
+           };
+           cert.onerror = function (e){
+             alert(cert.statusText);
+           };
+           cert.send(null);
+         }
+         else alert(choice.value + ": NOT available ");
+       }
+     }
+   };
+   function sendContract(jsonContract){
+     var cevent = new CustomEvent('taler-contract', { 'detail' : jsonContract });
+     document.body.dispatchEvent(cevent);
+   };
+
+In this example, the function `checkout` is the one attached to the
+'checkout' button (or some merchant-dependent triggering
+mechanism). This function issues the required POST and hooks the
+function `sendContract` as the handler of the successful case
+(i.e. response code is 200).  The hook then simply dispatches on the
+page's `body` element the 'taler-contract' event, by passing the
+gotten JSON as a further argument, which the wallet is waiting for.
+
+.. note::
+
+   Merchants should remind their customers to enable cookies acceptance while
+   browsing on the shop, otherwise it could get difficult to associate purchase's
+   metadata to its intended certificate.
 
 .. http:post:: /taler/pay
 
