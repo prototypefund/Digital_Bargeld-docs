@@ -109,6 +109,7 @@ from auditors, and the auditor keys should be hard-coded into the wallet as they
   :>json base32 master_public_key: EdDSA master public key of the mint, used to sign entries in `denoms` and `signkeys`
   :>json list denoms: A JSON list of denomination descriptions.  Described below in detail.
   :>json date list_issue_date: The date when the denomination keys were last updated.
+  :>json list auditors: A JSON list of the auditors of the mint. Described below in detail.
   :>json list signkeys: A JSON list of the mint's signing keys.  Described below in detail.
   :>json base32 eddsa_sig: compact EdDSA signature_ (binary-only) over the SHA-512 hash of the concatenation of all SHA-512 hashes of the RSA denomination public keys in `denoms` (in the same order as they were in `denoms`).  Note that for hashing, the binary format of the RSA public keys is used, and not their base32_ encoding.  Wallets cannot do much with this signature by itself; it is only useful when multiple clients need to establish that the mint is cheating (with respect to end-user anonymity) by giving disjoint denomination keys to different users.  If a mint were to do this, this signature allows the clients to demonstrate to the public that the mint is dishonest.
   :>json base32 eddsa_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
@@ -136,6 +137,18 @@ from auditors, and the auditor keys should be hard-coded into the wallet as they
   :>jsonarr date stamp_end: Date when all signatures made by the signing key expire and should henceforth no longer be considered valid in legal disputes.
   :>jsonarr date stamp_expire: Expiration date for the signing key.
   :>jsonarr base32 master_sig:  A signature_ (binary-only) with purpose `TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY` over the `key` and `stamp_expire` by the mint master key.
+
+  An entry in the `auditors` list is a JSON object with the following fields:
+
+  :>jsonarr base32 auditor_pub: The auditor's EdDSA signing public key.
+  :>jsonarr array denomination_keys: An array of denomination keys the auditor affirms with its signature. Note that the message only includes the hash of the public key, while the signature is actually over the expanded information including expiration times and fees.  The exact format is described below.
+
+  An entry in the `denomination_keys` list is a JSON object with the following field:
+
+  :>jsonarr base32 denom_pub_h: hash of the public RSA key used to sign coins of the respective denomination.  Note that the auditor's signature covers more than just the hash, but this other information is already provided in `denoms` and thus not repeated here.
+  :>jsonarr base32 auditor_sig: A signature_ (binary-only) with purpose `TALER_SIGNATURE_AUDITOR_MINT_KEYS` over the mint's public key and the denomination key information. To verify the signature, the `denom_pub_h` must be resolved with the information from `denoms`.
+
+  The same auditor may appear multiple times in the array (i.e. for different subsets of denomination keys) and the same denomination key hash may be listed multiple times for the same or different auditors.  The wallet or merchant just should check that the denomination keys they use are in the set for at least one of the auditors that they accept.
 
   .. note::
 
@@ -204,7 +217,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
      Eventually the mint will need to advertise a policy for how long it will keep transaction histories for inactive or even fully drained reserves.  So we will need some additional handler (similar to `/keys`) to advertise those terms of service.
 
 
-.. http:get:: /withdraw/status
+.. http:get:: /reserve/status
 
   Request information about a reserve, including the blinding key that is necessary to withdraw a coin.
 
@@ -235,7 +248,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
   :>json string parameter: the value is always "withdraw_pub"
 
 
-.. http:post:: /withdraw/sign
+.. http:post:: /reserve/withdraw
 
   Withdraw a coin of the specified denomination.  Note that the client should commit all of the request details (including the private key of the coin and the blinding factor) to disk before (!) issuing this request, so that it can recover the information if necessary in case of transient failures (power outage, network outage, etc.).
 
@@ -257,7 +270,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
   :resheader Content-Type: application/json
   :>json string error: the value is "Insufficient funds"
   :>json object balance: a JSON object with the current amount_ left in the reserve
-  :>json array history: a JSON list with the history of the reserve's activity, in the same format as returned by /withdraw/status.
+  :>json array history: a JSON list with the history of the reserve's activity, in the same format as returned by /reserve/status.
 
   **Error Response: Invalid signature**:
 
@@ -300,7 +313,7 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :<json date refund_deadline: date until which the merchant can issue a refund to the customer via the mint (can be zero if refunds are not allowed)
   :<json base32 coin_sig: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's private key.
 
-  The deposit operation succeeds if the coin is valid for making a deposit and has enough residual value that has not already been deposited, refreshed or locked.
+  The deposit operation succeeds if the coin is valid for making a deposit and has enough residual value that has not already been deposited or melted.
 
   **Success response: OK**
 
@@ -312,14 +325,14 @@ Deposit operations are requested by a merchant during a transaction. For the dep
 
   **Failure response: Double spending**
 
-  :status 403: the deposit operation has failed because the coin has insufficient (unlocked) residual value; the request should not be repeated again with this coin.
+  :status 403: the deposit operation has failed because the coin has insufficient residual value; the request should not be repeated again with this coin.
   :resheader Content-Type: application/json
   :>json string error: the string "insufficient funds"
   :>json object history: a JSON array with the transaction history for the coin
 
   The transaction history contains entries of the following format:
 
-  :>jsonarr string type: either "deposit" or "melt" (in the future, also "lock")
+  :>jsonarr string type: either "deposit" or "melt"
   :>jsonarr object amount: the total amount_ of the coin's value absorbed by this transaction
   :>jsonarr object signature: the signature_ (JSON object) of purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or `TALER_SIGNATURE_WALLET_COIN_MELT` with the details of the transaction that drained the coin's value
 
@@ -478,91 +491,6 @@ However, the new coins are linkable from the private keys of all old coins using
 
 
 --------------------
-Locking
---------------------
-
-Locking operations can be used by a merchant to ensure that a coin remains exclusively reserved for the particular merchant (and thus cannot be double-spent) for a certain period of time.  For locking operation, the merchant has to obtain a lock permission for a coin from the coin's owner.
-
-  .. note::
-
-     Locking is currently not implemented (#3625), this documentation is thus rather preliminary and subject to change.
-
-.. http:GET:: /lock
-
-  Lock the given coin which is identified by the coin's public key.
-
-  :query C: coin's public key
-  :query K: denomination key with which the coin is signed
-  :query ubsig: mint's unblinded signature of the coin
-  :query t: timestamp_ indicating the lock expire time
-  :query m: transaction id for the transaction between merchant and customer
-  :query f: the maximum amount_ for which the coin has to be locked
-  :query M: the public key of the merchant
-  :query csig: the signature made by the customer with the coin's private key over
-               the parameters `t`, `m`, `f`, `M` and the string `"LOCK"`
-
-  The locking operation may succeed if the coin is not already locked or a
-  previous lock for the coin has already expired.
-
-  **Success response**
-
-  :status 200: the operation succeeded
-
-  The mint responds with a JSON object containing the following fields:
-
-  :>json string status: The string constant `LOCK_OK`
-  :>json string C: the coin's public key
-  :>json integer t: timestamp_ indicating the lock expire time
-  :>json string m: transaction id for the transaction between merchant and customer
-  :>json object f: the maximum amount_ for which the coin has to be locked
-  :>json string M: the public key of the merchant
-  :>json string sig: the signature made by the mint with the corresponding
-           coin's denomination key over the parameters `status`, `C`, `t`, `m`,
-           `f`, `M`
-
-  The merchant can then save this JSON object as a proof that the mint has
-  agreed to transfer a maximum amount equalling to the locked amount upon a
-  successful deposit request (see /deposit).
-
-  **Failure response**
-
-  :status 403: the locking operation has failed because the coin is already
-               locked or already refreshed and the same request should not be
-               repeated as it will always fail.
-
-  In this case the response contains a proof that the given coin is already
-  locked ordeposited.
-
-  If the coin is already locked, then the response contains the existing lock
-  object rendered as a JSON object with the following fields:
-
-  :>json string status: the string constant `LOCKED`
-  :>json string C: the coin's public key
-  :>json integer t: the expiration time of the existing lock
-  :>json string m: the transaction ID which locked the coin
-  :>json object f: the amount_ locked for the coin
-  :>json string M: the public key of the merchant who locked the coin
-  :>json string csig: the signature made by the customer with the coin's private
-    key over the parameters `t`, `m`, `f` and `M`
-
-  If the coin has already been refreshed then the mint responds with a JSON
-  object with the following fields:
-
-  :>json string status: the string constant `REFRESHED`
-
-  * ... TBD
-
-  :status 404: the coin is not minted by this mint, or it has been expired
-  :status 501: the request or one of the query parameters are not valid and the
-               response body will contain an error string explaining why they are
-               invalid
-  :status 503: the mint is currently unavailable; the request can be retried after
-               the delay indicated in the Retry-After response header
-
-  In these failures, the response contains an error string describing the reason
-  why the request has failed.
-
---------------------
 Refunds
 --------------------
 
@@ -631,7 +559,7 @@ Administrative API: Bank transactions
 
   :>json string status: The string constant `NEW` or `DUP` to indicate
      whether the transaction was truly added to the DB
-                        or whether it already existed in the DB
+     or whether it already existed in the DB
 
   **Failure response**
 
@@ -655,6 +583,8 @@ Administrative API: Bank transactions
   :>json object amount: Amount transferred to the merchant
   :>json string transaction: Transaction identifier in the wire details
   :>json base32 wire: Wire transaction details (as originally specified by the merchant)
+
+
   **Success response**
 
   :status 200: the operation succeeded
@@ -663,7 +593,7 @@ Administrative API: Bank transactions
 
   :>json string status: The string constant `NEW` or `DUP` to indicate
      whether the transaction was truly added to the DB
-                        or whether it already existed in the DB
+     or whether it already existed in the DB
 
   **Failure response**
 

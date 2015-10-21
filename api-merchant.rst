@@ -88,8 +88,6 @@ Encodings
 
 The used encodings are the same described in :ref:`encodings-ref`.
 
-.. _contract:
-
 Contract
 --------
 The following structure is a container for the hashcode coming from the encoding of
@@ -98,7 +96,7 @@ as described in
 the `libjansson documentation <https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
 The signature's purpose is set to TALER_SIGNATURE_MERCHANT_CONTRACT.
 
-.. sourcecode:: c
+    .. sourcecode:: c
  
  struct Contract
  {
@@ -174,7 +172,6 @@ The following are the API made available by the merchant's frontend to the walle
 .. http:get:: /taler/contract
 
   Ask the merchant to send a contract for the current deal
-
   **Success Response**
 
   :status 200 OK: The request was successful.
@@ -210,11 +207,6 @@ The following are the API made available by the merchant's frontend to the walle
   :>json string address: an LNAME
   :>json string name: the merchant's name, possibly having legal relevance
   :>json object jurisdiction: the minimal set of values that denotes a geographical jurisdiction. That information is strictly dependant on the jusrisdiction's Country, and it can comprehend at most the following fields: `country`, `city`, `state`, `region`, `province`, `ZIP code`. Each field, except `ZIP code` which requires an `int` type, can be represented by the type `string`.
-
-
-
-
-
 
 
   **Failure Response**
@@ -302,7 +294,7 @@ gotten JSON as a further argument, which the wallet is waiting for.
   **Success Response: OK**
   :status 200 OK: the payment has been received.
 
-  **Failure Response: TBD **
+  **Failure Response: TBD**
 
   **Error Response: Invalid signature**
 
@@ -352,7 +344,7 @@ The following API are made available by the merchant's backend to the merchant's
   :<json base32 dep_perm: the signed deposit permission (link to the blob above)
   :<json base32 eddsa_pub: the public key of the customer.
 
-  **Failure Response: TBD **
+  **Failure Response: TBD**
 
   **Error Response: Invalid signature**:
 
