@@ -284,25 +284,31 @@ gotten JSON as a further argument, which the wallet is waiting for.
 
 .. http:post:: /taler/pay
 
-  Send the deposit permission to the merchant.
+  Send the deposit permission to the merchant. It is worth noting that the deposit permission
+  accounts for only `one` coin.
 
   :reqheader Content-Type: application/json
-  :<json base32 dep_perm: the signed deposit permission (link to the blob above)
-  :<json base32 eddsa_pub: the public key of the customer.
+  :<json amount f: the amount this coin is paying, including this coin's deposit fee
+  :<json base32 H_wire: the hashed wire details of this merchant. The wallet takes this value as-is from the contract
+  :<json base32 H_contract: the base32 encoding of the field `h_contract_details` of `contract`_. The wallet can choose whether to take this value from the gotten contract (field `h_contract`), or regenerating one starting from the values it gets within the contract
+  :<json base32 coin_pub: the coin's public key
+  :<json base32 denom_pub: the denomination's (RSA public) key
+  :<json base32 ub_sig: the mint's signature over this coin's public key
+  :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
+  :<json date refund_deadline: same value held in the contract's `refund` field
+  :<json base32 coin_sig: the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See (missinglink) `Signatures` section on the mint's specifications.
+  :<json string mint: the chosen mint's base URL
 
+  **Success Response:**
 
-  **Success Response: OK**
   :status 200 OK: the payment has been received.
+  :resheader Content-Type: text/html
 
-  **Failure Response: TBD**
+  In this case the merchant sends back a `fullfillment` page in HTML, which the wallet will make the new `BODY` of the merchant's current page. It is just a confirmation of the positive deal's conclusion
 
-  **Error Response: Invalid signature**
+  **Failure Responses:**
 
-  :status 401 Unauthorized: One of the signatures is invalid.
-  :resheader Content-Type: application/json
-  :>json string error: the value is "invalid signature"
-  :>json string paramter: the value is "coin_sig", "ub_sig" (TODO define this) or "wallet_sig", depending on which signature was deemed invalid by the mint
-
+  The error codes are a replication of what the mint sent to the merchant's backend when attempting to pay. So refer to the mint page (missinlink) to see their codes and specifications
 
 ----------------
 Frontend-Backend
@@ -314,41 +320,59 @@ The RESTful API
 
 The following API are made available by the merchant's backend to the merchant's frontend.
 
+.. http:get:: /key
+
+   Issued by the frontend to satisfy the request of the merchant's key coming from the wallet
+
+   **Success Response**
+
+   :status 200 OK: The request was successful.
+
+   The merchant responds with a JSON object containing the following fields:
+
+   :>json base32 merchant_pub: base32-encoded EdDSA public key of the merchant.
+
+   **Failure response**
+
+   :status 404 Not Found: Taler not supported.
 
 .. http:post:: /contract
    
-  Ask the backend to generate a contract on the basis of the given JSON.
+  Ask the backend to add some missing (mostly related to cryptography) information to the contract.
 
   :reqheader Content-Type: application/json
-  :<json string desc: a human readable description of this deal.
-  :<json unsigned\ 32 product: the identification number of this product, dependent on the frontend implementation.
-  :<json unsigned\ 32 cid: the identification number of this contract, dependent on the frontend implementation.
-  :<json object price: the amount (crosslink to amount's definition on mint's page) representing the price of this item.
- 
+
+  The JSON that is to be sent from the frontend is just a `contract` object which misses the fields
+
+  * `merchant_pub`
+  * `timestamp`
+  * `refund`
+  * `mints`
+
   **Success Response**
 
   :status 200 OK: The backend has successfully created the contract
-  :resheader Content-Type: application/json
-  :<json base32 contract: the encoding of the blob (which blob? link above.) representing the contract.
-  :<json base32 sig: signature of this contract with purpose TALER_SIGNATURE_MERCHANT_CONTRACT. 
-  :<json base32 eddsa_pub: EdDSA key of the merchant.
 
-  **Failure Response**
+  :resheader Content-Type: application/json
+
+  The backend will reply the same JSON as the one sent back to the wallet by the frontend as response to the "/taler/contract" call.
+
+  **Failure Responses: Bad contract**
 
   :status 400 Bad Request: Request not understood. The JSON was invalid.
-  :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
 
 .. http:post:: /pay
 
+  Ask the backend to start the communication with the mint to spend this coin
+
   :reqheader Content-Type: application/json
-  :<json base32 dep_perm: the signed deposit permission (link to the blob above)
-  :<json base32 eddsa_pub: the public key of the customer.
 
-  **Failure Response: TBD**
+  The frontend will just forward the deposit permission it got from the wallet, without making any modification
 
-  **Error Response: Invalid signature**:
+  **Success Response: OK**
 
-  :status 401 Unauthorized: One of the signatures is invalid.
-  :resheader Content-Type: application/json
-  :>json string error: the value is "invalid signature"
-  :>json string paramter: the value is "coin_sig", "ub_sig" (TODO define this) or "wallet_sig", depending on which signature was deemed invalid by the mint
+  :status 200 OK: the mint accepted this coin
+
+  **Failure Responses:**
+  
+  Again, the backend will route to the frontend any status code, as well as any JSON, that it got from the mint.
