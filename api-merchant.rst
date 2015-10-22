@@ -2,39 +2,50 @@
 The Merchant API
 ================
 
-The Merchant API serves as a protocol interface for the
-interactions between a customer and an HTTP-based RESTful merchant.
+This Merchant API defines the
+interactions between a browser-based wallet and an HTTP-based RESTful merchant.
 The protocol allows the customer and the merchant to agree upon a
 contract and for the customer to spend coins according to the contract
 proposed by the merchant.
 
-It is assumed that the customer has a secure (and possibly
-customer-anonymizing) channel to the merchant.  Futhermore, it is
-assumed that the merchant's server does not repudiate on contractual
-offers it has made.  If necessary, the merchant should be able to
-assure this by limiting the time for which the offer is valid.
+It is assumed that the browser has a secure and possibly
+customer-anonymizing channel to the merchant, typically by using the
+Tor browser bundle.  Furthermore, it is assumed that the merchant's
+server does not repudiate on contractual offers it has made.  If
+necessary, the merchant assures this by limiting the time for which
+the offer is valid.
+
+Taler also assumes that the wallet and the merchant can agree on the
+current time (similar to what is required to connect to Tor or
+validate TLS certificates).  The wallet may rely on the timestamp
+provided in the HTTP "Date:" header for this purpose, but the customer
+is expected to check that the time is approximately correct.
+
 
 -----------------------
 Architecture's Overview
 -----------------------
 
-In our settlement, the "merchant" is divided in two independent applications
-having different objectives. We consider a `frontend` and a `backend`. Please
-note, that for any existing merchant, which is presumed to have its
-own web portal (which represents the `frontent`, in our terminology), this
-architecture will only require for him to comply with not more than three JSON based
-communications with the `backend`.
-This design choice was dictated by the need of allowing cooperation between a
-dynamic frontend, more suited for serving interactive web content, and a standalone
-C application intended to implement all the cryptographic routines.
-That way, a merchant willing to integrate Taler-style payments in his business,
-can completely reuse his website in cooperation with the backend provided by Taler.
+In our settlement, the "merchant" is divided in two independent
+compontents, the `frontend` and the `backend`.
+
+The `frontend` is the (usually pre-existing) shopping portal of the
+merchant.  The architecture tries to minimize the amount of
+modifications necessary to the `frontend` as well as the trust that
+needs to be placed into the `frontend` logic.  Taler requires the
+frontend to facilitate three JSON-based interactions between the
+wallet and the `backend`, and two of those are trivial.
+
+The `backend` is a standalone C application intended to implement all
+the cryptographic routines required to interact with the Taler wallet
+and a Taler mint.
+
 
 +++++++++++++++++++++++++++++
 Wallet-Frontend communication
 +++++++++++++++++++++++++++++
 
-The Taler's virtual wallet is designed to notify the user when a certain webpage
+Taler's virtual wallet is designed to notify the user when a certain webpage
 is offering Taler as a payment option. It does so by simply changing the color of
 the wallet's button in the user's browser. In the other direction, the website
 may want to make the Taler payment option visible `only if` the user has the Taler
@@ -42,45 +53,53 @@ wallet active in his browser. So the notification is mutual:
 
 * the website notifies the wallet (`s -> w`), so it can change its color
 * the wallet notifies the website (`w -> s`), so it can show Taler as a
-  suitable payment mean
+  suitable payment option
 
 Furthermore, there are two scenarios according to which the mutual signaling would
-succeed; let `p` be the page where the merchant wants to show a Taler-style payment
-option and, accordingly, the wallet is supposed to change its color:
+succeed.  For a page where the merchant wants to show a Taler-style payment
+option and, accordingly, the wallet is supposed to change its color, there are
+two scenarios we need to handle:
 
-* the user has the wallet active at the moment of visiting `p`.
-* the user activates its wallet (regardless of whether he installs it or simply
-  enables it) `after` it downloads page `p`.
+* the customer has the wallet extension active at the moment of visiting the page, or
+* the customer activates the wallet extension
+  (regardless of whether he installs it or simply enables it)
+  `after` downloading the page.
 
-In the first case, the messagging sequence is `s -> w` and `w -> s`. In the
-second case, the first attempt (`s -> w`) will get no reply but as soon as the
+In the first case, the messaging sequence is `s -> w` and `w -> s`. In the
+second case, the first attempt (`s -> w`) will get no reply; however, as soon as the
 wallet becomes active, it issues a `w -> s`, and it will get a `s -> w` back.
 
-Besides this messagging issue, the wallet and the frontend have to communicate
-also for finalizing a purchase. According to Taler design and terminology, that
-communication must ensure the generation of a `contract` by the merchant, whenever
-the user wants to buy a good, and the generation of a `deposit permission` by the
-wallet in case the user validates the contract and wants to proceed with the actual
-payment.
+Beyond signaling to indicate the mutual support for Taler, the wallet
+and the frontend also have to communicate for finalizing a purchase.
+Here, the checkout page needs to generate a checkout event to signal
+to the wallet that payment with Taler is desired. The wallet will then
+fetch the contract from the `frontend`, allow the user to confirm and
+pay.  The wallet will then transmit the payment information to the
+`frontend` and redirect the user to the fullfillment page generated
+by the `frontend` in response to a successful payment.
+
+A precise specification and sample code for implementing the signalling
+is provided in section FIXME-REF.
+
 
 ++++++++++++++++++++++++++++++
 Frontend-Backend communication
 ++++++++++++++++++++++++++++++
-This cooperation is mainly intended to help the frontend to obtain contracts and deposit permissions.
-In particular, it wants to put the cryptographic facility and the bit-level memory management aside
-from scripted languages like, for example, PHP. Thus the typical work-cycle of a frontend is to
-  
-  1. Gather information from the user.
-  2. Format this information in JSON accordingly with the operation being served.
-  3. Send this JSON to the backend.
-  4. Forward the response to the user.
 
-.. note::
+To create a contract, the `frontend` needs to generate the body of a
+`contract` in JSON format.  This `proposition` is then signed by the
+`backend` and then sent to the wallet.  If the customer approves
+the `proposition`, the wallet signs the body of the `contract`
+using coins in the form of a `deposit permission`.  This signature
+using the coins signifies both agreement of the customer and
+represents payment at the same time.  The `frontend` passes the
+`deposit permission` to the `backend` which immediately verifies it
+with the mint and signals the `frontend` the success (or failure) of
+the payment process.  If the payment is successful, the `frontend` is
+responsible for generating the fullfillment page.
 
-  the fact that wallets never reach the backends directly allows the
-  merchants to place their backends in areas with security configurations
-  particularly addressed to them. Again, the merchant can demand the backend
-  management to some other body of his trust.
+The contract format is specified in section FIXME-REF.
+
 
 +++++++++
 Encodings
@@ -90,19 +109,60 @@ Data such as dates, binary blobs, and other useful formats, are encoded as descr
 
 Contract
 --------
-The following structure is a container for the hashcode coming from the encoding of
-the contract's JSON obtained by using the flags JSON_COMPACT | JSON_PRESERVE_ORDER,
-as described in
-the `libjansson documentation <https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
-The signature's purpose is set to TALER_SIGNATURE_MERCHANT_CONTRACT.
+
+A `contract` is a JSON object having the following structure:
+
+  :>json object amount: an :ref:`amount <Amount>` indicating the total price for this deal. Note that, in tha act of paying, the mint will subtract from this amount the total cost of deposit fee due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
+  :>json object max_fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant
+  :>json int trans_id: an identification number for this deal
+  :>json array details: a collection of `product` objects (described below), for each different item purchased within this deal.
+  :>json `date` timestamp: this contract's generation time
+  :>json `date` refund: the maximum time until which the merchant can reimburse the wallet in case of a problem, or some request
+  :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract; this information is typically added by the `backend`
+  :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
+  :>json array mints: a JSON array of `mint` objects, specifying to the wallet which mints the merchant is willing to deal with; this information is typically added by the `backend`
+
+  The `product` object focuses on one buyable good from this merchant. It has the following structure:
+
+  :>json object items: this object contains a human-readable `description` of the good, the `quantity` of goods to deliver to the customer, and the `price` of the single good; the italics denotes the name of this object's fields
+  :>json int product_id: some identification number for this good, mainly useful to the merchant but also useful when ambiguities may arise, like in courts
+  :>json array taxes: a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
+  :>json string delivery date: human-readable date indicating when this good should be delivered
+  :>json string delivery location: where to send this good. This field's value is a label defined inside a a collection of `L-names` provided inside `product`
+  :>json object merchant: the set of values describing this `merchant`, defined below
+  :>json object L-names: it has a field named `LNAMEx` indicating a human-readable geographical address, for each `LNAMEx` used throughout `product`
+
+  The `merchant` object:
+
+  :>json string address: an LNAME
+  :>json string name: the merchant's name, possibly having legal relevance
+  :>json object jurisdiction: the minimal set of values that denotes a geographical jurisdiction. That information is strictly dependant on the jusrisdiction's Country, and it can comprehend at most the following fields: `country`, `city`, `state`, `region`, `province`, `ZIP code`. Each field, except `ZIP code` which requires an `int` type, can be represented by the type `string`.
+
+
+
+
+
+When the contract is signed by the merchant or the wallet, the
+signature is made over the hash of the JSON text, as the contract may
+be confidential between merchant and customer and should not be
+exposed to the mint.  The hashcode is generated by hashing the
+encoding of the contract's JSON obtained by using the flags
+`JSON_COMPACT | JSON_PRESERVE_ORDER`, as described in the `libjansson
+documentation
+<https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
+The following structure is a container for the signature. The purpose
+should be set to `TALER_SIGNATURE_MERCHANT_CONTRACT`.
 
 .. sourcecode:: c
- 
+
    struct Contract
    {
      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
      struct GNUNET_HashCode h_contract_details;
    }
+
+
+
 
 ---------------
 Wallet-Frontend
@@ -134,15 +194,15 @@ option (for example on a "checkout" page), it sends the following event:
      document.body.dispatchEvent(eve);
      };"> ... </body>
 
-and the wallet will reply with a 
+and the wallet will reply with a
 
   .. js:data:: taler-wallet-mfirst
 
-The other direction, the wallet sends a 
+The other direction, the wallet sends a
 
   .. js:data:: taler-wallet-wfirst
 
-and the merchant must reply with a 
+and the merchant must reply with a
 
   .. js:data:: taler-payment-wfirst
 
@@ -180,35 +240,6 @@ The following are the API made available by the merchant's frontend to the walle
   :>json base32 sig: the signature of the binary described in :ref:`contract`.
   :>json base32 h_contract: the base32 encoding of the field `h_contract_details` of `contract`_
 
-  A `contract` is a JSON object having the following structure:
-
-  :>json object amount: an :ref:`amount <Amount>` indicating the total price for this deal. Note that, in tha act of paying, the mint will subtract from this amount the total cost of deposit fee due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
-  :>json object max fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant
-  :>json int trans_id: an identification number for this deal
-  :>json array details: a collection of `product` objects (described below), for each different item purchased within this deal.
-  :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`
-  :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract
-  :>json `date` timestamp: this contract's generation time
-  :>json `date` refund: the maximum time until which the merchant can reimburse the wallet in case of a problem, or some request
-  :>json array mints: a JSON array of `mint` objects, specifying to the wallet which mints the merchant is willing to deal with
-
-  The `product` object focuses on one buyable good from this merchant. It has the following structure:
-
-  :>json object items: this object contains a human-readable `description` of the good, the `quantity` of goods to deliver to the customer, and the `price` of the single good; the italics denotes the name of this object's fields
-  :>json int product_id: some identification number for this good, mainly useful to the merchant but also useful when ambiguities may arise, like in courts
-  :>json array taxes: a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
-  :>json string delivery date: human-readable date indicating when this good should be delivered
-  :>json string delivery location: where to send this good. This field's value is a label defined inside a a collection of `L-names` provided inside `product`
-  :>json object merchant: the set of values describing this `merchant`, defined below
-  :>json object L-names: it has a field named `LNAMEx` indicating a human-readable geographical address, for each `LNAMEx` used throughout `product`
-
-  The `merchant` object:
-
-  :>json string address: an LNAME
-  :>json string name: the merchant's name, possibly having legal relevance
-  :>json object jurisdiction: the minimal set of values that denotes a geographical jurisdiction. That information is strictly dependant on the jusrisdiction's Country, and it can comprehend at most the following fields: `country`, `city`, `state`, `region`, `province`, `ZIP code`. Each field, except `ZIP code` which requires an `int` type, can be represented by the type `string`.
-
-
   **Failure Response**
 
   In most cases, the response gotten by the wallet will just be the forwarded response
@@ -243,7 +274,7 @@ It is worth showing a simple code sample.
          if(choice.checked){
            if(choice.value == "Taler"){
              var cert = new XMLHttpRequest();
-             // request contract 
+             // request contract
              cert.open("POST", "/taler/contract", true);
              cert.onload = function (e) {
                if (cert.readyState == 4) {
@@ -337,7 +368,7 @@ The following API are made available by the merchant's backend to the merchant's
    :status 404 Not Found: Taler not supported.
 
 .. http:post:: /contract
-   
+
   Ask the backend to add some missing (mostly related to cryptography) information to the contract.
 
   :reqheader Content-Type: application/json
@@ -374,5 +405,5 @@ The following API are made available by the merchant's backend to the merchant's
   :status 200 OK: the mint accepted this coin
 
   **Failure Responses:**
-  
+
   Again, the backend will route to the frontend any status code, as well as any JSON, that it got from the mint.
