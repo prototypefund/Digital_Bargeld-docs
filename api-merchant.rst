@@ -121,7 +121,7 @@ successful response to the following two calls:
   section for its detailed REST interaction.
 
 .. http:get:: /taler/contract
-  
+
   Issued by the wallet when the customer wants to see the contract for a certain purchase
 
 .. http:post:: /contract
@@ -129,34 +129,52 @@ successful response to the following two calls:
   Issued by the frontend to the backend when it wants to augment its `proposition` with all the
   cryptographic information.
 
-  :>json object amount: an :ref:`amount <Amount>` indicating the total price for this deal. Note that, in tha act of paying, the mint will subtract from this amount the total cost of deposit fee due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
-  :>json object max_fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant
-  :>json int trans_id: an identification number for this deal
-  :>json array details: a collection of `product` objects (described below), for each different item purchased within this deal.
+  :>json object amount: an :ref:`amount <Amount>` indicating the total price for the transaction. Note that, in the act of paying, the mint will subtract from this amount the deposit fees due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
+  :>json object max_fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant for this transaction.
+  :>json int trans_id: a 53-bit number chosen by the merchant to uniquely identify the contract.
+  :>json array products: a collection of `product` objects (described below), for each different item purchased within this transaction.
   :>json `date` timestamp: this contract's generation time
-  :>json `date` refund: the maximum time until which the merchant can reimburse the wallet in case of a problem, or some request
+  :>json `date` refund: the maximum time until which the merchant can refund the wallet in case of a problem, or some request
   :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract; this information is typically added by the `backend`
   :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
   :>json array mints: a JSON array of `mint` objects, specifying to the wallet which mints the merchant is willing to deal with; this information is typically added by the `backend`
+  :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
 
-  The `product` object focuses on one buyable good from this merchant. It has the following structure:
+  The `product` object focuses on the product being purchased from the merchant. It has the following structure:
 
-  :>json object items: this object contains a human-readable `description` of the good, the `quantity` of goods to deliver to the customer, and the `price` of the single good; the italics denotes the name of this object's fields
-  :>json int product_id: some identification number for this good, mainly useful to the merchant but also useful when ambiguities may arise, like in courts
+  :>json string description: this object contains a human-readable description of the product
+  :>json int quantity: the quantity of the product to deliver to the customer (optional, if applicable)
+  :>json object price: the price of the product; this is the total price for the amount specified by `quantity`
+  :>json int product_id: merchant's 53-bit internal identification number for the product (optional)
   :>json array taxes: a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
-  :>json string delivery date: human-readable date indicating when this good should be delivered
-  :>json string delivery location: where to send this good. This field's value is a label defined inside a a collection of `L-names` provided inside `product`
+  :>json string delivery_date: human-readable date indicating when this product should be delivered
+  :>json string delivery_location: where to deliver this product. This may be an URI for online delivery (i.e. `http://example.com/download` or `mailto:customer@example.com`), or a location label defined inside the proposition's `locations`.  The presence of a colon (`:`) indicates the use of an URL.
   :>json object merchant: the set of values describing this `merchant`, defined below
-  :>json object L-names: it has a field named `LNAMEx` indicating a human-readable geographical address, for each `LNAMEx` used throughout `product`
 
   The `merchant` object:
 
-  :>json string address: an LNAME
-  :>json string name: the merchant's name, possibly having legal relevance
-  :>json object jurisdiction: the minimal set of values that denotes a geographical jurisdiction. That information is strictly dependant on the jusrisdiction's Country, and it can comprehend at most the following fields: `country`, `city`, `state`, `region`, `province`, `ZIP code`. Each field, except `ZIP code` which requires an `int` type, can be represented by the type `string`.
+  :>json string address: label for a location with the business address of the merchant
+  :>json string name: the merchant's legal name of business
+  :>json object jurisdiction: label for a location that denotes the jurisdiction for disputes. Some of the typical fields for a location (such as a street address) may be absent.
 
+  The `location` object:
 
+  :>json string county: blah
+  :>json string city: blah
+  :>json string state: blah
+  :>json string region: blah
+  :>json string province: blah
+  :>json int zip_code: blah
+  :>json string street: blah
+  :>json string street_number: blah
 
+  Additional fields may be present depending on the country.
+
+  The `mint` object:
+
+  :>json string address: label for a location with the business address of the mint
+  :>json string url: the mint's base URL
+  :>json base32 master_pub: master public key of the mint
 
 
 When the contract is signed by the merchant or the wallet, the
@@ -189,11 +207,16 @@ Wallet-Frontend
 +++++++++++++++++++
 Messagging protocol
 +++++++++++++++++++
-In order to reach mutual acknowledgement, and to avoid signaling loops,
-we define two protocols according to the initiator. The signals are to be
-implemented in JavaScript events dispatched on the HTML element `body`.
 
-Thus, when the merchant wants to notify the availability of a Taler-style payment
+In order to reach mutual acknowledgement, and to avoid signaling loops,
+we define two interactions.  One is initiated by the HTML page inquiring
+about the Taler wallet extension being available, the other by the wallet
+extension inquiring about page supporting Taler as a payment option.
+
+The HTML page implements all interactions using JavaScript signals
+dispatched on the HTML element `body`.
+
+When the merchant wants to notify the availability of a Taler-style payment
 option (for example on a "checkout" page), it sends the following event:
 
   .. js:data:: taler-payment-mfirst
