@@ -79,7 +79,7 @@ pay.  The wallet will then transmit the payment information to the
 by the `frontend` in response to a successful payment.
 
 A precise specification and sample code for implementing the signalling
-is provided in section FIXME-REF.
+is provided in the dedicated :ref:`section <message-passing-ref>`.
 
 
 ++++++++++++++++++++++++++++++
@@ -98,7 +98,7 @@ with the mint and signals the `frontend` the success (or failure) of
 the payment process.  If the payment is successful, the `frontend` is
 responsible for generating the fullfillment page.
 
-The contract format is specified in section FIXME-REF.
+The contract format is specified in section `contract`_.
 
 
 +++++++++
@@ -107,10 +107,27 @@ Encodings
 
 Data such as dates, binary blobs, and other useful formats, are encoded as described in :ref:`encodings-ref`.
 
+.. _contract:
+
 Contract
 --------
 
-A `contract` is a JSON object having the following structure:
+A `contract` is a JSON object having the following structure, which is returned as a
+successful response to the following two calls:
+
+.. note::
+
+  This section holds just a central definition for the `contract`, so refer to each component's
+  section for its detailed REST interaction.
+
+.. http:get:: /taler/contract
+  
+  Issued by the wallet when the customer wants to see the contract for a certain purchase
+
+.. http:post:: /contract
+
+  Issued by the frontend to the backend when it wants to augment its `proposition` with all the
+  cryptographic information.
 
   :>json object amount: an :ref:`amount <Amount>` indicating the total price for this deal. Note that, in tha act of paying, the mint will subtract from this amount the total cost of deposit fee due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
   :>json object max_fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant
@@ -153,6 +170,8 @@ documentation
 The following structure is a container for the signature. The purpose
 should be set to `TALER_SIGNATURE_MERCHANT_CONTRACT`.
 
+.. _contract-blob:
+
 .. sourcecode:: c
 
    struct Contract
@@ -161,12 +180,11 @@ should be set to `TALER_SIGNATURE_MERCHANT_CONTRACT`.
      struct GNUNET_HashCode h_contract_details;
    }
 
-
-
-
 ---------------
 Wallet-Frontend
 ---------------
+
+.. _message-passing-ref:
 
 +++++++++++++++++++
 Messagging protocol
@@ -232,13 +250,14 @@ The following are the API made available by the merchant's frontend to the walle
 .. http:get:: /taler/contract
 
   Ask the merchant to send a contract for the current deal
+
   **Success Response**
 
   :status 200 OK: The request was successful.
   :resheader Content-Type: application/json
-  :>json base32 contract: a JSON object being the contract for this deal, descibed below.
-  :>json base32 sig: the signature of the binary described in :ref:`contract`.
-  :>json base32 h_contract: the base32 encoding of the field `h_contract_details` of `contract`_
+  :>json base32 contract: a :ref:`JSON contract <contract>` for this deal.
+  :>json base32 sig: the signature of the binary described in :ref:`blob <contract-blob>`.
+  :>json base32 h_contract: the base32 encoding of the field `h_contract_details` of the contract's :ref:`blob <contract-blob>`
 
   **Failure Response**
 
