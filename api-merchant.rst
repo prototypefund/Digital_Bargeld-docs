@@ -33,8 +33,8 @@ The `frontend` is the (usually pre-existing) shopping portal of the
 merchant.  The architecture tries to minimize the amount of
 modifications necessary to the `frontend` as well as the trust that
 needs to be placed into the `frontend` logic.  Taler requires the
-frontend to facilitate three JSON-based interactions between the
-wallet and the `backend`, and two of those are trivial.
+frontend to facilitate two JSON-based interactions between the
+wallet and the `backend`, and one of those is trivial.
 
 The `backend` is a standalone C application intended to implement all
 the cryptographic routines required to interact with the Taler wallet
@@ -219,60 +219,137 @@ dispatched on the HTML element `body`.
 When the merchant wants to notify the availability of a Taler-style payment
 option (for example on a "checkout" page), it sends the following event:
 
-  .. js:data:: taler-payment-mfirst
+  .. js:data:: taler-checkout-probe
 
-.. note::
-   this event must be sent from a callback for the `onload` event of the `BODY` element,
-   otherwise the extension would have not time to register a listener for this event.
-   For example:
+This event must be sent from a callback for the `onload` event of the
+`body` element, otherwise the extension would have not time to
+register a listener for this event.  It also needs to be send when
+the Taler extension is dynamically loaded (if the user activates
+the extension while he is on the checkout page).  This is done by
+listening for the
+
+  .. js:data:: taler-load
+
+event.  If the Taler extension is present, it will respond with a
+
+  .. js:data:: taler-wallet-present
+
+event.  The handler should then activate the Taler payment option,
+for example by updating the DOM to enable the respective button.
+Finally, if the Taler extension is unloaded while the user is
+visiting a checkout page, the page should listen for the
+
+  .. js:data:: taler-unload
+
+event to hide the Taler payment option.
+
+The following source code highlights the key steps for adding
+the Taler signaling to a checkout page:
+
+.. sourcecode:: javascript
+    function has_taler_wallet_callback(aEvent){
+       // This function is called if a Taler wallet is available.
+       // suppose the radio button for the Taler option has
+       // the DOM ID attribute 'taler-radio-button-id'
+      var tbutton = document.getElementById("taler-radio-button-id");
+      tbutton.removeAttribute("disabled");
+    };
+
+    function taler_wallet_load_callback(aEvent){
+      // let the Taler wallet know that this is a Checkout page
+      // which supports Taler (the extension will have
+      // missed our initial 'taler-checkout-probe' from onload())
+      document.body.dispatchEvent(new Event('taler-checkout-probe'));
+    };
+
+    function taler_wallet_unload_callback(aEvent){
+       // suppose the radio button for the Taler option has
+       // the DOM ID attribute 'taler-radio-button-id'
+       var tbutton = document.getElementById("taler-radio-button-id");
+       tbutton.setAttribute("disabled", "true");
+    };
+
 
 .. sourcecode:: html
-
    <body onload="function(){
-     // set up the listener for 'taler-wallet-mfirst'
-     // ...
-     let eve = new Event('taler-payment-first');
-     document.body.dispatchEvent(eve);
-     };"> ... </body>
+        // First, we set up the listener to be called if a wallet is present.
+        document.body.addEventListener("taler-wallet-present", has_taler_wallet_callback, false);
+        // Detect if a wallet is dynamically added (rarely needed)
+        document.body.addEventListener("taler-load", taler_wallet_load_callback, false);
+        // Detect if a wallet is dynamically removed (rarely needed)
+        document.body.addEventListener("taler-unload", taler_wallet_unload_callback, false);
+        // Finally, signal the wallet that this is a payment page.
+        document.body.dispatchEvent(new Event('taler-checkout-probe'));
+      };">
+     ...
+   </body>
 
-and the wallet will reply with a
 
-  .. js:data:: taler-wallet-mfirst
+When the user chooses to pay, the page needs to inform the extension
+that it should execute the payment process.  This is done by sending
+a
 
-The other direction, the wallet sends a
+  .. js:data:: taler-contract
 
-  .. js:data:: taler-wallet-wfirst
+event to the extension.  The following example code fetches the
+contract from the merchant website and passes it to the extension
+when the button is clicked:
 
-and the merchant must reply with a
+.. sourcecode:: javascript
+   function deliver_contract_to_wallet(jsonContract){
+   var cevent = new CustomEvent('taler-contract', { detail: jsonContract, target: '/taler/pay' });
+     document.body.dispatchEvent(cevent);
+   };
 
-  .. js:data:: taler-payment-wfirst
+   function taler_pay(form){
+     var contract_req = new XMLHttpRequest();
+     // request contract from merchant website, i.e.:
+     contract_req.open("GET", "/taler/contract", true);
+     contract_req.onload = function (ev){
+       if (contract_req.readyState == 4){ // HTTP request is done
+         if (contract_req.status == 200){ // HTTP 200 OK
+           deliver_contract_to_wallet(contract_req.responseText);
+         }else{
+           alert("Merchant failed to generate contract: " + contract_req.status);
+         }
+       }
+     };
+     contract_req.onerror = function (ev){
+       // HTTP request failed, we didn't even get a status code...
+       alert(contract_req.statusText);
+     };
+     contract_req.send(null); // run the GET request
+   };
 
+.. sourcecode:: html
+    <input type="button" onclick="taler_pay(this.form)" value="Ok">
+
+
+In this example, the function `taler_pay` is attached to the
+'checkout' button. This function issues the required POST and passes
+the contract to the wallet in the the function
+`deliver_contract_to_wallet` if the contract was received correctly
+(i.e. HTTP response code was 200 OK).
 
 +++++++++++++++
 The RESTful API
 +++++++++++++++
 
-The following are the API made available by the merchant's frontend to the wallet:
+The merchant's frontend must provide the JavaScript logic with the
+ability to fetch the JSON contract.  In the example above, the
+JavaScript expected the contract at `/taler/contract` and the payment
+to go to '/taler/pay'.  However, it is possible to deliver the
+contract from any URL and post the deposit permission to any URL,
+as long as the client-side logic knows how to fetch it and pass it to
+the extension.  For example, the contract could already be embedded in
+the webpage or be at a contract-specific URL to avoid relying on
+cookies to identify the shopping session.
 
-.. http:get:: /taler/key
-
-   Allows the customer to obtain the merchant's public EdDSA key. Should only be used over a "secure" channel (i.e. at least HTTPS).
-
-   **Success Response**
-
-   :status 200 OK: The request was successful.
-
-   The merchant responds with a JSON object containing the following fields:
-
-   :>json base32 merchant_pub: base32-encoded EdDSA public key of the merchant.
-
-   **Failure response**
-
-   :status 404 Not Found: Taler not supported.
 
 .. http:get:: /taler/contract
 
-  Ask the merchant to send a contract for the current deal
+  Triggers the contract generation. Note that the URL may differ between
+  merchants.
 
   **Success Response**
 
@@ -284,100 +361,38 @@ The following are the API made available by the merchant's frontend to the walle
 
   **Failure Response**
 
-  In most cases, the response gotten by the wallet will just be the forwarded response
-  that the frontend got from the backend.
+  In most cases, the response will just be the forwarded response that the `frontend` got from the `backend`.
 
-  :status 400 Bad Request: Request not understood. Possibly due to some error in formatting the JSON by the frontend.
+  :status 400 Bad Request: Request not understood.
   :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
 
-It's up to the merchant's implementation to identify which product or service the customer
-is interested in.  For example, a common implementation might
-use a cookie to identify the customer's shopping cart.  After the customer
-has filled the shopping cart and selected "confirm", the merchant might
-display a catalog of payment options.  Upon confirming "Taler" as the payment
-option, the merchant must send the contract to the Wallet.
-
-So the "button" which allows the user to confirm his payment option has two main
-tasks: it request "/taler/contract" to the merchant, and secondly it forwards the
-received contract to the wallet.
-
-In terms of JavaScript, that translates to defining a JavaScript function hooked to
-that button, that will "POST /taler/contract" and send the result back to the wallet
-through an event called `taler-contract`. Upon receiving that event, the wallet
-will manage the contract visualization.
-
-It is worth showing a simple code sample.
-
-.. sourcecode:: js
-
-   function checkout(form){
-     for(var cnt=0; cnt < form.group1.length; cnt++){
-       var choice = form.group1[cnt];
-         if(choice.checked){
-           if(choice.value == "Taler"){
-             var cert = new XMLHttpRequest();
-             // request contract
-             cert.open("POST", "/taler/contract", true);
-             cert.onload = function (e) {
-               if (cert.readyState == 4) {
-                 if (cert.status == 200){
-                 // display contract (i.e. it sends the JSON string to the (XUL) extension)
-                   sendContract(cert.responseText);
-                 }
-               else alert("No contract gotten, status " + cert.status);
-             }
-           };
-           cert.onerror = function (e){
-             alert(cert.statusText);
-           };
-           cert.send(null);
-         }
-         else alert(choice.value + ": NOT available ");
-       }
-     }
-   };
-   function sendContract(jsonContract){
-     var cevent = new CustomEvent('taler-contract', { 'detail' : jsonContract });
-     document.body.dispatchEvent(cevent);
-   };
-
-In this example, the function `checkout` is the one attached to the
-'checkout' button (or some merchant-dependent triggering
-mechanism). This function issues the required POST and hooks the
-function `sendContract` as the handler of the successful case
-(i.e. response code is 200).  The hook then simply dispatches on the
-page's `body` element the 'taler-contract' event, by passing the
-gotten JSON as a further argument, which the wallet is waiting for.
-
-.. note::
-
-   Merchants should remind their customers to enable cookies acceptance while
-   browsing on the shop, otherwise it could get difficult to associate purchase's
-   metadata to its intended certificate.
 
 .. http:post:: /taler/pay
 
-  Send the deposit permission to the merchant. It is worth noting that the deposit permission
-  accounts for only `one` coin.
+  Send the deposit permission to the merchant. Note that the URL may differ between
+  merchants.
 
   :reqheader Content-Type: application/json
-  :<json amount f: the :ref:`amount <Amount>` this coin is paying, including this coin's deposit fee
   :<json base32 H_wire: the hashed `wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
   :<json base32 H_contract: the base32 encoding of the field `h_contract_details` of `contract`_. The wallet can choose whether to take this value from the gotten contract (field `h_contract`), or regenerating one starting from the values it gets within the contract
+  :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
+  :<json date refund_deadline: same value held in the contract's `refund` field
+  :<json string mint: the chosen mint's base URL
+  :<json array coins: the coins used to sign the contract
+
+  For each coin, the array contains the following information:
+  :<json amount f: the :ref:`amount <Amount>` this coin is paying, including this coin's deposit fee
   :<json base32 coin_pub: the coin's public key
   :<json base32 denom_pub: the denomination's (RSA public) key
   :<json base32 ub_sig: the mint's signature over this coin's public key
-  :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
-  :<json date refund_deadline: same value held in the contract's `refund` field
   :<json base32 coin_sig: the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See the :ref:`dedicated section <Signatures>` on the mint's specifications.
-  :<json string mint: the chosen mint's base URL
 
   **Success Response:**
 
   :status 200 OK: the payment has been received.
   :resheader Content-Type: text/html
 
-  In this case the merchant sends back a `fullfillment` page in HTML, which the wallet will make the new `BODY` of the merchant's current page. It is just a confirmation of the positive deal's conclusion
+  In this case the merchant sends back a `fullfillment` page in HTML, which the wallet will make the new `body` of the merchant's current page. It is just a confirmation of the positive transaction's conclusion.
 
   **Failure Responses:**
 
@@ -391,23 +406,7 @@ Frontend-Backend
 The RESTful API
 +++++++++++++++
 
-The following API are made available by the merchant's backend to the merchant's frontend.
-
-.. http:get:: /key
-
-   Issued by the frontend to satisfy the request of the merchant's key coming from the wallet
-
-   **Success Response**
-
-   :status 200 OK: The request was successful.
-
-   The merchant responds with a JSON object containing the following fields:
-
-   :>json base32 merchant_pub: base32-encoded EdDSA public key of the merchant.
-
-   **Failure response**
-
-   :status 404 Not Found: Taler not supported.
+The following API are made available by the merchant's `backend` to the merchant's `frontend`.
 
 .. http:post:: /contract
 
@@ -418,34 +417,33 @@ The following API are made available by the merchant's backend to the merchant's
   The JSON that is to be sent from the frontend is just a `contract` object which misses the fields
 
   * `merchant_pub`
-  * `timestamp`
-  * `refund`
   * `mints`
+
+  The `backend` then completes this information based on its configuration.
 
   **Success Response**
 
-  :status 200 OK: The backend has successfully created the contract
-
+  :status 200 OK: The backend has successfully created the contract.
   :resheader Content-Type: application/json
 
-  The backend will reply the same JSON as the one sent back to the wallet by the frontend as response to the "/taler/contract" call.
+  The `frontend` should pass this response verbatim to the wallet.
 
   **Failure Responses: Bad contract**
 
-  :status 400 Bad Request: Request not understood. The JSON was invalid.
+  :status 400 Bad Request: Request not understood. The JSON was invalid. Possibly due to some error in formatting the JSON by the `frontend`.
 
 .. http:post:: /pay
 
-  Ask the backend to start the communication with the mint to spend this coin
+  Asks the `backend` to execute the transaction with the mint and deposit the coins.
 
   :reqheader Content-Type: application/json
 
-  The frontend will just forward the deposit permission it got from the wallet, without making any modification
+  The `frontend` should just pass the deposit permission information it received from the wallet verbatim.
 
   **Success Response: OK**
 
-  :status 200 OK: the mint accepted this coin
+  :status 200 OK: The mint accepted all of the coins. The `frontend` should now fullfill the contract.  This response has no meaningful body, the frontend needs to generate the fullfillment page.
 
   **Failure Responses:**
 
-  Again, the backend will route to the frontend any status code, as well as any JSON, that it got from the mint.
+  The `backend` will return error codes received from the mint verbatim (see `/deposit` documentation for the mint API for possible errors).  If the wallet made a mistake (for example, by double-spending), the `frontend` should pass the reply verbatim to the browser/wallet. (This is pretty much always the case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.)
