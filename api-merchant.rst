@@ -136,6 +136,7 @@ successful response to the following two calls:
   :>json `date` timestamp: this contract's generation time
   :>json `date` refund: the maximum time until which the merchant can refund the wallet in case of a problem, or some request
   :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract; this information is typically added by the `backend`
+  :>json object merchant: the set of values describing this `merchant`, defined below
   :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
   :>json array mints: a JSON array of `mint` objects, specifying to the wallet which mints the merchant is willing to deal with; this information is typically added by the `backend`
   :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
@@ -149,7 +150,6 @@ successful response to the following two calls:
   :>json array taxes: a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
   :>json string delivery_date: human-readable date indicating when this product should be delivered
   :>json string delivery_location: where to deliver this product. This may be an URI for online delivery (i.e. `http://example.com/download` or `mailto:customer@example.com`), or a location label defined inside the proposition's `locations`.  The presence of a colon (`:`) indicates the use of an URL.
-  :>json object merchant: the set of values describing this `merchant`, defined below
 
   The `merchant` object:
 
@@ -247,6 +247,7 @@ The following source code highlights the key steps for adding
 the Taler signaling to a checkout page:
 
 .. sourcecode:: javascript
+
     function has_taler_wallet_callback(aEvent){
        // This function is called if a Taler wallet is available.
        // suppose the radio button for the Taler option has
@@ -271,6 +272,7 @@ the Taler signaling to a checkout page:
 
 
 .. sourcecode:: html
+
    <body onload="function(){
         // First, we set up the listener to be called if a wallet is present.
         document.body.addEventListener("taler-wallet-present", has_taler_wallet_callback, false);
@@ -296,6 +298,7 @@ contract from the merchant website and passes it to the extension
 when the button is clicked:
 
 .. sourcecode:: javascript
+
    function deliver_contract_to_wallet(jsonContract){
    var cevent = new CustomEvent('taler-contract', { detail: jsonContract, target: '/taler/pay' });
      document.body.dispatchEvent(cevent);
@@ -322,6 +325,7 @@ when the button is clicked:
    };
 
 .. sourcecode:: html
+
     <input type="button" onclick="taler_pay(this.form)" value="Ok">
 
 
