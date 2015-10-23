@@ -223,7 +223,7 @@ option (for example on a "checkout" page), it sends the following event:
 
 This event must be sent from a callback for the `onload` event of the
 `body` element, otherwise the extension would have not time to
-register a listener for this event.  It also needs to be send when
+register a listener for this event.  It also needs to be sent when
 the Taler extension is dynamically loaded (if the user activates
 the extension while he is on the checkout page).  This is done by
 listening for the
