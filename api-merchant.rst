@@ -159,7 +159,7 @@ successful response to the following two calls:
 
   The `location` object:
 
-  :>json string county: blah
+  :>json string country: blah
   :>json string city: blah
   :>json string state: blah
   :>json string region: blah
