@@ -138,7 +138,8 @@ successful response to the following two calls:
   :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract; this information is typically added by the `backend`
   :>json object merchant: the set of values describing this `merchant`, defined below
   :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
-  :>json array mints: a JSON array of `mint` objects, specifying to the wallet which mints the merchant is willing to deal with; this information is typically added by the `backend`
+  :>json array auditors: a JSON array of `auditor` objects. To finalize the payment, the wallet should agree on a mint audited by one of these auditos.
+  :>json array mints: a JSON array of `mint` objects. The wallet is encouraged to agree on some of those mints, in case it can't agree on any auditor trusted by this merchant.
   :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
 
   The `product` object focuses on the product being purchased from the merchant. It has the following structure:
@@ -168,11 +169,14 @@ successful response to the following two calls:
   :>json string street: blah
   :>json string street_number: blah
 
-  Additional fields may be present depending on the country.
+  Depending on the country, some fields may be missing
+
+  The `auditor` object:
+
+  :>json string name: official name
 
   The `mint` object:
 
-  :>json string address: label for a location with the business address of the mint
   :>json string url: the mint's base URL
   :>json base32 master_pub: master public key of the mint
 
@@ -401,6 +405,7 @@ cookies to identify the shopping session.
   :<json array coins: the coins used to sign the contract
 
   For each coin, the array contains the following information:
+
   :<json amount f: the :ref:`amount <Amount>` this coin is paying, including this coin's deposit fee
   :<json base32 coin_pub: the coin's public key
   :<json base32 denom_pub: the denomination's (RSA public) key
