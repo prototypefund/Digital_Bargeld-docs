@@ -440,11 +440,11 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :reqheader Content-Type: application/json
 
-  The JSON that is to be sent from the frontend is just a `contract` object which misses the fields
+  The `proposition` that is to be sent from the frontend is a `contract` object without the fields
 
   * `merchant_pub`
   * `mints`
-
+  
   The `backend` then completes this information based on its configuration.
 
   **Success Response**
@@ -464,7 +464,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :reqheader Content-Type: application/json
 
-  The `frontend` should just pass the deposit permission information it received from the wallet verbatim.
+  The `frontend` passes the deposit permission received from the wallet, by optionally adding a field named `edate`, indicating a deadline by which he would expect to receive the bank transfer for this deal
 
   **Success Response: OK**
 
