@@ -308,6 +308,7 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :<json base32 denom_pub: denomination (RSA) key with which the coin is signed
   :<json base32 ub_sig: mint's unblinded RSA signature_ of the coin
   :<json date timestamp: timestamp when the contract was finalized, must match approximately the current time of the mint
+  :<json date edate: indicative time by which the mint undertakes to transfer the funds to the merchant, in case of successful payment.
   :<json int transaction_id: 64-bit transaction id for the transaction between merchant and customer
   :<json base32 merchant_pub: the EdDSA public key of the merchant (used to identify the merchant for refund requests)
   :<json date refund_deadline: date until which the merchant can issue a refund to the customer via the mint (can be zero if refunds are not allowed)

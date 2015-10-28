@@ -32,7 +32,6 @@ contain a JSON object with the following fields:
   * `IBAN`: the International Bank Account Number (IBAN) of the account of the beneficiary
   * `name`: the name of the beneficiary
   * `bic`: the Bank Identification Code (BIC) code of the beneficiary's bank
-  * `edate`: the date given as a timestamp indicating when the transfer should be executed
   * `r`: random salt (used to make brute-forcing the hash harder)
 
 The JSON object may optionally contain:
