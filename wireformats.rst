@@ -33,7 +33,7 @@ contain a JSON object with the following fields:
   * `name`: the name of the beneficiary
   * `bic`: the Bank Identification Code (BIC) code of the beneficiary's bank
   * `edate`: the date given as a timestamp indicating when the transfer should be executed
-  * `r`: random nounce (used to make brute-forcing the hash harder)
+  * `r`: random salt (used to make brute-forcing the hash harder)
 
 The JSON object may optionally contain:
   * `address`: the address of the Beneficiary
