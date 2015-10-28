@@ -400,6 +400,7 @@ cookies to identify the shopping session.
   :<json base32 H_wire: the hashed `wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
   :<json base32 H_contract: the base32 encoding of the field `h_contract_details` of `contract`_. The wallet can choose whether to take this value from the gotten contract (field `h_contract`), or regenerating one starting from the values it gets within the contract
   :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
+  :<json date expiry: time extent during which this contract can be accepted by the merchant
   :<json date refund_deadline: same value held in the contract's `refund` field
   :<json string mint: the chosen mint's base URL
   :<json array coins: the coins used to sign the contract
