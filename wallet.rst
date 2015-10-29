@@ -129,10 +129,9 @@ whereas for `gnunet` and `taler`, do
 Finally, run the provided script (any final file will be placed under ``/tmp/emscripten``) that we
 just copied under any component's tree.
 
-At this point, you have the header files and the static library for each component compiled in the `LLVM` intermediate
-form. To see some final JavaScript, it is needed to compile a `C` program, though that is not the only way (once again,
-refer to the official `emscripten's documentation <http://kripken.github.io/emscripten-site/docs/compiling/Building-Projects.html#building-projects>`_),
-against the libraries we have just built. In `taler`'s case, this task is accomplished by a `C` source file called
+At this point, you have the header files and the static library for each component compiled in the `LLVM` intermediate form. To see some final JavaScript, it is needed to compile a `C` program, though that is not the only way against the libraries we have just built.
+See the official `emscripten's documentation <http://kripken.github.io/emscripten-site/docs/compiling/Building-Projects.html#building-projects>`_ for more details.
+In `taler`'s case, this task is accomplished by a `C` source file called
 ``wrap.c``, that is located at ``wallet/wallet_button/emscripten``. Its main purpose is to save JavaScript land from manipulating
 `C` structures to pass to `libgnunetutil_taler_wallet`'s and `libtalerutil_wallet`'s primitives, and to provide some handy functions.
 In order to compile it, issue
@@ -166,11 +165,11 @@ Thus, to see some output, issue
      nodejs ${X}.js
 
 
-The same directory offers a more "playful" example, called ``time_glue.c``. Its purpose is to be compiled
-as a JavaScript "library" (it actually lacks a `main()` function) that could be imported by a Web browser
-which can, in turn, call the functions provided by this library. So after sourcing ``final_build-time_glue.sh``,
-the assembling and linking phases (accomplished in the same way as the previous examples) will yield a HTML
-which embraces the JavaScript translation of ``time_glue.c``, called ``time_glue.html``.
+The same directory offers a more "playful" example, called ``time_glue.c``.  Its purpose is to be compiled
+as a JavaScript "library" that could be imported by a Web browser, which can, in turn, call the functions
+provided.  After sourcing ``final_build-time_glue.sh``, the assembling and linking phases, accomplished in
+the same way as the previous examples, yield a HTML containing the JavaScript translation of ``time_glue.c``,
+called ``time_glue.html``.
 
   .. note::
 
@@ -179,19 +178,19 @@ which embraces the JavaScript translation of ``time_glue.c``, called ``time_glue
 
 In order to import the library into the browser and call its functions,
 
-1. open ``time_glue.html``
-2. open the JavaScript shell environment (`CTRL+K`)
-3. import the function which retrieves the current time in binary format (by allocating
-   a proper structure and returning its pointer): at the prompt, issue ``var time =
+1. Open ``time_glue.html``
+2. Open the JavaScript shell environment (`CTRL+K`)
+3. Import the function which retrieves the current time in binary format by allocating
+   a proper structure and returning its pointer: at the prompt, issue ``var time =
    window.Module.cwrap('get_absolute_time', 'number');``
-4. import the function which convert such a binary format in a human readable string,
+4. Import the function which convert such a binary format in a human readable string,
    ``var pretty = window.Module.cwrap('get_fancy_time_dealloc', 'string', ['number']);``.
-   the `_dealloc` part is due to our choice to make this example easier by avoiding the
-   passing of whole C structures as parameters (though doable with emscripted code, that
-   adds more complexity than expectable for an example); thus instead of calling a further
+   The `_dealloc` part is due to our choice to make this example easier by avoiding the
+   passing of whole C structures as parameters.  Although doable with emscripted code, that
+   adds more complexity than expectable for an example.  Instead of calling a further
    function with the sole aim of deallocating the time holding structure from emscripten's
-   heap, we chose to do so from this function.
-5. import the "printer", ``var printTime = window.Module.cwrap('print_time', 'void', ['string']);``
+   heap, we therefore chose to do so from this function.
+5. Import the "printer", ``var printTime = window.Module.cwrap('print_time', 'void', ['string']);``
 6. Normally call the imported functions:
   .. sourcecode:: JavaScript
 
