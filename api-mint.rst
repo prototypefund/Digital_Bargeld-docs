@@ -19,7 +19,7 @@ This section describes how certain types of values are represented throughout th
   * **Binary data**:
     Binary data is generally encoded using Crockford's variant of Base32 (http://www.crockford.com/wrmg/base32.html), except that "U" is not excluded but also decodes to "V" to make OCR easy.  We will still simply use the JSON type "base32" and the term "Crockford Base32" in the text to refer to the resulting encoding.
 
-  * **Large numbers**: Large numbers (typically 256 bits), such as blinding factors and private keys, are transmitted as other binary data in Crockford Base32 encoding.
+  * **Large numbers**: Large numbers such as RSA blinding factors and 256 bit  keys, are transmitted as other binary data in Crockford Base32 encoding.
 
   .. _Timestamp:
 
@@ -28,26 +28,26 @@ This section describes how certain types of values are represented throughout th
 
   .. _public\ key:
 
-  * **Public key**: EdDSA and ECDHE public keys are always points on Curve25519 and represented using the Ed25519 standard compact format (256 bits), converted to Crockford Base32_.
+  * **Public key**: EdDSA and ECDHE public keys are always points on Curve25519 and represented using the standard 256 bits Ed25519 compact format, converted to Crockford Base32_.
 
   .. _Signature:
 
   * **Signatures**: EdDSA signatures are be transmitted in two forms in the protocol.  As 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only), or as JSON objects with following fields:
 
     * `purpose`: a unique number to state the context in which the signature is to be used in
-    * `size`: the number of bytes that were hashed (using SHA-512) to create the signature; note that signatures are always done over a packed, binary representation of the data and not the JSON representations.
+    * `size`: the number of bytes that were hashed using SHA-512 to create the signature; note that signatures are always done over a packed, binary representation of the data and not the JSON representations.
     * `eddsa_sig`: 64-byte base32_ binary encoding of the R and S values
-    * `eddsa_val`: base32_ binary encoding of the full signed data (including again `purpose` and `size`)
+    * `eddsa_val`: base32_ binary encoding of the full signed data, including again `purpose` and `size`.
 
-    RSA signatures are always simply base32_ encoded. The specific signature scheme in use (blind signature, EdDSA) depends on the context.
+    RSA signatures are always simply base32_ encoded. The specific signature scheme in use like blind signatures or EdDSA depends on the context.
 
   .. _Amount:
 
   * **Amounts**: Amounts of currency are expressed as a JSON object with the following fields:
 
-    * `currency`: name of the currency using either a three-character ISO 4217 currency code, or a regional currency identifier starting with a "*" followed by at most 10 characters; ISO 4217 exponents in the name are not supported (for this, the "fraction" is used, corresponding to an ISO 4217 exponent of 6).
-    * `value`: unsigned 32 bit value in the currency, note that "1" here would correspond to 1 EUR or 1 USD (depending on `currency`), not 1 cent.
-    * `fraction`: unsigned 32 bit fractional value (to be added to `value`) representing an additional currency fraction, in units of 1 in one million (1/1000000) of the base currency value.  For example, a fraction of 500000 (500 thousand) would correspond to 50 cents.
+    * `currency`: name of the currency using either a three-character ISO 4217 currency code, or a regional currency identifier starting with a "*" followed by at most 10 characters.  ISO 4217 exponents in the name are not supported, although the "fraction" is corresponds to an ISO 4217 exponent of 6.
+    * `value`: unsigned 32 bit value in the currency, note that "1" here would correspond to 1 EUR or 1 USD, depending on `currency`, not 1 cent.
+    * `fraction`: unsigned 32 bit fractional value to be added to `value` representing an additional currency fraction, in units of one millionth (10:superscript:-6) of the base currency value.  For example, a fraction of 500,000 would correspond to 50 cents.
 
 
 ++++++++++++++
@@ -62,11 +62,11 @@ Certain response formats are common for all requests. They are documented here i
 
   When encountering an internal error, the mint may respond to any request with an internal server error.
 
-  :status 500 Internal server error: This always indicates some serious internal operational error of the mint (i.e. a program bug, database problems, etc.) and must not be used for client-side problems.  When facing an internal server error, clients should retry their request after some delay (recommended after 1s, twice more at randomized times within 1 minute, then the user should be informed and another three retries should be scheduled within the next 24h). If the error persists, a report should ultimately be made to the auditor. (The auditor API for this is not yet specified.)  However, as internal server errors are always reported to the mint operator, a good operator should naturally be able to address them in a timely fashion, especially within 24h.  When generating an internal server error, the mint responds with a JSON object containing the following fields:
+  :status 500 Internal server error: This always indicates some serious internal operational error of the mint, such as a program bug, database problems, etc., and must not be used for client-side problems.  When facing an internal server error, clients should retry their request after some delay.  We recommended initially trying after 1s, twice more at randomized times within 1 minute, then the user should be informed and another three retries should be scheduled within the next 24h.  If the error persists, a report should ultimately be made to the auditor, although the auditor API for this is not yet specified.  However, as internal server errors are always reported to the mint operator, a good operator should naturally be able to address them in a timely fashion, especially within 24h.  When generating an internal server error, the mint responds with a JSON object containing the following fields:
 
   :resheader Content-Type: application/json
   :>json error: a string with the value "internal error"
-  :>json hint: a string with problem-specific human-readable diagnostic text (typically useful for the mint operator)
+  :>json hint: a string with problem-specific human-readable diagnostic text and typically useful for the mint operator
 
 
   **Error Response: Bad Request**
@@ -93,7 +93,7 @@ Obtaining Mint Keys
 
 This API is used by wallets and merchants to obtain global information about the mint, such as online signing keys, available denominations and the fee structure.
 This is typically the first call any mint client makes, as it returns information required to process all of the other interactions with the mint.  The returned
-information is secured by (1) signature(s) from the mint, especially the long-term offline signing key of the mint (which clients should cache); (2) signature(s)
+information is secured by (1) signature(s) from the mint, especially the long-term offline signing key of the mint, which clients should cache; (2) signature(s)
 from auditors, and the auditor keys should be hard-coded into the wallet as they are the trust anchors for Taler; (3) possibly by using HTTPS.
 
 
@@ -111,8 +111,8 @@ from auditors, and the auditor keys should be hard-coded into the wallet as they
   :>json date list_issue_date: The date when the denomination keys were last updated.
   :>json list auditors: A JSON list of the auditors of the mint. Described below in detail.
   :>json list signkeys: A JSON list of the mint's signing keys.  Described below in detail.
-  :>json base32 eddsa_sig: compact EdDSA signature_ (binary-only) over the SHA-512 hash of the concatenation of all SHA-512 hashes of the RSA denomination public keys in `denoms` (in the same order as they were in `denoms`).  Note that for hashing, the binary format of the RSA public keys is used, and not their base32_ encoding.  Wallets cannot do much with this signature by itself; it is only useful when multiple clients need to establish that the mint is cheating (with respect to end-user anonymity) by giving disjoint denomination keys to different users.  If a mint were to do this, this signature allows the clients to demonstrate to the public that the mint is dishonest.
-  :>json base32 eddsa_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
+  :>json base32 eddsa_sig: compact EdDSA signature_ (binary-only) over the SHA-512 hash of the concatenation of all SHA-512 hashes of the RSA denomination public keys in `denoms` in the same order as they were in `denoms`.  Note that for hashing, the binary format of the RSA public keys is used, and not their base32_ encoding.  Wallets cannot do much with this signature by itself; it is only useful when multiple clients need to establish that the mint is sabotaging end-user anonymity by giving disjoint denomination keys to different users.  If a mint were to do this, this signature allows the clients to demonstrate to the public that the mint is dishonest.
+  :>json base32 eddsa_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  It is given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
 
   A denomination description in the `denoms` list is a JSON object with the following fields:
 
@@ -148,7 +148,7 @@ from auditors, and the auditor keys should be hard-coded into the wallet as they
   :>jsonarr base32 denom_pub_h: hash of the public RSA key used to sign coins of the respective denomination.  Note that the auditor's signature covers more than just the hash, but this other information is already provided in `denoms` and thus not repeated here.
   :>jsonarr base32 auditor_sig: A signature_ (binary-only) with purpose `TALER_SIGNATURE_AUDITOR_MINT_KEYS` over the mint's public key and the denomination key information. To verify the signature, the `denom_pub_h` must be resolved with the information from `denoms`.
 
-  The same auditor may appear multiple times in the array (i.e. for different subsets of denomination keys) and the same denomination key hash may be listed multiple times for the same or different auditors.  The wallet or merchant just should check that the denomination keys they use are in the set for at least one of the auditors that they accept.
+  The same auditor may appear multiple times in the array for different subsets of denomination keys, and the same denomination key hash may be listed multiple times for the same or different auditors.  The wallet or merchant just should check that the denomination keys they use are in the set for at least one of the auditors that they accept.
 
   .. note::
 
@@ -169,7 +169,7 @@ Obtaining wire-transfer information
   :resheader Content-Type: application/json
   :>json array methods: a JSON array of strings with supported payment methods, i.e. "sepa". Further information about the respective payment method is then available under /wire/METHOD, i.e. /wire/sepa if the payment method was "sepa".
   :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_PAYMENT_METHODS` signing over the hash over the 0-terminated strings representing the payment methods in the same order as given in methods.
-  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
+  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  It is given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
 
 .. http:get:: /wire/test
 
@@ -210,11 +210,11 @@ Withdrawal
 
 This API is used by the wallet to obtain digital coins.
 
-When transfering money to the mint (for example, via SEPA transfers), the mint creates a *reserve*, which keeps the money from the customer.  The customer must specify an EdDSA reserve public key as part of the transfer, and can then withdraw digital coins using the corresponding private key.  All incoming and outgoing transactions are recorded under the corresponding public key by the mint.
+When transfering money to the mint such as via SEPA transfers, the mint creates a *reserve*, which keeps the money from the customer.  The customer must specify an EdDSA reserve public key as part of the transfer, and can then withdraw digital coins using the corresponding private key.  All incoming and outgoing transactions are recorded under the corresponding public key by the mint.
 
   .. note::
 
-     Eventually the mint will need to advertise a policy for how long it will keep transaction histories for inactive or even fully drained reserves.  So we will need some additional handler (similar to `/keys`) to advertise those terms of service.
+     Eventually the mint will need to advertise a policy for how long it will keep transaction histories for inactive or even fully drained reserves.  We will therefore need some additional handler similar to `/keys` to advertise those terms of service.
 
 
 .. http:get:: /reserve/status
@@ -224,7 +224,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
   :query reserve_pub: EdDSA reserve public key identifying the reserve.
 
   .. note::
-    The client currently does not have to demonstrate knowledge of the private key of the reserve to make this request.  This should be OK, as the only entities that learn about the reserves' public key (the client, the bank and the mint) should already know most of the information returned (in particular, the `wire` details), and everything else is not really sensitive information.  However, we might want to revisit this decision for maximum security in the future; for example, the client could EdDSA-sign an ECDHE key to be used to derive a symmetric key to encrypt the response.  This might be useful, especially if HTTPS is not used for communication with the mint.
+    The client currently does not have to demonstrate knowledge of the private key of the reserve to make this request, which makes the reserve's public key privliged information known only to the client, their bank, and the mint.  In future, we might wish to revisit this decision to improve security, such as by having the client EdDSA-sign an ECDHE key to be used to derive a symmetric key to encrypt the response.  This would be useful if for example HTTPS were not used for communication with the mint.  
 
   **Success Response: OK**
 
@@ -237,7 +237,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
 
   :>jsonarr string type: either the string "WITHDRAW" or the string "DEPOSIT"
   :>jsonarr object amount: the amount_ that was withdrawn or deposited
-  :>jsonarr object wire: a JSON object with the wiring details (specific to the banking system in use), present in case the `type` was "DEPOSIT"
+  :>jsonarr object wire: a JSON object with the wiring details needed by the banking system in use, present in case the `type` was "DEPOSIT"
   :>jsonarr object signature: signature_ (full object with all details) made with purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` made with the reserve's public key over the original "WITHDRAW" request, present if the `type` was "WITHDRAW"
 
   **Error Response: Unknown reserve**
@@ -250,12 +250,12 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
 
 .. http:post:: /reserve/withdraw
 
-  Withdraw a coin of the specified denomination.  Note that the client should commit all of the request details (including the private key of the coin and the blinding factor) to disk before (!) issuing this request, so that it can recover the information if necessary in case of transient failures (power outage, network outage, etc.).
+  Withdraw a coin of the specified denomination.  Note that the client should commit all of the request details, including the private key of the coin and the blinding factor, to disk *before* issuing this request, so that it can recover the information if necessary in case of transient failures, like power outage, network outage, etc.
 
   :reqheader Content-Type: application/json
   :<json base32 denom_pub: denomination public key (RSA), specifying the type of coin the client would like the mint to create.
   :<json base32 coin_ev: coin's blinded public key, should be (blindly) signed by the mint's denomination private key
-  :<json base32 reserve_pub: public (EdDSA) key of the reserve that the coin should be withdrawn from (the total amount deducted will be the coin's value plus the withdrawal fee as specified with the denomination information)
+  :<json base32 reserve_pub: public (EdDSA) key of the reserve from which the coin should be withdrawn.  The total amount deducted will be the coin's value plus the withdrawal fee as specified with the denomination information.
   :<json object reserve_sig: EdDSA signature_ (binary-only) of purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` created with the reserves's private key
 
   **Success Response: OK**:
@@ -281,7 +281,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
 
   **Error Response: Unknown key**:
 
-  :status 404 Not Found: The denomination key or the reserve are not known to the mint.  If the denomination key is unknown, this suggests a bug in the wallet as the wallet should have used current denomination keys from /keys.  If the reserve is unknown, the wallet should not report a hard error (yet) but instead simply wait (for like a day!) as the wire transaction might simply not yet have completed and might be known to the mint in the near future.  In this case, the wallet should repeat the exact same request later again (using exactly the same blinded coin).
+  :status 404 Not Found: The denomination key or the reserve are not known to the mint.  If the denomination key is unknown, this suggests a bug in the wallet as the wallet should have used current denomination keys from /keys.  If the reserve is unknown, the wallet should not report a hard error yet, but instead simply wait for up to a day, as the wire transaction might simply not yet have completed and might be known to the mint in the near future.  In this case, the wallet should repeat the exact same request later again using exactly the same blinded coin.
   :resheader Content-Type: application/json
   :>json string error: "unknown entity referenced"
   :>json string parameter: either "denom_pub" or "reserve_pub"
@@ -291,7 +291,7 @@ When transfering money to the mint (for example, via SEPA transfers), the mint c
 Deposit
 --------------------
 
-Deposit operations are requested by a merchant during a transaction. For the deposit operation, the merchant has to obtain the deposit permission for the coin from the owner of the coin (the merchant's customer).  When depositing a coin, the merchant is credited an amount specified in the deposit permission (which may be a fraction of the total coin's value) minus the deposit fee as specified by the coin's denomination.
+Deposit operations are requested by a merchant during a transaction. For the deposit operation, the merchant has to obtain the deposit permission for a coin from their customer who owns the coin.  When depositing a coin, the merchant is credited an amount specified in the deposit permission, possibly a fraction of the total coin's value, minus the deposit fee as specified by the coin's denomination.
 
 
 .. _deposit:
@@ -302,16 +302,16 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :reqheader Content-Type: application/json
   :<json object f: the amount_ to be deposited, can be a fraction of the coin's total value
   :<json object `wire`: the merchant's account details. This must be a JSON object whose format must correspond to one of the supported wire transfer formats of the mint.  See :ref:`wireformats`
-  :<json base32 H_wire: SHA-512 hash of the merchant's payment details from `wire` (yes, strictly speaking redundant, but useful to detect inconsistencies)
-  :<json base32 H_contract: SHA-512 hash of the contact of the merchant with the customer (further details are never disclosed to the mint)
-  :<json base32 coin_pub: coin's public key (ECDHE and EdDSA)
-  :<json base32 denom_pub: denomination (RSA) key with which the coin is signed
+  :<json base32 H_wire: SHA-512 hash of the merchant's payment details from `wire`.  Although strictly speaking redundant, this helps detect inconsistencies.
+  :<json base32 H_contract: SHA-512 hash of the contact of the merchant with the customer.  Further details are never disclosed to the mint.
+  :<json base32 coin_pub: coin's public key, both ECDHE and EdDSA.
+  :<json base32 denom_pub: denomination RSA key with which the coin is signed
   :<json base32 ub_sig: mint's unblinded RSA signature_ of the coin
   :<json date timestamp: timestamp when the contract was finalized, must match approximately the current time of the mint
   :<json date edate: indicative time by which the mint undertakes to transfer the funds to the merchant, in case of successful payment.
   :<json int transaction_id: 64-bit transaction id for the transaction between merchant and customer
-  :<json base32 merchant_pub: the EdDSA public key of the merchant (used to identify the merchant for refund requests)
-  :<json date refund_deadline: date until which the merchant can issue a refund to the customer via the mint (can be zero if refunds are not allowed)
+  :<json base32 merchant_pub: the EdDSA public key of the merchant, so that the client can identify the merchant for refund requests.
+  :<json date refund_deadline: date until which the merchant can issue a refund to the customer via the mint, possibly zero if refunds are not allowed.
   :<json base32 coin_sig: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's private key.
 
   The deposit operation succeeds if the coin is valid for making a deposit and has enough residual value that has not already been deposited or melted.
@@ -321,8 +321,8 @@ Deposit operations are requested by a merchant during a transaction. For the dep
   :status 200: the operation succeeded, the mint confirms that no double-spending took place.
   :resheader Content-Type: application/json
   :>json string status: the string constant `DEPOSIT_OK`
-  :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_CONFIRM_DEPOSIT` using a current signing key of the mint affirming the successful deposit and that the mint will transfer the funds after the refund deadline (or as soon as possible if the refund deadline is zero).
-  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
+  :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_CONFIRM_DEPOSIT` using a current signing key of the mint affirming the successful deposit and that the mint will transfer the funds after the refund deadline, or as soon as possible if the refund deadline is zero.
+  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  It is given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
 
   **Failure response: Double spending**
 
@@ -364,14 +364,14 @@ Deposit operations are requested by a merchant during a transaction. For the dep
 Refreshing
 ------------------
 
-Refreshing creates `n` new coins from `m` old coins, where the sum of denominations of the new coins must be smaller than the sum of the old coins' denominations plus melting (refresh) and withdrawal fees charged by the mint.  The refreshing API can be used by wallets to melt partially spent coins, making transactions with the freshly minted coins unlinkabe to previous transactions (by anyone except the wallet itself).
+Refreshing creates `n` new coins from `m` old coins, where the sum of denominations of the new coins must be smaller than the sum of the old coins' denominations plus melting (refresh) and withdrawal fees charged by the mint.  The refreshing API can be used by wallets to melt partially spent coins, making transactions with the freshly minted coins unlinkabe to previous transactions by anyone except the wallet itself.
 
-However, the new coins are linkable from the private keys of all old coins using the /refresh/link request.  While /refresh/link must be implemented by the mint to achieve certain security properties (taxability), wallets do not really ever need that part of the API during normal operation.
+However, the new coins are linkable from the private keys of all old coins using the /refresh/link request.  While /refresh/link must be implemented by the mint to achieve taxability, wallets do not really ever need that part of the API during normal operation.
 
 .. _refresh:
 .. http:post:: /refresh/melt
 
-  "Melt" coins.  Invalidates the coins and prepares for minting of fresh coins.  Taler uses a global parameter `kappa` (currently always 3) for the cut-and-choose component of the protocol (this request is the commitment for the cut-and-choose).  Thus, various arguments are given `kappa`-times in this step.
+  "Melt" coins.  Invalidates the coins and prepares for minting of fresh coins.  Taler uses a global parameter `kappa` for the cut-and-choose component of the protocol, for which this request is the commitment.  Thus, various arguments are given `kappa`-times in this step.  At present `kappa` is always 3.
 
   The request body must contain a JSON object with the following fields:
 
@@ -380,7 +380,7 @@ However, the new coins are linkable from the private keys of all old coins using
   :<json array coin_evs: For each of the `n` new coins, `kappa` coin blanks (2D array)
   :<json array transfer_pubs: For each of the `m` old coins, `kappa` transfer public keys (2D-array of ephemeral ECDHE keys)
   :<json array secret_encs: For each of the `m` old coins, `kappa` link encryptions with an ECDHE-encrypted SHA-512 hash code.  The ECDHE encryption is done using the private key of the respective old coin and the corresponding transfer public key.  Note that the SHA-512 hash code must be the same across all coins, but different across all of the `kappa` dimensions.  Given the private key of a single old coin, it is thus possible to decrypt the respective `secret_encs` and obtain the SHA-512 hash that was used to symetrically encrypt the `link_encs` of all of the new coins.
-  :<json array link_encs: For each of the `n` new coins, `kappa` (symmetric) encryptions of the EdDSA/ECDHE-private key of the new coins and the corresponding blinding factor, encrypted using the corresponding SHA-512 hash that is encrypted in `secret_encs`.
+  :<json array link_encs: For each of the `n` new coins, `kappa` symmetricly encrypted tuples consisting of the EdDSA/ECDHE-private key of the new coin and the corresponding blinding factor, encrypted using the corresponding SHA-512 hash that is encrypted in `secret_encs`.
 
   For details about the HKDF used to derive the symmetric encryption keys from ECDHE and the symmetric encryption (AES+Twofish) used, please refer to the implementation in `libtalerutil`. The `melt_coins` field is a list of JSON objects with the following fields:
 
@@ -399,7 +399,7 @@ However, the new coins are linkable from the private keys of all old coins using
   :resheader Content-Type: application/json
   :<json int noreveal_index: Which of the `kappa` indices does the client not have to reveal.
   :<json base32 mint_sig: binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_MELT` whereby the mint affirms the successful melt and confirming the `noreveal_index`
-  :<json base32 mint_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys. (Given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.)
+  :<json base32 mint_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  Again given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
 
   **Error Response: Invalid signature**:
 
@@ -410,11 +410,11 @@ However, the new coins are linkable from the private keys of all old coins using
 
   **Error Response: Precondition failed**:
 
-  :status 403 Forbidden: The operation is not allowed as (at least) one of the coins has insufficient funds.
+  :status 403 Forbidden: The operation is not allowed as at least one of the coins has insufficient funds.
   :resheader Content-Type: application/json
   :>json string error: the value is "insufficient funds"
   :>json base32 coin_pub: public key of a melted coin that had insufficient funds
-  :>json amount original_value: original (total) value of the coin
+  :>json amount original_value: original total value of the coin
   :>json amount residual_value: remaining value of the coin
   :>json amount requested_value: amount of the coin's value that was to be melted
   :>json array history: the transaction list of the respective coin that failed to have sufficient funds left.  The format is the same as for insufficient fund reports during /deposit.  Note that only the transaction history for one bogus coin is given, even if multiple coins would have failed the check.
@@ -437,11 +437,11 @@ However, the new coins are linkable from the private keys of all old coins using
 
   :status 200 OK: The transfer private keys matched the commitment and the original request was well-formed.  The mint responds with a JSON of the following type:
   :resheader Content-Type: application/json
-  :>json array ev_sigs: List of the mint's blind (RSA) signatures on the new coins.  Each element in the array is another JSON object which contains the signature in the "ev_sig" field.
+  :>json array ev_sigs: List of the mint's blinded RSA signatures on the new coins.  Each element in the array is another JSON object which contains the signature in the "ev_sig" field.
 
   **Failure Response: Conflict**
 
-  :status 409 Conflict: There is a problem between the original commitment and the revealed private keys.  The returned information is proof of the missmatch (and thus rather verbose, as it includes most of the original /refresh/melt request), but of course expected to be primarily used for diagnostics.
+  :status 409 Conflict: There is a problem between the original commitment and the revealed private keys.  The returned information is proof of the missmatch, and therefore rather verbose, as it includes most of the original /refresh/melt request, but of course expected to be primarily used for diagnostics.
   :resheader Content-Type: application/json
   :>json string error: the value is "commitment violation"
   :>json int offset: offset of in the array of `kappa` commitments where the error was detected
@@ -454,7 +454,7 @@ However, the new coins are linkable from the private keys of all old coins using
 
   The linkage information from `link_infos` consists of:
 
-  :>jsonarr base32 transfer_pub: the transfer public key (ECDHE key)
+  :>jsonarr base32 transfer_pub: the transfer ECDHE public key
   :>jsonarr base32 shared_secret_enc: the encrypted shared secret
 
   The commit information from `commit_infos` consists of:
@@ -471,21 +471,21 @@ However, the new coins are linkable from the private keys of all old coins using
 
   **Success Response**
 
-  :status 200 OK: All commitments were revealed successfully.  The mint returns an array (which typically only has one element in it) where each element contains information about a melting session that the coin was used in.
+  :status 200 OK: All commitments were revealed successfully.  The mint returns an array, typically consisting of only one element, in which each each element contains information about a melting session that the coin was used in.
 
   :>jsonarr base32 transfer_pub: transfer public key corresponding to the `coin_pub`, used to (ECDHE) decrypt the `secret_enc` in combination with the private key of `coin_pub`.
   :>jsonarr base32 secret_enc: ECDHE-encrypted link secret that, once decrypted, can be used to decrypt/unblind the `new_coins`.
   :>jsonarr array new_coins: array with (encrypted/blinded) information for each of the coins minted in the refresh operation.
 
-  The `new_coins` array contains the following fields (for each element):
+  The `new_coins` array contains the following fields for each element:
 
   :>jsonarr base32 link_enc: Encrypted private key and blinding factor information of the fresh coin
-  :>jsonarr base32 denom_pub: Public key of the minted coin (still blind).
-  :>jsonarr base32 ev_sig: Mint's signature over the minted coin (still blind).
+  :>jsonarr base32 denom_pub: ECDHE public key of the minted coin.
+  :>jsonarr base32 ev_sig: Mint's blinded signature over the minted coin.
 
   **Error Response: Unknown key**:
 
-  :status 404 Not Found: The mint has no linkage data for the given public key, as the coin has not (yet) been involved in a refresh operation.
+  :status 404 Not Found: The mint has no linkage data for the given public key, as the coin has not yet been involved in a refresh operation.
   :resheader Content-Type: application/json
   :>json string error: "unknown entity referenced"
   :>json string parameter: will be "coin_pub"
