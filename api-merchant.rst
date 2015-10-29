@@ -131,10 +131,11 @@ successful response to the following two calls:
 
   :>json object amount: an :ref:`amount <Amount>` indicating the total price for the transaction. Note that, in the act of paying, the mint will subtract from this amount the deposit fees due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
   :>json object max_fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant for this transaction.
-  :>json int trans_id: a 53-bit number chosen by the merchant to uniquely identify the contract.
+  :>json int transaction_id: a 53-bit number chosen by the merchant to uniquely identify the contract.
   :>json array products: a collection of `product` objects (described below), for each different item purchased within this transaction.
   :>json `date` timestamp: this contract's generation time
   :>json `date` refund: the maximum time until which the merchant can refund the wallet in case of a problem, or some request
+  :>json `date` expiry: the maximum time until which the wallet can agree on this contract
   :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract; this information is typically added by the `backend`
   :>json object merchant: the set of values describing this `merchant`, defined below
   :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
@@ -397,10 +398,10 @@ cookies to identify the shopping session.
   merchants.
 
   :reqheader Content-Type: application/json
-  :<json base32 H_wire: the hashed `wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
+  :<json base32 H_wire: the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
   :<json base32 H_contract: the base32 encoding of the field `h_contract_details` of `contract`_. The wallet can choose whether to take this value from the gotten contract (field `h_contract`), or regenerating one starting from the values it gets within the contract
+  :<json int transaction_id: a 53-bit number corresponding to the contract being agreed on
   :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
-  :<json date expiry: time extent during which this contract can be accepted by the merchant
   :<json date refund_deadline: same value held in the contract's `refund` field
   :<json string mint: the chosen mint's base URL
   :<json array coins: the coins used to sign the contract
@@ -444,6 +445,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   * `merchant_pub`
   * `mints`
+  * `H_wire`
   
   The `backend` then completes this information based on its configuration.
 
