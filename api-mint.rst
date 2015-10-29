@@ -473,7 +473,7 @@ However, the new coins are linkable from the private keys of all old coins using
 
   :status 200 OK: All commitments were revealed successfully.  The mint returns an array, typically consisting of only one element, in which each each element contains information about a melting session that the coin was used in.
 
-  :>jsonarr base32 transfer_pub: transfer public key corresponding to the `coin_pub`, used to (ECDHE) decrypt the `secret_enc` in combination with the private key of `coin_pub`.
+  :>jsonarr base32 transfer_pub: transfer ECDHE public key corresponding to the `coin_pub`, used to decrypt the `secret_enc` in combination with the private key of `coin_pub`.
   :>jsonarr base32 secret_enc: ECDHE-encrypted link secret that, once decrypted, can be used to decrypt/unblind the `new_coins`.
   :>jsonarr array new_coins: array with (encrypted/blinded) information for each of the coins minted in the refresh operation.
 
@@ -545,7 +545,7 @@ Administrative API: Bank transactions
 
 .. http:POST:: /admin/add/incoming
 
-  Notify mint of an incoming transaction (filling a reserve)
+  Notify mint of an incoming transaction to fill a reserve.
 
   :>json base32 reserve_pub: Reserve public key
   :>json object amount: Amount transferred to the reserve
@@ -568,13 +568,13 @@ Administrative API: Bank transactions
 
   The mint responds with a JSON object containing the following fields:
 
-  :>json string error: the error message (`permission denied`)
+  :>json string error: the error message, such as `permission denied`
   :>json string hint: hint as to why permission was denied
 
 
 .. http:POST:: /admin/add/outgoing
 
-  Notify mint about the completion of an outgoing transaction (satisfying a /deposit request).  This will (in the future) allow merchants to obtain details about the /deposit requests they send to the mint.
+  Notify mint about the completion of an outgoing transaction satisfying a /deposit request.  In the future, this will allow merchants to obtain details about the /deposit requests they send to the mint.
 
   .. note::
 
@@ -583,7 +583,7 @@ Administrative API: Bank transactions
   :>json base32 coin_pub: Coin public key
   :>json object amount: Amount transferred to the merchant
   :>json string transaction: Transaction identifier in the wire details
-  :>json base32 wire: Wire transaction details (as originally specified by the merchant)
+  :>json base32 wire: Wire transaction details, as originally specified by the merchant
 
 
   **Success response**
@@ -747,7 +747,7 @@ In signed messages, time is represented using 64-bit big-endian values, denoting
 Cryptographic primitives
 ------------------------
 
-All elliptic curve operations are on Curve25519.  Public and private keys are thus 32 bytes, and signatures 64 bytes.  For hashing (including HKDFs), Taler uses 512-bit hash codes (64 bytes).
+All elliptic curve operations are on Curve25519.  Public and private keys are thus 32 bytes, and signatures 64 bytes.  For hashing, including HKDFs, Taler uses 512-bit hash codes (64 bytes).
 
 .. sourcecode:: c
 
@@ -839,7 +839,7 @@ All elliptic curve operations are on Curve25519.  Public and private keys are th
 Signatures
 ------------------------
 
-EdDSA signatures are always made over (the hash of) a block of the same generic format, the `struct SignedData` given below.  In our notation, the type of a field can depend on the value of another field. For the following message, the length of the `payload` array must match the value of the `size` field:
+EdDSA signatures are always made on the hash of a block of the same generic format, the `struct SignedData` given below.  In our notation, the type of a field can depend on the value of another field. For the following message, the length of the `payload` array must match the value of the `size` field:
 
 .. sourcecode:: c
 
@@ -851,7 +851,7 @@ EdDSA signatures are always made over (the hash of) a block of the same generic 
 
 The `purpose` field in `struct SignedData` is used to express the context in which the signature is made, ensuring that a signature cannot be lifted from one part of the protocol to another.  The various `purpose` constants are defined in `taler_signatures.h`.  The `size` field prevents padding attacks.
 
-In the subsequent messages, we use the following notation
+In the subsequent messages, we use the following notation for signed data described in `FIELDS` with the given purpose.  
 
 .. sourcecode:: c
 
@@ -859,7 +859,7 @@ In the subsequent messages, we use the following notation
     FIELDS
   } msg;
 
-for signed data (contained in `FIELDS`) with the given purpose.  The `size` field of the corresponding `struct SignedData` is determined by the size of `FIELDS`.
+The `size` field of the corresponding `struct SignedData` is determined by the size of `FIELDS`.
 
 .. sourcecode:: c
 
