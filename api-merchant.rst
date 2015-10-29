@@ -139,6 +139,7 @@ successful response to the following two calls:
   :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract; this information is typically added by the `backend`
   :>json object merchant: the set of values describing this `merchant`, defined below
   :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
+  :>json base32 H_contract: encoding of the `h_contract` field of contract :ref:`blob <contract-blob>`. Tough the wallet gets all required information to regenerate this hash code locally, the merchant sends it anyway to avoid subtle encoding errors, or to allow the wallet to double check its locally generated copy
   :>json array auditors: a JSON array of `auditor` objects. To finalize the payment, the wallet should agree on a mint audited by one of these auditos.
   :>json array mints: a JSON array of `mint` objects. The wallet is encouraged to agree on some of those mints, in case it can't agree on any auditor trusted by this merchant.
   :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
@@ -197,10 +198,10 @@ should be set to `TALER_SIGNATURE_MERCHANT_CONTRACT`.
 
 .. sourcecode:: c
 
-   struct Contract
+   struct MERCHANT_Contract
    {
      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-     struct GNUNET_HashCode h_contract_details;
+     struct GNUNET_HashCode h_contract;
    }
 
 ---------------
@@ -382,7 +383,7 @@ cookies to identify the shopping session.
   :resheader Content-Type: application/json
   :>json base32 contract: a :ref:`JSON contract <contract>` for this deal.
   :>json base32 sig: the signature of the binary described in :ref:`blob <contract-blob>`.
-  :>json base32 h_contract: the base32 encoding of the field `h_contract_details` of the contract's :ref:`blob <contract-blob>`
+  :>json base32 h_contract: the base32 encoding of the field `h_contract` of the contract's :ref:`blob <contract-blob>`
 
   **Failure Response**
 
@@ -399,7 +400,7 @@ cookies to identify the shopping session.
 
   :reqheader Content-Type: application/json
   :<json base32 H_wire: the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
-  :<json base32 H_contract: the base32 encoding of the field `h_contract_details` of `contract`_. The wallet can choose whether to take this value from the gotten contract (field `h_contract`), or regenerating one starting from the values it gets within the contract
+  :<json base32 H_contract: the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value from the gotten contract (field `h_contract`), or regenerating one starting from the values it gets within the contract
   :<json int transaction_id: a 53-bit number corresponding to the contract being agreed on
   :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
   :<json date refund_deadline: same value held in the contract's `refund` field
