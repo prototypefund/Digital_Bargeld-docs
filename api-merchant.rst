@@ -466,7 +466,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :reqheader Content-Type: application/json
 
-  The `frontend` passes the deposit permission received from the wallet, by optionally adding a field named `edate`, indicating a deadline by which he would expect to receive the bank transfer for this deal
+  The `frontend` passes the deposit permission received from the wallet, by adding the field `max_fee` (see `contract`) and optionally adding a field named `edate`, indicating a deadline by which he would expect to receive the bank transfer for this deal
 
   **Success Response: OK**
 
