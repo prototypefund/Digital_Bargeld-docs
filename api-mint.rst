@@ -332,7 +332,8 @@ Deposit operations are requested by a merchant during a transaction. For the dep
 
   :>jsonarr string type: either "deposit" or "melt"
   :>jsonarr object amount: the total amount_ of the coin's value absorbed by this transaction
-  :>jsonarr object signature: the signature_ (JSON object) of purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or `TALER_SIGNATURE_WALLET_COIN_MELT` with the details of the transaction that drained the coin's value
+  :>jsonarr string details: base32_ binary encoding of the transaction data as a `TALER_DepositRequestPS` or `TALER_RefreshMeltCoinAffirmationPS` struct described in :ref:`Signatures`.  Its `purpose` should match our `type`, `amount_with_fee`, should match our `amount`, and its `size` should be consistent.
+  :>jsonarr object signature: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or `TALER_SIGNATURE_WALLET_COIN_MELT` over the transaction's details.
 
   **Error Response: Invalid signature**:
 
