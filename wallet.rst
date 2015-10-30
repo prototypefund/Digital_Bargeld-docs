@@ -3,9 +3,9 @@ The Wallet Reference
 ====================
 
   .. note::
-     
+
      This documentation goes in parallel with the wallet's development, so is to be considered as `work in pregress`
-     until a first operative version of the wallet will be released. 
+     until a first operative version of the wallet will be released.
 
 
 This section explains how to set up a wallet. It is worth noting that there are two versions for
@@ -48,13 +48,13 @@ Web and installed by just visiting its URI.
 Emscripten
 ^^^^^^^^^^
 
-Since the wallet makes extensive use of cryptographic primitives and of come coins' manipulating primitives, it relies on two fundamental libraries:
+Since the wallet makes extensive use of cryptographic primitives and of coin manipulation primitives, it relies on two fundamental libraries:
 ``libgnunetutils_taler_wallet`` and ``libtalerutil_wallet``; being the former from the `gnunet <https://gnunet.org>`_ project, and the latter from `taler <https://taler.net>`_
 project itself. Moreover, since those libraries depend on `libgpg-error`, `libgcrypt` and `libunistring`, and the non markup part of the extension is JavaScript,
 a language-to-language compiler such as `Emscripten <http://emscripten.org>`_ has been used to port `C` sources to JavaScript.
 
   .. note::
-     
+
      To just compile the extension and install it into your browser, it suffices to follow the above steps and simply ignore
      this section. That is possible since `git master` ships a previously made JavaScript version of ``libgnunetutil_taler_wallet``,
      that the extension is properly linked against to. So this section is dedicated to those who want to reproduce the steps
@@ -126,8 +126,7 @@ whereas for `gnunet` and `taler`, do
      ./bootstrap.sh
 
 
-Finally, run the provided script (any final file will be placed under ``/tmp/emscripten``) that we
-just copied under any component's tree.
+Finally, run the respective `myconf-*.sh` scripts in the order of the components given above. All generated files will be placed under ``/tmp/emscripten``.
 
 At this point, you have the header files and the static library for each component compiled in the `LLVM` intermediate form. To see some final JavaScript, it is needed to compile a `C` program, though that is not the only way against the libraries we have just built.
 See the official `emscripten's documentation <http://kripken.github.io/emscripten-site/docs/compiling/Building-Projects.html#building-projects>`_ for more details.
