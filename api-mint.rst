@@ -32,14 +32,11 @@ This section describes how certain types of values are represented throughout th
 
   .. _Signature:
 
-  * **Signatures**: EdDSA signatures are be transmitted in two forms in the protocol.  As 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only), or as JSON objects with following fields:
+  * **Signatures**: The specific signature scheme in use, like RSA blind signatures or EdDSA, depends on the context.  RSA blind signatures are only used for coins and always simply base32_ encoded. 
 
-    * `purpose`: a unique number to state the context in which the signature is to be used in
-    * `size`: the number of bytes that were hashed using SHA-512 to create the signature; note that signatures are always done over a packed, binary representation of the data and not the JSON representations.
-    * `eddsa_sig`: 64-byte base32_ binary encoding of the R and S values
-    * `eddsa_val`: base32_ binary encoding of the full signed data, including again `purpose` and `size`.
-
-    RSA signatures are always simply base32_ encoded. The specific signature scheme in use like blind signatures or EdDSA depends on the context.
+EdDSA signatures are transmitted as 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only). 
+These signed objects always contain a purpose number unique to the context in which the signature is used, but frequently the actual binary-object must be reconstructed locally from information available only in context, such as recent messages or account detals.
+These objects are described in detail in :ref:`Signatures`.
 
   .. _Amount:
 
@@ -47,7 +44,7 @@ This section describes how certain types of values are represented throughout th
 
     * `currency`: name of the currency using either a three-character ISO 4217 currency code, or a regional currency identifier starting with a "*" followed by at most 10 characters.  ISO 4217 exponents in the name are not supported, although the "fraction" is corresponds to an ISO 4217 exponent of 6.
     * `value`: unsigned 32 bit value in the currency, note that "1" here would correspond to 1 EUR or 1 USD, depending on `currency`, not 1 cent.
-    * `fraction`: unsigned 32 bit fractional value to be added to `value` representing an additional currency fraction, in units of one millionth (10 :superscript: -6) of the base currency value.  For example, a fraction of 500,000 would correspond to 50 cents.
+    * `fraction`: unsigned 32 bit fractional value to be added to `value` representing an additional currency fraction, in units of one millionth (10\ :superscript:`-6`) of the base currency value.  For example, a fraction of 500,000 would correspond to 50 cents.
 
 
 ++++++++++++++
