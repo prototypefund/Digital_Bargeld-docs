@@ -19,7 +19,8 @@ Taler also assumes that the wallet and the merchant can agree on the
 current time; similar to what is required to connect to Tor or
 validate TLS certificates.  The wallet may rely on the timestamp
 provided in the HTTP "Date:" header for this purpose, but the customer
-is expected to check that the time is approximately correct.
+is expected to check that the time of his machine is approximately
+correct.
 
 
 -----------------------
@@ -29,7 +30,7 @@ Architecture's Overview
 In our settlement, the "merchant" is divided in two independent
 compontents, the `frontend` and the `backend`.
 
-The `frontend` is the existing shopping portal of the merchant.  
+The `frontend` is the existing shopping portal of the merchant.
 The architecture tries to minimize the amount of modifications necessary
 to the `frontend` as well as the trust that needs to be placed into the
 `frontend` logic.  Taler requires the frontend to facilitate two
@@ -45,7 +46,7 @@ and a Taler mint.
 Wallet-Frontend communication
 +++++++++++++++++++++++++++++
 
-Taler's virtual wallet is designed to notify the user when a certain webpage
+Taler's wallet is designed to notify the user when a certain webpage
 is offering Taler as a payment option. It does so by simply changing the color of
 the wallet's button in the user's browser. In the other direction, the website
 may want to make the Taler payment option visible `only if` the user has the Taler
@@ -255,7 +256,7 @@ visiting a checkout page, the page should listen for the
 event to hide the Taler payment option.
 
 Secondly, when the Taler extension is active and the user closes (or navigates
-away from) the checkout page, the page should listen to a 
+away from) the checkout page, the page should listen to a
 
   .. js:data:: taler-navigating-away
 
@@ -448,7 +449,7 @@ The following API are made available by the merchant's `backend` to the merchant
   * `merchant_pub`
   * `mints`
   * `H_wire`
-  
+
   The `backend` then completes this information based on its configuration.
 
   **Success Response**

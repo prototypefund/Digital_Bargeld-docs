@@ -224,7 +224,7 @@ When transfering money to the mint such as via SEPA transfers, the mint creates 
   :query reserve_pub: EdDSA reserve public key identifying the reserve.
 
   .. note::
-    The client currently does not have to demonstrate knowledge of the private key of the reserve to make this request, which makes the reserve's public key privliged information known only to the client, their bank, and the mint.  In future, we might wish to revisit this decision to improve security, such as by having the client EdDSA-sign an ECDHE key to be used to derive a symmetric key to encrypt the response.  This would be useful if for example HTTPS were not used for communication with the mint.  
+    The client currently does not have to demonstrate knowledge of the private key of the reserve to make this request, which makes the reserve's public key privliged information known only to the client, their bank, and the mint.  In future, we might wish to revisit this decision to improve security, such as by having the client EdDSA-sign an ECDHE key to be used to derive a symmetric key to encrypt the response.  This would be useful if for example HTTPS were not used for communication with the mint.
 
   **Success Response: OK**
 
@@ -371,7 +371,7 @@ However, the new coins are linkable from the private keys of all old coins using
 .. _refresh:
 .. http:post:: /refresh/melt
 
-  "Melt" coins.  Invalidates the coins and prepares for minting of fresh coins.  Taler uses a global parameter `kappa` for the cut-and-choose component of the protocol, for which this request is the commitment.  Thus, various arguments are given `kappa`-times in this step.  At present `kappa` is always 3.
+  "Melts" coins.  Invalidates the coins and prepares for minting of fresh coins.  Taler uses a global parameter `kappa` for the cut-and-choose component of the protocol, for which this request is the commitment.  Thus, various arguments are given `kappa`-times in this step.  At present `kappa` is always 3.
 
   The request body must contain a JSON object with the following fields:
 
@@ -480,7 +480,7 @@ However, the new coins are linkable from the private keys of all old coins using
   The `new_coins` array contains the following fields for each element:
 
   :>jsonarr base32 link_enc: Encrypted private key and blinding factor information of the fresh coin
-  :>jsonarr base32 denom_pub: ECDHE public key of the minted coin.
+  :>jsonarr base32 denom_pub: RSA public key of the minted coin.
   :>jsonarr base32 ev_sig: Mint's blinded signature over the minted coin.
 
   **Error Response: Unknown key**:
@@ -564,7 +564,7 @@ Administrative API: Bank transactions
 
   **Failure response**
 
-  :status 403: the client is not permitted to add incoming transactions
+  :status 403: the client is not permitted to add incoming transactions. The request may be disallowed by the configuration in general or restricted to certain IP addresses (i.e. loopback-only).
 
   The mint responds with a JSON object containing the following fields:
 
@@ -851,7 +851,7 @@ EdDSA signatures are always made on the hash of a block of the same generic form
 
 The `purpose` field in `struct SignedData` is used to express the context in which the signature is made, ensuring that a signature cannot be lifted from one part of the protocol to another.  The various `purpose` constants are defined in `taler_signatures.h`.  The `size` field prevents padding attacks.
 
-In the subsequent messages, we use the following notation for signed data described in `FIELDS` with the given purpose.  
+In the subsequent messages, we use the following notation for signed data described in `FIELDS` with the given purpose.
 
 .. sourcecode:: c
 
