@@ -839,6 +839,8 @@ All elliptic curve operations are on Curve25519.  Public and private keys are th
 Signatures
 ------------------------
 
+Please note that any RSA signature is processed by a function called `GNUNET_CRYPTO_rsa_signature_encode (..)` **before** being sent over the network, so the receiving party must run `GNUNET_CRYPTO_rsa_signature_decode (..)` before verifying it. See their implementation in `src/util/crypto_rsa.c`, in GNUNET's code base. Finally, they are defined in `gnunet/gnunet_crypto_lib.h`.
+
 EdDSA signatures are always made on the hash of a block of the same generic format, the `struct SignedData` given below.  In our notation, the type of a field can depend on the value of another field. For the following message, the length of the `payload` array must match the value of the `size` field:
 
 .. sourcecode:: c
