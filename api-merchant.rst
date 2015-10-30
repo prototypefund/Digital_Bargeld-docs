@@ -53,8 +53,13 @@ may want to make the Taler payment option visible `only if` the user has the Tal
 wallet active in his browser. So the notification is mutual:
 
 * the website notifies the wallet (`s -> w`), so it can change its color
-* the wallet notifies the website (`w -> s`), so it can show Taler as a
-  suitable payment option
+* the wallet notifies the website (`w -> s`) by modifing the page's DOM, so
+  it can show Taler as a suitable payment option
+
+We acknowledge that notifying the website leaks the fact that Taler is installed,
+which could help track or deanonymize users.  We believe the usability gained by
+leaking this one bit represents an acceptable trade off.  It would rapidly become
+problematic though if several payment options take this approach. 
 
 Furthermore, there are two scenarios according to which the mutual signaling would
 succeed.  For a page where the merchant wants to show a Taler-style payment
@@ -62,9 +67,8 @@ option and, accordingly, the wallet is supposed to change its color, there are
 two scenarios we need to handle:
 
 * the customer has the wallet extension active at the moment of visiting the page, or
-* the customer activates the wallet extension
-  (regardless of whether he installs it or simply enables it)
-  `after` downloading the page.
+* the customer activates the wallet extension `after` downloading the page,
+  regardless of whether he installs it or simply enables it.
 
 In the first case, the messaging sequence is `s -> w` and `w -> s`. In the
 second case, the first attempt (`s -> w`) will get no reply; however, as soon as the
