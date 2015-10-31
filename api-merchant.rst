@@ -481,4 +481,5 @@ The following API are made available by the merchant's `backend` to the merchant
 
   **Failure Responses:**
 
-  The `backend` will return error codes received from the mint verbatim (see `/deposit` documentation for the mint API for possible errors).  If the wallet made a mistake (for example, by double-spending), the `frontend` should pass the reply verbatim to the browser/wallet. (This is pretty much always the case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.)
+  The `backend` will return error codes received from the mint verbatim (see `/deposit` documentation for the mint API for possible errors).  If the wallet made a mistake, like by double-spending for example, the `frontend` should pass the reply verbatim to the browser/wallet. This should be the expected case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.
+
