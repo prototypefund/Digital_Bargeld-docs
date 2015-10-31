@@ -99,11 +99,11 @@ using coins in the form of a `deposit permission`.  This signature
 using the coins signifies both agreement of the customer and
 represents payment at the same time.  The `frontend` passes the
 `deposit permission` to the `backend` which immediately verifies it
-with the mint and signals the `frontend` the success (or failure) of
+with the mint and signals the `frontend` the success or failure of
 the payment process.  If the payment is successful, the `frontend` is
 responsible for generating the fullfillment page.
 
-The contract format is specified in section `contract`_.
+The contract format is specified in the `contract`_ section.
 
 
 +++++++++
@@ -229,15 +229,15 @@ The HTML page implements all interactions using JavaScript signals
 dispatched on the HTML element `body`.
 
 When the merchant wants to notify the availability of a Taler-style payment
-option (for example on a "checkout" page), it sends the following event:
+option, such as on a "checkout" page, it sends the following event:
 
   .. js:data:: taler-checkout-probe
 
 This event must be sent from a callback for the `onload` event of the
 `body` element, otherwise the extension would have not time to
 register a listener for this event.  It also needs to be sent when
-the Taler extension is dynamically loaded (if the user activates
-the extension while he is on the checkout page).  This is done by
+the Taler extension is dynamically loaded, like when the user activates
+the extension while he is on the checkout page.  This is done by
 listening for the
 
   .. js:data:: taler-load
@@ -259,8 +259,8 @@ visiting a checkout page, the page should listen for the
 
 event to hide the Taler payment option.
 
-Secondly, when the Taler extension is active and the user closes (or navigates
-away from) the checkout page, the page should listen to a
+Secondly, when the Taler extension is active and the user closes or navigates
+away from the checkout page, the page should listen to a
 
   .. js:data:: taler-navigating-away
 
@@ -406,7 +406,7 @@ cookies to identify the shopping session.
 
   :reqheader Content-Type: application/json
   :<json base32 H_wire: the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
-  :<json base32 H_contract: the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value from the gotten contract (field `h_contract`), or regenerating one starting from the values it gets within the contract
+  :<json base32 H_contract: the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value obtained from the field `h_contract`, or regenerating one starting from the values it gets within the contract
   :<json int transaction_id: a 53-bit number corresponding to the contract being agreed on
   :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
   :<json date refund_deadline: same value held in the contract's `refund` field
