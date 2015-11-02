@@ -473,7 +473,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :reqheader Content-Type: application/json
 
-  The `frontend` passes the deposit permission received from the wallet, by adding the field `max_fee` (see `contract`) and optionally adding a field named `edate`, indicating a deadline by which he would expect to receive the bank transfer for this deal
+  The `frontend` passes the deposit permission received from the wallet, by adding the field `max_fee` (see :ref:`contract`) and optionally adding a field named `edate`, indicating a deadline by which he would expect to receive the bank transfer for this deal
 
   **Success Response: OK**
 
@@ -481,5 +481,5 @@ The following API are made available by the merchant's `backend` to the merchant
 
   **Failure Responses:**
 
-  The `backend` will return error codes received from the mint verbatim (see `/deposit` documentation for the mint API for possible errors).  If the wallet made a mistake, like by double-spending for example, the `frontend` should pass the reply verbatim to the browser/wallet. This should be the expected case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.
+  The `backend` will return verbatim the error codes received from the mint's :ref:`deposit` API.  If the wallet made a mistake, like by double-spending for example, the `frontend` should pass the reply verbatim to the browser/wallet. This should be the expected case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.
 
