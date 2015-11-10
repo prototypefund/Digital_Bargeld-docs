@@ -236,7 +236,7 @@ When transfering money to the mint such as via SEPA transfers, the mint creates 
   :>jsonarr object amount: the amount_ that was withdrawn or deposited
   :>jsonarr object wire: a JSON object with the wiring details needed by the banking system in use, present in case the `type` was "DEPOSIT"
   :>jsonarr string details: base32_ binary encoding of the transaction data as a `TALER_WithdrawRequestPS` struct described in :ref:`Signatures`, only present if the `type` was "WITHDRAW".  Its `purpose` should match our `type`, `amount_with_fee`, should match our `amount`, and its `size` should be consistent.
-  :>jsonarr object signature: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or `TALER_SIGNATURE_WALLET_COIN_MELT` over the transaction's details, again only present if the `type` was "WITHDRAW".
+  :>jsonarr object signature: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` over the transaction's details, again only present if the `type` was "WITHDRAW".
 
 
 
