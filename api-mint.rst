@@ -238,8 +238,6 @@ When transfering money to the mint such as via SEPA transfers, the mint creates 
   :>jsonarr string details: base32_ binary encoding of the transaction data as a `TALER_WithdrawRequestPS` struct described in :ref:`Signatures`, only present if the `type` was "WITHDRAW".  Its `purpose` should match our `type`, `amount_with_fee`, should match our `amount`, and its `size` should be consistent.
   :>jsonarr object signature: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` over the transaction's details, again only present if the `type` was "WITHDRAW".
 
-
-
   **Error Response: Unknown reserve**
 
   :status 404 Not Found: The withdrawal key does not belong to a reserve known to the mint.
