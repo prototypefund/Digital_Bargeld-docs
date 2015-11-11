@@ -570,7 +570,7 @@ typically also view the balance.)
   :<json base32 coin_pub: coin's public key, both ECDHE and EdDSA.
   :<json int transaction_id: 64-bit transaction id for the transaction between merchant and customer
   :<json base32 merchant_pub: the EdDSA public key of the merchant, so that the client can identify the merchant for refund requests.
-  :<json base32 merchant_sig: the EdDSA signature of the merchant, affirming that it is really the merchant who requires obtaining the wire transfer identifier.
+  :<json base32 merchant_sig: the EdDSA signature of the merchant made with purpose `TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID` , affirming that it is really the merchant who requires obtaining the wire transfer identifier.
 
   **Success Response: OK**
 
@@ -1072,5 +1072,16 @@ The `size` field of the corresponding `struct SignedData` is determined by the s
   struct TALER_MintWireSupportMethodsPS {
     signed (purpose = TALER_SIGNATURE_MINT_WIRE_TYPES) {
       struct GNUNET_HashCode h_wire_types;
+    }
+  };
+
+
+  struct TALER_DepositTrackPS {
+    signed (purpose = TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID) {
+      struct GNUNET_HashCode h_contract;
+      struct GNUNET_HashCode h_wire;
+      uint64_t transaction_id;
+      struct TALER_MerchantPublicKeyP merchant;
+      struct TALER_CoinSpendPublicKeyP coin_pub;
     }
   };
