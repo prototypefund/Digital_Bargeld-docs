@@ -1075,7 +1075,6 @@ The `size` field of the corresponding `struct SignedData` is determined by the s
     }
   };
 
-
   struct TALER_DepositTrackPS {
     signed (purpose = TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID) {
       struct GNUNET_HashCode h_contract;
