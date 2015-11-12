@@ -252,24 +252,12 @@ for example by updating the DOM to enable the respective button.
 The following events are needed when one of the two parties leaves the
 scenario.
 
-First, if the Taler extension is unloaded while the user is
+If the Taler extension is unloaded while the user is
 visiting a checkout page, the page should listen for the
 
   .. js:data:: taler-unload
 
 event to hide the Taler payment option.
-
-Secondly, when the Taler extension is active and the user closes or navigates
-away from the checkout page, the page should listen to a
-
-  .. js:data:: taler-navigating-away
-
-event, and reply with a
-
-  .. js:data:: taler-checkout-away
-
-event, in order to notify the extension that the user is leaving a checkout
-page, so that the extension can change its color back to its default.
 
 The following source code highlights the key steps for adding
 the Taler signaling to a checkout page:

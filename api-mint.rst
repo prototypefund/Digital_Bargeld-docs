@@ -718,7 +718,6 @@ Administrative API: Bank transactions
   :>json string error: the error message (`permission denied`)
   :>json string hint: hint as to why permission was denied
 
-
 ------------
 The Test API
 ------------

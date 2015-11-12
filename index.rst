@@ -31,6 +31,7 @@ Protocol Specification:
 
   api-mint
   api-merchant
+  banks
 
 Implementation:
 
