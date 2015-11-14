@@ -58,10 +58,12 @@ event, in order to hide the previously enabled button.
 How to trigger the wallet
 -------------------------
 
-This interaction will make the wallet generate a new reserve public key as
-well as paste this information inside the SEPA form. Lastly, it allows the
-wallet to fetch the desired amount to be transferred to the mint from the
-SEPA form. Typically, it is initiated by the user pushing a button.
+This interaction will make the wallet generate a new reserve public key,
+as well as allowing the user to choose his wanted mint. Finally, the wallet
+will directly paste this information inside the SEPA form and submit it.
+Lastly, it allows the wallet to fetch the desired amount to be transferred
+to the mint from the SEPA form. Typically, this trigger is initiated by the
+user pushing a button while he is on the page which hosts the SEPA Web form.
 
 The wallet listens to a 
 
@@ -70,21 +72,25 @@ The wallet listens to a
 event, through which it expects to receive the following object:
 
 .. sourcecode:: javascript
-  {input_amount: input-amount-id,
-   input_pub: input-pub-id}
 
-`input-amount-id` is the `id` attribute of the HTML `input` element which
+  {form_id: sepa-form-id,
+   input_amount: input-amount-id,
+   input_pub: input-pub-id,
+   mint_rcv: receiving-money-mint}
+
+`input_amount` is the `id` attribute of the HTML `input` element which
 hosts the amount to wire to the desired mint. Please note that the wallet will
 only accept amounts of the form `n[.x[y]] CUR`, where `CUR` is the ISO code
 of the specified currency. So it may be necessary for the bank's webmaster to
-preprocess this data to give it to the wallet in the right format. The wallet
-will fetch this element through the following event, triggere by the `onsubmit`
-attribute:
+preprocess this data to give it to the wallet in the right format.
 
-  .. js:data:: reserve-submitted
-
-`input-pub-id` must be the `id` of the `input` element which represents this
-SEPA transfer's "subject".
+`input_pub` must be the `id` attribute of the `input` element within the form
+which represents this SEPA transfer's "subject".
+`form_id` must be the `id` attribute of the SEPA `form` element (needed by the wallet to
+call `submit()` on it).
+Finally, `mint_rcv` is the `id` attribute of the `input` element within the form
+from which the server side handler of the SEPA form will fetch the mint base URL to issue
+`/admin/add/incoming` on.
 
 The following source code highlights the key steps for adding the Taler button
 to trigger the wallet on a SEPA form page:
@@ -127,21 +133,3 @@ to trigger the wallet on a SEPA form page:
       };">
      ...
    </body>
-
-Finally, the following snippet shows how to trigger the wallet to make it
-fetch the amount from the DOM
-
-.. sourcecode:: html
-
-  <form .. action=/bank_sepa.php .. onsubmit="signal_reserve()">
-  ..
-  </form>
-
-  <script type="text/javascript">
-  ..
-  function signal_reserve(){
-    var reserve_submitted = new Event("reserve-submitted");
-    document.body.dispatchEvent(reserve_submitted);
-  }
-
-  </script>
