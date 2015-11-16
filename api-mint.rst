@@ -651,6 +651,7 @@ interception.
   :>json object sign_info: Public part of the signing key
   :>json base32 sign_priv: Private EdDSA key
 
+.. _add-incoming:
 
 -------------------------------------
 Administrative API: Bank transactions

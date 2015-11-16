@@ -8,10 +8,6 @@ with the Taler wallet. This interaction is supposed to occur when
 the user is sending a SEPA transfer to some mint (i.e. he is creating
 a new reserve).
 
-   .. note::
-     For its being in early stage of development, the following protocol is
-     implemented inside the mint code, through a ad-hoc website.
-
 Through this interaction, the wallet can generate a new reserve's public
 key and insert it into the 'subject' field of the transfer without manual
 copy&paste. Secondly, the wallet is then able to fetch the amount to be
@@ -89,8 +85,8 @@ which represents this SEPA transfer's "subject".
 `form_id` must be the `id` attribute of the SEPA `form` element (needed by the wallet to
 call `submit()` on it).
 Finally, `mint_rcv` is the `id` attribute of the `input` element within the form
-from which the server side handler of the SEPA form will fetch the mint base URL to issue
-`/admin/add/incoming` on.
+from which the server side handler of this form will fetch the mint base URL to issue
+`/admin/add/incoming` on; see :ref:`add-incoming`.
 
 The following source code highlights the key steps for adding the Taler button
 to trigger the wallet on a SEPA form page:
