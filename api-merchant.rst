@@ -413,10 +413,7 @@ cookies to identify the shopping session.
 
   **Success Response:**
 
-  :status 200 OK: the payment has been received.
-  :resheader Content-Type: text/html
-
-  In this case the merchant sends back a `fullfillment` page in HTML, which the wallet will make the new `body` of the merchant's current page. It is just a confirmation of the positive transaction's conclusion.
+  :status 301 Redirection: the merchant should redirect the client to his fullfillment page, where the good outcome of the purchase must be shown to the user.
 
   **Failure Responses:**
 
