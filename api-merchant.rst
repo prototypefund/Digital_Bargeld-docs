@@ -59,7 +59,7 @@ wallet active in his browser. So the notification is mutual:
 We acknowledge that notifying the website leaks the fact that Taler is installed,
 which could help track or deanonymize users.  We believe the usability gained by
 leaking this one bit represents an acceptable trade off.  It would rapidly become
-problematic though if several payment options take this approach. 
+problematic though if several payment options take this approach.
 
 Furthermore, there are two scenarios according to which the mutual signaling would
 succeed.  For a page where the merchant wants to show a Taler-style payment
@@ -145,7 +145,7 @@ successful response to the following two calls:
   :>json object merchant: the set of values describing this `merchant`, defined below
   :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
   :>json base32 H_contract: encoding of the `h_contract` field of contract :ref:`blob <contract-blob>`. Tough the wallet gets all required information to regenerate this hash code locally, the merchant sends it anyway to avoid subtle encoding errors, or to allow the wallet to double check its locally generated copy
-  :>json array auditors: a JSON array of `auditor` objects.  Any mints audited by these auditors are accepted by the merchant.  
+  :>json array auditors: a JSON array of `auditor` objects.  Any mints audited by these auditors are accepted by the merchant.
   :>json string pay_url: the URL where the merchant will receive the deposit permission (i.e. the payment)
   :>json array mints: a JSON array of `mint` objects that the merchant accepts even if it does not accept any auditors that audit them.
   :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
@@ -470,7 +470,11 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 200 OK: The mint accepted all of the coins. The `frontend` should now fullfill the contract.  This response has no meaningful body, the frontend needs to generate the fullfillment page.
 
-  **Failure Responses:**
+  **Failure Responses: Bad mint**
+
+  :status 400 Precondition failed: The given mint is not acceptable for this merchant, as it is not in the list of accepted mints and not audited by an approved auditor.
+
+
+  **Failure Responses: Mint trouble**
 
   The `backend` will return verbatim the error codes received from the mint's :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by double-spending for example, the `frontend` should pass the reply verbatim to the browser/wallet. This should be the expected case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.
-
