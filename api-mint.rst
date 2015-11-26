@@ -32,9 +32,9 @@ This section describes how certain types of values are represented throughout th
 
   .. _Signature:
 
-  * **Signatures**: The specific signature scheme in use, like RSA blind signatures or EdDSA, depends on the context.  RSA blind signatures are only used for coins and always simply base32_ encoded. 
+  * **Signatures**: The specific signature scheme in use, like RSA blind signatures or EdDSA, depends on the context.  RSA blind signatures are only used for coins and always simply base32_ encoded.
 
-EdDSA signatures are transmitted as 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only). 
+EdDSA signatures are transmitted as 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only).
 These signed objects always contain a purpose number unique to the context in which the signature is used, but frequently the actual binary-object must be reconstructed locally from information available only in context, such as recent messages or account detals.
 These objects are described in detail in :ref:`Signatures`.
 
@@ -235,7 +235,8 @@ When transfering money to the mint such as via SEPA transfers, the mint creates 
   :>jsonarr string type: either the string "WITHDRAW" or the string "DEPOSIT"
   :>jsonarr object amount: the amount_ that was withdrawn or deposited
   :>jsonarr object wire: a JSON object with the wiring details needed by the banking system in use, present in case the `type` was "DEPOSIT"
-  :>jsonarr object signature: signature_ (full object with all details) made with purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` made with the reserve's public key over the original "WITHDRAW" request, present if the `type` was "WITHDRAW"
+  :>jsonarr string details: base32_ binary encoding of the transaction data as a `TALER_WithdrawRequestPS` struct described in :ref:`Signatures`, only present if the `type` was "WITHDRAW".  Its `purpose` should match our `type`, `amount_with_fee`, should match our `amount`, and its `size` should be consistent.
+  :>jsonarr object signature: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` over the transaction's details, again only present if the `type` was "WITHDRAW".
 
   **Error Response: Unknown reserve**
 
@@ -332,7 +333,8 @@ Deposit operations are requested by a merchant during a transaction. For the dep
 
   :>jsonarr string type: either "deposit" or "melt"
   :>jsonarr object amount: the total amount_ of the coin's value absorbed by this transaction
-  :>jsonarr object signature: the signature_ (JSON object) of purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or `TALER_SIGNATURE_WALLET_COIN_MELT` with the details of the transaction that drained the coin's value
+  :>jsonarr string details: base32_ binary encoding of the transaction data as a `TALER_DepositRequestPS` or `TALER_RefreshMeltCoinAffirmationPS` struct described in :ref:`Signatures`.  Its `purpose` should match our `type`, `amount_with_fee`, should match our `amount`, and its `size` should be consistent.
+  :>jsonarr object signature: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or `TALER_SIGNATURE_WALLET_COIN_MELT` over the transaction's details.
 
   **Error Response: Invalid signature**:
 
@@ -394,9 +396,9 @@ However, the new coins are linkable from the private keys of all old coins using
 
   :status 200 OK: The request was succesful. The response body contains a JSON object with the following fields:
   :resheader Content-Type: application/json
-  :<json int noreveal_index: Which of the `kappa` indices does the client not have to reveal.
-  :<json base32 mint_sig: binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_MELT` whereby the mint affirms the successful melt and confirming the `noreveal_index`
-  :<json base32 mint_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  Again given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
+  :>json int noreveal_index: Which of the `kappa` indices does the client not have to reveal.
+  :>json base32 mint_sig: binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_MELT` whereby the mint affirms the successful melt and confirming the `noreveal_index`
+  :>json base32 mint_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  Again given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
 
   **Error Response: Invalid signature**:
 
@@ -488,9 +490,123 @@ However, the new coins are linkable from the private keys of all old coins using
   :>json string parameter: will be "coin_pub"
 
 
---------------------
+
+-----------------------
+Tracking wire transfers
+-----------------------
+
+This API is used by merchants that need to find out which wire
+transfers (from the mint to the merchant) correspond to which deposit
+operations.  Typically, a merchant will receive a wire transfer with a
+**wire transfer identifier** and want to know the set of deposit
+operations that correspond to this wire transfer.  This is the
+preferred query that merchants should make for each wire transfer they
+receive.  If a merchant needs to investigate a specific deposit
+operation (i.e. because it seems that it was not paid), then the
+merchant can also request the wire transfer identifier for a deposit
+operation.
+
+Sufficient information is returned to verify that the coin signatures
+are correct. This also allows governments to use this API when doing
+a tax audit on merchants.
+
+Naturally, the returned information may be sensitive for the merchant.
+We do not require the merchant to sign the request, as the same requests
+may also be performed by the government auditing a merchant.
+However, wire transfer identifiers should have sufficient entropy to
+ensure that obtaining a successful reply by brute-force is not practical.
+Nevertheless, the merchant should protect the wire transfer identifiers
+from his bank statements against unauthorized access, least his income
+situation is revealed to an adversary. (This is not a major issue, as
+an adversary that has access to the line-items of bank statements can
+typically also view the balance.)
+
+  .. note::
+
+     Wire transfer tracking is currently not implemented (#3888).
+
+
+.. http:get:: /wire/deposits
+
+  Provides deposits associated with a given wire transfer.
+  :query wtid: wire transfer identifier identifying the wire transfer (a base32-encoded value)
+
+  **Success Response: OK**
+
+  :status 200 OK: The wire transfer is known to the mint, details about it follow in the body.
+  :resheader Content-Type: application/json
+  :>json object total: Total amount_ transferred.
+  :>json base32 H_wire: hash of the wire details (identical for all deposits)
+  :>json base32 merchant_pub: public key of the merchant (identical for all deposits)
+  :>json object deposits: JSON array with **deposit details**.
+
+  Objects in the deposit array have the following format:
+
+  :>jsonarr object f: the amount_ of the original deposit amount
+  :>jsonarr object deposit_fee: applicable fees for the deposit
+  :>json base32 H_contract: SHA-512 hash of the contact of the merchant with the customer.  Further details are never disclosed to the mint.
+  :>json base32 coin_pub: coin's public key, both ECDHE and EdDSA.
+  :>json date timestamp: timestamp when the contract was finalized, must match approximately the current time of the mint
+  :>json int transaction_id: 64-bit transaction id for the transaction between merchant and customer
+  :>json date refund_deadline: date until which the merchant can issue a refund to the customer via the mint, possibly zero if refunds are not allowed.
+  :>json base32 coin_sig: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's private key.
+
+
+  **Error Response: Unknown wire transfer identifier**
+
+  :status 404 Not Found: The wire transfer identifier is unknown to the mint.
+  :resheader Content-Type: application/json
+  :>json string error: the value is always "Wire transfer identifier not found"
+  :>json string parameter: the value is always "wtid"
+
+
+.. http:get:: /deposit/wtid
+
+  Provide the wire transfer identifier associated with an (existing) deposit operation.
+
+  :reqheader Content-Type: application/json
+  :<json base32 H_wire: SHA-512 hash of the merchant's payment details.
+  :<json base32 H_contract: SHA-512 hash of the contact of the merchant with the customer.
+  :<json base32 coin_pub: coin's public key, both ECDHE and EdDSA.
+  :<json int transaction_id: 64-bit transaction id for the transaction between merchant and customer
+  :<json base32 merchant_pub: the EdDSA public key of the merchant, so that the client can identify the merchant for refund requests.
+  :<json base32 merchant_sig: the EdDSA signature of the merchant made with purpose `TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID` , affirming that it is really the merchant who requires obtaining the wire transfer identifier.
+
+  **Success Response: OK**
+
+  :status 200 OK: The deposit has been executed by the mint and we have a wire transfer identifier.
+  :resheader Content-Type: application/json
+  :>json base32 wtid: wire transfer identifier of the deposit.
+  :>json date execution_time: when was the wire transfer given to the bank.
+  :>json base32 mint_sig: binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_WIRE` whereby the mint affirms the successful wire transfer.
+  :>json base32 mint_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  Again given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
+
+  **Error Response: Wire transfer not yet executed**
+
+  :status 202 Accepted: The deposit request has been accepted for processing, but was not yet executed.  Hence the mint does not yet have a wire transfer identifier.  The merchant should come back later and ask again.
+  :resheader Content-Type: application/json
+  :>json date execution_time: time by which the mint currently thinks the deposit will be executed.
+
+  **Error Response: Invalid signature**:
+
+  :status 401 Unauthorized: The signature is invalid.
+  :resheader Content-Type: application/json
+  :>json string error: the value is "invalid signature"
+  :>json string paramter: the value is "merchant_sig"
+
+  **Error Response: Unknown wire transfer identifier**
+
+  :status 404 Not Found: The deposit operation is unknown to the mint
+  :resheader Content-Type: application/json
+  :>json string error: the value is always "Deposit unknown"
+
+
+
+
+
+-------
 Refunds
---------------------
+-------
 
   .. note::
 
@@ -535,6 +651,7 @@ interception.
   :>json object sign_info: Public part of the signing key
   :>json base32 sign_priv: Private EdDSA key
 
+.. _add-incoming:
 
 -------------------------------------
 Administrative API: Bank transactions
@@ -601,7 +718,6 @@ Administrative API: Bank transactions
 
   :>json string error: the error message (`permission denied`)
   :>json string hint: hint as to why permission was denied
-
 
 ------------
 The Test API
@@ -956,5 +1072,15 @@ The `size` field of the corresponding `struct SignedData` is determined by the s
   struct TALER_MintWireSupportMethodsPS {
     signed (purpose = TALER_SIGNATURE_MINT_WIRE_TYPES) {
       struct GNUNET_HashCode h_wire_types;
+    }
+  };
+
+  struct TALER_DepositTrackPS {
+    signed (purpose = TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID) {
+      struct GNUNET_HashCode h_contract;
+      struct GNUNET_HashCode h_wire;
+      uint64_t transaction_id;
+      struct TALER_MerchantPublicKeyP merchant;
+      struct TALER_CoinSpendPublicKeyP coin_pub;
     }
   };

@@ -53,8 +53,13 @@ may want to make the Taler payment option visible `only if` the user has the Tal
 wallet active in his browser. So the notification is mutual:
 
 * the website notifies the wallet (`s -> w`), so it can change its color
-* the wallet notifies the website (`w -> s`), so it can show Taler as a
-  suitable payment option
+* the wallet notifies the website (`w -> s`) by modifing the page's DOM, so
+  it can show Taler as a suitable payment option
+
+We acknowledge that notifying the website leaks the fact that Taler is installed,
+which could help track or deanonymize users.  We believe the usability gained by
+leaking this one bit represents an acceptable trade off.  It would rapidly become
+problematic though if several payment options take this approach. 
 
 Furthermore, there are two scenarios according to which the mutual signaling would
 succeed.  For a page where the merchant wants to show a Taler-style payment
@@ -62,9 +67,8 @@ option and, accordingly, the wallet is supposed to change its color, there are
 two scenarios we need to handle:
 
 * the customer has the wallet extension active at the moment of visiting the page, or
-* the customer activates the wallet extension
-  (regardless of whether he installs it or simply enables it)
-  `after` downloading the page.
+* the customer activates the wallet extension `after` downloading the page,
+  regardless of whether he installs it or simply enables it.
 
 In the first case, the messaging sequence is `s -> w` and `w -> s`. In the
 second case, the first attempt (`s -> w`) will get no reply; however, as soon as the
@@ -95,11 +99,11 @@ using coins in the form of a `deposit permission`.  This signature
 using the coins signifies both agreement of the customer and
 represents payment at the same time.  The `frontend` passes the
 `deposit permission` to the `backend` which immediately verifies it
-with the mint and signals the `frontend` the success (or failure) of
+with the mint and signals the `frontend` the success or failure of
 the payment process.  If the payment is successful, the `frontend` is
 responsible for generating the fullfillment page.
 
-The contract format is specified in section `contract`_.
+The contract format is specified in the `contract`_ section.
 
 
 +++++++++
@@ -141,10 +145,12 @@ successful response to the following two calls:
   :>json object merchant: the set of values describing this `merchant`, defined below
   :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
   :>json base32 H_contract: encoding of the `h_contract` field of contract :ref:`blob <contract-blob>`. Tough the wallet gets all required information to regenerate this hash code locally, the merchant sends it anyway to avoid subtle encoding errors, or to allow the wallet to double check its locally generated copy
-  :>json array auditors: a JSON array of `auditor` objects. To finalize the payment, the wallet should agree on a mint audited by one of these auditos.
+  :>json array auditors: a JSON array of `auditor` objects.  Any mints audited by these auditors are accepted by the merchant.  
   :>json string pay_url: the URL where the merchant will receive the deposit permission (i.e. the payment)
-  :>json array mints: a JSON array of `mint` objects. The wallet is encouraged to agree on some of those mints, in case it can't agree on any auditor trusted by this merchant.
+  :>json array mints: a JSON array of `mint` objects that the merchant accepts even if it does not accept any auditors that audit them.
   :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
+
+  The wallet must select a mint that either the mechant accepts directly by listing it in the mints arry, or for which the merchant accepts an auditor that audits that mint by listing it in the auditors array.
 
   The `product` object focuses on the product being purchased from the merchant. It has the following structure:
 
@@ -227,15 +233,15 @@ The HTML page implements all interactions using JavaScript signals
 dispatched on the HTML element `body`.
 
 When the merchant wants to notify the availability of a Taler-style payment
-option (for example on a "checkout" page), it sends the following event:
+option, such as on a "checkout" page, it sends the following event:
 
   .. js:data:: taler-checkout-probe
 
 This event must be sent from a callback for the `onload` event of the
 `body` element, otherwise the extension would have not time to
 register a listener for this event.  It also needs to be sent when
-the Taler extension is dynamically loaded (if the user activates
-the extension while he is on the checkout page).  This is done by
+the Taler extension is dynamically loaded, like when the user activates
+the extension while he is on the checkout page.  This is done by
 listening for the
 
   .. js:data:: taler-load
@@ -250,24 +256,12 @@ for example by updating the DOM to enable the respective button.
 The following events are needed when one of the two parties leaves the
 scenario.
 
-First, if the Taler extension is unloaded while the user is
+If the Taler extension is unloaded while the user is
 visiting a checkout page, the page should listen for the
 
   .. js:data:: taler-unload
 
 event to hide the Taler payment option.
-
-Secondly, when the Taler extension is active and the user closes (or navigates
-away from) the checkout page, the page should listen to a
-
-  .. js:data:: taler-navigating-away
-
-event, and reply with a
-
-  .. js:data:: taler-checkout-away
-
-event, in order to notify the extension that the user is leaving a checkout
-page, so that the extension can change its color back to its default.
 
 The following source code highlights the key steps for adding
 the Taler signaling to a checkout page:
@@ -397,6 +391,8 @@ cookies to identify the shopping session.
   :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
 
 
+.. _deposit-permission:
+
 .. http:post:: /taler/pay
 
   Send the deposit permission to the merchant. Note that the URL may differ between
@@ -404,7 +400,7 @@ cookies to identify the shopping session.
 
   :reqheader Content-Type: application/json
   :<json base32 H_wire: the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
-  :<json base32 H_contract: the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value from the gotten contract (field `h_contract`), or regenerating one starting from the values it gets within the contract
+  :<json base32 H_contract: the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value obtained from the field `h_contract`, or regenerating one starting from the values it gets within the contract
   :<json int transaction_id: a 53-bit number corresponding to the contract being agreed on
   :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
   :<json date refund_deadline: same value held in the contract's `refund` field
@@ -421,10 +417,7 @@ cookies to identify the shopping session.
 
   **Success Response:**
 
-  :status 200 OK: the payment has been received.
-  :resheader Content-Type: text/html
-
-  In this case the merchant sends back a `fullfillment` page in HTML, which the wallet will make the new `body` of the merchant's current page. It is just a confirmation of the positive transaction's conclusion.
+  :status 301 Redirection: the merchant should redirect the client to his fullfillment page, where the good outcome of the purchase must be shown to the user.
 
   **Failure Responses:**
 
@@ -471,7 +464,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :reqheader Content-Type: application/json
 
-  The `frontend` passes the deposit permission received from the wallet, by adding the field `max_fee` (see `contract`) and optionally adding a field named `edate`, indicating a deadline by which he would expect to receive the bank transfer for this deal
+  The `frontend` passes the :ref:`deposit permission <deposit-permission>` received from the wallet, by adding the fields `max_fee`, `amount` (see :ref:`contract`) and optionally adding a field named `edate`, indicating a deadline by which he would expect to receive the bank transfer for this deal
 
   **Success Response: OK**
 
@@ -479,4 +472,5 @@ The following API are made available by the merchant's `backend` to the merchant
 
   **Failure Responses:**
 
-  The `backend` will return error codes received from the mint verbatim (see `/deposit` documentation for the mint API for possible errors).  If the wallet made a mistake (for example, by double-spending), the `frontend` should pass the reply verbatim to the browser/wallet. (This is pretty much always the case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.)
+  The `backend` will return verbatim the error codes received from the mint's :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by double-spending for example, the `frontend` should pass the reply verbatim to the browser/wallet. This should be the expected case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.
+
