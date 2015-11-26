@@ -178,6 +178,8 @@ successful response to the following two calls:
   The `auditor` object:
 
   :>json string name: official name
+  :>json base32 auditor_pub: public key of the auditor
+  :>json string uri: URI of the auditor
 
   The `mint` object:
 
