@@ -146,7 +146,7 @@ successful response to the following two calls:
   :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
   :>json base32 H_contract: encoding of the `h_contract` field of contract :ref:`blob <contract-blob>`. Tough the wallet gets all required information to regenerate this hash code locally, the merchant sends it anyway to avoid subtle encoding errors, or to allow the wallet to double check its locally generated copy
   :>json array auditors: a JSON array of `auditor` objects.  Any mints audited by these auditors are accepted by the merchant.
-  :>json string pay_url: the URL where the merchant will receive the deposit permission (i.e. the payment)
+  :>json string pay_url: the relative URL where the merchant will receive the deposit permission (i.e. the payment)
   :>json array mints: a JSON array of `mint` objects that the merchant accepts even if it does not accept any auditors that audit them.
   :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
 
