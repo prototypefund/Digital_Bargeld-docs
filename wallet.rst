@@ -27,6 +27,10 @@ When a user enters a URL that is, technically, relative (such as "alice.example.
 *may* transform it into a canonical base URL ("http://alice.example.com/mint/").  Other components *should not* accept
 URLs that are not canonical.
 
+Rationale:  Joining non-canonical URLs with relative URLs (e.g. "mint.example.com" with "reserve/status") 
+results in different and slightly unexpected behavior in some URL handling libraries.
+Canonical URLs give more predictable results with standard URL joining.
+
 --------------------
 Browser based wallet
 --------------------
