@@ -59,7 +59,7 @@ wallet active in his browser. So the notification is mutual:
 We acknowledge that notifying the website leaks the fact that Taler is installed,
 which could help track or deanonymize users.  We believe the usability gained by
 leaking this one bit represents an acceptable trade off.  It would rapidly become
-problematic though if several payment options take this approach. 
+problematic though if several payment options take this approach.
 
 Furthermore, there are two scenarios according to which the mutual signaling would
 succeed.  For a page where the merchant wants to show a Taler-style payment
@@ -132,7 +132,8 @@ successful response to the following two calls:
 .. http:post:: /contract
 
   Issued by the frontend to the backend when it wants to augment its `proposition` with all the
-  cryptographic information.
+  cryptographic information. For the sake of precision, the frontend encloses the following JSON inside a `contract`
+  field to the actual JSON sent to the backend.
 
   :>json object amount: an :ref:`amount <Amount>` indicating the total price for the transaction. Note that, in the act of paying, the mint will subtract from this amount the deposit fees due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
   :>json object max_fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant for this transaction.
@@ -145,10 +146,13 @@ successful response to the following two calls:
   :>json object merchant: the set of values describing this `merchant`, defined below
   :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
   :>json base32 H_contract: encoding of the `h_contract` field of contract :ref:`blob <contract-blob>`. Tough the wallet gets all required information to regenerate this hash code locally, the merchant sends it anyway to avoid subtle encoding errors, or to allow the wallet to double check its locally generated copy
-  :>json array auditors: a JSON array of `auditor` objects.  The wallets might concievably insist on sharing using only a mint audited by certian auditors.
-  :>json string pay_url: the URL where the merchant will receive the deposit permission (i.e. the payment)
-  :>json array mints: a JSON array of `mint` objects.  The wallet must select a mint that the merchant accepts.
+  :>json array auditors: a JSON array of `auditor` objects.  Any mints audited by these auditors are accepted by the merchant.
+  :>json string pay_url: the relative URL where the merchant will receive the deposit permission (i.e. the payment)
+  :>json string exec_url: FIXME
+  :>json array mints: a JSON array of `mint` objects that the merchant accepts even if it does not accept any auditors that audit them.
   :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
+
+  The wallet must select a mint that either the mechant accepts directly by listing it in the mints arry, or for which the merchant accepts an auditor that audits that mint by listing it in the auditors array.
 
   The `product` object focuses on the product being purchased from the merchant. It has the following structure:
 
@@ -182,6 +186,8 @@ successful response to the following two calls:
   The `auditor` object:
 
   :>json string name: official name
+  :>json base32 auditor_pub: public key of the auditor
+  :>json string uri: URI of the auditor
 
   The `mint` object:
 
@@ -252,24 +258,12 @@ for example by updating the DOM to enable the respective button.
 The following events are needed when one of the two parties leaves the
 scenario.
 
-First, if the Taler extension is unloaded while the user is
+If the Taler extension is unloaded while the user is
 visiting a checkout page, the page should listen for the
 
   .. js:data:: taler-unload
 
 event to hide the Taler payment option.
-
-Secondly, when the Taler extension is active and the user closes or navigates
-away from the checkout page, the page should listen to a
-
-  .. js:data:: taler-navigating-away
-
-event, and reply with a
-
-  .. js:data:: taler-checkout-away
-
-event, in order to notify the extension that the user is leaving a checkout
-page, so that the extension can change its color back to its default.
 
 The following source code highlights the key steps for adding
 the Taler signaling to a checkout page:
@@ -387,9 +381,11 @@ cookies to identify the shopping session.
 
   :status 200 OK: The request was successful.
   :resheader Content-Type: application/json
-  :>json base32 contract: a :ref:`JSON contract <contract>` for this deal.
+  :>json base32 contract: a :ref:`JSON contract <contract>` for this deal deprived of `pay_url` and `exec_url`
   :>json base32 sig: the signature of the binary described in :ref:`blob <contract-blob>`.
-  :>json base32 h_contract: the base32 encoding of the field `h_contract` of the contract's :ref:`blob <contract-blob>`
+  :>json string pay_url: relative URL where the wallet should issue the payment
+  :>json string exec_url: FIXME
+  :>json base32 H_contract: the base32 encoding of the field `h_contract` of the contract's :ref:`blob <contract-blob>`
 
   **Failure Response**
 
@@ -398,6 +394,8 @@ cookies to identify the shopping session.
   :status 400 Bad Request: Request not understood.
   :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
 
+
+.. _deposit-permission:
 
 .. http:post:: /taler/pay
 
@@ -423,10 +421,7 @@ cookies to identify the shopping session.
 
   **Success Response:**
 
-  :status 200 OK: the payment has been received.
-  :resheader Content-Type: text/html
-
-  In this case the merchant sends back a `fullfillment` page in HTML, which the wallet will make the new `body` of the merchant's current page. It is just a confirmation of the positive transaction's conclusion.
+  :status 301 Redirection: the merchant should redirect the client to his fullfillment page, where the good outcome of the purchase must be shown to the user.
 
   **Failure Responses:**
 
@@ -473,13 +468,17 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :reqheader Content-Type: application/json
 
-  The `frontend` passes the deposit permission received from the wallet, by adding the field `max_fee` (see :ref:`contract`) and optionally adding a field named `edate`, indicating a deadline by which he would expect to receive the bank transfer for this deal
+  The `frontend` passes the :ref:`deposit permission <deposit-permission>` received from the wallet, by adding the fields `max_fee`, `amount` (see :ref:`contract`) and optionally adding a field named `edate`, indicating a deadline by which he would expect to receive the bank transfer for this deal
 
   **Success Response: OK**
 
   :status 200 OK: The mint accepted all of the coins. The `frontend` should now fullfill the contract.  This response has no meaningful body, the frontend needs to generate the fullfillment page.
 
-  **Failure Responses:**
+  **Failure Responses: Bad mint**
 
-  The `backend` will return verbatim the error codes received from the mint's :ref:`deposit` API.  If the wallet made a mistake, like by double-spending for example, the `frontend` should pass the reply verbatim to the browser/wallet. This should be the expected case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.
+  :status 400 Precondition failed: The given mint is not acceptable for this merchant, as it is not in the list of accepted mints and not audited by an approved auditor.
 
+
+  **Failure Responses: Mint trouble**
+
+  The `backend` will return verbatim the error codes received from the mint's :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by double-spending for example, the `frontend` should pass the reply verbatim to the browser/wallet. This should be the expected case, as the `frontend` cannot really make mistakes; the only reasonable exception is if the `backend` is unavailable, in which case the customer might appreciate some reassurance that the merchant is working on getting his systems back online.

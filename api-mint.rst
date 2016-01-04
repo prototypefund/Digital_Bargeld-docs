@@ -651,6 +651,7 @@ interception.
   :>json object sign_info: Public part of the signing key
   :>json base32 sign_priv: Private EdDSA key
 
+.. _add-incoming:
 
 -------------------------------------
 Administrative API: Bank transactions
@@ -717,7 +718,6 @@ Administrative API: Bank transactions
 
   :>json string error: the error message (`permission denied`)
   :>json string hint: hint as to why permission was denied
-
 
 ------------
 The Test API
