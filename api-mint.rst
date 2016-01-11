@@ -560,7 +560,7 @@ typically also view the balance.)
   :>json string parameter: the value is always "wtid"
 
 
-.. http:get:: /deposit/wtid
+.. http:post:: /deposit/wtid
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 

@@ -132,7 +132,8 @@ successful response to the following two calls:
 .. http:post:: /contract
 
   Issued by the frontend to the backend when it wants to augment its `proposition` with all the
-  cryptographic information.
+  cryptographic information. For the sake of precision, the frontend encloses the following JSON inside a `contract`
+  field to the actual JSON sent to the backend.
 
   :>json object amount: an :ref:`amount <Amount>` indicating the total price for the transaction. Note that, in the act of paying, the mint will subtract from this amount the deposit fees due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
   :>json object max_fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant for this transaction.
@@ -147,6 +148,7 @@ successful response to the following two calls:
   :>json base32 H_contract: encoding of the `h_contract` field of contract :ref:`blob <contract-blob>`. Tough the wallet gets all required information to regenerate this hash code locally, the merchant sends it anyway to avoid subtle encoding errors, or to allow the wallet to double check its locally generated copy
   :>json array auditors: a JSON array of `auditor` objects.  Any mints audited by these auditors are accepted by the merchant.
   :>json string pay_url: the relative URL where the merchant will receive the deposit permission (i.e. the payment)
+  :>json string exec_url: FIXME
   :>json array mints: a JSON array of `mint` objects that the merchant accepts even if it does not accept any auditors that audit them.
   :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
 
@@ -379,9 +381,11 @@ cookies to identify the shopping session.
 
   :status 200 OK: The request was successful.
   :resheader Content-Type: application/json
-  :>json base32 contract: a :ref:`JSON contract <contract>` for this deal.
+  :>json base32 contract: a :ref:`JSON contract <contract>` for this deal deprived of `pay_url` and `exec_url`
   :>json base32 sig: the signature of the binary described in :ref:`blob <contract-blob>`.
-  :>json base32 h_contract: the base32 encoding of the field `h_contract` of the contract's :ref:`blob <contract-blob>`
+  :>json string pay_url: relative URL where the wallet should issue the payment
+  :>json string exec_url: FIXME
+  :>json base32 H_contract: the base32 encoding of the field `h_contract` of the contract's :ref:`blob <contract-blob>`
 
   **Failure Response**
 
