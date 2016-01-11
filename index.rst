@@ -1,5 +1,5 @@
-Welcome to Taler's REST API documentation!
-==========================================
+GNU Taler Documentation
+=======================
 
 We are building an anonymous, taxable payment system using modern
 cryptography.  Customers will use traditional money transfers to send
@@ -21,10 +21,17 @@ In this document, we describe the REST-based API of the Mint,
 which is at the heart of the system.
 
 
-Contents
-========
+Operator Handbook
+-----------------
 
-Protocol Specification:
+.. toctree::
+  :maxdepth: 2
+
+  impl-mint
+
+
+Protocol Specification
+----------------------
 
 .. toctree::
   :maxdepth: 2
@@ -33,24 +40,22 @@ Protocol Specification:
   api-merchant
   banks
 
-Implementation:
-
-.. toctree::
-  :maxdepth: 2
-
-  impl-mint
   wallet
-
-Supported Wire Transfer Formats:
-
-.. toctree::
-  :maxdepth: 2
 
   wireformats
 
 
+Developer Handbook
+------------------
+
+.. toctree::
+  :maxdepth: 2
+
+  dev-wallet-wx
+
+
 Indices and tables
-==================
+------------------
 
 * :ref:`search`
 

@@ -2,13 +2,7 @@
 The Wallet Reference
 ====================
 
-  .. note::
-
-     This documentation goes in parallel with the wallet's development, so is to be considered as `work in pregress`
-     until a first operative version of the wallet will be released.
-
-
-This section explains how to set up a wallet. It is worth noting that there are two versions for
+This chapter explains how to set up a wallet. It is worth noting that there are two versions for
 this componenet - one browser based and the other implemented as an `app` for mobile systems.
 
 -------
@@ -31,15 +25,33 @@ Rationale:  Joining non-canonical URLs with relative URLs (e.g. "mint.example.co
 results in different and slightly unexpected behavior in some URL handling libraries.
 Canonical URLs give more predictable results with standard URL joining.
 
+---------------
+Error Handling
+---------------
+
+---------------
+User Experience
+---------------
+
+Balance Overview
+~~~~~~~~~~~~~~~~
+
+Transactions Log
+~~~~~~~~~~~~~~~~
+
+The transaction log shows all events that lead to a change in balance, including
+withdrawal and purchases.
+
+Error Log
+~~~~~~~~~
+
+
+
 --------------------
 Browser based wallet
 --------------------
 
 This paragraph gives instructions on how to proceed from getting the source code to build the final `.xpi` that can be installed into the Web browser.
-
-  .. note::
-
-     In this phase of development only support for Mozilla Firefox is provided.
 
 
 .. ^^^^^^^^^^^^^^^^^^^^^^^.

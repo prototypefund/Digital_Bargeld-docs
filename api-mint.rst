@@ -216,7 +216,7 @@ When transfering money to the mint such as via SEPA transfers, the mint creates 
 
 .. http:get:: /reserve/status
 
-  Request information about a reserve, including the blinding key that is necessary to withdraw a coin.
+  Request information about a reserve.
 
   :query reserve_pub: EdDSA reserve public key identifying the reserve.
 
