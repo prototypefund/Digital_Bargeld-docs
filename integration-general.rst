@@ -29,6 +29,7 @@ by the wallet.  When the wallet is deactivated, the ``taler-wallet-unload`` even
 is sent by the wallet.
 
 .. _communication:
+
 ----------------------
 Communication Example
 ----------------------
