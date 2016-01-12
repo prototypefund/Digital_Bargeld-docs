@@ -13,27 +13,6 @@ Currently the following functionality is supported:
 
 For JavaScript code examples, see :ref:`communication`.
 
---------------
-Presence Query
---------------
-
-The bank website queries the wallet's presence by sending a ``taler-wire-probe`` event. The
-event data should be `null`.
-
-If the wallet is present and active, it will respond with a ``taler-wallet-present`` event.
-
--------------------
-Change Notification
--------------------
-
-While the user agent is displaying a bank website, the user might deactivate or
-re-activate the wallet.  A bank website *should* react to those events, and
-indicate to the user that they should (re-)enable if necessary.
-
-When the wallet is activated, the ``taler-wallet-load`` event is sent
-by the wallet.  When the wallet is deactivated, the ``taler-wallet-unload`` event
-is sent by the wallet.
-
 -------------------------
 Reserve Creation Request
 -------------------------

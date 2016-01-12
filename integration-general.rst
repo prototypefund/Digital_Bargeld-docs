@@ -11,8 +11,24 @@ on the bank website's ``HTMLDocument``.
 
 DOM events used by Taler have the prefix ``taler-``.
 
-.. _communication:
+-------------------------
+Wallet Presence Awareness
+-------------------------
 
+The bank website queries the wallet's presence by sending a ``taler-probe`` event. The
+event data should be `null`.
+
+If the wallet is present and active, it will respond with a ``taler-wallet-present`` event.
+
+While the user agent is displaying a website, the user might deactivate or
+re-activate the wallet.  A Taler-aware *should* react to those events, and
+indicate to the user that they should (re-)enable the wallet if necessary.
+
+When the wallet is activated, the ``taler-wallet-load`` event is sent
+by the wallet.  When the wallet is deactivated, the ``taler-wallet-unload`` event
+is sent by the wallet.
+
+.. _communication:
 ----------------------
 Communication Example
 ----------------------
