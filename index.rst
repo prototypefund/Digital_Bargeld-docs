@@ -25,22 +25,44 @@ which is at the heart of the system.
 Operator Handbook
 -----------------
 
+The *Operator Handbook* is for people who want to run a mint or a merchant.
+It focuses on how to install, configure and run the required software.
+
 .. toctree::
   :maxdepth: 2
 
   impl-mint
 
 
-----------------------
-Protocol Specification
-----------------------
+------------------------
+Web Integration Handbook
+------------------------
+
+The *Web Integration Handbook* is for those who want to interact with Taler
+wallets on their own website.  Integrators will also have to be familiar with
+the material covered in the *Operator Handbook*.
+
+
+.. toctree::
+  :maxdepth: 2
+
+  integration-general
+  integration-bank
+  integration-merchant
+
+
+---------------------------
+HTTP Protocol Specification
+---------------------------
+
+The *Protocol Specification* defines the HTTP-based, predominantly RESTful
+interfaces between the core components of Taler.
 
 .. toctree::
   :maxdepth: 2
 
   api-mint
   api-merchant
-  banks
 
   wallet
 
@@ -51,15 +73,24 @@ Protocol Specification
 Developer Handbook
 ------------------
 
+The *Developer Handbook* brings developers up to speed who want to hack on the
+core components of the Taler reference implementation.
+
 .. toctree::
   :maxdepth: 2
 
   dev-wallet-wx
+  dev-merchant
 
 
 ------------------
 Indices and tables
 ------------------
+
+.. toctree::
+  :maxdepth: 1
+
+  glossary
 
 * :ref:`search`
 
