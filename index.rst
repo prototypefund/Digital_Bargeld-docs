@@ -51,9 +51,9 @@ the material covered in the *Operator Handbook*.
   integration-merchant
 
 
----------------------------
-HTTP Protocol Specification
----------------------------
+--------------------------------------
+Taler HTTP Core Protocol Specification
+--------------------------------------
 
 The *Protocol Specification* defines the HTTP-based, predominantly RESTful
 interfaces between the core components of Taler.
