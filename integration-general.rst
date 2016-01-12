@@ -1,0 +1,57 @@
+================================
+Taler Wallet Website Integration
+================================
+
+Websites (such as banks and online shops) can communicate with
+the Taler wallet by a standardized protocol.
+
+From a technical perspective, the Taller wallet communicates with
+the website by sending and receiving `DOM events <http://www.w3.org/TR/DOM-Level-3-Events/>`_
+on the bank website's ``HTMLDocument``.
+
+DOM events used by Taler have the prefix ``taler-``.
+
+.. _communication:
+
+----------------------
+Communication Example
+----------------------
+
+The bank website can send the event ``taler-XYZ`` with the event data ``eventData``.
+to the wallet with the following JavaScript code:
+
+.. sourcecode:: javascript
+
+  const myEvent = new CustomEvent("taler-XYZ", eventData);
+  document.dispatchEvent(myEvent);
+
+Events can be received by installing a listener:
+
+
+.. sourcecode:: javascript
+
+  function myListener(talerEvent) {
+    // handle event here!
+  }
+  document.addEventListener("taler-XYZ", myListener);
+
+
+--------------------
+Normalized Base URLs
+--------------------
+
+Mints and merchants have a base URL for their service.  This URL *must* be in a
+canonical form when it is stored (e.g. in the wallet's database) or transmitted
+(e.g. to a bank page).
+
+1. The URL must be absolute.  This implies that the URL has a schema.
+2. The path component of the URL must end with a slash.
+3. The URL must not contain a fragment or query.
+
+When a user enters a URL that is, technically, relative (such as "alice.example.com/mint"), wallets
+*may* transform it into a canonical base URL ("http://alice.example.com/mint/").  Other components *should not* accept
+URLs that are not canonical.
+
+Rationale:  Joining non-canonical URLs with relative URLs (e.g. "mint.example.com" with "reserve/status") 
+results in different and slightly unexpected behavior in some URL handling libraries.
+Canonical URLs give more predictable results with standard URL joining.
