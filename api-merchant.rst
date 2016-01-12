@@ -2,19 +2,14 @@
 The Merchant HTTP API
 =====================
 
-The merchant API defines 
+This chapter defines the HTTP-based protocol between the Taler wallet and the
+merchant.
 
-This Merchant API defines the interactions between a browser-based wallet and
-an HTTP-based RESTful merchant.  The protocol allows the customer and the
-merchant to agree upon a contract and for the customer to spend coins according
-to the contract proposed by the merchant.
-
-It is assumed that the browser has a secure and possibly
-customer-anonymizing channel to the merchant, typically by using the
-Tor browser bundle.  Furthermore, it is assumed that the merchant's
-server does not repudiate on contractual offers it has made.  If
-necessary, the merchant assures this by limiting the time for which
-the offer is valid.
+It is assumed that the browser has a secure and possibly customer-anonymizing
+channel to the merchant, typically by using the Tor browser bundle.
+Furthermore, it is assumed that the merchant's server does not repudiate on
+contractual offers it has made.  If necessary, the merchant assures this by
+limiting the time for which the offer is valid.
 
 Taler also assumes that the wallet and the merchant can agree on the
 current time; similar to what is required to connect to Tor or
@@ -22,51 +17,6 @@ validate TLS certificates.  The wallet may rely on the timestamp
 provided in the HTTP "Date:" header for this purpose, but the customer
 is expected to check that the time of his machine is approximately
 correct.
-
-
------------------------------
-Wallet-Frontend communication
------------------------------
-
-Taler's wallet is designed to notify the user when a certain webpage
-is offering Taler as a payment option. It does so by simply changing the color of
-the wallet's button in the user's browser. In the other direction, the website
-may want to make the Taler payment option visible `only if` the user has the Taler
-wallet active in his browser. So the notification is mutual:
-
-* the website notifies the wallet (`s -> w`), so it can change its color
-* the wallet notifies the website (`w -> s`) by modifing the page's DOM, so
-  it can show Taler as a suitable payment option
-
-We acknowledge that notifying the website leaks the fact that Taler is installed,
-which could help track or deanonymize users.  We believe the usability gained by
-leaking this one bit represents an acceptable trade off.  It would rapidly become
-problematic though if several payment options take this approach.
-
-Furthermore, there are two scenarios according to which the mutual signaling would
-succeed.  For a page where the merchant wants to show a Taler-style payment
-option and, accordingly, the wallet is supposed to change its color, there are
-two scenarios we need to handle:
-
-* the customer has the wallet extension active at the moment of visiting the page, or
-* the customer activates the wallet extension `after` downloading the page,
-  regardless of whether he installs it or simply enables it.
-
-In the first case, the messaging sequence is `s -> w` and `w -> s`. In the
-second case, the first attempt (`s -> w`) will get no reply; however, as soon as the
-wallet becomes active, it issues a `w -> s`, and it will get a `s -> w` back.
-
-Beyond signaling to indicate the mutual support for Taler, the wallet
-and the frontend also have to communicate for finalizing a purchase.
-Here, the checkout page needs to generate a checkout event to signal
-to the wallet that payment with Taler is desired. The wallet will then
-fetch the contract from the `frontend`, allow the user to confirm and
-pay.  The wallet will then transmit the payment information to the
-`frontend` and redirect the user to the fullfillment page generated
-by the `frontend` in response to a successful payment.
-
-A precise specification and sample code for implementing the signalling
-is provided in the dedicated :ref:`section <message-passing-ref>`.
 
 
 ------------------------------
@@ -203,92 +153,6 @@ Wallet-Frontend
 ---------------
 
 .. _message-passing-ref:
-
--------------------
-Messagging protocol
--------------------
-
-In order to reach mutual acknowledgement, and to avoid signaling loops,
-we define two interactions.  One is initiated by the HTML page inquiring
-about the Taler wallet extension being available, the other by the wallet
-extension inquiring about page supporting Taler as a payment option.
-
-The HTML page implements all interactions using JavaScript signals
-dispatched on the HTML element `body`.
-
-When the merchant wants to notify the availability of a Taler-style payment
-option, such as on a "checkout" page, it sends the following event:
-
-  .. js:data:: taler-checkout-probe
-
-This event must be sent from a callback for the `onload` event of the
-`body` element, otherwise the extension would have not time to
-register a listener for this event.  It also needs to be sent when
-the Taler extension is dynamically loaded, like when the user activates
-the extension while he is on the checkout page.  This is done by
-listening for the
-
-  .. js:data:: taler-load
-
-event.  If the Taler extension is present, it will respond with a
-
-  .. js:data:: taler-wallet-present
-
-event.  The handler should then activate the Taler payment option,
-for example by updating the DOM to enable the respective button.
-
-The following events are needed when one of the two parties leaves the
-scenario.
-
-If the Taler extension is unloaded while the user is
-visiting a checkout page, the page should listen for the
-
-  .. js:data:: taler-unload
-
-event to hide the Taler payment option.
-
-The following source code highlights the key steps for adding
-the Taler signaling to a checkout page:
-
-.. sourcecode:: javascript
-
-    function has_taler_wallet_callback(aEvent){
-       // This function is called if a Taler wallet is available.
-       // suppose the radio button for the Taler option has
-       // the DOM ID attribute 'taler-radio-button-id'
-      var tbutton = document.getElementById("taler-radio-button-id");
-      tbutton.removeAttribute("disabled");
-    };
-
-    function taler_wallet_load_callback(aEvent){
-      // let the Taler wallet know that this is a Checkout page
-      // which supports Taler (the extension will have
-      // missed our initial 'taler-checkout-probe' from onload())
-      document.body.dispatchEvent(new Event('taler-checkout-probe'));
-    };
-
-    function taler_wallet_unload_callback(aEvent){
-       // suppose the radio button for the Taler option has
-       // the DOM ID attribute 'taler-radio-button-id'
-       var tbutton = document.getElementById("taler-radio-button-id");
-       tbutton.setAttribute("disabled", "true");
-    };
-
-
-.. sourcecode:: html
-
-   <body onload="function(){
-        // First, we set up the listener to be called if a wallet is present.
-        document.body.addEventListener("taler-wallet-present", has_taler_wallet_callback, false);
-        // Detect if a wallet is dynamically added (rarely needed)
-        document.body.addEventListener("taler-load", taler_wallet_load_callback, false);
-        // Detect if a wallet is dynamically removed (rarely needed)
-        document.body.addEventListener("taler-unload", taler_wallet_unload_callback, false);
-        // Finally, signal the wallet that this is a payment page.
-        document.body.dispatchEvent(new Event('taler-checkout-probe'));
-      };">
-     ...
-   </body>
 
 
 When the user chooses to pay, the page needs to inform the extension
