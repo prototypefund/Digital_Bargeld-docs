@@ -21,6 +21,7 @@ In this document, we describe the REST-based API of the Mint,
 which is at the heart of the system.
 
 
+-----------------
 Operator Handbook
 -----------------
 
@@ -30,6 +31,7 @@ Operator Handbook
   impl-mint
 
 
+----------------------
 Protocol Specification
 ----------------------
 
@@ -45,6 +47,7 @@ Protocol Specification
   wireformats
 
 
+------------------
 Developer Handbook
 ------------------
 
@@ -54,6 +57,7 @@ Developer Handbook
   dev-wallet-wx
 
 
+------------------
 Indices and tables
 ------------------
 
