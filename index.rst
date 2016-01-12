@@ -64,8 +64,6 @@ interfaces between the core components of Taler.
   api-mint
   api-merchant
 
-  wallet
-
   wireformats
 
 
