@@ -73,7 +73,7 @@ successful response to the following two calls:
       // Total price for the transaction.
       // The mint will subtract deposit fees from that amount
       // before transfering it to the merchant.
-      amount: JsonAmount;
+      amount: Amount;
 
       // Maximum total deposit fee accepted by the merchant for this contract
       max_fee: Amount;
@@ -131,7 +131,7 @@ successful response to the following two calls:
       quantity?: number;
 
       // The price of the product; this is the total price for the amount specified by `quantity`
-      price: AmountJson;
+      price: Amount;
 
       // merchant's 53-bit internal identification number for the product (optional)
       product_id?: number;
