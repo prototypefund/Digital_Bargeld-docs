@@ -34,7 +34,7 @@ is sent by the wallet.
 Communication Example
 ----------------------
 
-The bank website can send the event ``taler-XYZ`` with the event data ``eventData``.
+The bank website can send the event ``taler-XYZ`` with the event data ``eventData``
 to the wallet with the following JavaScript code:
 
 .. sourcecode:: javascript

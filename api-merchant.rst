@@ -67,64 +67,149 @@ successful response to the following two calls:
   cryptographic information. For the sake of precision, the frontend encloses the following JSON inside a `contract`
   field to the actual JSON sent to the backend.
 
-  :>json object amount: an :ref:`amount <Amount>` indicating the total price for the transaction. Note that, in the act of paying, the mint will subtract from this amount the deposit fees due to the choice of coins made by wallets, and finally transfer the remaining amount to the merchant's bank account.
-  :>json object max_fee: :ref:`amount <Amount>` indicating the maximum deposit fee accepted by the merchant for this transaction.
-  :>json int transaction_id: a 53-bit number chosen by the merchant to uniquely identify the contract.
-  :>json array products: a collection of `product` objects (described below), for each different item purchased within this transaction.
-  :>json `date` timestamp: this contract's generation time
-  :>json `date` refund_deadline: the maximum time until which the merchant can refund the wallet in case of a problem, or some request
-  :>json `date` expiry: the maximum time until which the wallet can agree on this contract
-  :>json base32 merchant_pub: merchant's EdDSA key used to sign this contract; this information is typically added by the `backend`
-  :>json object merchant: the set of values describing this `merchant`, defined below
-  :>json base32 H_wire: the hash of the merchant's :ref:`wire details <wireformats>`; this information is typically added by the `backend`
-  :>json base32 H_contract: encoding of the `h_contract` field of contract :ref:`blob <contract-blob>`. Tough the wallet gets all required information to regenerate this hash code locally, the merchant sends it anyway to avoid subtle encoding errors, or to allow the wallet to double check its locally generated copy
-  :>json array auditors: a JSON array of `auditor` objects.  Any mints audited by these auditors are accepted by the merchant.
-  :>json string pay_url: the relative URL where the merchant will receive the deposit permission (i.e. the payment)
-  :>json string exec_url: FIXME
-  :>json array mints: a JSON array of `mint` objects that the merchant accepts even if it does not accept any auditors that audit them.
-  :>json object locations: maps labels for locations to detailed geographical location data (details for the format of locations are specified below). The label strings must not contain a colon (`:`).  These locations can then be references by their respective labels throughout the contract.
+  .. code-block:: ts
+
+    interface Contract {
+      // Total price for the transaction.
+      // The mint will subtract deposit fees from that amount
+      // before transfering it to the merchant.
+      amount: JsonAmount;
+
+      // Maximum total deposit fee accepted by the merchant for this contract
+      max_fee: Amount;
+
+      // 53-bit number chosen by the merchant to uniquely identify the contract.
+      transaction_id: number;
+
+      // List of products that are part of the purchase (see below)
+      products: Product[];
+
+      // Time when this contract was generated
+      timestamp: number;
+
+      // After this deadline has passed, no refunds will be accepted.
+      refund_deadline: number;
+
+      // After this deadline, the merchant won't accept payments for the contact
+      expiry: number;
+
+      // Merchant's public key used to sign this contract; this information is typically added by the backend
+      // Note that this can be an ephemeral key.
+      merchant_pub: EddsaPublicKey;
+
+      // More info about the merchant, see below
+      merchant: Merchant;
+
+      // The hash of the merchant's wire details.
+      H_wire: HashCode;
+
+      // Any mints audited by these auditors are accepted by the merchant.
+      auditors: Auditor[];
+
+      // Mints that the merchant accepts even if it does not accept any auditors that audit them.
+      mints: Mint[];
+
+      // object locations: maps labels for locations to detailed geographical location data
+      // (details for the format of locations are specified below).
+      // The label strings must not contain a colon (`:`)
+      // These locations can then be references by their respective labels throughout the contract.
+      locations;
+    }
+
 
   The wallet must select a mint that either the mechant accepts directly by listing it in the mints arry, or for which the merchant accepts an auditor that audits that mint by listing it in the auditors array.
 
-  The `product` object focuses on the product being purchased from the merchant. It has the following structure:
+  The `product` object describes the product being purchased from the merchant. It has the following structure:
 
-  :>json string description: this object contains a human-readable description of the product
-  :>json int quantity: the quantity of the product to deliver to the customer (optional, if applicable)
-  :>json object price: the price of the product; this is the total price for the amount specified by `quantity`
-  :>json int product_id: merchant's 53-bit internal identification number for the product (optional)
-  :>json array taxes: a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
-  :>json string delivery_date: human-readable date indicating when this product should be delivered
-  :>json string delivery_location: where to deliver this product. This may be an URI for online delivery (i.e. `http://example.com/download` or `mailto:customer@example.com`), or a location label defined inside the proposition's `locations`.  The presence of a colon (`:`) indicates the use of an URL.
+  .. code-block:: ts
+    
+    interface Product {
+      // Human-readable product description.
+      description: string;
+
+      // The quantity of the product to deliver to the customer (optional, if applicable)
+      quantity?: number;
+
+      // The price of the product; this is the total price for the amount specified by `quantity`
+      price: AmountJson;
+
+      // merchant's 53-bit internal identification number for the product (optional)
+      product_id?: number;
+
+      // a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
+      taxes?: any[];
+
+      // human-readable date indicating when this product should be delivered
+      delivery_date: string;
+
+      // where to deliver this product. This may be an URI for online delivery
+      // (i.e. `http://example.com/download` or `mailto:customer@example.com`),
+      // or a location label defined inside the proposition's `locations`.
+      // The presence of a colon (`:`) indicates the use of an URL.
+      delivery_location: string;
+    }
 
   The `merchant` object:
 
-  :>json string address: label for a location with the business address of the merchant
-  :>json string name: the merchant's legal name of business
-  :>json object jurisdiction: label for a location that denotes the jurisdiction for disputes. Some of the typical fields for a location (such as a street address) may be absent.
+  .. code-block:: ts
+    
+    interface Merchant {
+      // label for a location with the business address of the merchant
+      address: string;
+
+      // the merchant's legal name of business
+      name: string;
+
+      // label for a location that denotes the jurisdiction for disputes.
+      // Some of the typical fields for a location (such as a street address) may be absent.
+      jurisdiction: string;
+    }
+
 
   The `location` object:
 
-  :>json string country: blah
-  :>json string city: blah
-  :>json string state: blah
-  :>json string region: blah
-  :>json string province: blah
-  :>json int zip_code: blah
-  :>json string street: blah
-  :>json string street_number: blah
+  .. code-block:: ts
+
+    interface Location {
+      country: string;
+      city: string;
+      state: string;
+      region: string;
+      province: string;
+      zip_code: string;
+      street: string;
+      street_number: string;
+    }
 
   Depending on the country, some fields may be missing
 
   The `auditor` object:
 
-  :>json string name: official name
-  :>json base32 auditor_pub: public key of the auditor
-  :>json string uri: URI of the auditor
+  .. code-block:: ts
+
+    interface Auditor {
+      // official name
+      name: string;
+
+      auditor_pub: EddsaPublicKey
+
+      // Base URL of the auditor
+      url: string;
+    }
+
 
   The `mint` object:
 
-  :>json string url: the mint's base URL
-  :>json base32 master_pub: master public key of the mint
+  
+  .. code-block:: ts
+
+    interface Mint {
+      // the mint's base URL
+      url: string;
+
+      // master public key of the mint
+      master_pub: EddsaPublicKey;
+    }
 
 
 When the contract is signed by the merchant or the wallet, the
@@ -203,9 +288,9 @@ the contract to the wallet in the the function
 `deliver_contract_to_wallet` if the contract was received correctly
 (i.e. HTTP response code was 200 OK).
 
-+++++++++++++++
+---------------
 The RESTful API
-+++++++++++++++
+---------------
 
 The merchant's frontend must provide the JavaScript logic with the
 ability to fetch the JSON contract.  In the example above, the
