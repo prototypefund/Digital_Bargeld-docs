@@ -529,6 +529,7 @@ typically also view the balance.)
 .. http:get:: /wire/deposits
 
   Provides deposits associated with a given wire transfer.
+
   :query wtid: wire transfer identifier identifying the wire transfer (a base32-encoded value)
 
   **Success Response: OK**
