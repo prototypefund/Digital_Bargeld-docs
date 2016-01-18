@@ -51,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Taler'
-copyright = u'2014, 2015 Florian Dold, Benedikt Muller, Sree Harsha Totakura, Christian Grothoff, Marcello Stanisci (GPLv3+ or GFDL 1.3+)'
+copyright = u'2014, 2015, 2016 Florian Dold, Benedikt Muller, Sree Harsha Totakura, Christian Grothoff, Marcello Stanisci (GPLv3+ or GFDL 1.3+)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
