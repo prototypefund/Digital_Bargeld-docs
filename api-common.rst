@@ -10,57 +10,71 @@ Common encodings
 
 This section describes how certain types of values are represented throughout the API.
 
+.. _base32:
+
+Binary Data
+^^^^^^^^^^^
+Binary data is generally encoded using Crockford's variant of Base32 (http://www.crockford.com/wrmg/base32.html), except that "U" is not excluded but also decodes to "V" to make OCR easy.  We will still simply use the JSON type "base32" and the term "Crockford Base32" in the text to refer to the resulting encoding.
 
 
-  .. _Base32:
+Large numbers
+^^^^^^^^^^^^^
 
-  * **Binary data**:
-    Binary data is generally encoded using Crockford's variant of Base32 (http://www.crockford.com/wrmg/base32.html), except that "U" is not excluded but also decodes to "V" to make OCR easy.  We will still simply use the JSON type "base32" and the term "Crockford Base32" in the text to refer to the resulting encoding.
+Large numbers such as RSA blinding factors and 256 bit  keys, are transmitted as other binary data in Crockford Base32 encoding.
 
-  * **Large numbers**: Large numbers such as RSA blinding factors and 256 bit  keys, are transmitted as other binary data in Crockford Base32 encoding.
+Timestamps
+^^^^^^^^^^
+  Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`, where `x` is the decimal representation of the number of seconds past the Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in JSON simply as a normal slash, but distinguishes the timestamp from a normal string literal.  We use the type "date" in the documentation below.  Additionally, the special strings "\\/never\\/" and "\\/forever\\/" are recognized to represent the end of time.
 
-  .. _Timestamp:
 
-  * **Timestamps**:
-    Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`, where `x` is the decimal representation of the number of seconds past the Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in JSON simply as a normal slash, but distinguishes the timestamp from a normal string literal.  We use the type "date" in the documentation below.  Additionally, the special strings "\\/never\\/" and "\\/forever\\/" are recognized to represent the end of time.
+.. _public\ key:
 
-  .. _public\ key:
+Public Keys
+^^^^^^^^^^^
+EdDSA and ECDHE public keys are always points on Curve25519 and represented
+using the standard 256 bits Ed25519 compact format, converted to Crockford
+Base32_.
 
-  * **Public key**: EdDSA and ECDHE public keys are always points on Curve25519 and represented using the standard 256 bits Ed25519 compact format, converted to Crockford Base32_.
+.. _signature:
 
-  .. _Signature:
+Signatures
+^^^^^^^^^^
 
-  * **Signatures**: The specific signature scheme in use, like RSA blind signatures or EdDSA, depends on the context.  RSA blind signatures are only used for coins and always simply base32_ encoded.
+The specific signature scheme in use, like RSA blind signatures or EdDSA, depends on the context.  RSA blind signatures are only used for coins and always simply base32_ encoded.
 
 EdDSA signatures are transmitted as 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only).
 These signed objects always contain a purpose number unique to the context in which the signature is used, but frequently the actual binary-object must be reconstructed locally from information available only in context, such as recent messages or account detals.
 These objects are described in detail in :ref:`Signatures`.
 
-  .. _Amount:
 
-  * **Amounts**: Amounts of currency are expressed as a JSON object with the following fields:
+.. _amount:
 
-  .. _`tsref-type-Amount`:
+Amounts
+^^^^^^^
 
-  .. code-block:: tsref
+Amounts of currency are expressed as a JSON object with the following fields:
 
-    interface Amount {
-      // name of the currency using either a three-character ISO 4217 currency
-      // code, or a regional currency identifier starting with a "*" followed by
-      // at most 10 characters.  ISO 4217 exponents in the name are not supported,
-      // although the "fraction" is corresponds to an ISO 4217 exponent of 6.
-      currency: string;
+.. _`tsref-type-Amount`:
 
-      // unsigned 32 bit value in the currency, note that "1" here would
-      // correspond to 1 EUR or 1 USD, depending on `currency`, not 1 cent.
-      value: number;
+.. code-block:: tsref
 
-      // unsigned 32 bit fractional value to be added to `value` representing
-      // an additional currency fraction, in units of one millionth (10e-6)
-      // of the base currency value.  For example, a fraction
-      // of 500,000 would correspond to 50 cents.
-      fraction: number;
-    }
+  interface Amount {
+    // name of the currency using either a three-character ISO 4217 currency
+    // code, or a regional currency identifier starting with a "*" followed by
+    // at most 10 characters.  ISO 4217 exponents in the name are not supported,
+    // although the "fraction" is corresponds to an ISO 4217 exponent of 6.
+    currency: string;
+
+    // unsigned 32 bit value in the currency, note that "1" here would
+    // correspond to 1 EUR or 1 USD, depending on `currency`, not 1 cent.
+    value: number;
+
+    // unsigned 32 bit fractional value to be added to `value` representing
+    // an additional currency fraction, in units of one millionth (10e-6)
+    // of the base currency value.  For example, a fraction
+    // of 500,000 would correspond to 50 cents.
+    fraction: number;
+  }
 
 
 --------------
@@ -89,36 +103,39 @@ Certain response formats are common for all requests. They are documented here i
   :status 400 Bad Request: One of the arguments to the request is missing or malformed.
   :resheader Content-Type: application/json
 
-  .. code-block:: ts
-    :caption: Response Object Description
+  .. ErrorDetail
+  .. _tsref-type-ErrorDetail
+  .. code-block:: tsref
 
-    // Description of the error, i.e. "missing parameter", "commitment violation", ...
-    // The other arguments are specific to the error value reported here.
-    error: string;
+    interface ErrorDetail {
+      // Description of the error, i.e. "missing parameter", "commitment violation", ...
+      // The other arguments are specific to the error value reported here.
+      error: string;
 
-    // Name of the parameter that was bogus (if applicable)
-    parameter?: string;
+      // Name of the parameter that was bogus (if applicable)
+      parameter?: string;
 
-    // Path to the argument that was bogus (if applicable)
-    path?: string;
+      // Path to the argument that was bogus (if applicable)
+      path?: string;
 
-    // Offset of the argument that was bogus (if applicable)
-    offset?: string;
+      // Offset of the argument that was bogus (if applicable)
+      offset?: string;
 
-    // Index of the argument that was bogus (if applicable)
-    index?: string;
+      // Index of the argument that was bogus (if applicable)
+      index?: string;
 
-    // Name of the object that was bogus (if applicable)
-    object?: string;
+      // Name of the object that was bogus (if applicable)
+      object?: string;
 
-    // Name of the currency thant was problematic (if applicable)
-    currency?: string;
+      // Name of the currency thant was problematic (if applicable)
+      currency?: string;
 
-    // Expected type (if applicable).
-    type_expected?: string;
+      // Expected type (if applicable).
+      type_expected?: string;
 
-    // Type that was provided instead (if applicable).
-    type_actual?: string;
+      // Type that was provided instead (if applicable).
+      type_actual?: string;
+    }
 
 
 

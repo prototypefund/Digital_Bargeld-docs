@@ -35,7 +35,7 @@ The section `[mint_keys]` containts the following entries:
 * `lookahead_sign`:  For how far into the future should keys be issued?  This determines the frequency
   of offline signing with the master key.
 * `lookahead_provide`: How far into the future should the mint provide keys?  This determines the attack
-window on keys.
+  window on keys.
 
 
 Sections specifying denomination (coin) information start with "coin\_".  By convention, the name continues with "$CURRENCY_[$SUBUNIT]_$VALUE", i.e. "[coin_eur_ct_10] for a 10 cent piece.  However, only the "coin\_" prefix is mandatory.  Each "coin\_"-section must then have the following options:
