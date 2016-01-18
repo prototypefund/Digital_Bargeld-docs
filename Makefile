@@ -49,6 +49,8 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
+# The html-linked builder does not support caching, so we
+# remove all cached state first.
 html:
 	rm -rf $(BUILDDIR)/*
 	$(SPHINXBUILD) -b html-linked $(ALLSPHINXOPTS) $(BUILDDIR)/html
