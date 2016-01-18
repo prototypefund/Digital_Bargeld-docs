@@ -157,8 +157,7 @@ class LinkFilter(Filter):
                         href = self.app.builder.get_target_uri(docname) + "#" + id
                         tok_setprop(t, "href", href)
                     else:
-                        # TODO: warn!
-                        pass
+                        self.app.builder.warn("unresolved link target in comment: " + id)
                     yield t, m.group(1)
                     last = m.end()
                 post = value[last:]
