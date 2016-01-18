@@ -108,7 +108,11 @@ possibly by using HTTPS.
       master_sig: EddsaSignature;
     }
 
-  Fees for any of the operations can be zero, but the fields must still be present. The currency of the `fee_deposit` and `fee_refresh` must match the currency of the `value`.  Theoretically, the `fee_withdraw` could be in a different currency, but this is not currently supported by the implementation.
+  Fees for any of the operations can be zero, but the fields must still be
+  present. The currency of the `fee_deposit` and `fee_refresh` must match the
+  currency of the `value`.  Theoretically, the `fee_withdraw` could be in a
+  different currency, but this is not currently supported by the
+  implementation.
 
   A signing key in the `signkeys` list is a JSON object with the following fields:
 
@@ -168,7 +172,11 @@ possibly by using HTTPS.
       auditor_sig: EddsaSignature;
     }
 
-  The same auditor may appear multiple times in the array for different subsets of denomination keys, and the same denomination key hash may be listed multiple times for the same or different auditors.  The wallet or merchant just should check that the denomination keys they use are in the set for at least one of the auditors that they accept.
+  The same auditor may appear multiple times in the array for different subsets
+  of denomination keys, and the same denomination key hash may be listed
+  multiple times for the same or different auditors.  The wallet or merchant
+  just should check that the denomination keys they use are in the set for at
+  least one of the auditors that they accept.
 
   .. note::
 
@@ -226,7 +234,9 @@ Obtaining wire-transfer information
 
 .. http:get:: /wire/sepa
 
-  Provides instructions for how to transfer funds to the mint using the SEPA transfers.  Always signed using the mint's long-term offline master public key.
+  Provides instructions for how to transfer funds to the mint using the SEPA
+  transfers.  Always signed using the mint's long-term offline master public
+  key.
 
   :status 200: This request should virtually always be successful.
   :status 501: This wire transfer method is not supported by this mint.
@@ -263,7 +273,12 @@ Withdrawal
 
 This API is used by the wallet to obtain digital coins.
 
-When transfering money to the mint such as via SEPA transfers, the mint creates a *reserve*, which keeps the money from the customer.  The customer must specify an EdDSA reserve public key as part of the transfer, and can then withdraw digital coins using the corresponding private key.  All incoming and outgoing transactions are recorded under the corresponding public key by the mint.
+When transfering money to the mint such as via SEPA transfers, the mint creates
+a *reserve*, which keeps the money from the customer.  The customer must
+specify an EdDSA reserve public key as part of the transfer, and can then
+withdraw digital coins using the corresponding private key.  All incoming and
+outgoing transactions are recorded under the corresponding public key by the
+mint.
 
   .. note::
 
@@ -275,7 +290,13 @@ When transfering money to the mint such as via SEPA transfers, the mint creates 
   Request information about a reserve.
 
   .. note::
-    The client currently does not have to demonstrate knowledge of the private key of the reserve to make this request, which makes the reserve's public key privliged information known only to the client, their bank, and the mint.  In future, we might wish to revisit this decision to improve security, such as by having the client EdDSA-sign an ECDHE key to be used to derive a symmetric key to encrypt the response.  This would be useful if for example HTTPS were not used for communication with the mint.
+    The client currently does not have to demonstrate knowledge of the private
+    key of the reserve to make this request, which makes the reserve's public
+    key privliged information known only to the client, their bank, and the
+    mint.  In future, we might wish to revisit this decision to improve
+    security, such as by having the client EdDSA-sign an ECDHE key to be used
+    to derive a symmetric key to encrypt the response.  This would be useful if
+    for example HTTPS were not used for communication with the mint.
 
 
   :query reserve_pub: EdDSA reserve public key identifying the reserve.
@@ -324,16 +345,32 @@ When transfering money to the mint such as via SEPA transfers, the mint creates 
 
 .. http:post:: /reserve/withdraw
 
-  Withdraw a coin of the specified denomination.  Note that the client should commit all of the request details, including the private key of the coin and the blinding factor, to disk *before* issuing this request, so that it can recover the information if necessary in case of transient failures, like power outage, network outage, etc.
+  Withdraw a coin of the specified denomination.  Note that the client should
+  commit all of the request details, including the private key of the coin and
+  the blinding factor, to disk *before* issuing this request, so that it can
+  recover the information if necessary in case of transient failures, like
+  power outage, network outage, etc.
 
   :Request Body: `WithdrawRequest`_
   :Response JSON Object:
 
     `WithdrawResponse`_ or `WithdrawError`_
 
-  :status 200 OK: The request was succesful.  Note that repeating exactly the same request will again yield the same response, so if the network goes down during the transaction or before the client can commit the coin signature to disk, the coin is not lost.
+  :status 200 OK:
+    The request was succesful.  Note that repeating exactly the same request
+    will again yield the same response, so if the network goes down during the
+    transaction or before the client can commit the coin signature to disk, the
+    coin is not lost.
   :status 401 Unauthorized: The signature is invalid.
-  :status 404 Not Found: The denomination key or the reserve are not known to the mint.  If the denomination key is unknown, this suggests a bug in the wallet as the wallet should have used current denomination keys from /keys.  If the reserve is unknown, the wallet should not report a hard error yet, but instead simply wait for up to a day, as the wire transaction might simply not yet have completed and might be known to the mint in the near future.  In this case, the wallet should repeat the exact same request later again using exactly the same blinded coin.
+  :status 404 Not Found:
+    The denomination key or the reserve are not known to the mint.  If the
+    denomination key is unknown, this suggests a bug in the wallet as the
+    wallet should have used current denomination keys from /keys.  If the
+    reserve is unknown, the wallet should not report a hard error yet, but
+    instead simply wait for up to a day, as the wire transaction might simply
+    not yet have completed and might be known to the mint in the near future.
+    In this case, the wallet should repeat the exact same request later again
+    using exactly the same blinded coin.
   :status 402 Payment Required: The balance of the reserve is not sufficient to withdraw a coin of the indicated denomination.
 
   **Details:**
@@ -390,13 +427,21 @@ When transfering money to the mint such as via SEPA transfers, the mint creates 
 Deposit
 --------------------
 
-Deposit operations are requested by a merchant during a transaction. For the deposit operation, the merchant has to obtain the deposit permission for a coin from their customer who owns the coin.  When depositing a coin, the merchant is credited an amount specified in the deposit permission, possibly a fraction of the total coin's value, minus the deposit fee as specified by the coin's denomination.
+Deposit operations are requested by a merchant during a transaction. For the
+deposit operation, the merchant has to obtain the deposit permission for a coin
+from their customer who owns the coin.  When depositing a coin, the merchant is
+credited an amount specified in the deposit permission, possibly a fraction of
+the total coin's value, minus the deposit fee as specified by the coin's
+denomination.
 
 
 .. _deposit:
 .. http:POST:: /deposit
 
-  Deposit the given coin and ask the mint to transfer the given :ref:`amount` to the merchants bank account.  This API is used by the merchant to redeem the digital coins.  The request should contain a JSON object with the following fields:
+  Deposit the given coin and ask the mint to transfer the given :ref:`amount`
+  to the merchants bank account.  This API is used by the merchant to redeem
+  the digital coins.  The request should contain a JSON object with the
+  following fields:
 
   :reqheader Content-Type: application/json
   :Request JSON Object: `DepositRequest`_
@@ -467,7 +512,8 @@ Deposit operations are requested by a merchant during a transaction. For the dep
     // private key.
     coin_sig: EddsaSignature;
 
-  The deposit operation succeeds if the coin is valid for making a deposit and has enough residual value that has not already been deposited or melted.
+  The deposit operation succeeds if the coin is valid for making a deposit and
+  has enough residual value that has not already been deposited or melted.
 
 
   .. code-block:: tsref
@@ -528,14 +574,26 @@ Deposit operations are requested by a merchant during a transaction. For the dep
 Refreshing
 ------------------
 
-Refreshing creates `n` new coins from `m` old coins, where the sum of denominations of the new coins must be smaller than the sum of the old coins' denominations plus melting (refresh) and withdrawal fees charged by the mint.  The refreshing API can be used by wallets to melt partially spent coins, making transactions with the freshly minted coins unlinkabe to previous transactions by anyone except the wallet itself.
+Refreshing creates `n` new coins from `m` old coins, where the sum of
+denominations of the new coins must be smaller than the sum of the old coins'
+denominations plus melting (refresh) and withdrawal fees charged by the mint.
+The refreshing API can be used by wallets to melt partially spent coins, making
+transactions with the freshly minted coins unlinkabe to previous transactions
+by anyone except the wallet itself.
 
-However, the new coins are linkable from the private keys of all old coins using the /refresh/link request.  While /refresh/link must be implemented by the mint to achieve taxability, wallets do not really ever need that part of the API during normal operation.
+However, the new coins are linkable from the private keys of all old coins
+using the /refresh/link request.  While /refresh/link must be implemented by
+the mint to achieve taxability, wallets do not really ever need that part of
+the API during normal operation.
 
 .. _refresh:
 .. http:post:: /refresh/melt
 
-  "Melts" coins.  Invalidates the coins and prepares for minting of fresh coins.  Taler uses a global parameter `kappa` for the cut-and-choose component of the protocol, for which this request is the commitment.  Thus, various arguments are given `kappa`-times in this step.  At present `kappa` is always 3.
+  "Melts" coins.  Invalidates the coins and prepares for minting of fresh
+  coins.  Taler uses a global parameter `kappa` for the cut-and-choose
+  component of the protocol, for which this request is the commitment.  Thus,
+  various arguments are given `kappa`-times in this step.  At present `kappa`
+  is always 3.
 
 
   :status 401 Unauthorized:
@@ -545,7 +603,9 @@ However, the new coins are linkable from the private keys of all old coins using
   :status 403 Forbidden:
     The operation is not allowed as at least one of the coins has insufficient funds.  The response
     is `MeltForbiddenResponse`_ in this case.
-  :status 404: the mint does not recognize the denomination key as belonging to the mint, or it has expired
+  :status 404:
+    the mint does not recognize the denomination key as belonging to the mint,
+    or it has expired
   :resheader Content-Type: application/json
 
   **Details:**
@@ -734,7 +794,8 @@ However, the new coins are linkable from the private keys of all old coins using
       // Information about each melted coin
       oldcoin_infos: OldCoinInfo[];
 
-      // array with RSA denomination public keys of the coins the original refresh request asked to be minted
+      // array with RSA denomination public keys of the coins the original
+      // refresh request asked to be minted
       newcoins_infos: RsaPublicKey[];
 
       // 2D array with `kappa` entries in the first dimension and the same
@@ -788,7 +849,9 @@ However, the new coins are linkable from the private keys of all old coins using
     All commitments were revealed successfully.  The mint returns an array,
     typically consisting of only one element, in which each each element contains
     information about a melting session that the coin was used in.
-  :status 404 Not Found: The mint has no linkage data for the given public key, as the coin has not yet been involved in a refresh operation.
+  :status 404 Not Found:
+    The mint has no linkage data for the given public key, as the coin has not
+    yet been involved in a refresh operation.
 
   **Details:**
 
@@ -921,43 +984,80 @@ typically also view the balance.)
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 
-  :reqheader Content-Type: application/json
-  :<json base32 H_wire: SHA-512 hash of the merchant's payment details.
-  :<json base32 H_contract: SHA-512 hash of the contact of the merchant with the customer.
-  :<json base32 coin_pub: coin's public key, both ECDHE and EdDSA.
-  :<json int transaction_id: 64-bit transaction id for the transaction between merchant and customer
-  :<json base32 merchant_pub: the EdDSA public key of the merchant, so that the client can identify the merchant for refund requests.
-  :<json base32 merchant_sig: the EdDSA signature of the merchant made with purpose `TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID` , affirming that it is really the merchant who requires obtaining the wire transfer identifier.
+  **Request:** The request body most be a `WtidRequest`_ JSON object.
 
-  **Success Response: OK**
-
-  :status 200 OK: The deposit has been executed by the mint and we have a wire transfer identifier.
-  :resheader Content-Type: application/json
-  :>json base32 wtid: wire transfer identifier of the deposit.
-  :>json date execution_time: when was the wire transfer given to the bank.
-  :>json base32 mint_sig: binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_WIRE` whereby the mint affirms the successful wire transfer.
-  :>json base32 mint_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  Again given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
-
-  **Error Response: Wire transfer not yet executed**
-
-  :status 202 Accepted: The deposit request has been accepted for processing, but was not yet executed.  Hence the mint does not yet have a wire transfer identifier.  The merchant should come back later and ask again.
-  :resheader Content-Type: application/json
-  :>json date execution_time: time by which the mint currently thinks the deposit will be executed.
-
-  **Error Response: Invalid signature**:
-
+  **Response:** 
+  :status 200 OK:
+    The deposit has been executed by the mint and we have a wire transfer identifier.
+    The response body is a `WtidResponse`_ object.
+  :status 202 Accepted:
+    The deposit request has been accepted for processing, but was not yet
+    executed.  Hence the mint does not yet have a wire transfer identifier.  The
+    merchant should come back later and ask again.
+    The response body is a `WtidAcceptedResponse`_.
   :status 401 Unauthorized: The signature is invalid.
-  :resheader Content-Type: application/json
-  :>json string error: the value is "invalid signature"
-  :>json string paramter: the value is "merchant_sig"
-
-  **Error Response: Unknown wire transfer identifier**
-
   :status 404 Not Found: The deposit operation is unknown to the mint
-  :resheader Content-Type: application/json
-  :>json string error: the value is always "Deposit unknown"
+
+  **Details:**
+
+  .. _tsref-type-WtidRequest:
+  .. _WtidRequest:
+  .. code-block:: tsref
+
+    interface WtidRequest {
+      // SHA-512 hash of the merchant's payment details.
+      H_wire: HashCode;
+
+      // SHA-512 hash of the contact of the merchant with the customer.
+      H_contract: HashCode;
+
+      // coin's public key, both ECDHE and EdDSA.
+      coin_pub: CoinPublicKey;
+
+      // 64-bit transaction id for the transaction between merchant and customer
+      transaction_id: number;
+
+      // the EdDSA public key of the merchant, so that the client can identify
+      // the merchant for refund requests.
+      merchant_pub: EddsaPublicKey;
+
+      // the EdDSA signature of the merchant made with purpose
+      // `TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID` , affirming that it is really the
+      // merchant who requires obtaining the wire transfer identifier.
+      merchant_sig: EddsaSignature;
+    }
 
 
+  .. _tsref-type-WtidResponse:
+  .. _WtidResponse:
+  .. code-block:: tsref
+
+    interface WtidResponse {
+      // wire transfer identifier of the deposit.
+      wtid: Base32;
+
+      // when was the wire transfer given to the bank.
+      execution_time: Timestamp;
+
+      // binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_WIRE`
+      // whereby the mint affirms the successful wire transfer.
+      mint_sig: EddsaSignature;
+
+      // public EdDSA key of the mint that was used to generate the signature.
+      // Should match one of the mint's signing keys from /keys.  Again given
+      // explicitly as the client might otherwise be confused by clock skew as to
+      // which signing key was used.
+      mint_pub: EddsaPublicKey;
+    }
+
+  .. _tsref-type-WtidAcceptedResponse:
+  .. _WtidAcceptedResponse:
+  .. code-block:: tsref
+
+    interface WtidAcceptedResponse {
+      // time by which the mint currently thinks the deposit will be executed.
+      execution_time: Timestamp;    
+    }
 
 
 
@@ -967,17 +1067,28 @@ Refunds
 
   .. note::
 
-     Refunds are currently not implemented (#3641), this documentation is thus rather preliminary and subject to change.
+     Refunds are currently not implemented (#3641), this documentation is thus
+     rather preliminary and subject to change.
 
 .. _refund:
 .. http:POST:: /refund
 
-  Undo deposit of the given coin, restoring its value.  The request
-  should contain a JSON object with the following fields:
+  Undo deposit of the given coin, restoring its value.
 
-  :>json obj retract_perm: If the coin was claimed as a refund, this field should contain the retract permission obtained from the merchant, otherwise it should not be present.  For details about the object type, see :ref:`Merchant API:retract<retract>`.
-  :>json string retract_value: Value returned due to the retraction.
+  **Request:**
 
+  .. code-block:: tsref
+
+    interface RefundRequest {
+      // If the coin was claimed as a refund, this field should contain the
+      // retract permission obtained from the merchant, otherwise it should not be
+      // present.
+      // TODO: document what the type
+      retract_perm: any;
+
+      // Value returned due to the retraction.
+      retract_value: string;
+    }
 
 
 ------------------------------
@@ -986,7 +1097,9 @@ Administrative API: Key update
 
   .. note::
 
-     This is not yet implemented (no bug number yet, as we are not sure we will implement this; for now, adding new files to the directory and sending a signal to the mint process seems to work fine).
+     This is not yet implemented (no bug number yet, as we are not sure we will
+     implement this; for now, adding new files to the directory and sending a
+     signal to the mint process seems to work fine).
 
 New denomination and signing keys can be uploaded to the mint via the
 HTTP interface.  It is, of course, only possible to upload keys signed
@@ -998,15 +1111,34 @@ interception.
 
   Upload a new denomination key.
 
-  :>json object denom_info: Public part of the denomination key
-  :>json base32 denom_priv: Private RSA key
+  **Request:**
+
+  .. code-block:: tsref
+
+    {
+      // Public part of the denomination key
+      denom_info: any:
+
+      // Private RSA key
+      denom_priv: RsaPrivateKey;
+    }
+
 
 .. http:POST:: /admin/add/sign_key
 
   Upload a new signing key.
 
-  :>json object sign_info: Public part of the signing key
-  :>json base32 sign_priv: Private EdDSA key
+  **Request:**
+
+  .. code-block:: tsref
+
+    {
+      // Public part of the signing key
+      sign_info: any;
+
+      // Private EdDSA key
+      sign_priv: EddsaPrivateKey;
+    }
 
 .. _add-incoming:
 
@@ -1018,63 +1150,83 @@ Administrative API: Bank transactions
 
   Notify mint of an incoming transaction to fill a reserve.
 
-  :>json base32 reserve_pub: Reserve public key
-  :>json object amount: Amount transferred to the reserve
-  :>json date execution_date: When was the transaction executed
-  :>json object wire: Wire details
+  **Request:**
 
-  **Success response**
+  .. code-block:: tsref
 
-  :status 200: the operation succeeded
+    {
+      // Reserve public key
+      reserve_pub: EddsaPublicKey;
 
-  The mint responds with a JSON object containing the following fields:
+      // Amount transferred to the reserve
+      amount: Amount;
 
-  :>json string status: The string constant `NEW` or `DUP` to indicate
-     whether the transaction was truly added to the DB
-     or whether it already existed in the DB
+      // When was the transaction executed
+      execution_date: Timestamp;
+      
+      // Wire details
+      wire: any;
+    }
 
-  **Failure response**
+  **Response:**
 
-  :status 403: the client is not permitted to add incoming transactions. The request may be disallowed by the configuration in general or restricted to certain IP addresses (i.e. loopback-only).
+  :status 200:
+    The operation succeeded. The body is an `AddIncomingResponse`_ object.
+  :status 403:
+    the client is not permitted to add incoming transactions. The request may
+    be disallowed by the configuration in general or restricted to certain IP
+    addresses (i.e. loopback-only).
 
-  The mint responds with a JSON object containing the following fields:
 
-  :>json string error: the error message, such as `permission denied`
-  :>json string hint: hint as to why permission was denied
+  .. code-block:: tsref
 
+    interface AddIncomingResponse {
+      // The string constant `NEW` or `DUP` to indicate whether the transaction
+      // was truly added to the DB or whether it already existed in the DB
+      status: string;
+    }
 
 .. http:POST:: /admin/add/outgoing
 
-  Notify mint about the completion of an outgoing transaction satisfying a /deposit request.  In the future, this will allow merchants to obtain details about the /deposit requests they send to the mint.
+  Notify mint about the completion of an outgoing transaction satisfying a
+  /deposit request.  In the future, this will allow merchants to obtain details
+  about the /deposit requests they send to the mint.
 
   .. note::
 
      This is not yet implemented (no bug number yet either).
 
-  :>json base32 coin_pub: Coin public key
-  :>json object amount: Amount transferred to the merchant
-  :>json string transaction: Transaction identifier in the wire details
-  :>json base32 wire: Wire transaction details, as originally specified by the merchant
+  **Request:**
 
+  .. code-block:: tsref
 
-  **Success response**
+    {
+      coin_pub: CoinPublicKey;
 
-  :status 200: the operation succeeded
+      // Amount transferred to the merchant
+      amount: Amount;
 
-  The mint responds with a JSON object containing the following fields:
+      // Transaction identifier in the wire details
+      transaction: number;
 
-  :>json string status: The string constant `NEW` or `DUP` to indicate
-     whether the transaction was truly added to the DB
-     or whether it already existed in the DB
+      // Wire transaction details, as originally specified by the merchant
+      wire: any;
+    }
 
-  **Failure response**
+  **Response**
 
+  :status 200: The request was successful.
   :status 403: the client is not permitted to add outgoing transactions
 
-  The mint responds with a JSON object containing the following fields:
+  If the request was successful, the response has the following format:
 
-  :>json string error: the error message (`permission denied`)
-  :>json string hint: hint as to why permission was denied
+  .. code-block:: tsref
+
+    {
+      // The string constant `NEW` or `DUP` to indicate whether the transaction
+      // was truly added to the DB or whether it already existed in the DB
+      status: string;
+    }
 
 ------------
 The Test API
@@ -1089,104 +1241,200 @@ binary-compatible with the implementation of the mint.
 
   Test hashing and Crockford base32_ encoding.
 
-  :reqheader Content-Type: application/json
-  :<json base32 input: some base32_-encoded value
-  :status 200: the operation succeeded
-  :resheader Content-Type: application/json
-  :>json base32 output: the base32_-encoded hash of the input value
+  **Request:**
+
+  .. code-block:: tsref
+
+    {
+      // some base32-encoded value
+      input: Base32;
+    }
+
+  **Response:**
+
+  .. code-block:: tsref
+
+    {
+      // the base32_-encoded hash of the input value
+      output: Base32;
+    }
 
 .. http:POST:: /test/encrypt
 
   Test symmetric encryption.
 
-  :reqheader Content-Type: application/json
-  :<json base32 input: some base32_-encoded value
-  :<json base32 key_hash: some base32_-encoded hash that is used to derive the symmetric key and initialization vector for the encryption using the HKDF with "skey" and "iv" as the salt.
-  :status 200: the operation succeeded
-  :resheader Content-Type: application/json
-  :>json base32 output: the encrypted value
+  **Request:**
+
+  .. code-block:: tsref
+
+    {
+      // Some `base32`_-encoded value
+      input: Base32;
+
+      // some `base32`_-encoded hash that is used to derive the symmetric key and
+      // initialization vector for the encryption using the HKDF with "skey" and
+      // "iv" as the salt.
+      key_hash: Base32;
+    }
+
+  **Response:**
+
+
+  .. code-block:: tsref
+
+    {
+      // the encrypted value
+      output: Base32;
+    }
 
 .. http:POST:: /test/hkdf
 
   Test Hash Key Deriviation Function.
 
-  :reqheader Content-Type: application/json
-  :<json base32 input: some base32_-encoded value
-  :status 200: the operation succeeded
-  :resheader Content-Type: application/json
-  :>json base32 output: the HKDF of the input using "salty" as salt
+  **Request:**
+
+
+  .. code-block:: tsref
+
+    {
+      // Some `base32`_-encoded value
+      input: Base32;
+    }
+
+  **Response:**
+
+
+  .. code-block:: tsref
+
+    {
+      // the HKDF of the input using "salty" as salt
+      output: Base32;
+    }
 
 .. http:POST:: /test/ecdhe
 
   Test ECDHE.
 
-  :reqheader Content-Type: application/json
-  :<json base32 ecdhe_pub: ECDHE public key
-  :<json base32 ecdhe_priv: ECDHE private key
-  :status 200: the operation succeeded
-  :resheader Content-Type: application/json
-  :>json base32 ecdh_hash: ECDH result from the two keys
+  **Request:**
+
+  .. code-block:: tsref
+
+    {
+      ecdhe_pub: EcdhePublicKey;
+      ecdhe_priv: EcdhePrivateKey;
+    }
+
+  **Response:**
+
+  .. code-block:: tsref
+
+    {
+      // ECDH result from the two keys
+      ecdhe_hash: HashCode;
+    }
+
 
 .. http:POST:: /test/eddsa
 
   Test EdDSA.
 
-  :reqheader Content-Type: application/json
-  :<json base32 eddsa_pub: EdDSA public key
-  :<json base32 eddsa_sig: EdDSA signature using purpose TALER_SIGNATURE_CLIENT_TEST_EDDSA. Note: the signed payload must be empty, we sign just the purpose here.
+  **Request:**
+
+  .. code-block:: tsref
+
+    {
+      eddsa_pub: EddsaPublicKey;
+
+      // EdDSA signature using purpose TALER_SIGNATURE_CLIENT_TEST_EDDSA. Note:
+      // the signed payload must be empty, we sign just the purpose here.
+      eddsa_sig: EddsaSignature;
+    }
+
+  **Response:**
+
   :status 200: the signature was valid
-  :resheader Content-Type: application/json
-  :>json base32 eddsa_pub: Another EdDSA public key
-  :>json base32 eddsa_sig: EdDSA signature using purpose TALER_SIGNATURE_MINT_TEST_EDDSA
+  :status 401 Unauthorized: the signature was invalid
+
+  The mint responds with another valid signature, which gives the
+  client the opportunity to test its signature verification implementation.
+
+  .. code-block:: tsref
+
+    {
+      // Another EdDSA public key
+      eddsa_pub: EddsaPublicKey;
+
+      // EdDSA signature using purpose TALER_SIGNATURE_MINT_TEST_EDDSA
+      eddsa_sig: EddsaSignature;
+    }
+
 
 .. http:GET:: /test/rsa/get
 
   Obtain the RSA public key used for signing in /test/rsa/sign.
 
-  :status 200: operation was successful
-  :resheader Content-Type: application/json
-  :>json base32 rsa_pub: The RSA public key the client should use when blinding a value for the /test/rsa/sign API.
+  **Response:**
+
+  .. code-block:: tsref
+
+    {
+      // The RSA public key the client should use when blinding a value for the /test/rsa/sign API.
+      rsa_pub: RsaPublicKey;
+    }
 
 .. http:POST:: /test/rsa/sign
 
   Test RSA blind signatures.
 
-  :reqheader Content-Type: application/json
-  :<json base32 blind_ev: Blinded value to sign.
-  :status 200: operation was successful
-  :resheader Content-Type: application/json
-  :>json base32 rsa_blind_sig: Blind RSA signature over the `blind_ev` using the private key corresponding to the RSA public key returned by /test/rsa/get.
+  **Request:**
 
+  .. code-block:: tsref
+
+    {
+      // Blinded value to sign.
+      blind_ev: BlindedRsaSignature;
+    }
+
+  **Response:**
+
+
+  .. code-block:: tsref
+
+    {
+      // Blind RSA signature over the `blind_ev` using the private key
+      // corresponding to the RSA public key returned by /test/rsa/get.
+      rsa_blind_sig: BlindedRsaSignature;
+    }
 
 .. http:POST:: /test/transfer
 
   Test Transfer decryption.
 
-  :reqheader Content-Type: application/json
-  :Request Body:
+  **Request:**
 
-    .. code-block:: tsref
+  .. code-block:: tsref
 
-      {
-        // Encrypted transfer secret
-        secret_enc: string;
+    {
+      // Encrypted transfer secret
+      secret_enc: string;
 
-        // Private transfer key
-        trans_priv: string;
+      // Private transfer key
+      trans_priv: string;
 
-        // Coin public ket
-        coin_pub: string;
-      }
+      // Coin public ket
+      coin_pub: string;
+    }
+
+  **Response:**
 
   :status 200: the operation succeeded
   :resheader Content-Type: application/json
-  :Response JSON Object:
 
-    .. code-block:: tsref
+  .. code-block:: tsref
 
-      {
-        // Decrypted transfer secret
-        secret: string;
-      }
+    {
+      // Decrypted transfer secret
+      secret: string;
+    }
 
 
