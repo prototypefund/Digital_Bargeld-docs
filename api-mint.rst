@@ -583,6 +583,7 @@ typically also view the balance.)
 .. http:get:: /wire/deposits
 
   Provides deposits associated with a given wire transfer.
+
   :query wtid: wire transfer identifier identifying the wire transfer (a base32-encoded value)
 
   **Success Response: OK**
@@ -594,16 +595,13 @@ typically also view the balance.)
   :>json base32 merchant_pub: public key of the merchant (identical for all deposits)
   :>json object deposits: JSON array with **deposit details**.
 
-  Objects in the deposit array have the following format:
+  Objects in the `deposits` array have the following format:
 
-  :>jsonarr object f: the amount_ of the original deposit amount
+  :>jsonarr object deposit_value: the total amount_ the original deposit was worth
   :>jsonarr object deposit_fee: applicable fees for the deposit
-  :>json base32 H_contract: SHA-512 hash of the contact of the merchant with the customer.  Further details are never disclosed to the mint.
-  :>json base32 coin_pub: coin's public key, both ECDHE and EdDSA.
-  :>json date timestamp: timestamp when the contract was finalized, must match approximately the current time of the mint
-  :>json int transaction_id: 64-bit transaction id for the transaction between merchant and customer
-  :>json date refund_deadline: date until which the merchant can issue a refund to the customer via the mint, possibly zero if refunds are not allowed.
-  :>json base32 coin_sig: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's private key.
+  :>jsonarr base32 H_contract: SHA-512 hash of the contact of the merchant with the customer.
+  :>jsonarr int transaction_id: 64-bit transaction id for the transaction between merchant and customer
+  :>jsonarr base32 coin_pub: coin's public key, both ECDHE and EdDSA.
 
 
   **Error Response: Unknown wire transfer identifier**
