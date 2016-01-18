@@ -131,7 +131,7 @@ successful response to the following two calls:
   .. code-block:: tsref
     
     interface Product {
-      // Human-readable product description. `foo`_
+      // Human-readable product description.
       description: string;
 
       // The quantity of the product to deliver to the customer (optional, if applicable)

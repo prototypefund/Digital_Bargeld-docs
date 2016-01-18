@@ -1,6 +1,88 @@
+.. _http-common:
+
 =================================
 Common Taler HTTP API Conventions
 =================================
+
+
+-------------------------
+HTTP Request and Response
+-------------------------
+
+Certain response formats are common for all requests. They are documented here
+instead of with each individual request.  Furthermore, we note that clients may
+theoretically fail to receive any response.  In this case, the client should
+verify that the Internet connection is working properly, and then proceed to
+handle the error as if an internal error (500) had been returned.
+
+.. http:any:: /*
+
+
+  **Request:**
+
+  Unless specified otherwise, HTTP requests that carry a message body must
+  have the content type `application/json`.
+
+  :reqheader Content-Type: application/json
+
+  **Response:**
+
+  :resheader Content-Type: application/json
+  :status 200: The request was successful.
+  :status 500 Internal server error:
+    This always indicates some serious internal operational error of the mint,
+    such as a program bug, database problems, etc., and must not be used for
+    client-side problems.  When facing an internal server error, clients should
+    retry their request after some delay.  We recommended initially trying after
+    1s, twice more at randomized times within 1 minute, then the user should be
+    informed and another three retries should be scheduled within the next 24h.
+    If the error persists, a report should ultimately be made to the auditor,
+    although the auditor API for this is not yet specified.  However, as internal
+    server errors are always reported to the mint operator, a good operator
+    should naturally be able to address them in a timely fashion, especially
+    within 24h.  When generating an internal server error, the mint responds with
+    a JSON object containing the following fields:
+  :status 400 Bad Request: One of the arguments to the request is missing or malformed.
+
+  Unless specified otherwise, all error status codes (4xx and 5xx) have a message
+  body with an `ErrorDetail`_ JSON object.
+
+  **Details:**
+
+  .. _ErrorDetail:
+  .. _tsref-type-ErrorDetail:
+  .. code-block:: tsref
+
+    interface ErrorDetail {
+      // Description of the error, i.e. "missing parameter", "commitment violation", ...
+      // The other arguments are specific to the error value reported here.
+      error: string;
+
+      // Name of the parameter that was bogus (if applicable)
+      parameter?: string;
+
+      // Path to the argument that was bogus (if applicable)
+      path?: string;
+
+      // Offset of the argument that was bogus (if applicable)
+      offset?: string;
+
+      // Index of the argument that was bogus (if applicable)
+      index?: string;
+
+      // Name of the object that was bogus (if applicable)
+      object?: string;
+
+      // Name of the currency thant was problematic (if applicable)
+      currency?: string;
+
+      // Expected type (if applicable).
+      type_expected?: string;
+
+      // Type that was provided instead (if applicable).
+      type_actual?: string;
+    }
+
 
 .. _encodings-ref:
 
@@ -75,68 +157,6 @@ Amounts of currency are expressed as a JSON object with the following fields:
     // of 500,000 would correspond to 50 cents.
     fraction: number;
   }
-
-
---------------
-General errors
---------------
-
-Certain response formats are common for all requests. They are documented here instead of with each individual request.  Furthermore, we note that clients may theoretically fail to receive any response.  In this case, the client should verify that the Internet connection is working properly, and then proceed to handle the error as if an internal error (500) had been returned.
-
-.. http:any:: /*
-
-  **Error Response: Internal error**
-
-  When encountering an internal error, the mint may respond to any request with an internal server error.
-
-  :status 500 Internal server error: This always indicates some serious internal operational error of the mint, such as a program bug, database problems, etc., and must not be used for client-side problems.  When facing an internal server error, clients should retry their request after some delay.  We recommended initially trying after 1s, twice more at randomized times within 1 minute, then the user should be informed and another three retries should be scheduled within the next 24h.  If the error persists, a report should ultimately be made to the auditor, although the auditor API for this is not yet specified.  However, as internal server errors are always reported to the mint operator, a good operator should naturally be able to address them in a timely fashion, especially within 24h.  When generating an internal server error, the mint responds with a JSON object containing the following fields:
-
-  :resheader Content-Type: application/json
-  :>json error: a string with the value "internal error"
-  :>json hint: a string with problem-specific human-readable diagnostic text and typically useful for the mint operator
-
-
-  **Error Response: Bad Request**
-
-  When the client issues a malformed request with missing parameters or where the parameters fail to comply with the specification, the mint generates this type of response.  The error should be shown to the user, while the other details are mostly intended as optional diagnostics for developers.
-
-  :status 400 Bad Request: One of the arguments to the request is missing or malformed.
-  :resheader Content-Type: application/json
-
-  .. ErrorDetail
-  .. _tsref-type-ErrorDetail:
-  .. code-block:: tsref
-
-    interface ErrorDetail {
-      // Description of the error, i.e. "missing parameter", "commitment violation", ...
-      // The other arguments are specific to the error value reported here.
-      error: string;
-
-      // Name of the parameter that was bogus (if applicable)
-      parameter?: string;
-
-      // Path to the argument that was bogus (if applicable)
-      path?: string;
-
-      // Offset of the argument that was bogus (if applicable)
-      offset?: string;
-
-      // Index of the argument that was bogus (if applicable)
-      index?: string;
-
-      // Name of the object that was bogus (if applicable)
-      object?: string;
-
-      // Name of the currency thant was problematic (if applicable)
-      currency?: string;
-
-      // Expected type (if applicable).
-      type_expected?: string;
-
-      // Type that was provided instead (if applicable).
-      type_actual?: string;
-    }
-
 
 
 --------------

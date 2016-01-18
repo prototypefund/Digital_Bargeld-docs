@@ -2,6 +2,9 @@
 The Mint RESTful JSON API
 =========================
 
+The API specified here follows the `general conventions <http-common>`_
+for all details not specified in the individual requests.
+
 -------------------
 Obtaining Mint Keys
 -------------------
