@@ -126,7 +126,9 @@ successful response to the following two calls:
 
   The `product` object describes the product being purchased from the merchant. It has the following structure:
 
-  .. code-block:: ts
+  .. _tsref-type-Product:
+
+  .. code-block:: tsref
     
     interface Product {
       // Human-readable product description.
