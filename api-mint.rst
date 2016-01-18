@@ -460,57 +460,60 @@ denomination.
 
   **Details:**
 
+  .. _DepositRequest:
   .. code-block:: tsref
-  
-    // Amount to be deposited, can be a fraction of the
-    // coin's total value.
-    f: Amount;
 
-    // The merchant's account details. This must be a JSON object whose format
-    // must correspond to one of the supported wire transfer formats of the mint.
-    // See `wireformats`_.
-    wire: WireFormat;
+    interface DepositRequest {
+      // Amount to be deposited, can be a fraction of the
+      // coin's total value.
+      f: Amount;
 
-    // SHA-512 hash of the merchant's payment details from `wire`.  Although
-    // strictly speaking redundant, this helps detect inconsistencies.
-    H_wire: HashCode;
+      // The merchant's account details. This must be a JSON object whose format
+      // must correspond to one of the supported wire transfer formats of the mint.
+      // See `wireformats`_.
+      wire: WireFormat;
 
-    // SHA-512 hash of the contact of the merchant with the customer.  Further
-    // details are never disclosed to the mint.
-    H_contract: HashCode;
+      // SHA-512 hash of the merchant's payment details from `wire`.  Although
+      // strictly speaking redundant, this helps detect inconsistencies.
+      H_wire: HashCode;
 
-    // coin's public key, both ECDHE and EdDSA.
-    coin_pub: CoinPublicKey;
+      // SHA-512 hash of the contact of the merchant with the customer.  Further
+      // details are never disclosed to the mint.
+      H_contract: HashCode;
 
-    // denomination RSA key with which the coin is signed
-    denom_pub: RsaPublicKey;
+      // coin's public key, both ECDHE and EdDSA.
+      coin_pub: CoinPublicKey;
 
-    // mint's unblinded RSA `signature`_ of the coin
-    ub_sig: RsaSignature;
+      // denomination RSA key with which the coin is signed
+      denom_pub: RsaPublicKey;
 
-    // timestamp when the contract was finalized, must match approximately the
-    // current time of the mint
-    timestamp: Timestamp;
+      // mint's unblinded RSA `signature`_ of the coin
+      ub_sig: RsaSignature;
 
-    // indicative time by which the mint undertakes to transfer the funds to
-    // the merchant, in case of successful payment.
-    edate: Timestamp;
+      // timestamp when the contract was finalized, must match approximately the
+      // current time of the mint
+      timestamp: Timestamp;
 
-    // 64-bit transaction id for the transaction between merchant and customer
-    transaction_id: number;
+      // indicative time by which the mint undertakes to transfer the funds to
+      // the merchant, in case of successful payment.
+      edate: Timestamp;
 
-    // EdDSA public key of the merchant, so that the client can identify the
-    // merchant for refund requests.
-    merchant_pub: EddsaPublicKey;
+      // 64-bit transaction id for the transaction between merchant and customer
+      transaction_id: number;
 
-    // date until which the merchant can issue a refund to the customer via the
-    // mint, possibly zero if refunds are not allowed.
-    refund_deadline: Timestamp;
+      // EdDSA public key of the merchant, so that the client can identify the
+      // merchant for refund requests.
+      merchant_pub: EddsaPublicKey;
 
-    // The EdDSA signature (binary-only) made with purpose
-    // `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's
-    // private key.
-    coin_sig: EddsaSignature;
+      // date until which the merchant can issue a refund to the customer via the
+      // mint, possibly zero if refunds are not allowed.
+      refund_deadline: Timestamp;
+
+      // The EdDSA signature (binary-only) made with purpose
+      // `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's
+      // private key.
+      coin_sig: EddsaSignature;
+    }
 
   The deposit operation succeeds if the coin is valid for making a deposit and
   has enough residual value that has not already been deposited or melted.
@@ -873,7 +876,7 @@ the API during normal operation.
       new_coins: NewCoinInfo[];
     }
 
-  .. _tsref-type-NewCoinInfo
+  .. _tsref-type-NewCoinInfo:
   .. code-block:: tsref
     
     interface NewCoinInfo {
@@ -987,6 +990,7 @@ typically also view the balance.)
   **Request:** The request body most be a `WtidRequest`_ JSON object.
 
   **Response:** 
+
   :status 200 OK:
     The deposit has been executed by the mint and we have a wire transfer identifier.
     The response body is a `WtidResponse`_ object.
@@ -1178,6 +1182,7 @@ Administrative API: Bank transactions
     addresses (i.e. loopback-only).
 
 
+  .. _AddIncomingResponse:
   .. code-block:: tsref
 
     interface AddIncomingResponse {
@@ -1239,7 +1244,7 @@ binary-compatible with the implementation of the mint.
 
 .. http:POST:: /test/base32
 
-  Test hashing and Crockford base32_ encoding.
+  Test hashing and Crockford :ref:`base32` encoding.
 
   **Request:**
 

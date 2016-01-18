@@ -104,7 +104,7 @@ Certain response formats are common for all requests. They are documented here i
   :resheader Content-Type: application/json
 
   .. ErrorDetail
-  .. _tsref-type-ErrorDetail
+  .. _tsref-type-ErrorDetail:
   .. code-block:: tsref
 
     interface ErrorDetail {
