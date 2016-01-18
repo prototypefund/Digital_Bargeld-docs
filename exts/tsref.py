@@ -21,7 +21,7 @@ _escape_html_table = {
 
 class LinkingHtmlFormatter(HtmlFormatter):
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        super(LinkingHtmlFormatter, self).__init__(**kwargs)
         self._builder = kwargs['_builder']
 
     def _fmt(self, value, tok):
@@ -88,7 +88,7 @@ class MyHtmlBuilder(StandaloneHTMLBuilder):
 
     def write_doc(self, docname, doctree):
         self._current_docname = docname
-        super().write_doc(docname, doctree)
+        super(MyHtmlBuilder, self).write_doc(docname, doctree)
 
 
 def get_annotation(tok, key):
