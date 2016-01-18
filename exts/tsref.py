@@ -57,7 +57,7 @@ class LinkingHtmlFormatter(HtmlFormatter):
         cls = self._get_css_class(tok)
         href = tok_getprop(tok, "href")
         if href:
-            value = '<a style="color:inherit" href="%s">%s</a>' % (href, value)
+            value = '<a style="color:inherit;text-decoration:underline" href="%s">%s</a>' % (href, value)
         if cls is None or cls == "":
             return value
         return '<span class="%s">%s</span>' % (cls, value)
