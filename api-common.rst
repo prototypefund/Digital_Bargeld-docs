@@ -97,26 +97,41 @@ This section describes how certain types of values are represented throughout th
 
 Binary Data
 ^^^^^^^^^^^
-Binary data is generally encoded using Crockford's variant of Base32 (http://www.crockford.com/wrmg/base32.html), except that "U" is not excluded but also decodes to "V" to make OCR easy.  We will still simply use the JSON type "base32" and the term "Crockford Base32" in the text to refer to the resulting encoding.
+
+Binary data is generally encoded using Crockford's variant of Base32
+(http://www.crockford.com/wrmg/base32.html), except that "U" is not excluded
+but also decodes to "V" to make OCR easy.  We will still simply use the JSON
+type "base32" and the term "Crockford Base32" in the text to refer to the
+resulting encoding.
+
 
 
 Large numbers
 ^^^^^^^^^^^^^
 
-Large numbers such as RSA blinding factors and 256 bit  keys, are transmitted as other binary data in Crockford Base32 encoding.
+Large numbers such as RSA blinding factors and 256 bit  keys, are transmitted
+as other binary data in Crockford Base32 encoding.
 
 
 .. _tsref-type-Timestamp:
 
 Timestamps
 ^^^^^^^^^^
-  Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`, where `x` is the decimal representation of the number of seconds past the Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in JSON simply as a normal slash, but distinguishes the timestamp from a normal string literal.  We use the type "date" in the documentation below.  Additionally, the special strings "\\/never\\/" and "\\/forever\\/" are recognized to represent the end of time.
+
+  Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`,
+  where `x` is the decimal representation of the number of seconds past the
+  Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in
+  JSON simply as a normal slash, but distinguishes the timestamp from a normal
+  string literal.  We use the type "date" in the documentation below.
+  Additionally, the special strings "\\/never\\/" and "\\/forever\\/" are
+  recognized to represent the end of time.
 
 
 .. _public\ key:
 
 Public Keys
 ^^^^^^^^^^^
+
 EdDSA and ECDHE public keys are always points on Curve25519 and represented
 using the standard 256 bits Ed25519 compact format, converted to Crockford
 Base32_.
@@ -126,11 +141,16 @@ Base32_.
 Signatures
 ^^^^^^^^^^
 
-The specific signature scheme in use, like RSA blind signatures or EdDSA, depends on the context.  RSA blind signatures are only used for coins and always simply base32_ encoded.
+The specific signature scheme in use, like RSA blind signatures or EdDSA,
+depends on the context.  RSA blind signatures are only used for coins and
+always simply base32_ encoded.
 
-EdDSA signatures are transmitted as 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only).
-These signed objects always contain a purpose number unique to the context in which the signature is used, but frequently the actual binary-object must be reconstructed locally from information available only in context, such as recent messages or account detals.
-These objects are described in detail in :ref:`Signatures`.
+EdDSA signatures are transmitted as 64-byte base32_ binary-encoded objects with
+just the R and S values (base32_ binary-only).  These signed objects always
+contain a purpose number unique to the context in which the signature is used,
+but frequently the actual binary-object must be reconstructed locally from
+information available only in context, such as recent messages or account
+detals.  These objects are described in detail in :ref:`Signatures`.
 
 
 .. _amount:
@@ -169,19 +189,27 @@ Binary Formats
 
   .. note::
 
-     This section largely corresponds to the definitions in taler_signatures.h.  You may also want to refer to this code, as it offers additional details on each of the members of the structs.
+     This section largely corresponds to the definitions in taler_signatures.h.
+     You may also want to refer to this code, as it offers additional details
+     on each of the members of the structs.
 
   .. note::
 
-     Due to the way of handling `big` numbers by some platforms (such as `JavaScript`, for example), wherever the following specification mentions a 64-bit value, the actual implementations
-     are strongly advised to rely on arithmetic up to 53 bits.
+     Due to the way of handling `big` numbers by some platforms (such as
+     `JavaScript`, for example), wherever the following specification mentions
+     a 64-bit value, the actual implementations are strongly advised to rely on
+     arithmetic up to 53 bits.
 
-This section specifies the binary representation of messages used in Taler's protocols. The message formats are given in a C-style pseudocode notation.  Padding is always specified explicitly, and numeric values are in network byte order (big endian).
+This section specifies the binary representation of messages used in Taler's
+protocols. The message formats are given in a C-style pseudocode notation.
+Padding is always specified explicitly, and numeric values are in network byte
+order (big endian).
 
 Amounts
 ^^^^^^^
 
-Amounts of currency are always expressed in terms of a base value, a fractional value and the denomination of the currency:
+Amounts of currency are always expressed in terms of a base value, a fractional
+value and the denomination of the currency:
 
 .. sourcecode:: c
 
@@ -195,7 +223,9 @@ Amounts of currency are always expressed in terms of a base value, a fractional 
 Time
 ^^^^
 
-In signed messages, time is represented using 64-bit big-endian values, denoting microseconds since the UNIX Epoch.  `UINT64_MAX` represents "never" (distant future, eternity).
+In signed messages, time is represented using 64-bit big-endian values,
+denoting microseconds since the UNIX Epoch.  `UINT64_MAX` represents "never"
+(distant future, eternity).
 
 .. sourcecode:: c
 
@@ -206,7 +236,9 @@ In signed messages, time is represented using 64-bit big-endian values, denoting
 Cryptographic primitives
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
-All elliptic curve operations are on Curve25519.  Public and private keys are thus 32 bytes, and signatures 64 bytes.  For hashing, including HKDFs, Taler uses 512-bit hash codes (64 bytes).
+All elliptic curve operations are on Curve25519.  Public and private keys are
+thus 32 bytes, and signatures 64 bytes.  For hashing, including HKDFs, Taler
+uses 512-bit hash codes (64 bytes).
 
 .. sourcecode:: c
 
@@ -297,9 +329,17 @@ All elliptic curve operations are on Curve25519.  Public and private keys are th
 Signatures
 ^^^^^^^^^^
 
-Please note that any RSA signature is processed by a function called `GNUNET_CRYPTO_rsa_signature_encode (..)` **before** being sent over the network, so the receiving party must run `GNUNET_CRYPTO_rsa_signature_decode (..)` before verifying it. See their implementation in `src/util/crypto_rsa.c`, in GNUNET's code base. Finally, they are defined in `gnunet/gnunet_crypto_lib.h`.
+Please note that any RSA signature is processed by a function called
+`GNUNET_CRYPTO_rsa_signature_encode (..)` **before** being sent over the
+network, so the receiving party must run `GNUNET_CRYPTO_rsa_signature_decode
+(..)` before verifying it. See their implementation in `src/util/crypto_rsa.c`,
+in GNUNET's code base. Finally, they are defined in
+`gnunet/gnunet_crypto_lib.h`.
 
-EdDSA signatures are always made on the hash of a block of the same generic format, the `struct SignedData` given below.  In our notation, the type of a field can depend on the value of another field. For the following message, the length of the `payload` array must match the value of the `size` field:
+EdDSA signatures are always made on the hash of a block of the same generic
+format, the `struct SignedData` given below.  In our notation, the type of a
+field can depend on the value of another field. For the following message, the
+length of the `payload` array must match the value of the `size` field:
 
 .. sourcecode:: c
 
@@ -309,9 +349,13 @@ EdDSA signatures are always made on the hash of a block of the same generic form
     uint8_t payload[size - sizeof (struct SignedData)];
   };
 
-The `purpose` field in `struct SignedData` is used to express the context in which the signature is made, ensuring that a signature cannot be lifted from one part of the protocol to another.  The various `purpose` constants are defined in `taler_signatures.h`.  The `size` field prevents padding attacks.
+The `purpose` field in `struct SignedData` is used to express the context in
+which the signature is made, ensuring that a signature cannot be lifted from
+one part of the protocol to another.  The various `purpose` constants are
+defined in `taler_signatures.h`.  The `size` field prevents padding attacks.
 
-In the subsequent messages, we use the following notation for signed data described in `FIELDS` with the given purpose.
+In the subsequent messages, we use the following notation for signed data
+described in `FIELDS` with the given purpose.
 
 .. sourcecode:: c
 
@@ -319,7 +363,8 @@ In the subsequent messages, we use the following notation for signed data descri
     FIELDS
   } msg;
 
-The `size` field of the corresponding `struct SignedData` is determined by the size of `FIELDS`.
+The `size` field of the corresponding `struct SignedData` is determined by the
+size of `FIELDS`.
 
 .. sourcecode:: c
 
