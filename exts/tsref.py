@@ -29,7 +29,6 @@ class LinkingHtmlFormatter(HtmlFormatter):
         href = tok_getprop(tok, "href")
         if href:
             value = '<a style="color:inherit" href="%s">%s</a>' % (href, value)
-            print("got target!!!!!!!!!!!")
         if cls is None or cls == "":
             return value
         return '<span class="%s">%s</span>' % (cls, value)
@@ -47,8 +46,6 @@ class LinkingHtmlFormatter(HtmlFormatter):
         line = ''
         for ttype, value in tokensource:
             link = get_annotation(ttype, "link")
-            if link:
-                print("got link", link)
 
             parts = value.translate(escape_table).split('\n')
 
@@ -90,7 +87,6 @@ class MyHtmlBuilder(StandaloneHTMLBuilder):
         self.highlighter = MyPygmentsBridge(self, self.config.trim_doctest_flags)
 
     def write_doc(self, docname, doctree):
-        print("writing doc", docname)
         self._current_docname = docname
         super().write_doc(docname, doctree)
 
@@ -141,11 +137,9 @@ class LinkFilter(Filter):
         for ttype, value in stream:
             if ttype in Token.Keyword.Type:
                 defname = make_id('tsref-type-' + value);
-                print("looking for", defname)
                 t = copy_token(ttype)
                 if defname in id_to_doc:
                     docname = id_to_doc[defname]
-                    print("found", defname, "in", docname)
                     href = self.app.builder.get_target_uri(docname) + "#" + defname
                     tok_setprop(t, "href", href)
 
@@ -153,7 +147,6 @@ class LinkFilter(Filter):
             elif ttype in Token.Comment:
                 last = 0
                 for m in re.finditer(link_reg, value):
-                    print("got link comment", value)
                     pre = value[last:m.start()]
                     if pre:
                         yield ttype, pre
@@ -164,9 +157,8 @@ class LinkFilter(Filter):
                         href = self.app.builder.get_target_uri(docname) + "#" + id
                         tok_setprop(t, "href", href)
                     else:
-                        print("target id not found:", id)
-                    print("old", ttype)
-                    print("new", t)
+                        # TODO: warn!
+                        pass
                     yield t, m.group(1)
                     last = m.end()
                 post = value[last:]
