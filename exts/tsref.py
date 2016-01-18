@@ -201,7 +201,8 @@ class LinkFilter(Filter):
 
 
 
-def remember_targets(app, doctree, docname):
+def remember_targets(app, doctree):
+    docname = app.env.docname
     for node in doctree.traverse():
         if not isinstance(node, nodes.Element):
             continue
@@ -220,7 +221,7 @@ def setup(app):
     lexer.add_filter(LinkFilter(app))
     app.add_lexer('tsref', lexer)
     app.add_builder(MyHtmlBuilder)
-    app.connect("doctree-resolved", remember_targets)
+    app.connect("doctree-read", remember_targets)
 
 
 
