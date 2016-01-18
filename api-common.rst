@@ -93,6 +93,7 @@ Common encodings
 This section describes how certain types of values are represented throughout the API.
 
 .. _base32:
+.. _tsref-type-Base32:
 
 Binary Data
 ^^^^^^^^^^^
@@ -103,6 +104,9 @@ Large numbers
 ^^^^^^^^^^^^^
 
 Large numbers such as RSA blinding factors and 256 bit  keys, are transmitted as other binary data in Crockford Base32 encoding.
+
+
+.. _tsref-type-Timestamp:
 
 Timestamps
 ^^^^^^^^^^

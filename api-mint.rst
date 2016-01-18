@@ -29,7 +29,6 @@ possibly by using HTTPS.
   The mint responds with a `MintKeysResponse`_ object.
 
   :status 200 OK: This request should virtually always be successful.
-  :resheader Content-Type: application/json
 
   **Details:**
   
@@ -197,7 +196,6 @@ Obtaining wire-transfer information
   **Response:**
 
   :status 200: This request should virtually always be successful.
-  :resheader Content-Type: application/json
   :Response JSON Object: `WireResponse`_
 
   **Details:**
@@ -243,7 +241,6 @@ Obtaining wire-transfer information
 
   :status 200: This request should virtually always be successful.
   :status 501: This wire transfer method is not supported by this mint.
-  :resheader Content-Type: application/json
   :Response JSON Object: `WireSepaResponse`_
     
 
@@ -305,7 +302,6 @@ mint.
   :query reserve_pub: EdDSA reserve public key identifying the reserve.
   :status 200 OK: The reserve was known to the mint, details about it follow in the body.
   :status 404 Not Found: The withdrawal key does not belong to a reserve known to the mint.
-  :resheader Content-Type: application/json
   :Response JSON Object: `ReserveStatus`_
 
   .. _ReserveStatus:
@@ -446,9 +442,7 @@ denomination.
   the digital coins.  The request should contain a JSON object with the
   following fields:
 
-  :reqheader Content-Type: application/json
   :Request JSON Object: `DepositRequest`_
-  :resheader Content-Type: application/json
   :status 200:
     The operation succeeded, the mint confirms that no double-spending took place.
   :status 401 Unauthorized:
@@ -612,7 +606,6 @@ the API during normal operation.
   :status 404:
     the mint does not recognize the denomination key as belonging to the mint,
     or it has expired
-  :resheader Content-Type: application/json
 
   **Details:**
 
@@ -1436,7 +1429,6 @@ binary-compatible with the implementation of the mint.
   **Response:**
 
   :status 200: the operation succeeded
-  :resheader Content-Type: application/json
 
   .. code-block:: tsref
 
