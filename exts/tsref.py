@@ -14,9 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-This extension adds a new lexer "tsref", which
+This extension adds a new lexer "tsref" for TypeScript, which
 allows reST-style links inside comments (`LinkName`_),
-and semi-automatically adds links to references to types.
+and semi-automatically adds links to the definition of types.
 
 For type TYPE, a reference to tsref-type-TYPE is added.
 
@@ -62,8 +62,6 @@ class LinkingHtmlFormatter(HtmlFormatter):
             return value
         return '<span class="%s">%s</span>' % (cls, value)
 
-
-
     def _format_lines(self, tokensource):
         """
         Just format the tokens, without any wrapping tags.
@@ -95,7 +93,6 @@ class LinkingHtmlFormatter(HtmlFormatter):
             yield 1, line + lsep
 
 
-
 class MyPygmentsBridge(PygmentsBridge):
     def __init__(self, builder, trim_doctest_flags):
         self.dest = "html"
@@ -125,12 +122,14 @@ def get_annotation(tok, key):
         return None
     return tok.kv.get(key)
 
+
 def copy_token(tok):
     new_tok = _TokenType(tok)
     # This part is very fragile against API changes ...
     new_tok.subtypes = set(tok.subtypes)
     new_tok.parent = tok.parent
     return new_tok
+
 
 def tok_setprop(tok, key, value):
     tokid = id(tok)
@@ -139,6 +138,7 @@ def tok_setprop(tok, key, value):
         e = token_props[tokid] = (tok, {})
     _, kv = e
     kv[key] = value
+
 
 def tok_getprop(tok, key):
     tokid = id(tok)
@@ -151,9 +151,13 @@ def tok_getprop(tok, key):
 
 link_reg = re.compile(r"`([^`]+)`_")
 
-# map from token id to props
+# Map from token id to props.
+# Properties can't be added to tokens
+# since they derive from Python's tuple.
 token_props = {}
 
+# Mapping from element IDs to document
+# name where the ID occurs.
 id_to_doc = {}
 
 
