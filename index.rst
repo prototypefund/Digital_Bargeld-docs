@@ -32,6 +32,7 @@ It focuses on how to install, configure and run the required software.
   :maxdepth: 2
 
   impl-mint
+  impl-merchant
 
 
 ------------------------
@@ -61,6 +62,7 @@ interfaces between the core components of Taler.
 .. toctree::
   :maxdepth: 2
 
+  api-common
   api-mint
   api-merchant
 
@@ -78,7 +80,6 @@ core components of the Taler reference implementation.
   :maxdepth: 2
 
   dev-wallet-wx
-  dev-merchant
 
 
 ------------------

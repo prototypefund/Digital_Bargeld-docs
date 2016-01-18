@@ -61,15 +61,20 @@ successful response to the following two calls:
 
   Issued by the wallet when the customer wants to see the contract for a certain purchase
 
+
 .. http:post:: /contract
 
   Issued by the frontend to the backend when it wants to augment its `proposition` with all the
   cryptographic information. For the sake of precision, the frontend encloses the following JSON inside a `contract`
   field to the actual JSON sent to the backend.
 
-  .. code-block:: ts
+
+  .. _`hello-link`:
+
+  .. code-block:: tsref
 
     interface Contract {
+      // `hello-link`_
       // Total price for the transaction.
       // The mint will subtract deposit fees from that amount
       // before transfering it to the merchant.
@@ -81,7 +86,7 @@ successful response to the following two calls:
       // 53-bit number chosen by the merchant to uniquely identify the contract.
       transaction_id: number;
 
-      // List of products that are part of the purchase (see below)
+      // List of products that are part of the purchase (see `below)
       products: Product[];
 
       // Time when this contract was generated

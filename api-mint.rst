@@ -2,91 +2,10 @@
 The Mint RESTful JSON API
 =========================
 
--------
-General
--------
-
-.. _encodings-ref:
-
-++++++++++++++++
-Common encodings
-++++++++++++++++
-
-This section describes how certain types of values are represented throughout the API.
-
-  .. _Base32:
-
-  * **Binary data**:
-    Binary data is generally encoded using Crockford's variant of Base32 (http://www.crockford.com/wrmg/base32.html), except that "U" is not excluded but also decodes to "V" to make OCR easy.  We will still simply use the JSON type "base32" and the term "Crockford Base32" in the text to refer to the resulting encoding.
-
-  * **Large numbers**: Large numbers such as RSA blinding factors and 256 bit  keys, are transmitted as other binary data in Crockford Base32 encoding.
-
-  .. _Timestamp:
-
-  * **Timestamps**:
-    Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`, where `x` is the decimal representation of the number of seconds past the Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in JSON simply as a normal slash, but distinguishes the timestamp from a normal string literal.  We use the type "date" in the documentation below.  Additionally, the special strings "\\/never\\/" and "\\/forever\\/" are recognized to represent the end of time.
-
-  .. _public\ key:
-
-  * **Public key**: EdDSA and ECDHE public keys are always points on Curve25519 and represented using the standard 256 bits Ed25519 compact format, converted to Crockford Base32_.
-
-  .. _Signature:
-
-  * **Signatures**: The specific signature scheme in use, like RSA blind signatures or EdDSA, depends on the context.  RSA blind signatures are only used for coins and always simply base32_ encoded.
-
-EdDSA signatures are transmitted as 64-byte base32_ binary-encoded objects with just the R and S values (base32_ binary-only).
-These signed objects always contain a purpose number unique to the context in which the signature is used, but frequently the actual binary-object must be reconstructed locally from information available only in context, such as recent messages or account detals.
-These objects are described in detail in :ref:`Signatures`.
-
-  .. _Amount:
-
-  * **Amounts**: Amounts of currency are expressed as a JSON object with the following fields:
-
-    * `currency`: name of the currency using either a three-character ISO 4217 currency code, or a regional currency identifier starting with a "*" followed by at most 10 characters.  ISO 4217 exponents in the name are not supported, although the "fraction" is corresponds to an ISO 4217 exponent of 6.
-    * `value`: unsigned 32 bit value in the currency, note that "1" here would correspond to 1 EUR or 1 USD, depending on `currency`, not 1 cent.
-    * `fraction`: unsigned 32 bit fractional value to be added to `value` representing an additional currency fraction, in units of one millionth (10\ :superscript:`-6`) of the base currency value.  For example, a fraction of 500,000 would correspond to 50 cents.
-
-
-++++++++++++++
-General errors
-++++++++++++++
-
-Certain response formats are common for all requests. They are documented here instead of with each individual request.  Furthermore, we note that clients may theoretically fail to receive any response.  In this case, the client should verify that the Internet connection is working properly, and then proceed to handle the error as if an internal error (500) had been returned.
-
-.. http:any:: /*
-
-  **Error Response: Internal error**
-
-  When encountering an internal error, the mint may respond to any request with an internal server error.
-
-  :status 500 Internal server error: This always indicates some serious internal operational error of the mint, such as a program bug, database problems, etc., and must not be used for client-side problems.  When facing an internal server error, clients should retry their request after some delay.  We recommended initially trying after 1s, twice more at randomized times within 1 minute, then the user should be informed and another three retries should be scheduled within the next 24h.  If the error persists, a report should ultimately be made to the auditor, although the auditor API for this is not yet specified.  However, as internal server errors are always reported to the mint operator, a good operator should naturally be able to address them in a timely fashion, especially within 24h.  When generating an internal server error, the mint responds with a JSON object containing the following fields:
-
-  :resheader Content-Type: application/json
-  :>json error: a string with the value "internal error"
-  :>json hint: a string with problem-specific human-readable diagnostic text and typically useful for the mint operator
-
-
-  **Error Response: Bad Request**
-
-  When the client issues a malformed request with missing parameters or where the parameters fail to comply with the specification, the mint generates this type of response.  The error should be shown to the user, while the other details are mostly intended as optional diagnostics for developers.
-
-  :status 400 Bad Request: One of the arguments to the request is missing or malformed.
-  :resheader Content-Type: application/json
-  :>json string error: description of the error, i.e. missing parameter, malformed parameter, commitment violation, etc.  The other arguments are specific to the error value reported here.
-  :>json string parameter: name of the parameter that was bogus (if applicable)
-  :>json string path: path to the argument that was bogus (if applicable)
-  :>json string offset: offset of the argument that was bogus (if applicable)
-  :>json string index: index of the argument that was bogus (if applicable)
-  :>json string object: name of the component of the object that was bogus (if applicable)
-  :>json string currency: currency that was problematic (if applicable)
-  :>json string type_expected: expected type (if applicable)
-  :>json string type_actual: type that was provided instead (if applicable)
-
-
-
 -------------------
 Obtaining Mint Keys
 -------------------
+
 
 This API is used by wallets and merchants to obtain global information about the mint, such as online signing keys, available denominations and the fee structure.
 This is typically the first call any mint client makes, as it returns information required to process all of the other interactions with the mint.  The returned
@@ -103,47 +22,137 @@ from auditors, and the auditor keys should be hard-coded into the wallet as they
 
   :status 200 OK: This request should virtually always be successful.
   :resheader Content-Type: application/json
-  :>json base32 master_public_key: EdDSA master public key of the mint, used to sign entries in `denoms` and `signkeys`
-  :>json list denoms: A JSON list of denomination descriptions.  Described below in detail.
-  :>json date list_issue_date: The date when the denomination keys were last updated.
-  :>json list auditors: A JSON list of the auditors of the mint. Described below in detail.
-  :>json list signkeys: A JSON list of the mint's signing keys.  Described below in detail.
-  :>json base32 eddsa_sig: compact EdDSA signature_ (binary-only) over the SHA-512 hash of the concatenation of all SHA-512 hashes of the RSA denomination public keys in `denoms` in the same order as they were in `denoms`.  Note that for hashing, the binary format of the RSA public keys is used, and not their base32_ encoding.  Wallets cannot do much with this signature by itself; it is only useful when multiple clients need to establish that the mint is sabotaging end-user anonymity by giving disjoint denomination keys to different users.  If a mint were to do this, this signature allows the clients to demonstrate to the public that the mint is dishonest.
-  :>json base32 eddsa_pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  It is given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
+  
+  .. code-block:: ts
 
-  A denomination description in the `denoms` list is a JSON object with the following fields:
+    interface MintKeysResponse {
+      // EdDSA master public key of the mint, used to sign entries in `denoms` and `signkeys`
+      master_public_key: EddsaPublicKey;
 
-  :>jsonarr object value: Amount_ of the denomination.  A JSON object specifying an amount_.
-  :>jsonarr date stamp_start: timestamp_ indicating when the denomination key becomes valid.
-  :>jsonarr date stamp_expire_withdraw: timestamp_ indicating when the denomination key can no longer be used to withdraw fresh coins.
-  :>jsonarr date stamp_expire_deposit: timestamp_ indicating when coins of this denomination become invalid for depositing.
-  :>jsonarr date stamp_expire_legal: timestamp_ indicating by when legal disputes relating to these coins must be settled, as the mint will afterwards destroy its evidence relating to transactions involving this coin.
-  :>jsonarr base32 denom_pub: Public (RSA) key for the denomination in base32_ encoding.
-  :>jsonarr object fee_withdraw: Fee charged by the mint for withdrawing a coin of this type, encoded as a JSON object specifying an amount_.
-  :>jsonarr object fee_deposit: Fee charged by the mint for depositing a coin of this type, encoded as a JSON object specifying an amount_.
-  :>jsonarr object fee_refresh: Fee charged by the mint for melting a coin of this type during a refresh operation, encoded as a JSON object specifying an amount_.  Note that the total refreshing charges will be the sum of the refresh fees for all of the melted coins and the sum of the withdraw fees for all "new" coins.
-  :>jsonarr base32 master_sig: Signature_ (binary-only) with purpose `TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY` over the expiration dates, value and the key, created with the mint's master key.
+      // Denomination offered by this mint.
+      denoms: Denom[];
+
+      // The date when the denomination keys were last updated.
+      list_issue_date: string;
+
+      // Auditors of the mint.
+      auditors: Auditor[];
+
+      // The mint's signing keys.
+      signkeys: SignKey[];
+
+      // compact EdDSA signature_ (binary-only) over the SHA-512 hash of the
+      // concatenation of all SHA-512 hashes of the RSA denomination public keys
+      // in `denoms` in the same order as they were in `denoms`.  Note that for
+      // hashing, the binary format of the RSA public keys is used, and not their
+      // base32_ encoding.  Wallets cannot do much with this signature by itself;
+      // it is only useful when multiple clients need to establish that the mint
+      // is sabotaging end-user anonymity by giving disjoint denomination keys to
+      // different users.  If a mint were to do this, this signature allows the
+      // clients to demonstrate to the public that the mint is dishonest.
+      eddsa_sig: string;
+
+      // Public EdDSA key of the mint that was used to generate the signature.
+      // Should match one of the mint's signing keys from /keys.  It is given
+      // explicitly as the client might otherwise be confused by clock skew as to
+      // which signing key was used.
+      eddsa_pub: string;
+    }
+
+    interface Denomination {
+      // How much are coins of this denomination worth?
+      value: Amount;
+
+      // When does the denomination key become valid?
+      stamp_start: Timestamp;
+
+      // When is it no longer possible to withdraw fresh coins
+      // of this denomination?
+      stamp_expire_withdraw: Timestamp;
+
+      // When is it no longer possible to deposit coins
+      // of this denomination?
+      stamp_expire_withdraw: Timestamp;
+
+      // Timestamp indicating by when legal disputes relating to these coins must
+      // be settled, as the mint will afterwards destroy its evidence relating to
+      // transactions involving this coin.
+      stamp_expire_legal: Timestamp;
+
+      // Public (RSA) key for the denomination in base32 encoding.
+      denom_pub: string;
+
+      // Fee charged by the mint for withdrawing a coin of this denomination
+      fee_withdraw: Amount;
+
+      // Fee charged by the mint for depositing a coin of this denomination
+      fee_deposit: Amount;
+
+      // Fee charged by the mint for refreshing a coin of this denomination
+      fee_refresh: Amount;
+
+      // Signature with purpose
+      // `TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY` over the expiration
+      // dates, value and the key, created with the mint's master key.
+      master_sig: EddsaSignature;
+    }
 
   Fees for any of the operations can be zero, but the fields must still be present. The currency of the `fee_deposit` and `fee_refresh` must match the currency of the `value`.  Theoretically, the `fee_withdraw` could be in a different currency, but this is not currently supported by the implementation.
 
   A signing key in the `signkeys` list is a JSON object with the following fields:
 
-  :>jsonarr base32 key: The actual mint's EdDSA signing public key.
-  :>jsonarr date stamp_start: Initial validity date for the signing key.
-  :>jsonarr date stamp_expire: Date when the mint will stop using the signing key, allowed to overlap slightly with the next signing key's validity to allow for clock skew.
-  :>jsonarr date stamp_end: Date when all signatures made by the signing key expire and should henceforth no longer be considered valid in legal disputes.
-  :>jsonarr date stamp_expire: Expiration date for the signing key.
-  :>jsonarr base32 master_sig:  A signature_ (binary-only) with purpose `TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY` over the `key` and `stamp_expire` by the mint master key.
+  .. code-block:: ts
+
+    interface SignKey {
+      // The actual mint's EdDSA signing public key.
+      key: EddsaPublicKey;
+
+      // Initial validity date for the signing key.
+      stamp_start: Timestamp;
+
+      // Date when the mint will stop using the signing key, allowed to overlap
+      // slightly with the next signing key's validity to allow for clock skew.
+      stamp_expire: Timestamp;
+
+      // Date when all signatures made by the signing key expire and should
+      // henceforth no longer be considered valid in legal disputes.
+      stamp_end: Timestamp;
+
+      // A signature_ (binary-only) with purpose
+      // `TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY` over the `key` and
+      // `stamp_expire` by the mint master key.
+      master_sig: EddsaSignature;
+    }
 
   An entry in the `auditors` list is a JSON object with the following fields:
 
-  :>jsonarr base32 auditor_pub: The auditor's EdDSA signing public key.
-  :>jsonarr array denomination_keys: An array of denomination keys the auditor affirms with its signature. Note that the message only includes the hash of the public key, while the signature is actually over the expanded information including expiration times and fees.  The exact format is described below.
+  .. code-block:: ts
 
-  An entry in the `denomination_keys` list is a JSON object with the following field:
+    interface Auditor {
+      // The auditor's EdDSA signing public key.
+      auditor_pub: EddsaPublicKey;
 
-  :>jsonarr base32 denom_pub_h: hash of the public RSA key used to sign coins of the respective denomination.  Note that the auditor's signature covers more than just the hash, but this other information is already provided in `denoms` and thus not repeated here.
-  :>jsonarr base32 auditor_sig: A signature_ (binary-only) with purpose `TALER_SIGNATURE_AUDITOR_MINT_KEYS` over the mint's public key and the denomination key information. To verify the signature, the `denom_pub_h` must be resolved with the information from `denoms`.
+      // An array of denomination keys the auditor affirms with its signature.
+      // Note that the message only includes the hash of the public key, while the
+      // signature is actually over the expanded information including expiration
+      // times and fees.  The exact format is described below.
+      denomination_keys: DenominationKey[];
+    }
+
+    interface DenominationKey {
+      // hash of the public RSA key used to sign coins of the respective
+      // denomination.  Note that the auditor's signature covers more than just
+      // the hash, but this other information is already provided in `denoms` and
+      // thus not repeated here.
+      denom_pub_h: HashCode;
+
+      // A signature_ (binary-only) with purpose
+      // `TALER_SIGNATURE_AUDITOR_MINT_KEYS` over the mint's public key and the
+      // denomination key information. To verify the signature, the `denom_pub_h`
+      // must be resolved with the information from `denoms`
+      auditor_sig: EddsaSignature;
+
+    }
 
   The same auditor may appear multiple times in the array for different subsets of denomination keys, and the same denomination key hash may be listed multiple times for the same or different auditors.  The wallet or merchant just should check that the denomination keys they use are in the set for at least one of the auditors that they accept.
 
@@ -164,9 +173,27 @@ Obtaining wire-transfer information
 
   :status 200: This request should virtually always be successful.
   :resheader Content-Type: application/json
-  :>json array methods: a JSON array of strings with supported payment methods, i.e. "sepa". Further information about the respective payment method is then available under /wire/METHOD, i.e. /wire/sepa if the payment method was "sepa".
-  :>json base32 sig: the EdDSA signature_ (binary-only) with purpose `TALER_SIGNATURE_MINT_PAYMENT_METHODS` signing over the hash over the 0-terminated strings representing the payment methods in the same order as given in methods.
-  :>json base32 pub: public EdDSA key of the mint that was used to generate the signature.  Should match one of the mint's signing keys from /keys.  It is given explicitly as the client might otherwise be confused by clock skew as to which signing key was used.
+
+  .. code-block:: ts
+
+    interface WireResponse {
+      // Names of supported methods (i.e. "sepa" or "test").
+      // Payment method METHOD is available under /wire/METHOD.
+      methods: string[];
+
+      // the EdDSA signature_ (binary-only) with purpose
+      // `TALER_SIGNATURE_MINT_PAYMENT_METHODS` signing over the hash over the
+      // 0-terminated strings representing the payment methods in the same order
+      // as given in methods.
+      sig: EddsaSignature;
+
+      // public EdDSA key of the mint that was used to generate the signature.
+      // Should match one of the mint's signing keys from /keys.  It is given
+      // explicitly as the client might otherwise be confused by clock skew as to
+      // which signing key was used.
+      pub: EddsaPublicKey;
+    }
+
 
 .. http:get:: /wire/test
 
@@ -227,16 +254,43 @@ When transfering money to the mint such as via SEPA transfers, the mint creates 
 
   :status 200 OK: The reserve was known to the mint, details about it follow in the body.
   :resheader Content-Type: application/json
-  :>json object balance: Total amount_ left in this reserve, an amount_ expressed as a JSON object.
-  :>json object history: JSON list with the history of transactions involving the reserve.
+
+  .. code-block:: ts
+
+    interface ReserveStatus {
+      // Balance left in the reserve.
+      balance: Amount;
+
+      // Transaction history for this reserve
+      history: TransactionHistoryItem[];
+    }
 
   Objects in the transaction history have the following format:
 
-  :>jsonarr string type: either the string "WITHDRAW" or the string "DEPOSIT"
-  :>jsonarr object amount: the amount_ that was withdrawn or deposited
-  :>jsonarr object wire: a JSON object with the wiring details needed by the banking system in use, present in case the `type` was "DEPOSIT"
-  :>jsonarr string details: base32_ binary encoding of the transaction data as a `TALER_WithdrawRequestPS` struct described in :ref:`Signatures`, only present if the `type` was "WITHDRAW".  Its `purpose` should match our `type`, `amount_with_fee`, should match our `amount`, and its `size` should be consistent.
-  :>jsonarr object signature: the EdDSA signature_ (binary-only) made with purpose `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` over the transaction's details, again only present if the `type` was "WITHDRAW".
+  .. code-block:: ts
+
+    interface TransactionHistoryItem {
+      // Either "WITHDRAW" or "DEPOSIT"
+      type: string;
+
+      // The amount that was withdrawn or deposited.
+      amount: Amount;
+
+      // Wiring details, only present if type is "DEPOSIT".
+      wire?: any;
+
+      // binary encoding of the transaction data as a `TALER_WithdrawRequestPS`
+      // struct described in :ref:`Signatures`, only present if the `type` was
+      // "WITHDRAW".  Its `purpose` should match our `type`, `amount_with_fee`,
+      // should match our `amount`, and its `size` should be consistent.
+      string?: details;
+
+      // Signature over the transaction details.
+      // Purpose: TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW
+      signature?: EddsaSignature;
+
+
+    }
 
   **Error Response: Unknown reserve**
 
@@ -814,273 +868,3 @@ binary-compatible with the implementation of the mint.
   :>json base32 secret: Decrypted transfer secret
 
 
-===========================
-Binary Blob Specification
-===========================
-
-  .. note::
-
-     This section largely corresponds to the definitions in taler_signatures.h.  You may also want to refer to this code, as it offers additional details on each of the members of the structs.
-
-  .. note::
-
-     Due to the way of handling `big` numbers by some platforms (such as `JavaScript`, for example), wherever the following specification mentions a 64-bit value, the actual implementations
-     are strongly advised to rely on arithmetic up to 53 bits.
-
-This section specifies the binary representation of messages used in Taler's protocols. The message formats are given in a C-style pseudocode notation.  Padding is always specified explicitly, and numeric values are in network byte order (big endian).
-
-------------------------
-Amounts
-------------------------
-
-Amounts of currency are always expressed in terms of a base value, a fractional value and the denomination of the currency:
-
-.. sourcecode:: c
-
-  struct TALER_AmountNBO {
-    uint64_t value;
-    uint32_t fraction;
-    uint8_t currency_code[12];
-  };
-
-
-------------------------
-Time
-------------------------
-
-In signed messages, time is represented using 64-bit big-endian values, denoting microseconds since the UNIX Epoch.  `UINT64_MAX` represents "never" (distant future, eternity).
-
-.. sourcecode:: c
-
-  struct GNUNET_TIME_AbsoluteNBO {
-    uint64_t timestamp_us;
-  };
-
-------------------------
-Cryptographic primitives
-------------------------
-
-All elliptic curve operations are on Curve25519.  Public and private keys are thus 32 bytes, and signatures 64 bytes.  For hashing, including HKDFs, Taler uses 512-bit hash codes (64 bytes).
-
-.. sourcecode:: c
-
-   struct GNUNET_HashCode {
-     uint8_t hash[64];
-   };
-
-   struct TALER_ReservePublicKeyP {
-     uint8_t eddsa_pub[32];
-   };
-
-   struct TALER_ReservePrivateKeyP {
-     uint8_t eddsa_priv[32];
-   };
-
-   struct TALER_ReserveSignatureP {
-     uint8_t eddsa_signature[64];
-   };
-
-   struct TALER_MerchantPublicKeyP {
-     uint8_t eddsa_pub[32];
-   };
-
-   struct TALER_MerchantPrivateKeyP {
-     uint8_t eddsa_priv[32];
-   };
-
-   struct TALER_TransferPublicKeyP {
-     uint8_t ecdhe_pub[32];
-   };
-
-   struct TALER_TransferPrivateKeyP {
-     uint8_t ecdhe_priv[32];
-   };
-
-   struct TALER_MintPublicKeyP {
-     uint8_t eddsa_pub[32];
-   };
-
-   struct TALER_MintPrivateKeyP {
-     uint8_t eddsa_priv[32];
-   };
-
-   struct TALER_MintSignatureP {
-     uint8_t eddsa_signature[64];
-   };
-
-   struct TALER_MasterPublicKeyP {
-     uint8_t eddsa_pub[32];
-   };
-
-   struct TALER_MasterPrivateKeyP {
-     uint8_t eddsa_priv[32];
-   };
-
-   struct TALER_MasterSignatureP {
-     uint8_t eddsa_signature[64];
-   };
-
-   union TALER_CoinSpendPublicKeyP {
-     uint8_t eddsa_pub[32];
-     uint8_t ecdhe_pub[32];
-   };
-
-   union TALER_CoinSpendPrivateKeyP {
-     uint8_t eddsa_priv[32];
-     uint8_t ecdhe_priv[32];
-   };
-
-   struct TALER_CoinSpendSignatureP {
-     uint8_t eddsa_signature[64];
-   };
-
-   struct TALER_TransferSecretP {
-     uint8_t key[sizeof (struct GNUNET_HashCode)];
-   };
-
-   struct TALER_LinkSecretP {
-     uint8_t key[sizeof (struct GNUNET_HashCode)];
-   };
-
-   struct TALER_EncryptedLinkSecretP {
-     uint8_t enc[sizeof (struct TALER_LinkSecretP)];
-   };
-
-.. _Signatures:
-
-------------------------
-Signatures
-------------------------
-
-Please note that any RSA signature is processed by a function called `GNUNET_CRYPTO_rsa_signature_encode (..)` **before** being sent over the network, so the receiving party must run `GNUNET_CRYPTO_rsa_signature_decode (..)` before verifying it. See their implementation in `src/util/crypto_rsa.c`, in GNUNET's code base. Finally, they are defined in `gnunet/gnunet_crypto_lib.h`.
-
-EdDSA signatures are always made on the hash of a block of the same generic format, the `struct SignedData` given below.  In our notation, the type of a field can depend on the value of another field. For the following message, the length of the `payload` array must match the value of the `size` field:
-
-.. sourcecode:: c
-
-  struct SignedData {
-    uint32_t size;
-    uint32_t purpose;
-    uint8_t payload[size - sizeof (struct SignedData)];
-  };
-
-The `purpose` field in `struct SignedData` is used to express the context in which the signature is made, ensuring that a signature cannot be lifted from one part of the protocol to another.  The various `purpose` constants are defined in `taler_signatures.h`.  The `size` field prevents padding attacks.
-
-In the subsequent messages, we use the following notation for signed data described in `FIELDS` with the given purpose.
-
-.. sourcecode:: c
-
-  signed (purpose = SOME_CONSTANT) {
-    FIELDS
-  } msg;
-
-The `size` field of the corresponding `struct SignedData` is determined by the size of `FIELDS`.
-
-.. sourcecode:: c
-
-  struct TALER_WithdrawRequestPS {
-    signed (purpose = TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW) {
-      struct TALER_ReservePublicKeyP reserve_pub;
-      struct TALER_AmountNBO amount_with_fee;
-      struct TALER_AmountNBO withdraw_fee;
-      struct GNUNET_HashCode h_denomination_pub;
-      struct GNUNET_HashCode h_coin_envelope;
-    }
-  };
-
-  struct TALER_DepositRequestPS {
-    signed (purpose = TALER_SIGNATURE_WALLET_COIN_DEPOSIT) {
-      struct GNUNET_HashCode h_contract;
-      struct GNUNET_HashCode h_wire;
-      struct GNUNET_TIME_AbsoluteNBO timestamp;
-      struct GNUNET_TIME_AbsoluteNBO refund_deadline;
-      uint64_t transaction_id;
-      struct TALER_AmountNBO amount_with_fee;
-      struct TALER_AmountNBO deposit_fee;
-      struct TALER_MerchantPublicKeyP merchant;
-      union TALER_CoinSpendPublicKeyP coin_pub;
-    }
-  };
-
-  struct TALER_DepositConfirmationPS {
-    signed (purpose = TALER_SIGNATURE_MINT_CONFIRM_DEPOSIT) {
-      struct GNUNET_HashCode h_contract;
-      struct GNUNET_HashCode h_wire;
-      uint64_t transaction_id GNUNET_PACKED;
-      struct GNUNET_TIME_AbsoluteNBO timestamp;
-      struct GNUNET_TIME_AbsoluteNBO refund_deadline;
-      struct TALER_AmountNBO amount_without_fee;
-      union TALER_CoinSpendPublicKeyP coin_pub;
-      struct TALER_MerchantPublicKeyP merchant;
-    }
-  };
-
-  struct TALER_RefreshMeltCoinAffirmationPS {
-    signed (purpose = TALER_SIGNATURE_WALLET_COIN_MELT) {
-      struct GNUNET_HashCode session_hash;
-      struct TALER_AmountNBO amount_with_fee;
-      struct TALER_AmountNBO melt_fee;
-      union TALER_CoinSpendPublicKeyP coin_pub;
-    }
-  };
-
-  struct TALER_RefreshMeltConfirmationPS {
-    signed (purpose = TALER_SIGNATURE_MINT_CONFIRM_MELT) {
-      struct GNUNET_HashCode session_hash;
-      uint16_t noreveal_index;
-    }
-  };
-
-  struct TALER_MintSigningKeyValidityPS {
-    signed (purpose = TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY) {
-      struct TALER_MasterPublicKeyP master_public_key;
-      struct GNUNET_TIME_AbsoluteNBO start;
-      struct GNUNET_TIME_AbsoluteNBO expire;
-      struct GNUNET_TIME_AbsoluteNBO end;
-      struct TALER_MintPublicKeyP signkey_pub;
-    }
-  };
-
-  struct TALER_MintKeySetPS {
-    signed (purpose=TALER_SIGNATURE_MINT_KEY_SET) {
-      struct GNUNET_TIME_AbsoluteNBO list_issue_date;
-      struct GNUNET_HashCode hc;
-    }
-  };
-
-  struct TALER_DenominationKeyValidityPS {
-    signed (purpose = TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY) {
-      struct TALER_MasterPublicKeyP master;
-      struct GNUNET_TIME_AbsoluteNBO start;
-      struct GNUNET_TIME_AbsoluteNBO expire_withdraw;
-      struct GNUNET_TIME_AbsoluteNBO expire_spend;
-      struct GNUNET_TIME_AbsoluteNBO expire_legal;
-      struct TALER_AmountNBO value;
-      struct TALER_AmountNBO fee_withdraw;
-      struct TALER_AmountNBO fee_deposit;
-      struct TALER_AmountNBO fee_refresh;
-      struct GNUNET_HashCode denom_hash;
-    }
-  };
-
-  struct TALER_MasterWireSepaDetailsPS {
-    signed (purpose = TALER_SIGNATURE_MASTER_SEPA_DETAILS) {
-      struct GNUNET_HashCode h_sepa_details;
-    }
-  };
-
-  struct TALER_MintWireSupportMethodsPS {
-    signed (purpose = TALER_SIGNATURE_MINT_WIRE_TYPES) {
-      struct GNUNET_HashCode h_wire_types;
-    }
-  };
-
-  struct TALER_DepositTrackPS {
-    signed (purpose = TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID) {
-      struct GNUNET_HashCode h_contract;
-      struct GNUNET_HashCode h_wire;
-      uint64_t transaction_id;
-      struct TALER_MerchantPublicKeyP merchant;
-      struct TALER_CoinSpendPublicKeyP coin_pub;
-    }
-  };
