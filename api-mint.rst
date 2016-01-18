@@ -26,9 +26,10 @@ possibly by using HTTPS.
   as well as the bank's current online signing key.
 
   **Response:**
-  The mint responds with a `MintKeysResponse`_ object.
 
-  :status 200 OK: This request should virtually always be successful.
+  :status 200 OK:
+    The mint responds with a `MintKeysResponse`_ object. This request should
+    virtually always be successful.
 
   **Details:**
   
@@ -195,8 +196,7 @@ Obtaining wire-transfer information
 
   **Response:**
 
-  :status 200: This request should virtually always be successful.
-  :Response JSON Object: `WireResponse`_
+  :status 200: The mint responds with a `WireResponse`_ object. This request should virtually always be successful.
 
   **Details:**
 
@@ -239,9 +239,8 @@ Obtaining wire-transfer information
   transfers.  Always signed using the mint's long-term offline master public
   key.
 
-  :status 200: This request should virtually always be successful.
+  :status 200: The mint responds with a `WireSepaResponse`_ object. This request should virtually always be successful.
   :status 501: This wire transfer method is not supported by this mint.
-  :Response JSON Object: `WireSepaResponse`_
     
 
   **Details:**
@@ -298,11 +297,17 @@ mint.
     to derive a symmetric key to encrypt the response.  This would be useful if
     for example HTTPS were not used for communication with the mint.
 
+  **Request:**
 
   :query reserve_pub: EdDSA reserve public key identifying the reserve.
-  :status 200 OK: The reserve was known to the mint, details about it follow in the body.
+
+  **Response:**
+
+  :status 200 OK:
+    The mint responds with a `ReserveStatus`_ object;  the reserve was known to the mint,
   :status 404 Not Found: The withdrawal key does not belong to a reserve known to the mint.
-  :Response JSON Object: `ReserveStatus`_
+
+  **Details:**
 
   .. _ReserveStatus:
   .. code-block:: tsref
@@ -350,13 +355,12 @@ mint.
   recover the information if necessary in case of transient failures, like
   power outage, network outage, etc.
 
-  :Request Body: `WithdrawRequest`_
-  :Response JSON Object:
+  **Request:** The request body must be a `WithdrawRequest`_ object.
 
-    `WithdrawResponse`_ or `WithdrawError`_
+  **Response:**
 
   :status 200 OK:
-    The request was succesful.  Note that repeating exactly the same request
+    The request was succesful, and the response is a `WithdrawResponse`.  Note that repeating exactly the same request
     will again yield the same response, so if the network goes down during the
     transaction or before the client can commit the coin signature to disk, the
     coin is not lost.
@@ -370,7 +374,10 @@ mint.
     not yet have completed and might be known to the mint in the near future.
     In this case, the wallet should repeat the exact same request later again
     using exactly the same blinded coin.
-  :status 402 Payment Required: The balance of the reserve is not sufficient to withdraw a coin of the indicated denomination.
+  :status 402 Payment Required:
+    The balance of the reserve is not sufficient to withdraw a coin of the indicated denomination.
+    The response is `WithdrawError`_ object.
+
 
   **Details:**
 
@@ -442,7 +449,10 @@ denomination.
   the digital coins.  The request should contain a JSON object with the
   following fields:
 
-  :Request JSON Object: `DepositRequest`_
+  **Request:** The request body must be a `DepositRequest`_ object.
+
+  **Response:**
+
   :status 200:
     The operation succeeded, the mint confirms that no double-spending took place.
   :status 401 Unauthorized:
