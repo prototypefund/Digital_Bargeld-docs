@@ -87,9 +87,10 @@ Indices and tables
 ------------------
 
 .. toctree::
-  :maxdepth: 1
+  :hidden:
 
   glossary
 
+* :doc:`glossary`
 * :ref:`search`
 
