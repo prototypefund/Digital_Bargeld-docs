@@ -2,7 +2,7 @@
 The Mint RESTful JSON API
 =========================
 
-The API specified here follows the `general conventions <http-common>`_
+The API specified here follows the :ref:`general conventions <http-common>`
 for all details not specified in the individual requests.
 
 -------------------
