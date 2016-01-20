@@ -24,7 +24,6 @@ Encodings
 
 Data such as dates, binary blobs, and other useful formats, are encoded as described in :ref:`encodings-ref`.
 
-.. _offer:
 .. _contract:
 
 Offer and Contract
@@ -35,6 +34,7 @@ that is legally non-binding:
 
   .. _tsref-type-Offer:
   .. code-block:: tsref
+    :name: offer
 
     interface Offer {
       // The actual contract
