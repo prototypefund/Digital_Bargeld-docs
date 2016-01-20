@@ -56,8 +56,10 @@ class LinkingHtmlFormatter(HtmlFormatter):
     def _fmt(self, value, tok):
         cls = self._get_css_class(tok)
         href = tok_getprop(tok, "href")
+        caption = tok_getprop(tok, "caption")
+        content = caption if caption is not None else value
         if href:
-            value = '<a style="color:inherit;text-decoration:underline" href="%s">%s</a>' % (href, value)
+            value = '<a style="color:inherit;text-decoration:underline" href="%s">%s</a>' % (href, content)
         if cls is None or cls == "":
             return value
         return '<span class="%s">%s</span>' % (cls, value)
@@ -149,7 +151,7 @@ def tok_getprop(tok, key):
     return kv.get(key)
 
 
-link_reg = re.compile(r"`([^`]+)`_")
+link_reg = re.compile(r"`([^`<]+)\s*(?:<([^>]+)>)?\s*`_")
 
 # Map from token id to props.
 # Properties can't be added to tokens
@@ -184,11 +186,18 @@ class LinkFilter(Filter):
                     if pre:
                         yield ttype, pre
                     t = copy_token(ttype)
-                    id = make_id(m.group(1))
+                    x1, x2 = m.groups()
+                    if x2 is None:
+                        caption = x1.strip()
+                        id = make_id(x1)
+                    else:
+                        caption = x1.strip()
+                        id = make_id(x2)
                     if id in id_to_doc:
                         docname = id_to_doc[id]
                         href = self.app.builder.get_target_uri(docname) + "#" + id
                         tok_setprop(t, "href", href)
+                        tok_setprop(t, "caption", caption)
                     else:
                         self.app.builder.warn("unresolved link target in comment: " + id)
                     yield t, m.group(1)
