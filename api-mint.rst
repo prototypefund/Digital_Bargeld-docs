@@ -940,7 +940,7 @@ typically also view the balance.)
 
   **Request:**
 
-  :query wtid: wire transfer identifier identifying the wire transfer (a base32-encoded value)
+  :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
 
   **Response:**
 
@@ -1046,7 +1046,7 @@ typically also view the balance.)
   .. code-block:: tsref
 
     interface WtidResponse {
-      // wire transfer identifier of the deposit.
+      // raw wire transfer identifier of the deposit.
       wtid: Base32;
 
       // when was the wire transfer given to the bank.
