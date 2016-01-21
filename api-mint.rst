@@ -56,7 +56,7 @@ possibly by using HTTPS.
       // concatenation of all SHA-512 hashes of the RSA denomination public keys
       // in `denoms` in the same order as they were in `denoms`.  Note that for
       // hashing, the binary format of the RSA public keys is used, and not their
-      // base32_ encoding.  Wallets cannot do much with this signature by itself;
+      // `base32 encoding <base32>`_.  Wallets cannot do much with this signature by itself;
       // it is only useful when multiple clients need to establish that the mint
       // is sabotaging end-user anonymity by giving disjoint denomination keys to
       // different users.  If a mint were to do this, this signature allows the
