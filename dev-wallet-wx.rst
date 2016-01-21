@@ -8,13 +8,12 @@ Introduction
 
 The WebExtensions Wallet (*wxwallet*) can be used to pay with GNU Taler on web
 sites from within modern web browsers.  The `WebExtensions
-<https://wiki.mozilla.org/WebExtensions>`_ API interface that enables the
-development cross-browser extensions.  Google Chrome / Chromium, Mozilla
-Firefox, Opera and Microsoft Edge will all offer support for WebExtensions in
-the future.
+<https://wiki.mozilla.org/WebExtensions>`_ API enables the development of
+cross-browser extensions.  Google Chrome / Chromium, Mozilla Firefox, Opera and
+Microsoft Edge will all offer support for WebExtensions and thus be able to support Taler.
 
-Currently Chrome hast the best support for WebExtensions (since the API is a superset
-of Chrome's extension API).
+Currently Chrome hast the best support for WebExtensions (since the API is a
+superset of Chrome's extension API).
 
 -----------------------
 Development Environment
@@ -147,5 +146,5 @@ run with `mochajs <http://mochajs.org/>`_ and the `better-assert <https://github
 library.
 
 Run the default test suite with ``npm run test``, which will
-call `moch` with the right parameters.
+call `mocha` with the right parameters.
 
