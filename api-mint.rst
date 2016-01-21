@@ -549,6 +549,10 @@ typically also view the balance.)
   :>jsonarr int transaction_id: 64-bit transaction id for the transaction between merchant and customer
   :>jsonarr base32 coin_pub: coin's public key, both ECDHE and EdDSA.
 
+  .. note::
+
+     We might want to add a signature of the mint over the response in the future.  That way, a merchant has proof should a mint ever try to change the story here. (#4135)
+
 
   **Error Response: Unknown wire transfer identifier**
 
