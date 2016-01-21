@@ -32,7 +32,7 @@ possibly by using HTTPS.
     virtually always be successful.
 
   **Details:**
-  
+
   .. _MintKeysResponse:
   .. code-block:: tsref
 
@@ -241,7 +241,7 @@ Obtaining wire-transfer information
 
   :status 200: The mint responds with a `WireSepaResponse`_ object. This request should virtually always be successful.
   :status 501: This wire transfer method is not supported by this mint.
-    
+
 
   **Details:**
 
@@ -402,7 +402,7 @@ mint.
       // `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` created with the reserves's
       // private key
       reserve_sig: EddsaSignature;
-    } 
+    }
 
 
   .. _WithdrawResponse:
@@ -548,7 +548,7 @@ denomination.
 
   .. _DepositDoubleSpendError:
   .. code-block:: tsref
-    
+
     interface DepositDoubleSpendError {
       // The string constant "insufficient funds"
       string error;
@@ -884,7 +884,7 @@ the API during normal operation.
 
   .. _tsref-type-NewCoinInfo:
   .. code-block:: tsref
-    
+
     interface NewCoinInfo {
       // Encrypted private key and blinding factor information of the fresh coin
       link_enc: Base32;
@@ -947,7 +947,7 @@ typically also view the balance.)
   :status 200 OK:
     The wire transfer is known to the mint, details about it follow in the body.
     The body of the response is a `WireDepositsResponse`_.
-  :status 404 Not Found: 
+  :status 404 Not Found:
     The wire transfer identifier is unknown to the mint.
 
   .. _WireDepositsResponse:
@@ -998,7 +998,7 @@ typically also view the balance.)
 
   **Request:** The request body most be a `WtidRequest`_ JSON object.
 
-  **Response:** 
+  **Response:**
 
   :status 200 OK:
     The deposit has been executed by the mint and we have a wire transfer identifier.
@@ -1052,6 +1052,12 @@ typically also view the balance.)
       // when was the wire transfer given to the bank.
       execution_time: Timestamp;
 
+      // The contribution of this coin to the total (without fees)
+      coin_contribution: Amount;
+
+      // Total amount transferred
+      total_amount: Amount;
+
       // binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_WIRE`
       // whereby the mint affirms the successful wire transfer.
       mint_sig: EddsaSignature;
@@ -1069,7 +1075,7 @@ typically also view the balance.)
 
     interface WtidAcceptedResponse {
       // time by which the mint currently thinks the deposit will be executed.
-      execution_time: Timestamp;    
+      execution_time: Timestamp;
     }
 
 
@@ -1176,7 +1182,7 @@ Administrative API: Bank transactions
 
       // When was the transaction executed
       execution_date: Timestamp;
-      
+
       // Wire details
       wire: any;
     }
@@ -1449,5 +1455,3 @@ binary-compatible with the implementation of the mint.
       // Decrypted transfer secret
       secret: string;
     }
-
-
