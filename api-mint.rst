@@ -987,6 +987,9 @@ typically also view the balance.)
       // coin's public key, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
     }
+  .. note::
+
+     We might want to add a signature of the mint over the response in the future.  That way, a merchant has proof should a mint ever try to change the story here. (#4135)
 
 
 .. http:post:: /deposit/wtid
