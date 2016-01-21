@@ -158,10 +158,6 @@ link_reg = re.compile(r"`([^`<]+)\s*(?:<([^>]+)>)?\s*`_")
 # since they derive from Python's tuple.
 token_props = {}
 
-# Mapping from element IDs to document
-# name where the ID occurs.
-id_to_doc = {}
-
 
 class LinkFilter(Filter):
     def __init__(self, app, **options):
@@ -169,6 +165,7 @@ class LinkFilter(Filter):
         Filter.__init__(self, **options)
 
     def filter(self, lexer, stream):
+        id_to_doc = self.app.env.domaindata.get("_tsref", {})
         for ttype, value in stream:
             if ttype in Token.Keyword.Type:
                 defname = make_id('tsref-type-' + value);
@@ -212,6 +209,9 @@ class LinkFilter(Filter):
 
 def remember_targets(app, doctree):
     docname = app.env.docname
+    id_to_doc = app.env.domaindata.get("_tsref", None)
+    if id_to_doc is None:
+        id_to_doc = app.env.domaindata["_tsref"] = {}
     for node in doctree.traverse():
         if not isinstance(node, nodes.Element):
             continue
