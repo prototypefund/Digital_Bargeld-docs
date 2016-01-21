@@ -18,26 +18,6 @@ provided in the HTTP "Date:" header for this purpose, but the customer
 is expected to check that the time of his machine is approximately
 correct.
 
-
-------------------------------
-Frontend-Backend communication
-------------------------------
-
-To create a contract, the `frontend` needs to generate the body of a
-`contract` in JSON format.  This `proposition` is then signed by the
-`backend` and then sent to the wallet.  If the customer approves
-the `proposition`, the wallet signs the body of the `contract`
-using coins in the form of a `deposit permission`.  This signature
-using the coins signifies both agreement of the customer and
-represents payment at the same time.  The `frontend` passes the
-`deposit permission` to the `backend` which immediately verifies it
-with the mint and signals the `frontend` the success or failure of
-the payment process.  If the payment is successful, the `frontend` is
-responsible for generating the fullfillment page.
-
-The contract format is specified in the `contract`_ section.
-
-
 ---------
 Encodings
 ---------
@@ -46,28 +26,43 @@ Data such as dates, binary blobs, and other useful formats, are encoded as descr
 
 .. _contract:
 
-Contract
-^^^^^^^^
+Offer and Contract
+^^^^^^^^^^^^^^^^^^
 
-A `contract` is a JSON object having the following structure, which is returned as a
-successful response to the following two calls:
+An `offer` is a wrapper around a contract with some additional information
+that is legally non-binding:
 
-.. note::
+  .. _tsref-type-Offer:
+  .. code-block:: tsref
+    :name: offer
 
-  This section holds just a central definition for the `contract`, so refer to each component's
-  section for its detailed REST interaction.
+    interface Offer {
+      // The actual contract
+      contract: Contract;
 
-.. http:get:: /taler/contract
+      // The hash of the contract, provided as a convenience.
+      // All components that do not fully trust the
+      // merchant must verify this field.
+      H_contract: HashCode;
 
-  Issued by the wallet when the customer wants to see the contract for a certain purchase
+      // Signature over the contract made by the merchant.
+      // Must confirm to the `Signature specification`_ below.
+      sig: EddsaSignature;
 
-.. http:post:: /contract
+      // URL where the customer's wallet
+      // must send the payment for the contract.
+      // May be relative to the URL of the page that
+      // delivered the contract.
+      pay_url: string;
 
-  Issued by the frontend to the backend when it wants to augment its `proposition` with all the
-  cryptographic information. For the sake of precision, the frontend encloses the following JSON inside a `contract`
-  field to the actual JSON sent to the backend.
+      // URL to the `execution page`_.
+      exec_url: string;
+    }
 
-  .. code-block:: ts
+The contract must have the following structure:
+
+  .. _tsref-type-Contract:
+  .. code-block:: tsref
 
     interface Contract {
       // Total price for the transaction.
@@ -81,7 +76,7 @@ successful response to the following two calls:
       // 53-bit number chosen by the merchant to uniquely identify the contract.
       transaction_id: number;
 
-      // List of products that are part of the purchase (see below)
+      // List of products that are part of the purchase (see `below)
       products: Product[];
 
       // Time when this contract was generated
@@ -109,19 +104,17 @@ successful response to the following two calls:
       // Mints that the merchant accepts even if it does not accept any auditors that audit them.
       mints: Mint[];
 
-      // object locations: maps labels for locations to detailed geographical location data
-      // (details for the format of locations are specified below).
-      // The label strings must not contain a colon (`:`)
-      // These locations can then be references by their respective labels throughout the contract.
-      locations;
+      // Map from label to a `Location`_.
+      // The label strings must not contain a colon (`:`).
+      locations: { [label: string]: Location>;
     }
-
 
   The wallet must select a mint that either the mechant accepts directly by listing it in the mints arry, or for which the merchant accepts an auditor that audits that mint by listing it in the auditors array.
 
   The `product` object describes the product being purchased from the merchant. It has the following structure:
 
-  .. code-block:: ts
+  .. _tsref-type-Product:
+  .. code-block:: tsref
     
     interface Product {
       // Human-readable product description.
@@ -149,8 +142,7 @@ successful response to the following two calls:
       delivery_location: string;
     }
 
-  The `merchant` object:
-
+  .. _tsref-type-Merchant:
   .. code-block:: ts
     
     interface Merchant {
@@ -166,24 +158,20 @@ successful response to the following two calls:
     }
 
 
-  The `location` object:
-
+  .. _Location:
+  .. _tsref-type-Location:
   .. code-block:: ts
 
     interface Location {
-      country: string;
-      city: string;
-      state: string;
-      region: string;
-      province: string;
-      zip_code: string;
-      street: string;
-      street_number: string;
+      country?: string;
+      city?: string;
+      state?: string;
+      region?: string;
+      province?: string;
+      zip_code?: string;
+      street?: string;
+      street_number?: string;
     }
-
-  Depending on the country, some fields may be missing
-
-  The `auditor` object:
 
   .. code-block:: ts
 
@@ -197,10 +185,6 @@ successful response to the following two calls:
       url: string;
     }
 
-
-  The `mint` object:
-
-  
   .. code-block:: ts
 
     interface Mint {
@@ -210,22 +194,23 @@ successful response to the following two calls:
       // master public key of the mint
       master_pub: EddsaPublicKey;
     }
+    
 
+.. _`Signature specification`:
 
 When the contract is signed by the merchant or the wallet, the
 signature is made over the hash of the JSON text, as the contract may
 be confidential between merchant and customer and should not be
 exposed to the mint.  The hashcode is generated by hashing the
 encoding of the contract's JSON obtained by using the flags
-`JSON_COMPACT | JSON_PRESERVE_ORDER`, as described in the `libjansson
+``JSON_COMPACT | JSON_PRESERVE_ORDER``, as described in the `libjansson
 documentation
 <https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
 The following structure is a container for the signature. The purpose
-should be set to `TALER_SIGNATURE_MERCHANT_CONTRACT`.
+should be set to ``TALER_SIGNATURE_MERCHANT_CONTRACT``.
 
 .. _contract-blob:
-
-.. sourcecode:: c
+.. code-block:: c
 
    struct MERCHANT_Contract
    {
@@ -233,102 +218,14 @@ should be set to `TALER_SIGNATURE_MERCHANT_CONTRACT`.
      struct GNUNET_HashCode h_contract;
    }
 
----------------
-Wallet-Frontend
----------------
+---------------------
+The Merchant HTTP API
+---------------------
 
-.. _message-passing-ref:
+In the following requests, ``$``-variables refer to the variables in the
+merchant's offer.
 
-
-When the user chooses to pay, the page needs to inform the extension
-that it should execute the payment process.  This is done by sending
-a
-
-  .. js:data:: taler-contract
-
-event to the extension.  The following example code fetches the
-contract from the merchant website and passes it to the extension
-when the button is clicked:
-
-.. sourcecode:: javascript
-
-   function deliver_contract_to_wallet(jsonContract){
-   var cevent = new CustomEvent('taler-contract', { detail: jsonContract });
-     document.body.dispatchEvent(cevent);
-   };
-
-   function taler_pay(form){
-     var contract_req = new XMLHttpRequest();
-     // request contract from merchant website, i.e.:
-     contract_req.open("GET", "/taler/contract", true);
-     contract_req.onload = function (ev){
-       if (contract_req.readyState == 4){ // HTTP request is done
-         if (contract_req.status == 200){ // HTTP 200 OK
-           deliver_contract_to_wallet(contract_req.responseText);
-         }else{
-           alert("Merchant failed to generate contract: " + contract_req.status);
-         }
-       }
-     };
-     contract_req.onerror = function (ev){
-       // HTTP request failed, we didn't even get a status code...
-       alert(contract_req.statusText);
-     };
-     contract_req.send(null); // run the GET request
-   };
-
-.. sourcecode:: html
-
-    <input type="button" onclick="taler_pay(this.form)" value="Ok">
-
-
-In this example, the function `taler_pay` is attached to the
-'checkout' button. This function issues the required POST and passes
-the contract to the wallet in the the function
-`deliver_contract_to_wallet` if the contract was received correctly
-(i.e. HTTP response code was 200 OK).
-
----------------
-The RESTful API
----------------
-
-The merchant's frontend must provide the JavaScript logic with the
-ability to fetch the JSON contract.  In the example above, the
-JavaScript expected the contract at `/taler/contract` and the payment
-to go to '/taler/pay'.  However, it is possible to deliver the
-contract from any URL and post the deposit permission to any URL,
-as long as the client-side logic knows how to fetch it and pass it to
-the extension.  For example, the contract could already be embedded in
-the webpage or be at a contract-specific URL to avoid relying on
-cookies to identify the shopping session.
-
-
-.. http:get:: /taler/contract
-
-  Triggers the contract generation. Note that the URL may differ between
-  merchants.
-
-  **Success Response**
-
-  :status 200 OK: The request was successful.
-  :resheader Content-Type: application/json
-  :>json base32 contract: a :ref:`JSON contract <contract>` for this deal deprived of `pay_url` and `exec_url`
-  :>json base32 sig: the signature of the binary described in :ref:`blob <contract-blob>`.
-  :>json string pay_url: relative URL where the wallet should issue the payment
-  :>json string exec_url: FIXME
-  :>json base32 H_contract: the base32 encoding of the field `h_contract` of the contract's :ref:`blob <contract-blob>`
-
-  **Failure Response**
-
-  In most cases, the response will just be the forwarded response that the `frontend` got from the `backend`.
-
-  :status 400 Bad Request: Request not understood.
-  :status 500 Internal Server Error: In most cases, some error occurred while the backend was generating the contract. For example, it failed to store it into its database.
-
-
-.. _deposit-permission:
-
-.. http:post:: /taler/pay
+.. http:post:: $pay_url
 
   Send the deposit permission to the merchant. Note that the URL may differ between
   merchants.
@@ -357,5 +254,17 @@ cookies to identify the shopping session.
   **Failure Responses:**
 
   The error codes and data sent to the wallet are a mere copy of those gotten from the mint when attempting to pay. The section about :ref:`deposit <deposit>` explains them in detail.
+
+
+.. http:post:: $exec_url
+
+  Returns a cooperative merchant page (called the execution page) that will
+  send the ``taler-execute-payment`` to the wallet and react to failure or
+  success of the actual payment.
+
+  The wallet will inject an ``XMLHttpRequest`` request to the merchant's
+  ``$pay_url`` in the context of the execution page.  This mechanism is
+  necessary since the request to ``$pay_url`` must be made from the merchant's
+  origin domain in order to preserve information (e.g. cookies).
 
 

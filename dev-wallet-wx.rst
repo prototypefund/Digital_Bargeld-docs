@@ -91,4 +91,16 @@ IndexedDB Query Abstractions
 
 The *wxwallet* uses a fluent-style API for queries on IndexedDB.
 
-TODO: say more
+TODO: say more about this
+
+
+-------
+Testing
+-------
+
+Test cases for the wallet are written in TypeScript and
+run with `mochajs <http://mochajs.org/>`_ and the `better-assert <https://github.com/tj/better-assert>`_ assertion
+library.
+
+Run the default test suite with ``XXX``.
+

@@ -23,12 +23,15 @@ import os
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-#needs_sphinx = '1.0'
+needs_sphinx = '1.3'
+
+sys.path.append(os.path.abspath('exts'))
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'tsref',
     'sphinx.ext.todo',
     'sphinx.ext.pngmath',
     'sphinxcontrib.httpdomain'
@@ -48,7 +51,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Taler'
-copyright = u'2014, 2015 Florian Dold, Benedikt Muller, Sree Harsha Totakura, Christian Grothoff, Marcello Stanisci (GPLv3+ or GFDL 1.3+)'
+copyright = u'2014, 2015, 2016 Florian Dold, Benedikt Muller, Sree Harsha Totakura, Christian Grothoff, Marcello Stanisci (GPLv3+ or GFDL 1.3+)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
