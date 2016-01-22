@@ -176,7 +176,7 @@ Amounts of currency are expressed as a JSON object with the following fields:
     value: number;
 
     // unsigned 32 bit fractional value to be added to `value` representing
-    // an additional currency fraction, in units of one millionth (10e-6)
+    // an additional currency fraction, in units of one millionth (1e-6)
     // of the base currency value.  For example, a fraction
     // of 500,000 would correspond to 50 cents.
     fraction: number;
