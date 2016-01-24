@@ -70,6 +70,12 @@ The contract must have the following structure:
       // before transfering it to the merchant.
       amount: Amount;
 
+      // Optional identifier chosen by the merchant,
+      // which allows the wallet to detect if it is buying
+      // a contract where it already has paid for the same
+      // product instance.
+      repurchase_correlation_id?: string;
+
       // Maximum total deposit fee accepted by the merchant for this contract
       max_fee: Amount;
 
