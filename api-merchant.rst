@@ -265,6 +265,6 @@ merchant's offer.
   The wallet will inject an ``XMLHttpRequest`` request to the merchant's
   ``$pay_url`` in the context of the execution page.  This mechanism is
   necessary since the request to ``$pay_url`` must be made from the merchant's
-  origin domain in order to preserve information (e.g. cookies).
+  origin domain in order to preserve information (e.g. cookies, origin header).
 
 
