@@ -39,10 +39,10 @@ involved.
       tid: number; 
 
       // The recipient's account identificator. For this testing purpose, the
-      // account format will just be the normal IBAN format having the token "TEST"
-      // in place of the country code. For instance, if "SA03 8000 0000 6080 1016 7519"
-      // were a valid Saudi Arabian IBAN, then "TEST03 8000 0000 6080 1016 7519" would
-      // be a correct test account number as well.
+      // account format will the normal IBAN format having the token "TEST"
+      // in place of the country code and having the check digit removed. For instance,
+      // if "SA03 8000 0000 6080 1016 7519" were a valid Saudi Arabian IBAN, then
+      // "TEST 8000 0000 6080 1016 7519" would be a correct test account number as well.
       account: string;
     
     }
