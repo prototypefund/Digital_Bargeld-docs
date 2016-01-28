@@ -121,7 +121,7 @@ The contract must have the following structure:
 
   .. _tsref-type-Product:
   .. code-block:: tsref
-    
+
     interface Product {
       // Human-readable product description.
       description: string;
@@ -150,7 +150,7 @@ The contract must have the following structure:
 
   .. _tsref-type-Merchant:
   .. code-block:: ts
-    
+
     interface Merchant {
       // label for a location with the business address of the merchant
       address: string;
@@ -200,7 +200,7 @@ The contract must have the following structure:
       // master public key of the mint
       master_pub: EddsaPublicKey;
     }
-    
+
 
 .. _`Signature specification`:
 
@@ -221,6 +221,25 @@ should be set to ``TALER_SIGNATURE_MERCHANT_CONTRACT``.
    struct MERCHANT_Contract
    {
      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+     /**
+      * Transaction ID must match the one in the JSON contract, here given
+      * in big endian.
+      */
+     uint64_t transaction_id;
+
+     /**
+      * Total amount to be paid for the contract, must match JSON "amount".
+      */
+     struct TALER_AmountNBO total_amount;
+
+     /**
+      * Total amount to be paid for the contract, must match JSON "max_fee".
+      */
+     struct TALER_AmountNBO max_fee;
+
+     /**
+      * Hash of the overall JSON contract.
+      */
      struct GNUNET_HashCode h_contract;
    }
 
@@ -272,5 +291,3 @@ merchant's offer.
   ``$pay_url`` in the context of the execution page.  This mechanism is
   necessary since the request to ``$pay_url`` must be made from the merchant's
   origin domain in order to preserve information (e.g. cookies, origin header).
-
-
