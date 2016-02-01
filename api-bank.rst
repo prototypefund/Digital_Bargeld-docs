@@ -23,21 +23,34 @@ namely mints.
 
 :status 200 OK: The request has been correctly handled, so the funds have been transferred to
 the recipient's account
+
+:status 400 Bad Request: The bank replies a `BankIncomingError`_ object
 **Details:**
 
-  .. _BankDepositRequest:
-  .. code-block:: tsref
+.. _BankDepositRequest:
+.. code-block:: tsref
 
-    interface BankDepositRequest {
-      
-      // JSON 'amount' object. The amount the caller wants to transfer
-      // to the recipient's count
-      amount: Amount;
-
-      // The id of this wire transfer
-      wid: base32; 
-
-      // The recipient's account identificator
-      account: number;
+  interface BankDepositRequest {
     
-    }
+    // JSON 'amount' object. The amount the caller wants to transfer
+    // to the recipient's count
+    amount: Amount;
+
+    // The id of this wire transfer
+    wid: base32; 
+
+    // The recipient's account identificator
+    account: number;
+    
+  }
+
+.. _BankIncomingError:
+.. code-block:: tsref
+
+  interface BankIncomingError {
+
+    // The reason which made this request fail. Typically due to malfomation
+    // of the POST's body
+    reason: string
+  
+  }
