@@ -17,36 +17,49 @@ For JavaScript code examples, see :ref:`communication`.
 Reserve Creation Request
 -------------------------
 
-The bank website can request the creation of a :term:`reserve`.  Note that the
-user will always be prompted by the wallet before a reserve is created in the
-wallet.
+The bank website can request the creation of a :term:`reserve`.  This operation
+will require the user to specify the mint where he wants to create the reserve
+and the resolution of a CAPTCHA, before any action will be taken.
 
-As a result of the reserve creation request, the following steps will happen insequence:
- 1. The wallet will prompt the user for the *mint base URL* and ask the user to
-    confirm creating the reserve.
+As a result of the reserve creation request, the following steps will happen in sequence:
+ 1. The user chooses the desired amount from the bank's form
+ 2. Upon confirmation, the wallet fetches the desired amount from the user-filled form and
+    prompts the user for the *mint base URL*. Then ask the user to confirm creating the
+    reserve.
  2. The wallet will create a key pair for the reserve.
- 3. The wallet will make a request to the bank, containing
-    the reserve's public key and the mint base URL chosen by the user
+ 3. The wallet will request the CAPTCHA page to the bank. In that request's parameters it
+    communicates the desired amount, the reserve's public key and the mint base URL to the
+    bank
+ 4. Upon successful resolution of the CAPTCHA by the user, the bank initiates the reserve
+    creation according to the gotten parameters.
 
-The bank should then take steps that will establish the reserve at the
-customer's requested mint.  This could, depending on the bank and mint, either
-be a SEPA wire transfer or some other means.
+
+Note that the reserve creation can be done by a SEPA wire transfer or some other means,
+depending on the user's bank and chosen mint.
 
 In response to the reserve creation request, the Taler wallet MAY cause the
 current document location to be changed, in order to navigate to a
 wallet-internal confirmation page.
 
 The bank requests reserve creation with the ``taler-create-reserve`` event.
-The event data must be a JavaScript ``object`` with the following fields:
+The event data must be a `CreateReserveDetail`_:
 
- * ``form_id``: The ``id`` of the ``form`` HTML element that contains data for the HTTP POST request
-   that confirms reserve creation with the bank.
- * ``input_amount``: Amount of the reserve in the format ``N.C CUR``, where ``CUR`` is the
-   currency code.
- * ``mint_rcv``: The ``id`` of the ``input`` HTML element in the reserve creation form
-   that will contain mint base URL for the reserve
- * ``input_pub``: The ``id`` of the ``input`` HTML element in the reserve creation form
-   that will contain the reserve's public key.
 
-Note that the bank website MUST contain an HTML form with the data required for the request and
-input fields for receiving data from the mint.
+.. _CreateReserveDetail:
+.. code-block:: tsref
+
+  interface CreateReserveDetail {
+    
+    // JSON 'amount' object. The amount the caller wants to transfer
+    // to the recipient's count
+    amount: Amount;
+
+    // CAPTCHA's page URL which needs the following parameters
+    // query parameters:
+    // amount_value
+    // amount_fraction
+    // amount_currency
+    // reserve_pub
+    // mint
+    callback_url: string;
+  }
