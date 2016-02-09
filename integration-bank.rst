@@ -31,8 +31,8 @@ As a result of the reserve creation request, the following steps will happen in 
     communicates the desired amount, the reserve's public key and the mint base URL to the
     bank
  4. Upon successful resolution of the CAPTCHA by the user, the bank initiates the reserve
-    creation according to the gotten parameters.
-
+    creation according to the gotten parameters. Together with `200 OK` status code sent back
+    to the wallet, it gets also a `ReserveCreated`_ object.
 
 Note that the reserve creation can be done by a SEPA wire transfer or some other means,
 depending on the user's bank and chosen mint.
@@ -62,4 +62,15 @@ The event data must be a `CreateReserveDetail`_:
     // reserve_pub
     // mint
     callback_url: string;
+  }
+
+.. _ReserveCreated:
+.. code-block:: tsref
+
+  interface ReserveCreated {
+
+    // A URL informing the user about the succesfull outcome
+    // of his operation
+    redirect_url: string;  
+
   }
