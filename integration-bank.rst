@@ -62,6 +62,10 @@ The event data must be a `CreateReserveDetail`_:
     // reserve_pub
     // mint
     callback_url: string;
+
+    // list of wire transfer types supported by the bank
+    // e.g. "SEPA", "test"
+    wt_types: Array<string>
   }
 
 .. _ReserveCreated:
