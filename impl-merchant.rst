@@ -50,6 +50,22 @@ The Merchant Backend HTTP API
 
 The following API are made available by the merchant's `backend` to the merchant's `frontend`.
 
+.. http:post:: /hash-contract
+  
+  Ask the backend to compute the hash of the `contract` given in the POST's body. This feature
+  allows frontends to verify that names of resources which are going to be sold are actually `in`
+  the paid cotnract. Without this feature, a malicious wallet can request resource A and pay for
+  resource B without the frontend being aware of that.
+
+  **Response**
+
+  :status 200 OK:
+    hash succesfully computed. The returned value is a JSON having one field called `hash` containing
+    the hashed contract
+  :status 400 Bad Request:
+    Request not understood. The JSON was invalid. Possibly due to some error in
+    formatting the JSON by the `frontend`.
+
 .. http:post:: /contract
 
   Ask the backend to add some missing (mostly related to cryptography) information to the contract.
