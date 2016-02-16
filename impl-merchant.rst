@@ -52,10 +52,11 @@ The following API are made available by the merchant's `backend` to the merchant
 
 .. http:post:: /hash-contract
   
-  Ask the backend to compute the hash of the `contract` given in the POST's body. This feature
-  allows frontends to verify that names of resources which are going to be sold are actually `in`
-  the paid cotnract. Without this feature, a malicious wallet can request resource A and pay for
-  resource B without the frontend being aware of that.
+  Ask the backend to compute the hash of the `contract` given in the POST's body (the full contract
+  should be the value of a JSON field named `contract`). This feature allows frontends to verify
+  that names of resources which are going to be sold are actually `in` the paid cotnract. Without
+  this feature, a malicious wallet can request resource A and pay for resource B without the frontend
+  being aware of that.
 
   **Response**
 
