@@ -12,7 +12,7 @@ The `/essay` URL takes the following query parameters:
    the essay with the given `tid`.
 
 These are the steps for showing `/essay`.  If the wallet is not present in
-steps 2 and 3, the user agent is be redirected to a mock credit card
+steps 2 and 3, the user agent is redirected to a mock credit card
 payment page.
 
 1. The server checks the status of the the essay with the name `name` in the server-side
