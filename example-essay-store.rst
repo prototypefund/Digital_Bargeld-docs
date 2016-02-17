@@ -23,9 +23,10 @@ payment page.
 
 2. The server checks if the `tid` and `timestamp` query parameters are present
 
-  * If `tid` and `timestamp` are present, restore the contract for the essay (using `tid` as
-    transaction id in the contract and `timestamp` as timestamp) and emit the `taler-execute-contract` DOM
-    event in the user agent.
+  * If `tid` and `timestamp` are present, restore the contract for the essay
+    (using `tid` as transaction id in the contract, `timestamp` as timestamp
+    and `timestamp+REFUND_DELTA` as refund deadline) and emit the
+    `taler-execute-contract` DOM event in the user agent.
   * Otherwise proceed with step 3
 
 3. The server generates a new contract and emits the `taler-confirm-contract` DOM event in the user agent,
@@ -43,3 +44,6 @@ In step 2, the `taler-execute-contract` event has the following parameters:
   page, without the `tid` parameter.
 
 
+Note that we assume that all essays cost the same (otherwise the amount would have to be included in
+the restoration information in the /essay fulfillment URL).  The refund deadline is computed
+by adding the merchant-specific constant `REFUND_DELTA` to the contract's timestamp.
