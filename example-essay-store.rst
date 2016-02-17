@@ -18,10 +18,10 @@ payment page.
 1. The server checks the status of the the essay with the name `name` in the server-side
    session state
 
-  * If the essay is marked as payed for the client, display the essay.
+  * If the essay is marked as payed, display the essay.
   * Otherwise proceed with step 2
 
-2. The server checks if the `tid` query parameter is present
+2. The server checks if the `tid` and `timestamp` query parameters are present
 
   * If `tid` and `timestamp` are present, restore the contract for the essay (using `tid` as
     transaction id in the contract and `timestamp` as timestamp) and emit the `taler-execute-contract` DOM
@@ -35,9 +35,10 @@ payment page.
 In step 2, the `taler-execute-contract` event has the following parameters:
 
 * `H_contract`: hash of the contract that was restored
-* `payment_url`: The internal URL `/pay?H_contract=...` of the essay store, will set the server-side session state
-  for the article associated with the contract hash on successful coin deposit.  When the contract is
-  fetched, the contract hash is associated with the article name in the server-side session state.
+* `payment_url`: The internal URL `/pay?H_contract=...` of the essay store,
+  will set the server-side session state for the article associated with the
+  contract hash on successful coin deposit.  The contract hash is associated
+  with the article name in the server-side session state when the contract is restored.
 * `offer_url`: Link to a teaser page (`/teaser?name=...`), which also contains a link to the article
   page, without the `tid` parameter.
 
