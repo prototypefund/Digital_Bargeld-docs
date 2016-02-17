@@ -36,7 +36,8 @@ In step 2, the `taler-execute-contract` event has the following parameters:
 
 * `H_contract`: hash of the contract that was restored
 * `payment_url`: The internal URL `/pay?H_contract=...` of the essay store, will set the server-side session state
-  for the article associated with the contract hash on successful coin deposit
+  for the article associated with the contract hash on successful coin deposit.  When the contract is
+  fetched, the contract hash is associated with the article name in the server-side session state.
 * `offer_url`: Link to a teaser page (`/teaser?name=...`), which also contains a link to the article
   page, without the `tid` parameter.
 
