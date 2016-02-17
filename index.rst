@@ -50,6 +50,7 @@ the material covered in the *Operator Handbook*.
   integration-general
   integration-bank
   integration-merchant
+  example-essay-store
 
 
 --------------------------------------
