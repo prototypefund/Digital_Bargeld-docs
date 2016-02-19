@@ -259,6 +259,9 @@ merchant's offer.
   :<json base32 H_wire: the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
   :<json base32 H_contract: the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value obtained from the field `h_contract`, or regenerating one starting from the values it gets within the contract
   :<json int transaction_id: a 53-bit number corresponding to the contract being agreed on
+  :<json amount total_amount: total amount being paid as per the contract (the sum of the amounts from the `coins` may be larger to cover deposit fees not covered by the merchant)
+  :<json amount max_fee: maximum fees merchant agreed to cover as per the contract
+  :<json base32 merchant_sig: signature by the merchant over the contract, must match signed data of purpose TALER_SIGNATURE_MERCHANT_CONTRACT
   :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
   :<json date refund_deadline: same value held in the contract's `refund` field
   :<json string mint: the chosen mint's base URL
