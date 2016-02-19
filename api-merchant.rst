@@ -48,15 +48,6 @@ that is legally non-binding:
       // Signature over the contract made by the merchant.
       // Must confirm to the `Signature specification`_ below.
       sig: EddsaSignature;
-
-      // URL where the customer's wallet
-      // must send the payment for the contract.
-      // May be relative to the URL of the page that
-      // delivered the contract.
-      pay_url: string;
-
-      // URL to the `execution page`_.
-      exec_url: string;
     }
 
 The contract must have the following structure:
@@ -75,6 +66,15 @@ The contract must have the following structure:
       // a contract where it already has paid for the same
       // product instance.
       repurchase_correlation_id?: string;
+
+      // URL that the wallet will navigate to after the customer
+      // confirmed purchasing the contract.  Responsible for
+      // doing the actual payment and making available the product (if digital)
+      // or displaying a confirmation.
+      // The placeholder ${H_contract} will be replaced
+      // with the contract hash by wallets before navigating
+      // to the fulfillment URL.
+      fulfillment_url: string;
 
       // Maximum total deposit fee accepted by the merchant for this contract
       max_fee: Amount;

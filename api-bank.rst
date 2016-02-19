@@ -1,5 +1,5 @@
 =========
-Banks API
+Bank API
 =========
 
 The following APIs are served from banks, in order to allow mints to
@@ -7,12 +7,12 @@ deposit funds to money recipients.  A typical scenario for calling this
 APIs is after a merchant has deposited coins to the mint, and the mint
 needs to give real money to the merchant.
 
---------
-Test API
---------
+------------------
+Administrative API
+------------------
 
-This API is useful for testing purposes, as no real money will be
-involved.
+This is `local` API, meant to make the bank communicate with trusted entities,
+namely mints.
 
 .. _bank-deposit:
 .. http:post:: /admin/add/incoming
@@ -21,28 +21,36 @@ involved.
 
 **Response:**
 
-:status 200: The request has been correctly handled, so the funds have been transferred to the merchant's account
+:status 200 OK: The request has been correctly handled, so the funds have been transferred to
+the recipient's account
+
+:status 400 Bad Request: The bank replies a `BankIncomingError`_ object
 **Details:**
 
-  .. _BankDepositRequest:
-  .. code-block:: tsref
+.. _BankDepositRequest:
+.. code-block:: tsref
 
-    interface BankDepositRequest {
-      
-      // JSON 'amount' object. The amount the caller wants to transfer
-      // to the recipient's count
-      f: Amount;
-
-      // The transaction id (meant as in 'Taler transaction id') according
-      // to which the caller is now giving money to the recipient. That way,
-      // the recipient can link inwards money to commercial activity.
-      tid: number; 
-
-      // The recipient's account identificator. For this testing purpose, the
-      // account format will the normal IBAN format having the token "TEST"
-      // in place of the country code and having the check digit removed. For instance,
-      // if "SA03 8000 0000 6080 1016 7519" were a valid Saudi Arabian IBAN, then
-      // "TEST 8000 0000 6080 1016 7519" would be a correct test account number as well.
-      account: string;
+  interface BankDepositRequest {
     
-    }
+    // JSON 'amount' object. The amount the caller wants to transfer
+    // to the recipient's count
+    amount: Amount;
+
+    // The id of this wire transfer
+    wid: base32; 
+
+    // The recipient's account identificator
+    account: number;
+    
+  }
+
+.. _BankIncomingError:
+.. code-block:: tsref
+
+  interface BankIncomingError {
+
+    // The reason which made this request fail. Typically due to malfomation
+    // of the POST's body
+    reason: string
+  
+  }

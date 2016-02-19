@@ -80,10 +80,6 @@ possibly by using HTTPS.
       // When does the denomination key become valid?
       stamp_start: Timestamp;
 
-      // When is it no longer possible to withdraw fresh coins
-      // of this denomination?
-      stamp_expire_withdraw: Timestamp;
-
       // When is it no longer possible to deposit coins
       // of this denomination?
       stamp_expire_withdraw: Timestamp;

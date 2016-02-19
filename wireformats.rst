@@ -12,6 +12,26 @@ The information required for wire transfer depends on the type of wire transfer
 used.  Since the wire transfers differ for each region, we document here the
 ones currently supported by the mint.
 
+TEST
+----
+
+The TEST wire format is used for testing and for integration with Taler's
+simple "bank" system which in the future might be useful to setup a bank
+for a local / regional currency or accounting system.  Using the TEST
+wire format in combination with the Taler's bank, it is thus possible to
+fully test the Taler system without using real currencies.  The wire
+format for "TEST" is very simple, in that it only specifies an account
+number in a field "account_number".  The account number given must be
+a positive 53-bit integer.  Additional fields may be present, but are
+not required.
+
+For the merchant or mint to receive deposits through TEST, the deposit
+request must thus contain a JSON object with the following fields:
+
+  * `type`: the string constant `"TEST"`
+  * `account_number`: the account number of the merchant at the bank
+
+
 SEPA
 ----
 
