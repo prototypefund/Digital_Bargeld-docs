@@ -160,12 +160,16 @@ Strings in the JavaScript code are internationalised using the following functio
 
   i18n`You have ${n} coins.`
 
-- *i18n.parts*: Interpolate i18nized values with arbitrary objects. Useful for example to include HTML elements.
+- *i18n.parts*: Interpolate i18nized values with arbitrary objects.
+  Useful for example to include HTML elements.
 .. code-block:: js
 
   i18n.parts`Visit ${link} to get more coins.`
 
-- *i18n.pluralize*: translate with plural form
+- *i18n.pluralize*: translate with plural form.
+  The i18n.number() function returns a ``PluralNumber`` object
+  that specifies the argument that determines the plural form,
+  if not present the first numeric argument is used.
 
 .. code-block:: js
 
