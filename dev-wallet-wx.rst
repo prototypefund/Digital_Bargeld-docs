@@ -153,12 +153,12 @@ call `mocha` with the right parameters.
 Internationalisation
 --------------------
 
-Strings in the JavaScript code are internationalised using the following functions,
+Strings in the JavaScript code are internationalised using the following functions:
 
 - *i18n*: translate string with arbitrary arguments, the result is returned as string.
 .. code-block:: js
 
-  i18n`You have ${n} coins.
+  i18n`You have ${n} coins.`
 
 - *i18n.parts*: Interpolate i18nized values with arbitrary objects. Useful for example to include HTML elements.
 .. code-block:: js
