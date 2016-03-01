@@ -158,12 +158,12 @@ Strings in the JavaScript code are internationalised using the following functio
 - *i18n*: translate string with arbitrary arguments, the result is returned as string.
 .. code-block:: js
 
-  ``i18n`You have ${n} coins.``
+  i18n`You have ${n} coins.
 
 - *i18n.parts*: Interpolate i18nized values with arbitrary objects. Useful for example to include HTML elements.
 .. code-block:: js
 
-  ``i18n.parts`Visit ${link} to get more coins.```
+  i18n.parts`Visit ${link} to get more coins.`
 
 - *i18n.pluralize*: translate with plural form
 
@@ -182,5 +182,11 @@ To extract strings from sources and update the .po files, run:
 
   $ make i18n
 
-In static HTML files the ``lang`` attribute is used for language-specific strings.
+In static HTML files the ``lang`` attribute is used for language-specific strings:
+
+.. code-block:: html
+
+  <p lang="en">Hello World!</p>
+  <p lang="de">Hallo Welt!</p>
+
 ``lib/i18n.js`` and ``style/lang.css`` needs to be included for this to work.
