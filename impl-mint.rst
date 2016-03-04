@@ -1,25 +1,25 @@
 ===================================
-The Mint Reference Implementation
+The Exchange Reference Implementation
 ===================================
 
 ----------------------
 The Configuration File
 ----------------------
 
-The section `[mint]` contains various global options for the mint:
+The section `[exchange]` contains various global options for the exchange:
 
-* `master_public_key`: Must specify the mint's master public key.
-* `wireformat`: The wireformat supported by the mint (i.e. "SEPA")
-* `currency`: The currency supported by the mint (i.e. "EUR")
+* `master_public_key`: Must specify the exchange's master public key.
+* `wireformat`: The wireformat supported by the exchange (i.e. "SEPA")
+* `currency`: The currency supported by the exchange (i.e. "EUR")
 
 
 ^^^^^^^^^^^^^^^^^^^^^^
 SEPA accounts
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The command line tool `taler-mint-sepa` is used to create a file with
-the JSON response to /wire/sepa requests using the mint's offline
-master key.  This file needs to be created and added to the configuration under SEPA_RESPONSE_FILE in section [mint-wire-sepa] when the 
+The command line tool `taler-exchange-sepa` is used to create a file with
+the JSON response to /wire/sepa requests using the exchange's offline
+master key.  This file needs to be created and added to the configuration under SEPA_RESPONSE_FILE in section [exchange-wire-sepa] when the 
 `wireformat` option in the configuration file allows SEPA transactions.
 
 
@@ -27,23 +27,23 @@ master key.  This file needs to be created and added to the configuration under 
 Key Management Options
 ^^^^^^^^^^^^^^^^^^^^^^
 
-The command line tool `taler-mint-keyup` updates the signing key and list of denominations offered by the mint.  This process requires the mint's master key, and should be done offline in order to protect the master key.  For this, `taler-mint-keyup` uses additional configuration options.
+The command line tool `taler-exchange-keyup` updates the signing key and list of denominations offered by the exchange.  This process requires the exchange's master key, and should be done offline in order to protect the master key.  For this, `taler-exchange-keyup` uses additional configuration options.
 
-The section `[mint_keys]` containts the following entries:
+The section `[exchange_keys]` containts the following entries:
 
 * `signkey_duration`: How long should one signing key be used?
 * `lookahead_sign`:  For how far into the future should keys be issued?  This determines the frequency
   of offline signing with the master key.
-* `lookahead_provide`: How far into the future should the mint provide keys?  This determines the attack
+* `lookahead_provide`: How far into the future should the exchange provide keys?  This determines the attack
   window on keys.
 
 
 Sections specifying denomination (coin) information start with "coin\_".  By convention, the name continues with "$CURRENCY_[$SUBUNIT]_$VALUE", i.e. "[coin_eur_ct_10] for a 10 cent piece.  However, only the "coin\_" prefix is mandatory.  Each "coin\_"-section must then have the following options:
 
 * `value`: How much is the coin worth, the format is CURRENCY:VALUE.FRACTION.  For example, a 10 cent piece is "EUR:0.10".
-* `duration_withdraw`: How long can a coin of this type be withdrawn?  This limits the losses incured by the mint when a denomination key is compromised.
+* `duration_withdraw`: How long can a coin of this type be withdrawn?  This limits the losses incured by the exchange when a denomination key is compromised.
 * `duration_overlap`: What is the overlap of the withdrawal timespan for this coin type?
-* `duration_spend`: How long is a coin of the given type valid?  Smaller values result in lower storage costs for the mint.
+* `duration_spend`: How long is a coin of the given type valid?  Smaller values result in lower storage costs for the exchange.
 * `fee_withdraw`: What does it cost to withdraw this coin? Specified using the same format as `value`.
 * `fee_deposit`: What does it cost to deposit this coin? Specified using the same format as `value`.
 * `fee_refresh`: What does it cost to refresh this coin? Specified using the same format as `value`.
@@ -54,9 +54,9 @@ Sections specifying denomination (coin) information start with "coin\_".  By con
 Reserve management
 ------------------
 
-Incoming transactions to the mint's provider result in the creation or update of reserves, identified by their withdrawal key.
+Incoming transactions to the exchange's provider result in the creation or update of reserves, identified by their withdrawal key.
 
-The command line tool `taler-mint-reservemod` allows create and add money to reserves in the mint's database.
+The command line tool `taler-exchange-reservemod` allows create and add money to reserves in the exchange's database.
 
 
 -------------------
@@ -87,7 +87,7 @@ Database Scheme
     expiration       INT8,
 
     -- The blinding key (public part) for the purse, can be NULL
-    -- if funds are insufficient or the mint has not
+    -- if funds are insufficient or the exchange has not
     -- generated it yet.
     blinding_pub        BYTEA,
 
@@ -117,7 +117,7 @@ Database Scheme
     -- The coin blank provided by the customer.
     blind_blank_coin  BYTEA,
 
-    -- Signature over the minting request by the customer.
+    -- Signature over the exchangeing request by the customer.
     customer_sig      BYTEA,
 
     -- The signed blind blank coin.
@@ -127,13 +127,13 @@ Database Scheme
     -- blind signed coin.
     denom_pub         BYTEA,
 
-    -- The purse that requested the minting of this
+    -- The purse that requested the exchangeing of this
     -- coin.
     withdraw_pub      BYTEA REFERENCES purses(withdraw_pub)
   );
 
 
-The table `coins` stores information about coins known to the mint.
+The table `coins` stores information about coins known to the exchange.
 
 .. sourcecode:: postgres
 
@@ -198,7 +198,7 @@ The following tables are used for refreshing.
     idx INTEGER,
     coin_link_enc BYTEA,
     -- The blinding key (public part) for the purse, can be NULL
-    -- if funds are insufficient or the mint has not
+    -- if funds are insufficient or the exchange has not
     -- generated it yet.
     blinding_pub        BYTEA,
 
@@ -215,7 +215,7 @@ The following tables are used for refreshing.
 Key Storage Format
 ------------------
 
-The mint's key directory contains the two subdirectories `signkeys` and `coinkeys`.
+The exchange's key directory contains the two subdirectories `signkeys` and `coinkeys`.
 
 The directory `signkeys` contains signkey files, where the name is the start date of the respective key.
 

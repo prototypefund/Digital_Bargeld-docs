@@ -30,7 +30,7 @@ handle the error as if an internal error (500) had been returned.
   :resheader Content-Type: application/json
   :status 200: The request was successful.
   :status 500 Internal server error:
-    This always indicates some serious internal operational error of the mint,
+    This always indicates some serious internal operational error of the exchange,
     such as a program bug, database problems, etc., and must not be used for
     client-side problems.  When facing an internal server error, clients should
     retry their request after some delay.  We recommended initially trying after
@@ -38,9 +38,9 @@ handle the error as if an internal error (500) had been returned.
     informed and another three retries should be scheduled within the next 24h.
     If the error persists, a report should ultimately be made to the auditor,
     although the auditor API for this is not yet specified.  However, as internal
-    server errors are always reported to the mint operator, a good operator
+    server errors are always reported to the exchange operator, a good operator
     should naturally be able to address them in a timely fashion, especially
-    within 24h.  When generating an internal server error, the mint responds with
+    within 24h.  When generating an internal server error, the exchange responds with
     a JSON object containing the following fields:
   :status 400 Bad Request: One of the arguments to the request is missing or malformed.
 
@@ -274,15 +274,15 @@ uses 512-bit hash codes (64 bytes).
      uint8_t ecdhe_priv[32];
    };
 
-   struct TALER_MintPublicKeyP {
+   struct TALER_ExchangePublicKeyP {
      uint8_t eddsa_pub[32];
    };
 
-   struct TALER_MintPrivateKeyP {
+   struct TALER_ExchangePrivateKeyP {
      uint8_t eddsa_priv[32];
    };
 
-   struct TALER_MintSignatureP {
+   struct TALER_ExchangeSignatureP {
      uint8_t eddsa_signature[64];
    };
 
@@ -393,7 +393,7 @@ size of `FIELDS`.
   };
 
   struct TALER_DepositConfirmationPS {
-    signed (purpose = TALER_SIGNATURE_MINT_CONFIRM_DEPOSIT) {
+    signed (purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_DEPOSIT) {
       struct GNUNET_HashCode h_contract;
       struct GNUNET_HashCode h_wire;
       uint64_t transaction_id GNUNET_PACKED;
@@ -415,24 +415,24 @@ size of `FIELDS`.
   };
 
   struct TALER_RefreshMeltConfirmationPS {
-    signed (purpose = TALER_SIGNATURE_MINT_CONFIRM_MELT) {
+    signed (purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_MELT) {
       struct GNUNET_HashCode session_hash;
       uint16_t noreveal_index;
     }
   };
 
-  struct TALER_MintSigningKeyValidityPS {
+  struct TALER_ExchangeSigningKeyValidityPS {
     signed (purpose = TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY) {
       struct TALER_MasterPublicKeyP master_public_key;
       struct GNUNET_TIME_AbsoluteNBO start;
       struct GNUNET_TIME_AbsoluteNBO expire;
       struct GNUNET_TIME_AbsoluteNBO end;
-      struct TALER_MintPublicKeyP signkey_pub;
+      struct TALER_ExchangePublicKeyP signkey_pub;
     }
   };
 
-  struct TALER_MintKeySetPS {
-    signed (purpose=TALER_SIGNATURE_MINT_KEY_SET) {
+  struct TALER_ExchangeKeySetPS {
+    signed (purpose=TALER_SIGNATURE_EXCHANGE_KEY_SET) {
       struct GNUNET_TIME_AbsoluteNBO list_issue_date;
       struct GNUNET_HashCode hc;
     }
@@ -459,8 +459,8 @@ size of `FIELDS`.
     }
   };
 
-  struct TALER_MintWireSupportMethodsPS {
-    signed (purpose = TALER_SIGNATURE_MINT_WIRE_TYPES) {
+  struct TALER_ExchangeWireSupportMethodsPS {
+    signed (purpose = TALER_SIGNATURE_EXCHANGE_WIRE_TYPES) {
       struct GNUNET_HashCode h_wire_types;
     }
   };

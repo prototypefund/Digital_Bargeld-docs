@@ -57,7 +57,7 @@ Events can be received by installing a listener:
 Normalized Base URLs
 --------------------
 
-Mints and merchants have a base URL for their service.  This URL *must* be in a
+Exchanges and merchants have a base URL for their service.  This URL *must* be in a
 canonical form when it is stored (e.g. in the wallet's database) or transmitted
 (e.g. to a bank page).
 
@@ -65,10 +65,10 @@ canonical form when it is stored (e.g. in the wallet's database) or transmitted
 2. The path component of the URL must end with a slash.
 3. The URL must not contain a fragment or query.
 
-When a user enters a URL that is, technically, relative (such as "alice.example.com/mint"), wallets
-*may* transform it into a canonical base URL ("http://alice.example.com/mint/").  Other components *should not* accept
+When a user enters a URL that is, technically, relative (such as "alice.example.com/exchange"), wallets
+*may* transform it into a canonical base URL ("http://alice.example.com/exchange/").  Other components *should not* accept
 URLs that are not canonical.
 
-Rationale:  Joining non-canonical URLs with relative URLs (e.g. "mint.example.com" with "reserve/status") 
+Rationale:  Joining non-canonical URLs with relative URLs (e.g. "exchange.example.com" with "reserve/status") 
 results in different and slightly unexpected behavior in some URL handling libraries.
 Canonical URLs give more predictable results with standard URL joining.

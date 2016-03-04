@@ -18,7 +18,7 @@ one of those is trivial.
 
 The `backend` is a standalone C application intended to implement all
 the cryptographic routines required to interact with the Taler wallet
-and a Taler mint.
+and a Taler exchange.
 
 
 
@@ -76,7 +76,7 @@ The following API are made available by the merchant's `backend` to the merchant
   The `proposition` that is to be sent from the frontend is a `contract` object without the fields
 
   * `merchant_pub`
-  * `mints`
+  * `exchanges`
   * `H_wire`
 
   The `backend` then completes this information based on its configuration.
@@ -94,7 +94,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
 .. http:post:: /pay
 
-  Asks the `backend` to execute the transaction with the mint and deposit the coins.
+  Asks the `backend` to execute the transaction with the exchange and deposit the coins.
 
   **Request:**
 
@@ -106,15 +106,15 @@ The following API are made available by the merchant's `backend` to the merchant
   **Response:**
 
   :status 200 OK:
-    The mint accepted all of the coins. The `frontend` should now fullfill the
+    The exchange accepted all of the coins. The `frontend` should now fullfill the
     contract.  This response has no meaningful body, the frontend needs to
     generate the fullfillment page.
   :status 400 Precondition failed:
-    The given mint is not acceptable for this merchant, as it is not in the
-    list of accepted mints and not audited by an approved auditor.
+    The given exchange is not acceptable for this merchant, as it is not in the
+    list of accepted exchanges and not audited by an approved auditor.
 
 
-  The `backend` will return verbatim the error codes received from the mint's
+  The `backend` will return verbatim the error codes received from the exchange's
   :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
   double-spending for example, the `frontend` should pass the reply verbatim to
   the browser/wallet. This should be the expected case, as the `frontend`

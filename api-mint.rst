@@ -1,20 +1,20 @@
 =========================
-The Mint RESTful JSON API
+The Exchange RESTful JSON API
 =========================
 
 The API specified here follows the :ref:`general conventions <http-common>`
 for all details not specified in the individual requests.
 
 -------------------
-Obtaining Mint Keys
+Obtaining Exchange Keys
 -------------------
 
 This API is used by wallets and merchants to obtain global information about
-the mint, such as online signing keys, available denominations and the fee
-structure.  This is typically the first call any mint client makes, as it
+the exchange, such as online signing keys, available denominations and the fee
+structure.  This is typically the first call any exchange client makes, as it
 returns information required to process all of the other interactions with the
-mint.  The returned information is secured by (1) signature(s) from the mint,
-especially the long-term offline signing key of the mint, which clients should
+exchange.  The returned information is secured by (1) signature(s) from the exchange,
+especially the long-term offline signing key of the exchange, which clients should
 cache; (2) signature(s) from auditors, and the auditor keys should be
 hard-coded into the wallet as they are the trust anchors for Taler; (3)
 possibly by using HTTPS.
@@ -28,28 +28,28 @@ possibly by using HTTPS.
   **Response:**
 
   :status 200 OK:
-    The mint responds with a `MintKeysResponse`_ object. This request should
+    The exchange responds with a `ExchangeKeysResponse`_ object. This request should
     virtually always be successful.
 
   **Details:**
 
-  .. _MintKeysResponse:
+  .. _ExchangeKeysResponse:
   .. code-block:: tsref
 
-    interface MintKeysResponse {
-      // EdDSA master public key of the mint, used to sign entries in `denoms` and `signkeys`
+    interface ExchangeKeysResponse {
+      // EdDSA master public key of the exchange, used to sign entries in `denoms` and `signkeys`
       master_public_key: EddsaPublicKey;
 
-      // Denomination offered by this mint.
+      // Denomination offered by this exchange.
       denoms: Denom[];
 
       // The date when the denomination keys were last updated.
       list_issue_date: string;
 
-      // Auditors of the mint.
+      // Auditors of the exchange.
       auditors: Auditor[];
 
-      // The mint's signing keys.
+      // The exchange's signing keys.
       signkeys: SignKey[];
 
       // compact EdDSA signature_ (binary-only) over the SHA-512 hash of the
@@ -57,14 +57,14 @@ possibly by using HTTPS.
       // in `denoms` in the same order as they were in `denoms`.  Note that for
       // hashing, the binary format of the RSA public keys is used, and not their
       // `base32 encoding <base32>`_.  Wallets cannot do much with this signature by itself;
-      // it is only useful when multiple clients need to establish that the mint
+      // it is only useful when multiple clients need to establish that the exchange
       // is sabotaging end-user anonymity by giving disjoint denomination keys to
-      // different users.  If a mint were to do this, this signature allows the
-      // clients to demonstrate to the public that the mint is dishonest.
+      // different users.  If a exchange were to do this, this signature allows the
+      // clients to demonstrate to the public that the exchange is dishonest.
       eddsa_sig: string;
 
-      // Public EdDSA key of the mint that was used to generate the signature.
-      // Should match one of the mint's signing keys from /keys.  It is given
+      // Public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
       eddsa_pub: string;
@@ -85,25 +85,25 @@ possibly by using HTTPS.
       stamp_expire_withdraw: Timestamp;
 
       // Timestamp indicating by when legal disputes relating to these coins must
-      // be settled, as the mint will afterwards destroy its evidence relating to
+      // be settled, as the exchange will afterwards destroy its evidence relating to
       // transactions involving this coin.
       stamp_expire_legal: Timestamp;
 
       // Public (RSA) key for the denomination in base32 encoding.
       denom_pub: string;
 
-      // Fee charged by the mint for withdrawing a coin of this denomination
+      // Fee charged by the exchange for withdrawing a coin of this denomination
       fee_withdraw: Amount;
 
-      // Fee charged by the mint for depositing a coin of this denomination
+      // Fee charged by the exchange for depositing a coin of this denomination
       fee_deposit: Amount;
 
-      // Fee charged by the mint for refreshing a coin of this denomination
+      // Fee charged by the exchange for refreshing a coin of this denomination
       fee_refresh: Amount;
 
       // Signature with purpose
       // `TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY` over the expiration
-      // dates, value and the key, created with the mint's master key.
+      // dates, value and the key, created with the exchange's master key.
       master_sig: EddsaSignature;
     }
 
@@ -119,13 +119,13 @@ possibly by using HTTPS.
   .. code-block:: tsref
 
     interface SignKey {
-      // The actual mint's EdDSA signing public key.
+      // The actual exchange's EdDSA signing public key.
       key: EddsaPublicKey;
 
       // Initial validity date for the signing key.
       stamp_start: Timestamp;
 
-      // Date when the mint will stop using the signing key, allowed to overlap
+      // Date when the exchange will stop using the signing key, allowed to overlap
       // slightly with the next signing key's validity to allow for clock skew.
       stamp_expire: Timestamp;
 
@@ -133,7 +133,7 @@ possibly by using HTTPS.
       // henceforth no longer be considered valid in legal disputes.
       stamp_end: Timestamp;
 
-      // Signature over `key` and `stamp_expire` by the mint master key.
+      // Signature over `key` and `stamp_expire` by the exchange master key.
       // Must have purpose TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY.
       master_sig: EddsaSignature;
     }
@@ -165,7 +165,7 @@ possibly by using HTTPS.
       denom_pub_h: HashCode;
 
       // A signature_ (binary-only) with purpose
-      // `TALER_SIGNATURE_AUDITOR_MINT_KEYS` over the mint's public key and the
+      // `TALER_SIGNATURE_AUDITOR_EXCHANGE_KEYS` over the exchange's public key and the
       // denomination key information. To verify the signature, the `denom_pub_h`
       // must be resolved with the information from `denoms`
       auditor_sig: EddsaSignature;
@@ -188,11 +188,11 @@ Obtaining wire-transfer information
 
 .. http:get:: /wire
 
-  Returns a list of payment methods supported by the mint.  The idea is that wallets may use this information to instruct users on how to perform wire transfers to top up their wallets.
+  Returns a list of payment methods supported by the exchange.  The idea is that wallets may use this information to instruct users on how to perform wire transfers to top up their wallets.
 
   **Response:**
 
-  :status 200: The mint responds with a `WireResponse`_ object. This request should virtually always be successful.
+  :status 200: The exchange responds with a `WireResponse`_ object. This request should virtually always be successful.
 
   **Details:**
 
@@ -206,13 +206,13 @@ Obtaining wire-transfer information
       methods: string[];
 
       // the EdDSA signature_ (binary-only) with purpose
-      // `TALER_SIGNATURE_MINT_PAYMENT_METHODS` signing over the hash over the
+      // `TALER_SIGNATURE_EXCHANGE_PAYMENT_METHODS` signing over the hash over the
       // 0-terminated strings representing the payment methods in the same order
       // as given in methods.
       sig: EddsaSignature;
 
-      // public EdDSA key of the mint that was used to generate the signature.
-      // Should match one of the mint's signing keys from /keys.  It is given
+      // public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
       pub: EddsaPublicKey;
@@ -222,21 +222,21 @@ Obtaining wire-transfer information
 .. http:get:: /wire/test
 
   The "test" payment method is for testing the system without using
-  real-world currencies or actual wire transfers.  If the mint operates
+  real-world currencies or actual wire transfers.  If the exchange operates
   in "test" mode, this request provides a redirect to an address where
   the user can initiate a fake wire transfer for testing.
 
-  :status 200: The mint responds with a `WireTestResponse`_ object. This request should virtually always be successful.
-  :status 501: This wire transfer method is not supported by this mint.
+  :status 200: The exchange responds with a `WireTestResponse`_ object. This request should virtually always be successful.
+  :status 501: This wire transfer method is not supported by this exchange.
 
 .. http:get:: /wire/sepa
 
-  Provides instructions for how to transfer funds to the mint using the SEPA
-  transfers.  Always signed using the mint's long-term offline master public
+  Provides instructions for how to transfer funds to the exchange using the SEPA
+  transfers.  Always signed using the exchange's long-term offline master public
   key.
 
-  :status 200: The mint responds with a `WireSepaResponse`_ object. This request should virtually always be successful.
-  :status 501: This wire transfer method is not supported by this mint.
+  :status 200: The exchange responds with a `WireSepaResponse`_ object. This request should virtually always be successful.
+  :status 501: This wire transfer method is not supported by this exchange.
 
 
   **Details:**
@@ -246,17 +246,17 @@ Obtaining wire-transfer information
   .. code-block:: tsref
 
     interface WireSepaResponse {
-      // Legal name of the mint operator who is receiving the funds
+      // Legal name of the exchange operator who is receiving the funds
       receiver_name: string;
 
-      // IBAN account number for the mint
+      // IBAN account number for the exchange
       iban: string;
 
-      // BIC of the bank of the mint
+      // BIC of the bank of the exchange
       bic: string;
 
       // the EdDSA signature_ (binary-only) with purpose
-      // `TALER_SIGNATURE_MINT_PAYMENT_METHOD_SEPA` signing over the hash over the
+      // `TALER_SIGNATURE_EXCHANGE_PAYMENT_METHOD_SEPA` signing over the hash over the
       // 0-terminated strings representing the receiver's name, IBAN and the BIC.
       sig: EddsaSignature;
     }
@@ -268,16 +268,16 @@ Withdrawal
 
 This API is used by the wallet to obtain digital coins.
 
-When transfering money to the mint such as via SEPA transfers, the mint creates
+When transfering money to the exchange such as via SEPA transfers, the exchange creates
 a *reserve*, which keeps the money from the customer.  The customer must
 specify an EdDSA reserve public key as part of the transfer, and can then
 withdraw digital coins using the corresponding private key.  All incoming and
 outgoing transactions are recorded under the corresponding public key by the
-mint.
+exchange.
 
   .. note::
 
-     Eventually the mint will need to advertise a policy for how long it will keep transaction histories for inactive or even fully drained reserves.  We will therefore need some additional handler similar to `/keys` to advertise those terms of service.
+     Eventually the exchange will need to advertise a policy for how long it will keep transaction histories for inactive or even fully drained reserves.  We will therefore need some additional handler similar to `/keys` to advertise those terms of service.
 
 
 .. http:get:: /reserve/status
@@ -288,10 +288,10 @@ mint.
     The client currently does not have to demonstrate knowledge of the private
     key of the reserve to make this request, which makes the reserve's public
     key privliged information known only to the client, their bank, and the
-    mint.  In future, we might wish to revisit this decision to improve
+    exchange.  In future, we might wish to revisit this decision to improve
     security, such as by having the client EdDSA-sign an ECDHE key to be used
     to derive a symmetric key to encrypt the response.  This would be useful if
-    for example HTTPS were not used for communication with the mint.
+    for example HTTPS were not used for communication with the exchange.
 
   **Request:**
 
@@ -300,8 +300,8 @@ mint.
   **Response:**
 
   :status 200 OK:
-    The mint responds with a `ReserveStatus`_ object;  the reserve was known to the mint,
-  :status 404 Not Found: The withdrawal key does not belong to a reserve known to the mint.
+    The exchange responds with a `ReserveStatus`_ object;  the reserve was known to the exchange,
+  :status 404 Not Found: The withdrawal key does not belong to a reserve known to the exchange.
 
   **Details:**
 
@@ -362,12 +362,12 @@ mint.
     coin is not lost.
   :status 401 Unauthorized: The signature is invalid.
   :status 404 Not Found:
-    The denomination key or the reserve are not known to the mint.  If the
+    The denomination key or the reserve are not known to the exchange.  If the
     denomination key is unknown, this suggests a bug in the wallet as the
     wallet should have used current denomination keys from /keys.  If the
     reserve is unknown, the wallet should not report a hard error yet, but
     instead simply wait for up to a day, as the wire transaction might simply
-    not yet have completed and might be known to the mint in the near future.
+    not yet have completed and might be known to the exchange in the near future.
     In this case, the wallet should repeat the exact same request later again
     using exactly the same blinded coin.
   :status 402 Payment Required:
@@ -382,10 +382,10 @@ mint.
 
     interface WithdrawRequest {
       // Denomination public key (RSA), specifying the type of coin the client
-      // would like the mint to create.
+      // would like the exchange to create.
       denom_pub: RsaPublicKey;
 
-      // coin's blinded public key, should be (blindly) signed by the mint's
+      // coin's blinded public key, should be (blindly) signed by the exchange's
       // denomination private key
       coin_ev: CoinEnvelope;
 
@@ -440,7 +440,7 @@ denomination.
 .. _deposit:
 .. http:POST:: /deposit
 
-  Deposit the given coin and ask the mint to transfer the given :ref:`amount`
+  Deposit the given coin and ask the exchange to transfer the given :ref:`amount`
   to the merchants bank account.  This API is used by the merchant to redeem
   the digital coins.  The request should contain a JSON object with the
   following fields:
@@ -450,7 +450,7 @@ denomination.
   **Response:**
 
   :status 200:
-    The operation succeeded, the mint confirms that no double-spending took place.
+    The operation succeeded, the exchange confirms that no double-spending took place.
   :status 401 Unauthorized:
     One of the signatures is invalid.
   :status 403:
@@ -472,7 +472,7 @@ denomination.
       f: Amount;
 
       // The merchant's account details. This must be a JSON object whose format
-      // must correspond to one of the supported wire transfer formats of the mint.
+      // must correspond to one of the supported wire transfer formats of the exchange.
       // See `wireformats`_.
       wire: WireFormat;
 
@@ -481,7 +481,7 @@ denomination.
       H_wire: HashCode;
 
       // SHA-512 hash of the contact of the merchant with the customer.  Further
-      // details are never disclosed to the mint.
+      // details are never disclosed to the exchange.
       H_contract: HashCode;
 
       // coin's public key, both ECDHE and EdDSA.
@@ -490,14 +490,14 @@ denomination.
       // denomination RSA key with which the coin is signed
       denom_pub: RsaPublicKey;
 
-      // mint's unblinded RSA `signature`_ of the coin
+      // exchange's unblinded RSA `signature`_ of the coin
       ub_sig: RsaSignature;
 
       // timestamp when the contract was finalized, must match approximately the
-      // current time of the mint
+      // current time of the exchange
       timestamp: Timestamp;
 
-      // indicative time by which the mint undertakes to transfer the funds to
+      // indicative time by which the exchange undertakes to transfer the funds to
       // the merchant, in case of successful payment.
       edate: Timestamp;
 
@@ -509,7 +509,7 @@ denomination.
       merchant_pub: EddsaPublicKey;
 
       // date until which the merchant can issue a refund to the customer via the
-      // mint, possibly zero if refunds are not allowed.
+      // exchange, possibly zero if refunds are not allowed.
       refund_deadline: Timestamp;
 
       // The EdDSA signature (binary-only) made with purpose
@@ -529,14 +529,14 @@ denomination.
       status: string;
 
       // the EdDSA :ref:`signature` (binary-only) with purpose
-      // `TALER_SIGNATURE_MINT_CONFIRM_DEPOSIT` using a current signing key of the
-      // mint affirming the successful deposit and that the mint will transfer the
+      // `TALER_SIGNATURE_EXCHANGE_CONFIRM_DEPOSIT` using a current signing key of the
+      // exchange affirming the successful deposit and that the exchange will transfer the
       // funds after the refund deadline, or as soon as possible if the refund
       // deadline is zero.
       sig: EddsaSignature;
 
-      // public EdDSA key of the mint that was used to generate the signature.
-      // Should match one of the mint's signing keys from /keys.  It is given
+      // public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
       pub: EddsaPublicKey;
@@ -582,20 +582,20 @@ Refreshing
 
 Refreshing creates `n` new coins from `m` old coins, where the sum of
 denominations of the new coins must be smaller than the sum of the old coins'
-denominations plus melting (refresh) and withdrawal fees charged by the mint.
+denominations plus melting (refresh) and withdrawal fees charged by the exchange.
 The refreshing API can be used by wallets to melt partially spent coins, making
-transactions with the freshly minted coins unlinkabe to previous transactions
+transactions with the freshly exchangeed coins unlinkabe to previous transactions
 by anyone except the wallet itself.
 
 However, the new coins are linkable from the private keys of all old coins
 using the /refresh/link request.  While /refresh/link must be implemented by
-the mint to achieve taxability, wallets do not really ever need that part of
+the exchange to achieve taxability, wallets do not really ever need that part of
 the API during normal operation.
 
 .. _refresh:
 .. http:post:: /refresh/melt
 
-  "Melts" coins.  Invalidates the coins and prepares for minting of fresh
+  "Melts" coins.  Invalidates the coins and prepares for exchangeing of fresh
   coins.  Taler uses a global parameter `kappa` for the cut-and-choose
   component of the protocol, for which this request is the commitment.  Thus,
   various arguments are given `kappa`-times in this step.  At present `kappa`
@@ -610,7 +610,7 @@ the API during normal operation.
     The operation is not allowed as at least one of the coins has insufficient funds.  The response
     is `MeltForbiddenResponse`_ in this case.
   :status 404:
-    the mint does not recognize the denomination key as belonging to the mint,
+    the exchange does not recognize the denomination key as belonging to the exchange,
     or it has expired
 
   **Details:**
@@ -663,7 +663,7 @@ the API during normal operation.
       // Coin public key, uniquely identifies the coin
       coin_pub: string;
 
-      // The denomination public key allows the mint to determine total coin value.
+      // The denomination public key allows the exchange to determine total coin value.
       denom_pub: RsaPublicKey;
 
       // Signature over the coin public key by the denomination.
@@ -693,16 +693,16 @@ the API during normal operation.
       // Which of the `kappa` indices does the client not have to reveal.
       noreveal_index: number;
 
-      // binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_MELT`
-      // whereby the mint affirms the successful melt and confirming the
+      // binary-only Signature_ for purpose `TALER_SIGNATURE_EXCHANGE_CONFIRM_MELT`
+      // whereby the exchange affirms the successful melt and confirming the
       // `noreveal_index`
-      mint_sig: EddsaSignature;
+      exchange_sig: EddsaSignature;
 
-      // public EdDSA key of the mint that was used to generate the signature.
-      // Should match one of the mint's signing keys from /keys.  Again given
+      // public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  Again given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
-      mint_pub: EddsaPublicKey;
+      exchange_pub: EddsaPublicKey;
     }
 
 
@@ -735,8 +735,8 @@ the API during normal operation.
 
 .. http:post:: /refresh/reveal
 
-  Reveal previously commited values to the mint, except for the values
-  corresponding to the `noreveal_index` returned by the /mint/melt step.
+  Reveal previously commited values to the exchange, except for the values
+  corresponding to the `noreveal_index` returned by the /exchange/melt step.
   Request body contains a JSON object with the following fields:
 
 
@@ -755,14 +755,14 @@ the API during normal operation.
   .. code-block:: tsref
 
     interface RevealRequest {
-      // Hash over most of the arguments to the /mint/melt step.  Used to
+      // Hash over most of the arguments to the /exchange/melt step.  Used to
       // identify the corresponding melt operation.  For details on which elements
-      // must be hashed in which order, please consult the source code of the mint
+      // must be hashed in which order, please consult the source code of the exchange
       // reference implementation.
       session_hash: HashCode;
 
       // 2D array of `kappa - 1` times number of melted coins ECDHE transfer
-      // private keys.  The mint will use those to decrypt the transfer secrets,
+      // private keys.  The exchange will use those to decrypt the transfer secrets,
       // check that they match across all coins, and then decrypt the private keys
       // of the coins to be generated and check all this against the commitments.
       transfer_privs: EddsaPrivateKey[][];
@@ -773,7 +773,7 @@ the API during normal operation.
   .. code-block:: tsref
 
     interface RevealResponse {
-      // List of the mint's blinded RSA signatures on the new coins.  Each
+      // List of the exchange's blinded RSA signatures on the new coins.  Each
       // element in the array is another JSON object which contains the signature
       // in the "ev_sig" field.
       ev_sigs: BlindedRsaSignature[];
@@ -800,7 +800,7 @@ the API during normal operation.
       oldcoin_infos: OldCoinInfo[];
 
       // array with RSA denomination public keys of the coins the original
-      // refresh request asked to be minted
+      // refresh request asked to be exchangeed
       newcoins_infos: RsaPublicKey[];
 
       // 2D array with `kappa` entries in the first dimension and the same
@@ -842,7 +842,7 @@ the API during normal operation.
 
 .. http:get:: /refresh/link
 
-  Link the old public key of a melted coin to the coin(s) that were minted during the refresh operation.
+  Link the old public key of a melted coin to the coin(s) that were exchangeed during the refresh operation.
 
   **Request:**
 
@@ -851,11 +851,11 @@ the API during normal operation.
   **Response:**
 
   :status 200 OK:
-    All commitments were revealed successfully.  The mint returns an array,
+    All commitments were revealed successfully.  The exchange returns an array,
     typically consisting of only one element, in which each each element contains
     information about a melting session that the coin was used in.
   :status 404 Not Found:
-    The mint has no linkage data for the given public key, as the coin has not
+    The exchange has no linkage data for the given public key, as the coin has not
     yet been involved in a refresh operation.
 
   **Details:**
@@ -874,7 +874,7 @@ the API during normal operation.
       secret_enc: Base32;
 
       // array with (encrypted/blinded) information for each of the coins
-      // minted in the refresh operation.
+      // exchangeed in the refresh operation.
       new_coins: NewCoinInfo[];
     }
 
@@ -885,10 +885,10 @@ the API during normal operation.
       // Encrypted private key and blinding factor information of the fresh coin
       link_enc: Base32;
 
-      // RSA public key of the minted coin.
+      // RSA public key of the exchangeed coin.
       denom_pub: RsaPublicKey;
 
-      // Mint's blinded signature over the minted coin.
+      // Exchange's blinded signature over the exchangeed coin.
       ev_sig: BlindedRsaSignature;
     }
 
@@ -900,7 +900,7 @@ Tracking wire transfers
 -----------------------
 
 This API is used by merchants that need to find out which wire
-transfers (from the mint to the merchant) correspond to which deposit
+transfers (from the exchange to the merchant) correspond to which deposit
 operations.  Typically, a merchant will receive a wire transfer with a
 **wire transfer identifier** and want to know the set of deposit
 operations that correspond to this wire transfer.  This is the
@@ -941,10 +941,10 @@ typically also view the balance.)
   **Response:**
 
   :status 200 OK:
-    The wire transfer is known to the mint, details about it follow in the body.
+    The wire transfer is known to the exchange, details about it follow in the body.
     The body of the response is a `WireDepositsResponse`_.
   :status 404 Not Found:
-    The wire transfer identifier is unknown to the mint.
+    The wire transfer identifier is unknown to the exchange.
 
   .. _WireDepositsResponse:
   .. code-block:: tsref
@@ -985,7 +985,7 @@ typically also view the balance.)
     }
   .. note::
 
-     We might want to add a signature of the mint over the response in the future.  That way, a merchant has proof should a mint ever try to change the story here. (#4135)
+     We might want to add a signature of the exchange over the response in the future.  That way, a merchant has proof should a exchange ever try to change the story here. (#4135)
 
 
 .. http:post:: /deposit/wtid
@@ -997,15 +997,15 @@ typically also view the balance.)
   **Response:**
 
   :status 200 OK:
-    The deposit has been executed by the mint and we have a wire transfer identifier.
+    The deposit has been executed by the exchange and we have a wire transfer identifier.
     The response body is a `WtidResponse`_ object.
   :status 202 Accepted:
     The deposit request has been accepted for processing, but was not yet
-    executed.  Hence the mint does not yet have a wire transfer identifier.  The
+    executed.  Hence the exchange does not yet have a wire transfer identifier.  The
     merchant should come back later and ask again.
     The response body is a `WtidAcceptedResponse`_.
   :status 401 Unauthorized: The signature is invalid.
-  :status 404 Not Found: The deposit operation is unknown to the mint
+  :status 404 Not Found: The deposit operation is unknown to the exchange
 
   **Details:**
 
@@ -1054,15 +1054,15 @@ typically also view the balance.)
       // Total amount transferred
       total_amount: Amount;
 
-      // binary-only Signature_ for purpose `TALER_SIGNATURE_MINT_CONFIRM_WIRE`
-      // whereby the mint affirms the successful wire transfer.
-      mint_sig: EddsaSignature;
+      // binary-only Signature_ for purpose `TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE`
+      // whereby the exchange affirms the successful wire transfer.
+      exchange_sig: EddsaSignature;
 
-      // public EdDSA key of the mint that was used to generate the signature.
-      // Should match one of the mint's signing keys from /keys.  Again given
+      // public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  Again given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
-      mint_pub: EddsaPublicKey;
+      exchange_pub: EddsaPublicKey;
     }
 
   .. _tsref-type-WtidAcceptedResponse:
@@ -1070,7 +1070,7 @@ typically also view the balance.)
   .. code-block:: tsref
 
     interface WtidAcceptedResponse {
-      // time by which the mint currently thinks the deposit will be executed.
+      // time by which the exchange currently thinks the deposit will be executed.
       execution_time: Timestamp;
     }
 
@@ -1114,11 +1114,11 @@ Administrative API: Key update
 
      This is not yet implemented (no bug number yet, as we are not sure we will
      implement this; for now, adding new files to the directory and sending a
-     signal to the mint process seems to work fine).
+     signal to the exchange process seems to work fine).
 
-New denomination and signing keys can be uploaded to the mint via the
+New denomination and signing keys can be uploaded to the exchange via the
 HTTP interface.  It is, of course, only possible to upload keys signed
-by the mint's master key.  Furthermore, this API should probably only
+by the exchange's master key.  Furthermore, this API should probably only
 be used via loopback, as we want to protect the private keys from
 interception.
 
@@ -1163,7 +1163,7 @@ Administrative API: Bank transactions
 
 .. http:POST:: /admin/add/incoming
 
-  Notify mint of an incoming transaction to fill a reserve.
+  Notify exchange of an incoming transaction to fill a reserve.
 
   **Request:**
 
@@ -1204,9 +1204,9 @@ Administrative API: Bank transactions
 
 .. http:POST:: /admin/add/outgoing
 
-  Notify mint about the completion of an outgoing transaction satisfying a
+  Notify exchange about the completion of an outgoing transaction satisfying a
   /deposit request.  In the future, this will allow merchants to obtain details
-  about the /deposit requests they send to the mint.
+  about the /deposit requests they send to the exchange.
 
   .. note::
 
@@ -1248,10 +1248,10 @@ Administrative API: Bank transactions
 The Test API
 ------------
 
-The test API is not there to test the mint, but to allow
-clients of the mint (merchant and wallet implementations)
+The test API is not there to test the exchange, but to allow
+clients of the exchange (merchant and wallet implementations)
 to test if their implemenation of the cryptography is
-binary-compatible with the implementation of the mint.
+binary-compatible with the implementation of the exchange.
 
 .. http:POST:: /test/base32
 
@@ -1371,7 +1371,7 @@ binary-compatible with the implementation of the mint.
   :status 200: the signature was valid
   :status 401 Unauthorized: the signature was invalid
 
-  The mint responds with another valid signature, which gives the
+  The exchange responds with another valid signature, which gives the
   client the opportunity to test its signature verification implementation.
 
   .. code-block:: tsref
@@ -1380,7 +1380,7 @@ binary-compatible with the implementation of the mint.
       // Another EdDSA public key
       eddsa_pub: EddsaPublicKey;
 
-      // EdDSA signature using purpose TALER_SIGNATURE_MINT_TEST_EDDSA
+      // EdDSA signature using purpose TALER_SIGNATURE_EXCHANGE_TEST_EDDSA
       eddsa_sig: EddsaSignature;
     }
 

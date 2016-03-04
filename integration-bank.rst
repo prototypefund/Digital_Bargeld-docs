@@ -18,24 +18,24 @@ Reserve Creation Request
 -------------------------
 
 The bank website can request the creation of a :term:`reserve`.  This operation
-will require the user to specify the mint where he wants to create the reserve
+will require the user to specify the exchange where he wants to create the reserve
 and the resolution of a CAPTCHA, before any action will be taken.
 
 As a result of the reserve creation request, the following steps will happen in sequence:
  1. The user chooses the desired amount from the bank's form
  2. Upon confirmation, the wallet fetches the desired amount from the user-filled form and
-    prompts the user for the *mint base URL*. Then ask the user to confirm creating the
+    prompts the user for the *exchange base URL*. Then ask the user to confirm creating the
     reserve.
  2. The wallet will create a key pair for the reserve.
  3. The wallet will request the CAPTCHA page to the bank. In that request's parameters it
-    communicates the desired amount, the reserve's public key and the mint base URL to the
+    communicates the desired amount, the reserve's public key and the exchange base URL to the
     bank
  4. Upon successful resolution of the CAPTCHA by the user, the bank initiates the reserve
     creation according to the gotten parameters. Together with `200 OK` status code sent back
     to the wallet, it gets also a `ReserveCreated`_ object.
 
 Note that the reserve creation can be done by a SEPA wire transfer or some other means,
-depending on the user's bank and chosen mint.
+depending on the user's bank and chosen exchange.
 
 In response to the reserve creation request, the Taler wallet MAY cause the
 current document location to be changed, in order to navigate to a
@@ -60,7 +60,7 @@ The event data must be a `CreateReserveDetail`_:
     // amount_fraction
     // amount_currency
     // reserve_pub
-    // mint
+    // exchange
     callback_url: string;
 
     // list of wire transfer types supported by the bank

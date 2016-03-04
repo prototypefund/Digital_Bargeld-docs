@@ -2,9 +2,9 @@
 Bank API
 =========
 
-The following APIs are served from banks, in order to allow mints to
+The following APIs are served from banks, in order to allow exchanges to
 deposit funds to money recipients.  A typical scenario for calling this
-APIs is after a merchant has deposited coins to the mint, and the mint
+APIs is after a merchant has deposited coins to the exchange, and the exchange
 needs to give real money to the merchant.
 
 ------------------
@@ -12,7 +12,7 @@ Administrative API
 ------------------
 
 This is `local` API, meant to make the bank communicate with trusted entities,
-namely mints.
+namely exchanges.
 
 .. _bank-deposit:
 .. http:post:: /admin/add/incoming

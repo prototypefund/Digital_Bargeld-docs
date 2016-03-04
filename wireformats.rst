@@ -3,14 +3,14 @@
 Wire Transfer Formats
 =====================
 
-A wire transfer is essential for the mint to transfer funds into a merchant's
+A wire transfer is essential for the exchange to transfer funds into a merchant's
 account upon a successful deposit (see :ref:`deposit request <deposit>`).  The
-merchant has to include the necessary information for the mint to initiate the
+merchant has to include the necessary information for the exchange to initiate the
 wire transfer.
 
 The information required for wire transfer depends on the type of wire transfer
 used.  Since the wire transfers differ for each region, we document here the
-ones currently supported by the mint.
+ones currently supported by the exchange.
 
 TEST
 ----
