@@ -34,7 +34,7 @@ Project Structure
 -----------------
 
 .. parsed-literal::
-  
+
   **manifest.json**               extension configuration
   **package.json**                node.js package configuration
   **tsconfig.json**               TypeScript compiler configuration
@@ -148,3 +148,49 @@ library.
 Run the default test suite with ``npm run test``, which will
 call `mocha` with the right parameters.
 
+
+--------------------
+Internationalisation
+--------------------
+
+Strings in the JavaScript code are internationalised using the following functions:
+
+- *i18n*: translate string with arbitrary arguments, the result is returned as string.
+.. code-block:: js
+
+  i18n`You have ${n} coins.`
+
+- *i18n.parts*: Interpolate i18nized values with arbitrary objects.
+  Useful for example to include HTML elements.
+.. code-block:: js
+
+  i18n.parts`Visit ${link} to get more coins.`
+
+- *i18n.pluralize*: translate with plural form.
+  The i18n.number() function returns a ``PluralNumber`` object
+  that specifies the argument that determines the plural form,
+  if not present the first numeric argument is used.
+
+.. code-block:: js
+
+  i18n.pluralize(
+    i18n`${i}: you have ${i18n.number(n)} coin.`,
+        `${i}: you have ${i18n.number(n)} coins.`);
+
+These functions are defined in ``lib/i18n.ts``.
+Include ``lib/vendor/jed.js``, ``lib/i18n.js``, ``lib/i18n-strings.js`` to use them.
+
+To extract strings from sources and update the .po files, run:
+
+.. code-block:: sh
+
+  $ make i18n
+
+In static HTML files the ``lang`` attribute is used for language-specific strings:
+
+.. code-block:: html
+
+  <p lang="en">Hello World!</p>
+  <p lang="de">Hallo Welt!</p>
+
+``lib/i18n.js`` and ``style/lang.css`` needs to be included for this to work.

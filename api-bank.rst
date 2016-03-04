@@ -31,17 +31,20 @@ the recipient's account
 .. code-block:: tsref
 
   interface BankDepositRequest {
-    
+
     // JSON 'amount' object. The amount the caller wants to transfer
     // to the recipient's count
     amount: Amount;
 
     // The id of this wire transfer
-    wid: base32; 
+    wid: base32;
+
+    // The sender's account identificator
+    debit_account: number;
 
     // The recipient's account identificator
-    account: number;
-    
+    credit_account: number;
+
   }
 
 .. _BankIncomingError:
@@ -52,5 +55,5 @@ the recipient's account
     // The reason which made this request fail. Typically due to malfomation
     // of the POST's body
     reason: string
-  
+
   }
