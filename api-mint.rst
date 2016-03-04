@@ -226,7 +226,7 @@ Obtaining wire-transfer information
   in "test" mode, this request provides a redirect to an address where
   the user can initiate a fake wire transfer for testing.
 
-  :status 302: Redirect to the webpage where fake wire transfers can be made.
+  :status 200: The mint responds with a `WireTestResponse`_ object. This request should virtually always be successful.
   :status 501: This wire transfer method is not supported by this mint.
 
 .. http:get:: /wire/sepa

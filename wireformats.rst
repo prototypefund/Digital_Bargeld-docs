@@ -21,15 +21,21 @@ for a local / regional currency or accounting system.  Using the TEST
 wire format in combination with the Taler's bank, it is thus possible to
 fully test the Taler system without using real currencies.  The wire
 format for "TEST" is very simple, in that it only specifies an account
-number in a field "account_number".  The account number given must be
-a positive 53-bit integer.  Additional fields may be present, but are
-not required.
-
-For the merchant or mint to receive deposits through TEST, the deposit
-request must thus contain a JSON object with the following fields:
+number in a field "account_number" and the URI of the bank:
 
   * `type`: the string constant `"TEST"`
-  * `account_number`: the account number of the merchant at the bank
+  * `bank_uri`: the URI of the bank
+  * `account_number`: the number of the exchange's account at the bank (for incoming transfers)
+
+The account number given must be a positive 53-bit integer.
+Additional fields may be present, but are not required.
+
+Note that a particular exchange is usually only supporting one
+particular bank with the "TEST" wire format, so it is not possible for
+a merchant with an account at a different bank to use "TEST" to
+transfer funds across banks. After all, this is for testing and not
+for real banking.
+
 
 
 SEPA
