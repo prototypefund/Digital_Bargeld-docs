@@ -27,5 +27,5 @@ We list as 'runtime dependencies'
 The following list encompasses all the runtime dependencies for this project,
 and gives the copyright holder for each of them
 
-* Sphinx : Georg Brandl and the Sphinx team
-* Python:   Python Software Foundation
+* Sphinx : Python Software Foundation License v2, LPGL-Compatible, Python Software Foundation
+* Python : Python Software Foundation License v2, LPGL-Compatible, Python Software Foundation
