@@ -18,14 +18,5 @@ which do not have legal significance in this context)
 --------------------
 Runtime dependencies
 --------------------
-We list as 'runtime dependencies'
-
-* shared libraries (namely \*.so files)
-* running services (like databases)
-* languages interpreters (like PHP)
-
-The following list encompasses all the runtime dependencies for this project,
-and gives the copyright holder for each of them
-
-* Sphinx : Python Software Foundation License v2, LPGL-Compatible, Python Software Foundation
-* Python : Python Software Foundation License v2, LPGL-Compatible, Python Software Foundation
+This component has no runtime dependencies as it is supposed to generate
+HTML.
