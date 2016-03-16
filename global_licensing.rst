@@ -19,19 +19,21 @@ to be under AGPL.
 API (git://taler.net/api)
 +++++++++++++++++++++++++
 
-This project has been jointly developed by INRIA and by individuals
+The specification has been jointly developed by INRIA and by individuals
 being under the juridical subject called 'GNUnet e.V.'. For each source
 file, the header indicated whose is holding the copyright, since some
-parts have been taken "verbatim" from the GNUnet e.V. licensed code, and
+parts have been taken "verbatim" from the GNUnet e.V. foundation, and
 some other have been developed at INRIA "ex novo".
 
 Generally, GNU GPLv3 license is used for them; see COPYING.GPL.
+
 
 --------------------
 Runtime dependencies
 --------------------
 This component has no runtime dependencies as it is supposed to generate
 HTML.
+
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
 Firefox/Android/Python Wallet (git://taler.net/wallet)
