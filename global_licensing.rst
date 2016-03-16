@@ -90,6 +90,22 @@ This project contains code under two different licenses, and whose
 copyright is held by INRIA and/or GNUnet e.V..  Please refer to each
 source file to know which party holds the copyright.
 
+Source files are located in the following directories:
+
+* src/lib/
+* src/backend/
+* src/backenddb/
+* src/include/
+* src/tests/
+* examples/blog/
+* examples/shop/
+* copylib/
+
+In examples/blog/articles/ we included a book by Richard Stallman.
+It comes with its own permissive license (see COPYING in the
+directory).
+
+
 The merchant's backend (i.e. all the code in src/backend/) is under
 the GNU Affero GPL as it depends on libgnunetutil.  Note that the use
 of the Affero GPL has little impact as the backend is not supposed to
@@ -106,9 +122,6 @@ with more diverse licensed software.  The license text for this code
 is in COPYING.LGPL.
 
 
-In examples/blog/articles/ we included a book by Richard Stallman.
-It comes with its own permissive license (see COPYING in the
-directory).
 
 --------------------
 Runtime dependencies
