@@ -1,0 +1,10 @@
+digraph g {
+size="800,800";
+wallet -> merchant_frontend [label=" buy"];
+merchant_frontend -> merchant_backend [label="internal cooperation"];
+merchant_backend -> merchant_frontend;
+wallet -> exchange [label=" coins withdrawal"];
+merchant_backend -> exchange [label="deposit coins"];
+wallet -> bank [label="wire funds to exchange's account"];
+bank -> exchange [label="notify of wiretransfer"];
+}
