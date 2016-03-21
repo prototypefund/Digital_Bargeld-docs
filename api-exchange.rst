@@ -161,6 +161,9 @@ possibly by using HTTPS.
       // The auditor's EdDSA signing public key.
       auditor_pub: EddsaPublicKey;
 
+      // The auditor's URL.
+      auditor_url: String;
+
       // An array of denomination keys the auditor affirms with its signature.
       // Note that the message only includes the hash of the public key, while the
       // signature is actually over the expanded information including expiration

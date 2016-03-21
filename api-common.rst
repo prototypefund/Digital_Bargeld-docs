@@ -488,3 +488,19 @@ size of `FIELDS`.
       struct TALER_CoinSpendPublicKeyP coin_pub;
     }
   };
+
+  struct TALER_ExchangeKeyValidityPS {
+    signed (purpose = TALER_SIGNATURE_AUDITOR_EXCHANGE_KEYS) {
+      struct GNUNET_HashCode auditor_url_hash;
+      struct TALER_MasterPublicKeyP master;
+      struct GNUNET_TIME_AbsoluteNBO start;
+      struct GNUNET_TIME_AbsoluteNBO expire_withdraw;
+      struct GNUNET_TIME_AbsoluteNBO expire_spend;
+      struct GNUNET_TIME_AbsoluteNBO expire_legal;
+      struct TALER_AmountNBO value;
+      struct TALER_AmountNBO fee_withdraw;
+      struct TALER_AmountNBO fee_deposit;
+      struct TALER_AmountNBO fee_refresh;
+      struct GNUNET_HashCode denom_hash GNUNET_PACKED;
+    }
+  };
