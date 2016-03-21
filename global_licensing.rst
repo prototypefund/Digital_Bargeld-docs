@@ -52,6 +52,7 @@ The following list encompasses all the runtime dependencies for this
 project, and gives the copyright holder for each of them:
 
 * libgnunetutil: GPLv3+, GNUnet e.V.
+* libgnunetjson: GPLv3+, GNUnet e.V.
 * libgcrypt: LGPL, Free Software Foundation
 * libunistring: LGPL, Free Software Foundation
 * Python:   Python Software Foundation License, LGPL-Compatible, Python Software Foundation
@@ -77,6 +78,7 @@ The following list encompasses all the runtime dependencies for this
 project, and gives the copyright holder for each of them:
 
 * libgnunetutil: GPLv3+, GNUnet e.V.
+* libgnunetjson: GPLv3+, GNUnet e.V.
 * libgcrypt: LGPL, Free Software Foundation
 * libunistring: LGPL, Free Software Foundation
 
@@ -132,11 +134,11 @@ Runtime dependencies
 The following list encompasses all the runtime dependencies for this
 project, and gives the copyright holder for each of them:
 
-* libjansson : MIT License, AGPL- and LGPL-Compatible, owned by Petri Lehtinen and other individuals
-* libgcrypt : LGPL, owned by Free Software Foundation
-* postgresql : PostgreSQL License, AGPL- and LGPL-Compatible, owned by The PostgreSQL Global Development Group
-* libgnunetutil (in all of its variants) : GPLv3+, owned by GNUnet e.V.
-* PHP :  PHP License, AGPL- and LGPL-Compatible, owned by The PHP Group
+* libjansson: MIT License, AGPL- and LGPL-Compatible, owned by Petri Lehtinen and other individuals
+* libgcrypt: LGPL, owned by Free Software Foundation
+* postgresql: PostgreSQL License, AGPL- and LGPL-Compatible, owned by The PostgreSQL Global Development Group
+* libgnunetutil (in all of its variants): GPLv3+, owned by GNUnet e.V.
+* PHP:  PHP License, AGPL- and LGPL-Compatible, owned by The PHP Group
 
 +++++++++++++++++++++++++++
 Bank (git://taler.net/bank)
@@ -194,10 +196,11 @@ Runtime dependencies
 The following list encompasses all the runtime dependencies for this
 project, and gives the copyright holder for each of them:
 
-* libjansson : MIT License, AGPL- and LGPL-Compatible, owned by Petri Lehtinen and other individuals
-* libgcrypt : LGPL, owned by Free Software Foundation
-* postgresql : PostgreSQL License, AGPL- and LGPL-Compatible, owned by The PostgreSQL Global Development Group
-* libgnunetutil (in all of its variants) : GPLv3+, owned by GNUnet e.V.
+* libjansson: MIT License, AGPL- and LGPL-Compatible, owned by Petri Lehtinen and other individuals
+* libgcrypt: LGPL, owned by Free Software Foundation
+* postgresql: PostgreSQL License, AGPL- and LGPL-Compatible, owned by The PostgreSQL Global Development Group
+* libgnunetutil (in all of its variants): GPLv3+, owned by GNUnet e.V.
+* libgnunetjson: GPLv3+, GNUnet e.V.
 
 
 +++++++++++++++++++++++++++++++++++++++++
