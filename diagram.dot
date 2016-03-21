@@ -7,7 +7,7 @@ subgraph cluster_wallet {
    color=lightgrey;
    webex [label="wallet-webex"];
    android [label="wallet-android"];
-   legacy [label="wallet-python"];
+   legacy [label="wallet-legacy"];
    label="Wallets";
 }
 android -> merchant_frontend [label="buy", ltail=cluster_wallet];
