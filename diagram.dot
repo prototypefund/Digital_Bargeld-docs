@@ -1,10 +1,21 @@
 digraph g {
-size="800,800";
-wallet -> merchant_frontend [label=" buy"];
-merchant_frontend -> merchant_backend [label="internal cooperation"];
-merchant_backend -> merchant_frontend;
-wallet -> exchange [label=" coins withdrawal"];
-merchant_backend -> exchange [label="deposit coins"];
-wallet -> bank [label="wire funds to exchange's account"];
-bank -> exchange [label="notify of wiretransfer"];
+# size="800,800";
+compound=true;
+concatenate=true;
+subgraph cluster_wallet {
+   style=filled;
+   color=lightgrey;
+   webex [label="wallet-webex"];
+   android [label="wallet-android"];
+   legacy [label="wallet-python"];
+   label="Wallets";
+}
+android -> merchant_frontend [label="buy", ltail=cluster_wallet];
+merchant_frontend -> merchant_backend [dir="both"];
+merchant_frontend [label="merchant (frontend)"];
+merchant_backend [label="merchant (backend)"];
+android -> exchange [label="withdraw", ltail=cluster_wallet, dir="both"];
+merchant_backend -> exchange [label="deposit"];
+android -> bank [label="select exchange", ltail=cluster_wallet];
+bank -> exchange [label="wire transfer", dir="both"];
 }
