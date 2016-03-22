@@ -61,3 +61,51 @@ In step 2, the `taler-execute-contract` event has the following parameters:
 Note that we assume that all essays cost the same (otherwise the amount would have to be included in
 the restoration information in the /essay fulfillment URL).  The refund deadline is computed
 by adding the merchant-specific constant `REFUND_DELTA` to the contract's timestamp.
+
+..
+  Describing implementation of the above scenario
+
+The essay store, available at https://blog.demo.taler.net, is such that its homepage
+is basically a list to buyable articles and each list item is a reference to an `offering
+URL` (see :ref:`offer`).  In particular, this offering URL has the following format:
+
+  `/essay_fulfillment.php?article=articleId`
+
+It is worth noting that in our implementation the `offering` and the `fulfillment` URLs
+differ only respect to the given parameters to the path `/essay_fulfillment.php`.  Namely,
+it acts as a fulfillment URL when the user adds the parameters needed to reconstruct the
+contract, which are `tid` (transaction id) and `timestamp` (see :ref:`tsref-type-Contract`,
+and :ref:`ffil`).  For the sake of completeness,
+
+
+  `/essay_fulfillment.php?article=articleId&tid=3489&timestamp=8374738`
+
+would be a fulfillment URL.
+
+Once the user visits the offering URL by clicking on some article's title, the merchant
+
+1. checks if the state associated to this article corresponds to "payed".  If this is the
+   case, it goes to point `x`, which is what happens when point 0 of :ref:`offer`
+   is true.
+
+2. checks if the user gave additional parameters to the URL above, actually making it a
+   fulfillment URL.  If so, jump to point `y`.
+
+3. returns a page which can detect if a Taler wallet is installed in the user's browser and,
+   if so, automatically downloads the contract from the merchant; if not, displays a paywall
+   for credit card payment.  Note that the contract's request is entirely managed by the page's
+   JavaScript and not by the wallet (FIXME explain reason).  The wallet gets involved once the
+   contract arrives and the JavaScript fires a `taler-confirmation-event` containing the contract,
+   see point 1. of :ref:`offer`.
+
+4. the wallet then visits the fulfillment URL associated with this purchase (the fulfillment
+   URL's path is indicated in the contract, so the wallet has to just add `tid` and `timestamp`
+   to it).
+
+5. the same script as in point 1. gets executed but this time it detects that the user is visiting
+   fulfillment URL. FIXME FINISH 
+
+
+
+
+x. Display article `articleId`
