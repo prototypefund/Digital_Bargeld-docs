@@ -55,14 +55,14 @@ that is legally non-binding:
       // The actual contract
       contract: Contract;
 
-      // The hash of the contract, provided as a convenience.
-      // All components that do not fully trust the
-      // merchant must verify this field.
-      H_contract: HashCode;
+      // The hash of the contract, encoded in base32, provided
+      // as a convenience.  All components that do not fully trust
+      // the merchant must verify this field.
+      H_contract: string;
 
       // Signature over the contract made by the merchant.
       // Must confirm to the `Signature specification`_ below.
-      sig: EddsaSignature;
+      sig: string;
     }
 
 The contract must have the following structure:
@@ -258,6 +258,7 @@ should be set to ``TALER_SIGNATURE_MERCHANT_CONTRACT``.
      struct GNUNET_HashCode h_contract;
    }
 
+
 ---------------------
 The Merchant HTTP API
 ---------------------
@@ -265,6 +266,7 @@ The Merchant HTTP API
 In the following requests, ``$``-variables refer to the variables in the
 merchant's offer.
 
+.. _pay:
 .. http:post:: $pay_url
 
   Send the deposit permission to the merchant. Note that the URL may differ between

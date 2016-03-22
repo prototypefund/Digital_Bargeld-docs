@@ -2,57 +2,10 @@
 Interaction with merchant websites
 ==================================
 
--------------
-Purchase Flow
--------------
 
-The purchase flow consists of the following steps:
-
-1. UA visits merchant's checkout page
-2. The merchant's checkout page notifies the wallet
-   of the contract (``taler-deliver-contract``).
-3. The user reviews the contract inside the wallet
-4. The wallet directs the UA to the payment execution page
-5. The execution page must send the event ``taler-execute-payment`` with
-   the contract hash of the payment to be executed.
-6. The wallet executes the payment in the domain context of the
-   execution page and emits the ``taler-payment-result`` event
-   on the execution page.
-7. The execution page reacts to the payment result (which
-   is either successful or unsuccessful) by showing
-   an appropriate response to the user.
-
-----------------
-Event Reference
-----------------
-
-.. topic:: ``taler-deliver-contract``
-
-  The event takes an :ref:`offer <offer>` as event detail.
-
-.. topic:: ``taler-execute-payment``
-
-  The event takes `H_contract` of a :ref:`Contract <tsref-type-Contract>` as event detail.
-
-.. topic:: ``taler-payment-result``
-
-  The event takes the following object as event detail:
-
-  .. code-block:: tsref
-
-    {
-      // was the payment successful?
-      success: boolean;
-
-      // human-readable indication of what went wrong
-      hint: string;
-    }
-   
-
-
-----------------
+++++++++++++++++
 Payment protocol
-----------------
+++++++++++++++++
 
 The events descripted below get triggered when the user confirms its
 purchase on a checkout page, or when by visiting some merchant's resource
@@ -75,6 +28,10 @@ a physical good on his screen, the user will receive it by mail.
 IIG triggers different flows according to the user visiting an offering or a fulfillment
 URL. For clarity, below are listed the steps taken when the user visits an offering URL.
 
+---------------------
+IIG by `offering` URL
+---------------------
+
 1. The merchant sends the following object embedded in a `taler-confirm-contract` event
 
   .. code-block:: tsref
@@ -82,7 +39,7 @@ URL. For clarity, below are listed the steps taken when the user visits an offer
     {
       // Contract and cryptographic information
       contract_wrapper: {
-        contract: :ref:`Contract <tsref-type-Contract>`;
+        contract: Contract;
         // base32 of the merchant's signature over this contract
         merchant_sig: string;
         // base32 of this contract's hashcode
@@ -95,20 +52,20 @@ URL. For clarity, below are listed the steps taken when the user visits an offer
     }
 
 2. The wallet's reaction is dual: it can either let the user pay for this contract, or
-detect whether the user has already payed for this resource by looking at the `repurchase_corelation_id`
-field in the contract.  In the first case, the wallet stores `H_contract` in its local database.
-If there is a match, the wallet starts a IIG by visiting the fulfillment URL associated with the
-already-made payment (see next section)
+   detect whether the user has already payed for this resource by looking at the `repurchase_corelation_id`
+   field in the contract.  In the first case, the wallet stores `H_contract` in its local database.
+   If there is a match, the wallet starts a IIG by visiting the fulfillment URL associated with the
+   already-made payment (see :ref:`ffil`)
 
 3. The payment is asked to the merchant by visiting the fulfillment URL (which inficated in the
-Contract). Since the merchant keeps no state for any purchase, it needs relevant information
-in the fulfillment URL in order to reconstruct the contract and send the payment to the backend.
-This information is implicit in the mention of 'fulfillment URL'.
+   Contract). Since the merchant keeps no state for any purchase, it needs relevant information
+   in the fulfillment URL in order to reconstruct the contract and send the payment to the backend.
+   This information is implicit in the mention of 'fulfillment URL'.
 
 4. When a fulfillment URL is visited, the merchant reconstructs the contract and sends back to
-the user the a `taler-execute-payment` event which embeds the following object
+   the user the a `taler-execute-payment` event which embeds the following object
 
-    .. code-block:: tsref
+  .. code-block:: tsref
 
     {
       // base32 of the Contract's hashcode
@@ -117,15 +74,36 @@ the user the a `taler-execute-payment` event which embeds the following object
       // URL where to send deposit permission
       pay_url: string;
 
-      // Used in the other IIG initiation (see next section)
+      // Used in 'IIG by fulfillment URL'
       offering_url: string;
     }
 
 5. The wallet sends the deposit permission to `pay_url`
 
 6. If the payment is successful, then the merchant sets the state for the bought
-item to `payed` and communicate the outcome to the wallet (see merchant API for
-involved HTTP codes and JSONs)
+   item to `payed` and communicate the outcome to the wallet (see :ref:`merchant API <pay>` for
+   involved HTTP codes and JSONs)
 
 7. Finally, the wallet can visit again the fulfillment URL and get the payed resource
-thanks to the `payed` state
+   thanks to the `payed` state
+
+.. _ffil:
+
+------------------------
+IIG by `fulfillment` URL
+------------------------
+
+We stress again that the fulfillment URL contains all the information a merchant needs
+to reconstruct a contract.
+
+1. The user visits a fulfillment URL
+
+2. The merchant replies with the same data structure shown in point 4 above
+
+3. The wallet checks if `H_contract` already exists in its database.  If it does not exist,
+   then the wallet will automatically visit the offering URL (by looking at the `uffering_url`
+   field) and all the process will restart as in point 1 above.  Tipically, this occurs when a
+   user visits a fulfillment URL gotten from some other user.  If `H_contract` is known, then the
+   wallet takes the associated deposit permission from its database and the process will continue
+   as from point 5 above.  Please note that the latter scenario is not double spending since the
+   same coins are spent on the same contract.
