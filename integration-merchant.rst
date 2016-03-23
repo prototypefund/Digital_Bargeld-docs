@@ -21,19 +21,21 @@ Interaction with merchant websites
 Payment protocol
 ++++++++++++++++
 
-The events descripted below get triggered when the user confirms its
-purchase on a checkout page, or when by visiting some merchant's resource
+The events described below get triggered when the user confirms its
+purchase on a checkout page, or visits some merchant's resource
 that needs a payment to be visualized.  We call this situation `IIG` (Interest
-In some Good).  There are two kinds of URL that let a merchant know when
-IIG occurs, they are
+In some Good).  The user can initialize a IIG by visiting one of the following kind
+of URL
 
-* offering URLs
-* fulfillment URLs
+* offering URL
+* fulfillment URL
 
-Generally, offering URLs' purpose is to send Taler-type contracts to the user, whereas
-fulfillment URLs can be used both by wallets to send coins for a payment or by users to
-access a payed resource multiple times.  In other words, fulfillment URLs are bookmarkable
-and shareable.  There is no hard separation between physical and virtual resources since
+Offering URLs are visited the very first time the user wants to get some resource, whereas
+fulfillment URLs let both the user access bought items later in the future (by bookmarking it)
+and share its purchases with other users.  In the last case, the fulfillment URL acts like
+a `pointer to the chart` whose items can be bought by who visits the fulfillment URL.
+
+There is no hard separation between physical and virtual resources since
 the receipt for a physical resource plays the same role of a 100% virtual resource like a
 blog article.  In other words, when seeing a pay-per-view blog article on his screen, then
 the user has payed for the article; on the other end, when seeing an electronic receipt of
@@ -70,15 +72,15 @@ IIG by `offering` URL
     }
 
 2. The wallet's reaction is dual: it can either let the user pay for this contract, or
-   detect whether the user has already payed for this resource by looking at the `repurchase_corelation_id`
+   detect whether the user has already payed for this resource by looking at the `repurchase_correlation_id`
    field in the contract.  In the first case, the wallet stores `H_contract` in its local database.
    If there is a match, the wallet starts a IIG by visiting the fulfillment URL associated with the
    already-made payment (see :ref:`ffil`)
 
-3. The payment is asked to the merchant by visiting the fulfillment URL (which inficated in the
-   Contract). Since the merchant keeps no state for any purchase, it needs relevant information
-   in the fulfillment URL in order to reconstruct the contract and send the payment to the backend.
-   This information is implicit in the mention of 'fulfillment URL'.
+3. The wallet visits the fulfillment URL (which indicated in the Contract). Since the merchant keeps
+   no state for any purchase, it needs relevant information in the fulfillment URL in order to
+   reconstruct the contract and send the payment to the backend.  This information is implicit in the
+   mention of 'fulfillment URL'.
 
 4. When a fulfillment URL is visited, the merchant reconstructs the contract and sends back to
    the user the a `taler-execute-payment` event which embeds the following object
@@ -114,14 +116,14 @@ IIG by `fulfillment` URL
 We stress again that the fulfillment URL contains all the information a merchant needs
 to reconstruct a contract.
 
-0. If the state associated to the resource requested is `payed`, go to point 7 above.
+0. If the state associated to the resource requested is `payed`, get the wanted resource.
 
 1. The user visits a fulfillment URL
 
 2. The merchant replies with the same data structure shown in point 4 above
 
 3. The wallet checks if `H_contract` already exists in its database.  If it does not exist,
-   then the wallet will automatically visit the offering URL (by looking at the `uffering_url`
+   then the wallet will automatically visit the offering URL (by looking at the `offering_url`
    field) and all the process will restart as in point 1 above.  Tipically, this occurs when a
    user visits a fulfillment URL gotten from some other user.  If `H_contract` is known, then the
    wallet takes the associated deposit permission from its database and the process will continue
