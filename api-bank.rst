@@ -51,7 +51,7 @@ the recipient's account
     amount: Amount;
 
     // The id of this wire transfer
-    wid: base32;
+    wtid: base32;
 
     // The sender's account identificator
     debit_account: number;
