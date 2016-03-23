@@ -10,7 +10,7 @@
   You should have received a copy of the GNU Lesser General Public License along with
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
 
-  @author Florian Dold
+  @author Marcello Stanisci
 
 ==================================
 Example: Essay Store
@@ -70,7 +70,7 @@ Example: Essay Store
 Before reading
 --------------
 To properly understand this example, the reader should be familiar with Taler's terminology;
-in particular, definitions like `contract`, `fulfillment URL`, `offering URL` and `deposit permission`,
+in particular, definitions like `contract`, `fulfillment URL`, `offering URL`, `IIG` and `deposit permission`,
 are assumed to be known.  Refer to :ref:`contract`, :ref:`payprot` and :ref:`deposit` in order to get
 some general insight on terms and interactions between components.
 
@@ -145,3 +145,9 @@ Once the user visits the offering URL by clicking on some article's title, the m
    script will just show the wanted article.
 
   `https://blog.demo.taler.net/essay_fulfillment.php?article=articleId&tid=3489&timestamp=8374738`
+
+----------------------
+IIG by fulfillment URL
+----------------------
+
+TBD
