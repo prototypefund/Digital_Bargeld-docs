@@ -125,7 +125,7 @@ to reconstruct a contract.
 
 3. The wallet checks if `H_contract` already exists in its database.  If it does not exist,
    then the wallet will automatically visit the offering URL (by looking at the `offering_url`
-   field) and all the process will restart as in point 1 above.  Tipically, this occurs when a
+   field) and all the process will restart as in point 1 above.  Typically, this occurs when a
    user visits a fulfillment URL gotten from some other user.  If `H_contract` is known, then the
    wallet takes the associated deposit permission from its database and the process will continue
    as from point 5 above.  Please note that the latter scenario is not double spending since the

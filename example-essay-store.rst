@@ -69,13 +69,13 @@ Example: Essay Store
 --------------
 Before reading
 --------------
-To properly understand this example, the read should be familiar with Taler's terminology;
-in particular, definitions like `contract`, `fulfillment URL` and `offering URL` are assumed
-to be known.  Refer to :ref:`contract` and :ref:`payprot` in order to get some general insight
-on terms and interactions between components.
+To properly understand this example, the reader should be familiar with Taler's terminology;
+in particular, definitions like `contract`, `fulfillment URL`, `offering URL` and `deposit permission`,
+are assumed to be known.  Refer to :ref:`contract`, :ref:`payprot` and :ref:`deposit` in order to get
+some general insight on terms and interactions between components.
 
-
-This section describes how the demonstrator essay store interacts with the Taler system.
+This section describes how the demonstrator essay store interacts with the Taler system.  As for Taler's
+terminology, the demonstrator essay store is an example of `frontend`.
 This demonstrator lies in `examples/blog` of `git://taler.net/merchant/examples/blog`
 
 The essay store, available at https://blog.demo.taler.net, is such that its homepage
@@ -98,8 +98,7 @@ would be a fulfillment URL.
 Once the user visits the offering URL by clicking on some article's title, the merchant
 
 1. checks if the state associated to this article corresponds to "payed".  If this is the
-   case, it goes to point `x`, which is what happens when point 0 of :ref:`offer`
-   is true.
+   case, point 7. is triggered, which is what happens when point 0 of :ref:`offer` is true.
 
 2. checks if the user gave additional parameters to the URL above, actually making it a
    fulfillment URL.  If so, jump to point `y`.
@@ -116,10 +115,33 @@ Once the user visits the offering URL by clicking on some article's title, the m
    URL's path is indicated in the contract, so the wallet has to just add `tid` and `timestamp`
    to it).
 
-5. the same script as in point 1. gets executed but this time it detects that the user is visiting
-   fulfillment URL. FIXME FINISH 
+5. the same script as in point 1. gets executed, but this time it detects that the user is visiting
+   a fulfillment URL.  The script can now reconstruct the contract and store its hash in the state.
+   The hash is stored in an associative array having resource names as keys; in this case the key
+   `articleId` points to the contract's hash.  This way is easier to detect if a resource which is
+   to be payed is actually mentioned in the deposit permission.  Without this control, a malicious
+   wallet can send a deposit permission for `articleA` and get the resource `articleB`, see point 6.
+   As a last step, the script returns a page which fires a `taler-execute-payment` event in the user's
+   browser carrying the same data structure as in point 4. of :ref:`offer`.
+   Note that both in point 3. and 5. the HTML page returned is the same, namely it is the page showing
+   the credit card payment.  It is designed so that it is possible to `inject` the event to fire at the
+   user's browser.  So in point 3. the injected event is `taler-confirm-contract`, and in point 5. is
+   `taler-execute-payment`.  This way if the Taler wallet responds to the event, then the payment is
+   kept Taler-style, otherwise the user just sees a credit card form (without making further requests).
 
+6. the wallet POSTs the deposit permission to `pay_url`, which is
 
+   `https://blog.demo.taler.net/essay_pay.php?article=articleId`
+   
+   This step is responsible for setting the state for `articleId` as payed;  to that end it uses
+   `articleId` as the key to get `H_contract` from the state and checks if `H_contract` equals
+   the contract's hash contained in the deposit permission.  If they are equal, then the deposit
+   permission is forwarded to the backend.  If the backend return a HTTP status 200, then `essay_pay.php`
+   sets the state for `articleId` as payed and notify the wallet about the payment's outcome.
+   If the backend reports any problem, `essay_pay.php` will just forward the data gotten from the
+   backend to the wallet, which will be in charge of managing the error.
 
+7. the wallet visit the fulfillment URL, but now the state for `articleId` is set to payed, so the
+   script will just show the wanted article.
 
-x. Display article `articleId`
+  `https://blog.demo.taler.net/essay_fulfillment.php?article=articleId&tid=3489&timestamp=8374738`
