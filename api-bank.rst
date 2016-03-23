@@ -71,3 +71,12 @@ the recipient's account
     reason: string
 
   }
+
+--------
+Util API
+--------
+
+Whenever the user wants to know the bank account number of a public account,
+the following path returns a human readable HTML containing this information
+
+  `/public-accounts/details?account=accountName`

@@ -16,6 +16,7 @@
 Interaction with merchant websites
 ==================================
 
+.. _payprot:
 
 ++++++++++++++++
 Payment protocol
