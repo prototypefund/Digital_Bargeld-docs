@@ -66,19 +66,19 @@ by adding the merchant-specific constant `REFUND_DELTA` to the contract's timest
   Describing implementation of the above scenario
 
 The essay store, available at https://blog.demo.taler.net, is such that its homepage
-is basically a list to buyable articles and each list item is a reference to an `offering
+is a list of buyable articles and each list item is a reference to an `offering
 URL` (see :ref:`offer`).  In particular, this offering URL has the following format:
 
-  `/essay_fulfillment.php?article=articleId`
+  `https://blog.demo.taler.net/essay_fulfillment.php?article=articleId`
 
 It is worth noting that in our implementation the `offering` and the `fulfillment` URLs
-differ only respect to the given parameters to the path `/essay_fulfillment.php`.  Namely,
-it acts as a fulfillment URL when the user adds the parameters needed to reconstruct the
-contract, which are `tid` (transaction id) and `timestamp` (see :ref:`tsref-type-Contract`,
-and :ref:`ffil`).  For the sake of completeness,
+differ only respect to the parameters given to the path `/essay_fulfillment.php`.  Namely,
+the offering URL becomes a fulfillment URL whenever the user adds the parameters needed to
+reconstruct the contract, which are `tid` (transaction id) and `timestamp`
+(see :ref:`contract`, and :ref:`ffil`).  For the sake of completeness,
 
 
-  `/essay_fulfillment.php?article=articleId&tid=3489&timestamp=8374738`
+  `https://blog.demo.taler.net/essay_fulfillment.php?article=articleId&tid=3489&timestamp=8374738`
 
 would be a fulfillment URL.
 
