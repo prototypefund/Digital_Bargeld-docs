@@ -61,10 +61,12 @@ The event data must be a `CreateReserveDetail`_:
     // amount_currency
     // reserve_pub
     // exchange
+    // type ("TEST" or "SEPA")
+    // account_number (which account number has this exchange at this bank)
     callback_url: string;
 
     // list of wire transfer types supported by the bank
-    // e.g. "SEPA", "test"
+    // e.g. "SEPA", "TEST"
     wt_types: Array<string>
   }
 
