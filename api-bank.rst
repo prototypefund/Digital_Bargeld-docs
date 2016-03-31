@@ -66,8 +66,7 @@ the recipient's account
 
   interface BankIncomingError {
 
-    // The reason which made this request fail. Typically due to malfomation
-    // of the POST's body
+    // Human readable explanation of the failure.
     reason: string
 
   }
