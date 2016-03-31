@@ -51,7 +51,7 @@ the recipient's account
     amount: Amount;
 
     // The id of this wire transfer
-    wid: base32;
+    wtid: base32;
 
     // The sender's account identificator
     debit_account: number;
@@ -66,8 +66,16 @@ the recipient's account
 
   interface BankIncomingError {
 
-    // The reason which made this request fail. Typically due to malfomation
-    // of the POST's body
+    // Human readable explanation of the failure.
     reason: string
 
   }
+
+--------
+Util API
+--------
+
+Whenever the user wants to know the bank account number of a public account,
+the following path returns a human readable HTML containing this information
+
+  `/public-accounts/details?account=accountName`
