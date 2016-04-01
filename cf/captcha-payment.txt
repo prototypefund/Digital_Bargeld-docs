@@ -1,0 +1,116 @@
+Supporting DDoS blockers with Taler
+===================================
+
+Overview:
+
+  In many IP reputation systems, CAPTCHAS are used to separate humans from
+  bots, allowing humans to access resources while blocking automated
+  attackers.  However, especially complex modern Web sites require many
+  resources and thus can triger a large number of CAPTCHAS, limiting
+  usability.  The problem is compounded if users access the Web via
+  Tor or VPNs, as this means mechanisms to track users cannot be used to
+  reduce the number of CAPTCHAS.
+
+  We propose an alternative where we use Taler-style micropayments to
+  automatically pay for access to resources.  The micropayments would
+  be done in a provider-specific currency, effectively turning Taler
+  payments into anonymous credentials or tokens.  Tokens would be
+  provided by the provider in exchange for the user solving CAPTCHAS,
+  but instead of solving one CAPTCHA per request a user may be issued
+  thousands of tokens for one CAPTCHA, which could then be used across
+  multiple websites without creating anonymity/linkability issues.
+
+Rationale:
+
+  Reducing the use of CAPTCHA's improves usability for everybody, and
+  by (re)using Taler we limit the need for security audits for custom
+  solutions. Furthermore, it also becomes conceivable to move from
+  CAPTCHAS to actual payments or other mechanisms to hand out tokens
+  (i.e. researchers that legitimately need to perform automated
+  requests may apply for a token grant).
+
+Challenges:
+
+  To make this work, we need to address three issues:
+  1) Taler needs to add support for an 'auto-pay' flag that would be
+     associated with a currency. If the flag is present, the wallet
+     would not interactively ask the user to confirm the payment, but
+     just automatically pay (if funds are available; otherwise it
+     should redirect to the provider's "bank" where the user would
+     solve a CAPTCHA to obtain tokens).  This is relatively trivial
+     and necessary for usability.
+  2) Right now, the Wallet-Web site interaction uses JavaScript.  This
+     is not acceptable for some of the CAPTCHA-use case domains, as
+     Tor users may disable JavaScript and injecting Taler-specific
+     JavaScript into generic Web sites is messy.
+  3) The solution needs to work with embedded resources and POST requests,
+     where running a JavaScript interaction for each resource is both
+     too expensive and rather complicated.  Instead, a page should indicate
+     that all resources associated with a DOM require payment, and then
+     payment should automatically and efficiently be provided with each
+     request.
+
+Required changes to Taler:
+
+  We mainly need to make three changes:
+  1) Support for auto-pay (rather trivial), by tagging currencies, and
+     by redirecting to a "bank" page to withdraw tokens if funds are
+     insufficient.
+  2) In the 'withdraw' protocol, the bank should be able to specify the
+     payment system provider and tell the wallet to skip the interactive
+     selection/confirmation dialog (as there is only one provider and
+     thus no choice to be made). This change is also rather trivial.
+  3) Change Wallet to check for HTTP headers requesting payment for the
+     DOM, and then inject an HTTP header in all subsequent requests generated
+     by that page with the payment (i.e. signing the request's URI with
+     the coin/token).  This change is non-trivial, and may require
+     browser-specific solutions.
+
+Technical differences to captcha-plugin-draft.txt:
+  * both solutions use RSA blind signatures for privacy, my reading
+    of the draft is that 256-bits are proposed, while Taler leaves
+    the bit length variable (to the payment service provider).
+  * Taler uses Ed25519 for "tokens", while the draft proposes
+    random nonces as tokens.  Taler can thus spend tokens using
+    EdDSA signatures, while the draft uses encryption (of the
+    nonce/Token) with the server's key and a keyed HMAC.  I do not
+    attribute either design a significant performance advantage,
+    except with Taler the server could skip checking either signature
+    (to shard load if stressed), while the draft requires server-side
+    decryption to obtain the nonce.
+    Taler's use of an EdDSA signature is also more flexibile for other
+    applications, but in this particular context there is no
+    significant difference to the keyed HMAC with encrypted nonce.
+  * Instead of using the draft's scheme for withdrawing coins by
+    a magic HTML form attribute, Taler's bank API would be used,
+    where the bank (in this case the CAPTCHA-DDoS-protection provider)
+    signals to the wallet that a withdraw operation is being authorized
+    using a JavaScript signal. This is significantly more efficient,
+    as registering a signal handler is O(1) per page, while parsing
+    all DOMs to find a magic HTML form attribute is O(n) (where n is
+    the size of the DOM).
+
+
+Scalability:
+
+  Given that DDoS-protection has weaker requirements, it would be
+  trivial to use regional double-spending detection instead of global
+  double-spending detection.  Also, a custom exchange could use
+  probabilistic data structures to improve efficiency.
+  Alternatively, multiple currencies could be used; for this, the
+  HTTP header requiring auto-pay should simply specifiy the desired
+  currency, enabling further sharding of the load.
+
+Benefits of integrated solution with Taler:
+
+  * significant re-use of expertise, code, auditing effort and
+    protocol design
+  * provider-independent free software solution
+  * possibility to trivially "upgrade" to payment or data grants
+  * solution that is not Tor-specific, plugin should work for
+    various browsers
+  * 1 bit information leakage (is plugin present), instead of 2 bits
+    (if there are two separate plugins)
+  * Tor wants to solve CAPTCHA problem, Tor wants to support
+    anonymous payments.  This could solve both with 98%
+    shared code.
