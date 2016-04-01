@@ -1,12 +1,15 @@
 ..
   This file is part of GNU TALER.
   Copyright (C) 2014, 2015, 2016 GNUnet e.V. and INRIA
+
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
   Foundation; either version 2.1, or (at your option) any later version.
+
   TALER is distributed in the hope that it will be useful, but WITHOUT ANY
   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
   A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
   You should have received a copy of the GNU Lesser General Public License along with
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
 
@@ -218,58 +221,50 @@ Obtaining wire-transfer information
   .. code-block:: tsref
 
     interface WireResponse {
-      // Names of supported methods (i.e. "sepa" or "test").
-      // Payment method METHOD is available under /wire/METHOD.
-      methods: string[];
+      // The key is a supported method (i.e. "sepa" or "test").
+      // The value is a method-specific JSON object with account details
+      // (i.e. IBAN number, owner name, bank address, etc.).
+      // The value objects may also contain signatures (if applicable).
+      //
+      // A single /wire response can contain an arbitrary number of these
+      // string-object pairs.  However, the keys must be unique.
+      string : Object;
 
-      // the EdDSA signature_ (binary-only) with purpose
-      // `TALER_SIGNATURE_EXCHANGE_PAYMENT_METHODS` signing over the hash over the
-      // 0-terminated strings representing the payment methods in the same order
-      // as given in methods.
-      sig: EddsaSignature;
-
-      // public EdDSA key of the exchange that was used to generate the signature.
-      // Should match one of the exchange's signing keys from /keys.  It is given
-      // explicitly as the client might otherwise be confused by clock skew as to
-      // which signing key was used.
-      pub: EddsaPublicKey;
     }
 
+  Possible encodings for the objects are right now the following:
 
-.. http:get:: /wire/test
+  .. _WireTestResponse:
+  .. _tsref-type-WireTestResponse:
+  .. code-block:: tsref
 
-  The "test" payment method is for testing the system without using
-  real-world currencies or actual wire transfers.  If the exchange operates
-  in "test" mode, this request provides a redirect to an address where
-  the user can initiate a fake wire transfer for testing.
+  interface WireTestResponse {
+      // Mandatory indicator that this is a TEST wire response.
+      type: "test";
 
-  :status 200: The exchange responds with a `WireTestResponse`_ object. This request should virtually always be successful.
-  :status 501: This wire transfer method is not supported by this exchange.
+      // Account number at the bank
+      account_number: Integer;
 
-.. http:get:: /wire/sepa
+      // URI of the bank
+      bank_uri: string;
 
-  Provides instructions for how to transfer funds to the exchange using the SEPA
-  transfers.  Always signed using the exchange's long-term offline master public
-  key.
+    }
 
-  :status 200: The exchange responds with a `WireSepaResponse`_ object. This request should virtually always be successful.
-  :status 501: This wire transfer method is not supported by this exchange.
-
-
-  **Details:**
-
-  .. _WireSepaResponse:
+      .. _WireSepaResponse:
   .. _tsref-type-WireSepaResponse:
   .. code-block:: tsref
 
-    interface WireSepaResponse {
-      // Legal name of the exchange operator who is receiving the funds
+  interface WireSepaResponse {
+      // Mandatory indicator that this is a SEPA wire response.
+      type: "sepa";
+
+      // Legal name of the owner of the account
       receiver_name: string;
 
-      // IBAN account number for the exchange
+      // IBAN account number.
       iban: string;
 
-      // BIC of the bank of the exchange
+      // BIC of the bank.
       bic: string;
 
       // the EdDSA signature_ (binary-only) with purpose
