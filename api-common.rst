@@ -474,12 +474,6 @@ size of `FIELDS`.
     }
   };
 
-  struct TALER_ExchangeWireSupportMethodsPS {
-    signed (purpose = TALER_SIGNATURE_EXCHANGE_WIRE_TYPES) {
-      struct GNUNET_HashCode h_wire_types;
-    }
-  };
-
   struct TALER_DepositTrackPS {
     signed (purpose = TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID) {
       struct GNUNET_HashCode h_contract;
