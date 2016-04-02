@@ -54,11 +54,11 @@ contain a JSON object with the following fields:
 
   .. The following are taken from Page 33, SEPA_SCT.pdf .
 
-  * `type`: the string constant `"SEPA"`
-  * `IBAN`: the International Bank Account Number (IBAN) of the account of the beneficiary
+  * `type`: the string constant `"sepa"`
+  * `iban`: the International Bank Account Number (IBAN) of the account of the beneficiary
   * `name`: the name of the beneficiary
   * `bic`: the Bank Identification Code (BIC) code of the beneficiary's bank
-  * `r`: random salt (used to make brute-forcing the hash harder)
+  * `salt`: random salt (used to make brute-forcing the hash harder)
 
 The JSON object may optionally contain:
   * `address`: the address of the Beneficiary

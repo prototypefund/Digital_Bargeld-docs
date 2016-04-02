@@ -467,8 +467,9 @@ size of `FIELDS`.
     }
   };
 
-  struct TALER_MasterWireSepaDetailsPS {
-    signed (purpose = TALER_SIGNATURE_MASTER_SEPA_DETAILS) {
+  struct TALER_MasterWireDetailsPS {
+    signed (purpose = (TALER_SIGNATURE_MASTER_SEPA_DETAILS ||
+                       TALER_SIGNATURE_MASTER_TEST_DETAILS ) ) {
       struct GNUNET_HashCode h_sepa_details;
     }
   };
