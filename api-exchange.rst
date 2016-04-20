@@ -118,6 +118,9 @@ possibly by using HTTPS.
       // Fee charged by the exchange for refreshing a coin of this denomination
       fee_refresh: Amount;
 
+      // Fee charged by the exchange for refunding a coin of this denomination
+      fee_refund: Amount;
+
       // Signature with purpose
       // `TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY` over the expiration
       // dates, value and the key, created with the exchange's master key.
@@ -125,7 +128,7 @@ possibly by using HTTPS.
     }
 
   Fees for any of the operations can be zero, but the fields must still be
-  present. The currency of the `fee_deposit` and `fee_refresh` must match the
+  present. The currency of the `fee_deposit`, `fee_refresh` and `fee_refund` must match the
   currency of the `value`.  Theoretically, the `fee_withdraw` could be in a
   different currency, but this is not currently supported by the
   implementation.
