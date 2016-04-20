@@ -464,8 +464,8 @@ denomination.
 
   **Response:**
 
-  :status 200:
-    The operation succeeded, the exchange confirms that no double-spending took place.
+  :status 200 Ok:
+    The operation succeeded, the exchange confirms that no double-spending took place.  The response will include a `DepositSuccess`_ object.
   :status 401 Unauthorized:
     One of the signatures is invalid.
   :status 403:
@@ -539,7 +539,8 @@ denomination.
 
   .. code-block:: tsref
 
-    interface DepositSuccess {
+     .. _DepositSuccess:
+     interface DepositSuccess {
       // The string constant "DEPOSIT_OK"
       status: string;
 
@@ -1090,36 +1091,80 @@ typically also view the balance.)
     }
 
 
-
 -------
 Refunds
 -------
 
   .. note::
 
-     Refunds are currently not implemented (#3641), this documentation is thus
-     rather preliminary and subject to change.
+     Refunds are currently not implemented (#3641), this documentation is thus a bit preliminary and may still change.
 
 .. _refund:
 .. http:POST:: /refund
 
   Undo deposit of the given coin, restoring its value.
 
-  **Request:**
+  **Request:** The request body must be a `RefundRequest`_ object.
+
+  **Response:**
+
+  :status 200 Ok:
+    The operation succeeded, the exchange confirms that the coin can now be refreshed.  The response will include a `RefundSuccess`_ object.
+  :status 401 Unauthorized:
+    Merchant signature is invalid.
+  :status 404 Not found: 
+    The refund operation failed as we could not find a matching deposit operation (coin, contract, transaction ID and merchant public key must all match).
+
+  **Details:**
+
+  .. _RefundRequest:
+  .. code-block:: tsref
+
+     interface RefundRequest {
+
+      // Amount to be refunded, can be a fraction of the
+      // coin's total deposit value (including deposit fee);
+      // must be larger than the refund fee.
+      refund_amount: Amount;
+
+      // SHA-512 hash of the contact of the merchant with the customer.
+      H_contract: HashCode;
+
+      // coin's public key, both ECDHE and EdDSA.
+      coin_pub: CoinPublicKey;
+
+      // 64-bit transaction id of the original transaction between merchant and customer
+      transaction_id: number;
+     
+      // 64-bit transaction id of the refund transaction between merchant and customer
+      rtransaction_id: number;
+
+      // EdDSA public key of the merchant.
+      merchant_pub: EddsaPublicKey;
+
+      // EdDSA signature of the merchant affirming the refund.
+      merchant_sig: EddsaPublicKey;
+
+    }
 
   .. code-block:: tsref
 
-    interface RefundRequest {
-      // If the coin was claimed as a refund, this field should contain the
-      // retract permission obtained from the merchant, otherwise it should not be
-      // present.
-      // TODO: document what the type
-      retract_perm: any;
+     .. _RefundSuccess:
+     interface RefundSuccess {
+      // The string constant "REFUND_OK"
+      status: string;
 
-      // Value returned due to the retraction.
-      retract_value: string;
+      // the EdDSA :ref:`signature` (binary-only) with purpose
+      // `TALER_SIGNATURE_EXCHANGE_CONFIRM_REFUND` using a current signing key of the
+      // exchange affirming the successful refund
+      sig: EddsaSignature;
+
+      // public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  It is given
+      // explicitly as the client might otherwise be confused by clock skew as to
+      // which signing key was used.
+      pub: EddsaPublicKey;
     }
-
 
 ------------------------------
 Administrative API: Key update
