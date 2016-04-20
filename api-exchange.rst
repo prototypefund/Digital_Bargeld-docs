@@ -1127,6 +1127,10 @@ Refunds
       // must be larger than the refund fee.
       refund_amount: Amount;
 
+      // Refund fee associated with the given coin.
+      // must be smaller than the refund amount.
+      refund_fee: Amount;
+
       // SHA-512 hash of the contact of the merchant with the customer.
       H_contract: HashCode;
 
