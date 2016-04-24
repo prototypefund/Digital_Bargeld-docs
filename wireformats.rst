@@ -19,13 +19,13 @@ The TEST wire format is used for testing and for integration with Taler's
 simple "bank" system which in the future might be useful to setup a bank
 for a local / regional currency or accounting system.  Using the TEST
 wire format in combination with the Taler's bank, it is thus possible to
-fully test the Taler system without using real currencies.  The wire
+fully test the Taler system without using "real" currencies.  The wire
 format for "TEST" is very simple, in that it only specifies an account
 number in a field "account_number" and the URI of the bank:
 
-  * `type`: the string constant `"TEST"`
-  * `bank_uri`: the URI of the bank
-  * `account_number`: the number of the exchange's account at the bank (for incoming transfers)
+  * `type`: the string constant `"test"`
+  * `bank_uri`: the URI of the bank (starting with `http://` or `https://`)
+  * `account_number`: the number of the account at the bank
 
 The account number given must be a positive 53-bit integer.
 Additional fields may be present, but are not required.
@@ -35,8 +35,6 @@ particular bank with the "TEST" wire format, so it is not possible for
 a merchant with an account at a different bank to use "TEST" to
 transfer funds across banks. After all, this is for testing and not
 for real banking.
-
-
 
 SEPA
 ----
@@ -63,5 +61,9 @@ contain a JSON object with the following fields:
 The JSON object may optionally contain:
   * `address`: the address of the Beneficiary
 
+The implementation of the SEPA plugin is currently incomplete.  Specifically, we need a working implementation of `libebics` which is a sub-project trying to implement the EBICS [#ebics]_ standard.
+    
 .. [#sepa] SEPA - Single Euro Payments Area:
-          http://www.ecb.europa.eu/paym/sepa/html/index.en.html
+           http://www.ecb.europa.eu/paym/sepa/html/index.en.html
+.. [#ebics] EBCIS - European Banking Computer Interface Standard
+          http://www.ebics.org/
