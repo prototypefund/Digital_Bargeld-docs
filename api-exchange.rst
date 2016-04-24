@@ -570,25 +570,28 @@ denomination.
       history: CoinSpendHistoryItem[];
     }
 
+  .. _CoinSpendHistoryItem:
   .. code-block:: tsref
 
     interface CoinSpendHistoryItem {
-      // Either "deposit" or "melt"
+      // Either "deposit" or "melt" or "refund"
       type: string;
 
-      // The total amount of the coin's value absorbed by this transaction
+      // The total amount of the coin's value absorbed (or restored in the case of a refund) by this transaction
       amount: Amount;
 
       // base32 binary encoding of the transaction data as a
       // `TALER_DepositRequestPS` or `TALER_RefreshMeltCoinAffirmationPS`
+      // or `TALER_RefundRequestPS`
       // struct described in :ref:`Signatures`.  Its `purpose` should match our
       // `type`, `amount_with_fee`, should match our `amount`, and its `size`
-      // should be consistent.
+      // should be consistent with the respective struct type.
       details: string;
 
       // the EdDSA :ref:`signature` (binary-only) made with purpose
       // `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or
-      // `TALER_SIGNATURE_WALLET_COIN_MELT` over the transaction's details.
+      // `TALER_SIGNATURE_WALLET_COIN_MELT` or
+      // `TALER_SIGNATURE_MERCHANT_REFUND` over the transaction's details.
       signature: EddsaSignature;
     }
 
