@@ -965,26 +965,30 @@ typically also view the balance.)
       // Total amount transferred
       total: Amount;
 
-      // hash of the wire details (identical for all deposits)
-      H_wire: HashCode;
-
       // public key of the merchant (identical for all deposits)
       merchant_pub: EddsaPublicKey;
 
-      deposits: DepositDetail[];
-    }
+      // hash of the wire details (identical for all deposits)
+      H_wire: HashCode;
 
+      // details about the deposits
+      deposits: DepositDetail[];
+
+      // signature from the exchange made with purpose
+      // `TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT`
+      exchange_sig: EddsaSignature;
+
+      // public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  Again given
+      // explicitly as the client might otherwise be confused by clock skew as to
+      // which signing key was used.
+      exchange_pub: EddsaSignature;
+    }
 
   .. _tsref-type-DepositDetail:
   .. code-block:: tsref
 
-    interface DepositDetail {
-      // The total amount the original deposit was worth.
-      deposit_value: Amount;
-
-      // applicable fees for the deposit
-      deposit_fee: Amount;
-
+    interface WireDepositDetail {
       // SHA-512 hash of the contact of the merchant with the customer.
       H_contract: HashCode;
 
@@ -994,11 +998,14 @@ typically also view the balance.)
 
       // coin's public key, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
+
+    // The total amount the original deposit was worth.
+      deposit_value: Amount;
+
+      // applicable fees for the deposit
+      deposit_fee: Amount;
+
     }
-  .. note::
-
-     We might want to add a signature of the exchange over the response in the future.  That way, a merchant has proof should a exchange ever try to change the story here. (#4135)
-
 
 .. http:post:: /deposit/wtid
 
