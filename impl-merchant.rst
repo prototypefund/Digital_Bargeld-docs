@@ -141,10 +141,13 @@ The following API are made available by the merchant's `backend` to the merchant
     The exchange accepted all of the coins. The `frontend` should now fullfill the
     contract.  This response has no meaningful body, the frontend needs to
     generate the fullfillment page.
-  :status 400 Precondition failed:
+  :status 412 Precondition Failed:
     The given exchange is not acceptable for this merchant, as it is not in the
     list of accepted exchanges and not audited by an approved auditor.
-
+  :status 403 Forbidden:
+    The exchange rejected the payment because a coin was already spent before.
+    The response will include the `coin_pub` for which the payment failed,
+    in addition to the response from the exchange to the `/deposit` request.
 
   The `backend` will return verbatim the error codes received from the exchange's
   :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
