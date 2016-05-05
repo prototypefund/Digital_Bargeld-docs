@@ -272,6 +272,8 @@ merchant's offer.
   Send the deposit permission to the merchant. Note that the URL may differ between
   merchants.
 
+  .. _deposit-permission:
+
   :reqheader Content-Type: application/json
   :<json base32 H_wire: the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
   :<json base32 H_contract: the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value obtained from the field `h_contract`, or regenerating one starting from the values it gets within the contract

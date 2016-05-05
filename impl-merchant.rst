@@ -66,7 +66,7 @@ The Merchant Backend HTTP API
 The following API are made available by the merchant's `backend` to the merchant's `frontend`.
 
 .. http:post:: /hash-contract
-  
+
   Ask the backend to compute the hash of the `contract` given in the POST's body (the full contract
   should be the value of a JSON field named `contract`). This feature allows frontends to verify
   that names of resources which are going to be sold are actually `in` the paid cotnract. Without
@@ -99,13 +99,29 @@ The following API are made available by the merchant's `backend` to the merchant
   **Response**
 
   :status 200 OK:
-    The backend has successfully created the contract.
-  :status 400 Bad Request:
-    Request not understood. The JSON was invalid. Possibly due to some error in
-    formatting the JSON by the `frontend`.
+    The backend has successfully created the contract.  It responds with a `ContractBackendResponse`_ object. This request should virtually always be successful.
 
   On success, the `frontend` should pass this response verbatim to the wallet.
 
+  **Details:**
+
+  .. _ContractBackendResponse:
+  .. code-block:: tsref
+
+    interface ContractBackendResponse {
+      // Contract with additional fields added by the backend.
+      contract : Object;
+
+      // Signature of the merchant over the contract.
+      // Purpose: TALER_SIGNATURE_MERCHANT_CONTRACT
+      merchant_sig: EddsaSignature;
+
+      // Hash of the contract, technically redundant, but allows
+      // the frontend to not have logic for canonicalizing the
+      // contract and doing the hasing itself.
+      H_contract: HashCode;
+
+    }
 
 .. http:post:: /pay
 
@@ -114,9 +130,9 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   The `frontend` passes the :ref:`deposit permission <deposit-permission>`
-  received from the wallet, by adding the fields `max_fee`, `amount` (see
-  :ref:`contract`) and optionally adding a field named `edate`, indicating a
-  deadline by which he would expect to receive the bank transfer for this deal
+  received from the wallet, and optionally adding a field named `edate`,
+  indicating a deadline by which he would expect to receive the bank transfer
+  for this deal.  Note that the `edate` must be after the `refund_deadline`.
 
   **Response:**
 
