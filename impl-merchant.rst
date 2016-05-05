@@ -90,9 +90,10 @@ The following API are made available by the merchant's `backend` to the merchant
 
   The `proposition` that is to be sent from the frontend is a `contract` object without the fields
 
-  * `merchant_pub`
   * `exchanges`
+  * `auditors`
   * `H_wire`
+  * `merchant_pub`
 
   The `backend` then completes this information based on its configuration.
 
