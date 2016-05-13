@@ -270,29 +270,64 @@ merchant's offer.
 .. http:post:: $pay_url
 
   Send the deposit permission to the merchant. Note that the URL may differ between
-  merchants.
+  merchants. The client should POST a `deposit-permission`_ object
 
   .. _deposit-permission:
+  .. code-block:: tsref
 
-  :reqheader Content-Type: application/json
-  :<json base32 H_wire: the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
-  :<json base32 H_contract: the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value obtained from the field `h_contract`, or regenerating one starting from the values it gets within the contract
-  :<json int transaction_id: a 53-bit number corresponding to the contract being agreed on
-  :<json amount total_amount: total amount being paid as per the contract (the sum of the amounts from the `coins` may be larger to cover deposit fees not covered by the merchant)
-  :<json amount max_fee: maximum fees merchant agreed to cover as per the contract
-  :<json base32 merchant_sig: signature by the merchant over the contract, must match signed data of purpose TALER_SIGNATURE_MERCHANT_CONTRACT
-  :<json date timestamp: a timestamp of this deposit permission. It equals just the contract's timestamp
-  :<json date refund_deadline: same value held in the contract's `refund` field
-  :<json string exchange: the chosen exchange's base URL
-  :<json array coins: the coins used to sign the contract
+    interface DepositPermission {
+      // the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
+      H_wire: string;
 
-  For each coin, the array contains the following information:
+      // the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value obtained from the field `h_contract`, or regenerating one starting from the values it gets within the contract
+      H_contract: string;
 
-  :<json amount f: the :ref:`amount <Amount>` this coin is paying, including this coin's deposit fee
-  :<json base32 coin_pub: the coin's public key
-  :<json base32 denom_pub: the denomination's (RSA public) key
-  :<json base32 ub_sig: the exchange's signature over this coin's public key
-  :<json base32 coin_sig: the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See the :ref:`dedicated section <Signatures>` on the exchange's specifications.
+      // a 53-bit number corresponding to the contract being agreed on
+      transaction_id: number;
+    
+      // total amount being paid as per the contract (the sum of the amounts from the `coins` may be larger to cover deposit fees not covered by the merchant)
+      total_amount: Amount;
+
+      // maximum fees merchant agreed to cover as per the contract
+      max_fee: Amount;
+
+      // signature by the merchant over the contract, must match signed data of purpose TALER_SIGNATURE_MERCHANT_CONTRACT
+      merchant_sig: string;
+
+      // a timestamp of this deposit permission. It equals just the contract's timestamp
+      timestamp: Timestamp;
+
+      // same value held in the contract's `refund` field
+      refund_deadline: Timestamp;
+
+      // the chosen exchange's base URL
+      exchange: string;
+
+      // the coins used to sign the contract
+      coins: DepositedCoin[];
+
+    }
+
+  .. _`tsref-type-DepositedCoin`:
+
+  .. code-block:: tsref
+
+    interface DepositedCoin {
+      // the amount this coin is paying for
+      amount: Amount;
+
+      // coin's public key
+      coin_pub: RsaPublicKey;
+
+      // denomination key
+      denom_pub: RsaPublicKey;
+
+      // exchange's signature over this coin's public key
+      ub_sig: RsaSignature;
+      
+      // the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See section `Signatures` on the exchange's API page.
+      coin_sig: EddsaSignature;
+  }
 
   **Success Response:**
 
