@@ -577,7 +577,12 @@ denomination.
       // Either "deposit" or "melt" or "refund"
       type: string;
 
-      // The total amount of the coin's value absorbed (or restored in the case of a refund) by this transaction
+      // The total amount of the coin's value absorbed (or restored in the case of a refund) by this transaction.
+      // Note that for deposit and melt, this means the amount given includes
+      // the transaction fee, while for refunds the amount given excludes
+      // the transaction fee. The current coin value can thus be computed by
+      // subtracting deposit and melt amounts and adding refund amounts from
+      // the coin's denomination value.
       amount: Amount;
 
       // base32 binary encoding of the transaction data as a
@@ -592,6 +597,8 @@ denomination.
       // `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or
       // `TALER_SIGNATURE_WALLET_COIN_MELT` or
       // `TALER_SIGNATURE_MERCHANT_REFUND` over the transaction's details.
+      // Note that in the case of a 'refund', the signature is made with
+      // the public key of the merchant, and not that of the coin.
       signature: EddsaSignature;
     }
 
@@ -648,19 +655,17 @@ the API during normal operation.
       // coin_evs[j][k] is the k-th blank (of kappa) for the k-th new coin (of n).
       coin_evs: CoinBlank[][]
 
-      // For each of the `m` old coins, `kappa` transfer public keys (2D-array
-      // of ephemeral ECDHE keys)
-      transfer_pubs: EddsaPublicKey[][];
+      // `kappa` transfer public keys (ephemeral ECDHE keys)
+      transfer_pubs: EddsaPublicKey[];
 
-      // For each of the `m` old coins, `kappa` link encryptions with an
-      // ECDHE-encrypted SHA-512 hash code.  The ECDHE encryption is done using
-      // the private key of the respective old coin and the corresponding transfer
-      // public key.  Note that the SHA-512 hash code must be the same across all
-      // coins, but different across all of the `kappa` dimensions.  Given the
-      // private key of a single old coin, it is thus possible to decrypt the
-      // respective `secret_encs` and obtain the SHA-512 hash that was used to
+      // `kappa` link encryptions with an ECDHE-encrypted SHA-512 hash code.
+      // The ECDHE encryption is done using
+      // the private key of the old coin and the corresponding transfer
+      // public key.  Given the
+      // private key of the old coin, it is thus possible to decrypt the
+      // `secret_encs` and obtain the SHA-512 hash that was used to
       // symetrically encrypt the `link_encs` of all of the new coins.
-      secret_encs: string[][];
+      secret_encs: string[];
 
       // For each of the `n` new coins, `kappa` symmetrically encrypted tuples
       // consisting of the EdDSA/ECDHE-private key of the new coin and the
@@ -694,6 +699,7 @@ the API during normal operation.
       // Amount of the value of the coin that should be melted as part of
       // this refresh operation, including melting fee.
       value_with_fee: Amount;
+    }
 
   Errors such as failing to do proper arithmetic when it comes to calculating
   the total of the coin values and fees are simply reported as bad requests.
@@ -780,11 +786,11 @@ the API during normal operation.
       // reference implementation.
       session_hash: HashCode;
 
-      // 2D array of `kappa - 1` times number of melted coins ECDHE transfer
-      // private keys.  The exchange will use those to decrypt the transfer secrets,
-      // check that they match across all coins, and then decrypt the private keys
+      // Array of `kappa - 1` ECDHE transfer private keys.
+      // The exchange will use those to decrypt the transfer secrets,
+      // and then decrypt the private keys and blinding factors
       // of the coins to be generated and check all this against the commitments.
-      transfer_privs: EddsaPrivateKey[][];
+      transfer_privs: EddsaPrivateKey[];
     }
 
 
@@ -806,26 +812,28 @@ the API during normal operation.
       // Constant "commitment violation"
       error: string;
 
-      // offset of in the array of `kappa` commitments where the error was detected
+      // offset of in the array of `kappa` commitments where the error
+      // was detected
       offset: number;
 
-      // index of in the with respect to the melted coin where the error was detected
+      // index of in the with respect to the new coin where the error was
+      // detected, or 2^32-1 if the error is not dependnet on an offeset
+      // related to the new coins.
       index: number;
 
       // name of the entity that failed the check (i.e. "transfer key")
       object: string;
 
       // Information about each melted coin
-      oldcoin_infos: OldCoinInfo[];
+      refresh_melt_info: OldCoinInfo;
 
       // array with RSA denomination public keys of the coins the original
       // refresh request asked to be exchangeed
       newcoins_infos: RsaPublicKey[];
 
-      // 2D array with `kappa` entries in the first dimension and the same
-      // length as the `oldcoin_infos` in the 2nd dimension containing as elements
+      // array with `kappa` entries containing as elements
       // objects with the linkage information
-      link_infos: LinkInfo[][];
+      link_infos: LinkInfo[];
 
       // 2D array with `kappa` entries in the first dimension and the same
       // length as `newcoin_infos` in the 2nd dimension containing as elements
@@ -1122,7 +1130,7 @@ Refunds
     The operation succeeded, the exchange confirms that the coin can now be refreshed.  The response will include a `RefundSuccess`_ object.
   :status 401 Unauthorized:
     Merchant signature is invalid.
-  :status 404 Not found: 
+  :status 404 Not found:
     The refund operation failed as we could not find a matching deposit operation (coin, contract, transaction ID and merchant public key must all match).
 
   **Details:**
@@ -1149,7 +1157,7 @@ Refunds
 
       // 64-bit transaction id of the original transaction between merchant and customer
       transaction_id: number;
-     
+
       // 64-bit transaction id of the refund transaction between merchant and customer
       rtransaction_id: number;
 
