@@ -1026,7 +1026,7 @@ typically also view the balance.)
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 
-  **Request:** The request body most be a `WtidRequest`_ JSON object.
+  **Request:** The request body must be a `WtidRequest`_ JSON object.
 
   **Response:**
 
