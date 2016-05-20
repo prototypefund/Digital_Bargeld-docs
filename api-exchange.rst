@@ -302,7 +302,7 @@ exchange.
   .. note::
     The client currently does not have to demonstrate knowledge of the private
     key of the reserve to make this request, which makes the reserve's public
-    key privliged information known only to the client, their bank, and the
+    key privileged information known only to the client, their bank, and the
     exchange.  In future, we might wish to revisit this decision to improve
     security, such as by having the client EdDSA-sign an ECDHE key to be used
     to derive a symmetric key to encrypt the response.  This would be useful if
