@@ -1262,9 +1262,15 @@ Administrative API: Bank transactions
       execution_date: Timestamp;
 
       // Client's wire details, so that the exchange knows from whom money comes from.
-      // We strees again that in order to create a reserve on any exchange, an equivalent
+      // In order to create a reserve on any exchange, an equivalent
       // amount of money must be wire transferred from the client's to the exchange's
-      // bank account
+      // bank account.
+      // The wire details given here should include some unique identifier
+      // for each transaction. The exchange will check that the details
+      // given are unique, and if the wire details are identical to previous
+      // wire details will treat the request as a duplicate and not actually
+      // do any update. This is true even if the amount or execution date
+      // differs.
       wire: any;
     }
 
