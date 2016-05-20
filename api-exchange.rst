@@ -1261,7 +1261,10 @@ Administrative API: Bank transactions
       // When was the transaction executed
       execution_date: Timestamp;
 
-      // Wire details
+      // Client's wire details, so that the exchange knows from whom money comes from.
+      // We strees again that in order to create a reserve on any exchange, an equivalent
+      // amount of money must be wire transferred from the client's to the exchange's
+      // bank account
       wire: any;
     }
 
