@@ -117,9 +117,11 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   The `frontend` passes the :ref:`deposit permission <deposit-permission>`
-  received from the wallet, and optionally adding a field named `edate`,
+  received from the wallet, and optionally adding a field named `pay_deadline`,
   indicating a deadline by which he would expect to receive the bank transfer
-  for this deal.  Note that the `edate` must be after the `refund_deadline`.
+  for this deal.  Note that the `pay_deadline` must be after the `refund_deadline`.
+  The backend calculates the `pay_deadline` by adding the `wire_transfer_delay`
+  value found in the configuration to the current time.
 
   **Response:**
 

@@ -514,7 +514,7 @@ denomination.
 
       // indicative time by which the exchange undertakes to transfer the funds to
       // the merchant, in case of successful payment.
-      edate: Timestamp;
+      pay_deadline: Timestamp;
 
       // 64-bit transaction id for the transaction between merchant and customer
       transaction_id: number;
