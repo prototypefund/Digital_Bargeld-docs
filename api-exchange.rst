@@ -343,8 +343,11 @@ exchange.
       // The amount that was withdrawn or deposited.
       amount: Amount;
 
-      // Wiring details, only present if type is "DEPOSIT".
-      wire?: any;
+      // Sender account details, only present if type is "DEPOSIT".
+      sender_account_details?: any;
+
+      // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
+      transfer_details?: any;
 
       // binary encoding of the transaction data as a `TALER_WithdrawRequestPS`
       // struct described in :ref:`Signatures`, only present if the `type` was
@@ -1261,17 +1264,22 @@ Administrative API: Bank transactions
       // When was the transaction executed
       execution_date: Timestamp;
 
-      // Client's wire details, so that the exchange knows from whom money comes from.
-      // In order to create a reserve on any exchange, an equivalent
-      // amount of money must be wire transferred from the client's to the exchange's
-      // bank account.
-      // The wire details given here should include some unique identifier
+      // Sender's wire account details, so that the exchange knows from whom the
+      // money comes from (and can possibly refund it).  The details
+      // given here must be in a wire format supported by the exchange.
+      sender_account_details: any;
+
+      // The wire details given here should include an unique identifier
       // for each transaction. The exchange will check that the details
       // given are unique, and if the wire details are identical to previous
       // wire details will treat the request as a duplicate and not actually
       // do any update. This is true even if the amount or execution date
       // differs.
-      wire: any;
+      //
+      // Note that the exchange does not interpret these details in any
+      // way, other than for "being unique". They are stored for diagnostics
+      // and auditing.
+      transfer_details: any;
     }
 
   **Response:**
