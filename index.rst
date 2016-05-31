@@ -47,6 +47,7 @@ It focuses on how to install, configure and run the required software.
 .. toctree::
   :maxdepth: 2
 
+  global_licensing
   impl-exchange
   impl-merchant
 
@@ -111,4 +112,3 @@ Indices and tables
 
 * :doc:`glossary`
 * :ref:`search`
-
