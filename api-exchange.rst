@@ -1132,6 +1132,8 @@ Refunds
     Merchant signature is invalid.
   :status 404 Not found:
     The refund operation failed as we could not find a matching deposit operation (coin, contract, transaction ID and merchant public key must all match).
+  :status 410 Gone:
+    It is too late for a refund by the exchange, the money was already sent to the merchant.
 
   **Details:**
 
