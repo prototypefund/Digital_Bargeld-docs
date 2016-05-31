@@ -302,7 +302,7 @@ exchange.
   .. note::
     The client currently does not have to demonstrate knowledge of the private
     key of the reserve to make this request, which makes the reserve's public
-    key privliged information known only to the client, their bank, and the
+    key privileged information known only to the client, their bank, and the
     exchange.  In future, we might wish to revisit this decision to improve
     security, such as by having the client EdDSA-sign an ECDHE key to be used
     to derive a symmetric key to encrypt the response.  This would be useful if
@@ -343,8 +343,11 @@ exchange.
       // The amount that was withdrawn or deposited.
       amount: Amount;
 
-      // Wiring details, only present if type is "DEPOSIT".
-      wire?: any;
+      // Sender account details, only present if type is "DEPOSIT".
+      sender_account_details?: any;
+
+      // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
+      transfer_details?: any;
 
       // binary encoding of the transaction data as a `TALER_WithdrawRequestPS`
       // struct described in :ref:`Signatures`, only present if the `type` was
@@ -514,7 +517,7 @@ denomination.
 
       // indicative time by which the exchange undertakes to transfer the funds to
       // the merchant, in case of successful payment.
-      edate: Timestamp;
+      pay_deadline: Timestamp;
 
       // 64-bit transaction id for the transaction between merchant and customer
       transaction_id: number;
@@ -1026,7 +1029,7 @@ typically also view the balance.)
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 
-  **Request:** The request body most be a `WtidRequest`_ JSON object.
+  **Request:** The request body must be a `WtidRequest`_ JSON object.
 
   **Response:**
 
@@ -1263,8 +1266,22 @@ Administrative API: Bank transactions
       // When was the transaction executed
       execution_date: Timestamp;
 
-      // Wire details
-      wire: any;
+      // Sender's wire account details, so that the exchange knows from whom the
+      // money comes from (and can possibly refund it).  The details
+      // given here must be in a wire format supported by the exchange.
+      sender_account_details: any;
+
+      // The wire details given here should include an unique identifier
+      // for each transaction. The exchange will check that the details
+      // given are unique, and if the wire details are identical to previous
+      // wire details will treat the request as a duplicate and not actually
+      // do any update. This is true even if the amount or execution date
+      // differs.
+      //
+      // Note that the exchange does not interpret these details in any
+      // way, other than for "being unique". They are stored for diagnostics
+      // and auditing.
+      transfer_details: any;
     }
 
   **Response:**

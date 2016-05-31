@@ -65,20 +65,6 @@ The Merchant Backend HTTP API
 
 The following API are made available by the merchant's `backend` to the merchant's `frontend`.
 
-.. http:post:: /hash-contract
-
-  Ask the backend to compute the hash of the `contract` given in the POST's body (the full contract
-  should be the value of a JSON field named `contract`). This feature allows frontends to verify
-  that names of resources which are going to be sold are actually `in` the paid cotnract. Without
-  this feature, a malicious wallet can request resource A and pay for resource B without the frontend
-  being aware of that.
-
-  **Response**
-
-  :status 200 OK:
-    hash succesfully computed. The returned value is a JSON having one field called `hash` containing
-    the hashed contract
-
 .. http:post:: /contract
 
   Ask the backend to add some missing (mostly related to cryptography) information to the contract.
@@ -131,9 +117,11 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   The `frontend` passes the :ref:`deposit permission <deposit-permission>`
-  received from the wallet, and optionally adding a field named `edate`,
+  received from the wallet, and optionally adding a field named `pay_deadline`,
   indicating a deadline by which he would expect to receive the bank transfer
-  for this deal.  Note that the `edate` must be after the `refund_deadline`.
+  for this deal.  Note that the `pay_deadline` must be after the `refund_deadline`.
+  The backend calculates the `pay_deadline` by adding the `wire_transfer_delay`
+  value found in the configuration to the current time.
 
   **Response:**
 
