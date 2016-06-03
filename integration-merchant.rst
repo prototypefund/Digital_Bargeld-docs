@@ -45,7 +45,7 @@ a physical good on his screen, the user will receive it by mail.
 IIG triggers different flows according to the user visiting an offering or a fulfillment
 URL. For clarity, below are listed the steps taken when the user visits an offering URL.
 
-.. _offer:
+.. _byoffer:
 
 ---------------------
 IIG by `offering` URL

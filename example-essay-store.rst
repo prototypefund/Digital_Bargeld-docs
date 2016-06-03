@@ -80,7 +80,7 @@ This demonstrator lies in `examples/blog` of `git://taler.net/merchant/examples/
 
 The essay store, available at https://blog.demo.taler.net, is such that its homepage
 is a list of buyable articles and each article is a reference to an `offering
-URL` (see :ref:`offer`).  In particular, this offering URL has the following format:
+URL` (see :ref:`byoffer`).  In particular, this offering URL has the following format:
 
   `https://blog.demo.taler.net/essay_fulfillment.php?article=articleId`
 
@@ -98,7 +98,7 @@ would be a fulfillment URL.
 Once the user visits the offering URL by clicking on some article's title, the merchant
 
 1. checks if the state associated to this article corresponds to "payed".  If this is the
-   case, point 7. is triggered, which is what happens when point 0 of :ref:`offer` is true.
+   case, point 7. is triggered, which is what happens when point 0 of :ref:`byoffer` is true.
 
 2. checks if the user gave additional parameters to the URL above, actually making it a
    fulfillment URL.  If so, jump to point `y`.
@@ -109,7 +109,7 @@ Once the user visits the offering URL by clicking on some article's title, the m
    JavaScript and not by the wallet; that gives more flexibility to the merchants by reducing
    the communication between wallets and shops. The wallet gets involved once the
    contract arrives and the JavaScript fires a `taler-confirm-contract` event containing the
-   contract, see point 1. of :ref:`offer`.
+   contract, see point 1. of :ref:`byoffer`.
 
 4. the wallet visits the fulfillment URL associated with this purchase (the fulfillment
    URL's path is indicated in the contract, so the wallet has to just add `tid` and `timestamp`
@@ -122,7 +122,7 @@ Once the user visits the offering URL by clicking on some article's title, the m
    to be payed is actually mentioned in the deposit permission.  Without this control, a malicious
    wallet can send a deposit permission for `articleA` and get the resource `articleB`, see point 6.
    As a last step, the script returns a page which fires a `taler-execute-payment` event in the user's
-   browser carrying the same data structure as in point 4. of :ref:`offer`.
+   browser carrying the same data structure as in point 4. of :ref:`byoffer`.
    Note that both in point 3. and 5. the HTML page returned is the same, namely it is the page showing
    the credit card payment.  It is designed so that it is possible to `inject` the event to fire at the
    user's browser.  So in point 3. the injected event is `taler-confirm-contract`, and in point 5. is

@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014, 2015, 2016 and INRIA
+  Copyright (C) 2014, 2015, 2016 INRIA
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
   Foundation; either version 2.1, or (at your option) any later version.
@@ -10,28 +10,187 @@
   You should have received a copy of the GNU Lesser General Public License along with
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
 
-  @author Florian Dold
   @author Marcello Stanisci
+  @author Florian Dold
 
-=====================
-The Merchant HTTP API
-=====================
+============
+Merchant API
+============
 
-This chapter defines the HTTP-based protocol between the Taler wallet and the
-merchant.
+Before reading the API reference documentation, it is suggested to read the :ref:`merchant-arch`
 
-It is assumed that the browser has a secure and possibly customer-anonymizing
-channel to the merchant, typically by using the Tor browser bundle.
-Furthermore, it is assumed that the merchant's server does not repudiate on
-contractual offers it has made.  If necessary, the merchant assures this by
-limiting the time for which the offer is valid.
+------------------------------
+The Frontent HTTP API
+------------------------------
 
-Taler also assumes that the wallet and the merchant can agree on the
-current time; similar to what is required to connect to Tor or
-validate TLS certificates.  The wallet may rely on the timestamp
-provided in the HTTP "Date:" header for this purpose, but the customer
-is expected to check that the time of his machine is approximately
-correct.
+.. http:get:: /taler/contract
+
+  Triggers the contract generation. Note that the URL may differ between
+  merchants.
+
+  **Request:**
+
+  The request depends entirely on the merchant implementation.
+
+  **Response**
+
+  :status 200 OK: The request was successful.  The body contains an :ref:`Offer <contract>`.
+  :status 400 Bad Request: Request not understood.
+  :status 500 Internal Server Error:
+    In most cases, some error occurred while the backend was generating the
+    contract. For example, it failed to store it into its database.
+
+.. _pay:
+.. http:post:: pay_url
+  
+
+  Send the deposit permission to the merchant. The client should POST a `deposit-permission`_
+  object. Note that ``pay_url`` is make known by the frontent to the wallet via the DOM event
+  ``taler-execute-payment``, documented in :ref:`byoffer`.
+
+  .. _deposit-permission:
+  .. code-block:: tsref
+
+    interface DepositPermission {
+      // the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
+      H_wire: HashCode;
+
+      // the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value obtained from the field `h_contract`, or regenerating one starting from the values it gets within the contract
+      H_contract: HashCode;
+
+      // a 53-bit number corresponding to the contract being agreed on
+      transaction_id: number;
+    
+      // total amount being paid as per the contract (the sum of the amounts from the `coins` may be larger to cover deposit fees not covered by the merchant)
+      total_amount: Amount;
+
+      // maximum fees merchant agreed to cover as per the contract
+      max_fee: Amount;
+
+      // signature by the merchant over the contract, must match signed data of purpose TALER_SIGNATURE_MERCHANT_CONTRACT
+      merchant_sig: EddsaSignature;
+
+      // a timestamp of this deposit permission. It equals just the contract's timestamp
+      timestamp: Timestamp;
+
+      // same value held in the contract's `refund` field
+      refund_deadline: Timestamp;
+
+      // the chosen exchange's base URL
+      exchange: string;
+
+      // the coins used to sign the contract
+      coins: DepositedCoin[];
+
+    }
+
+  .. _`tsref-type-DepositedCoin`:
+
+  .. code-block:: tsref
+
+    interface DepositedCoin {
+      // the amount this coin is paying for
+      amount: Amount;
+
+      // coin's public key
+      coin_pub: RsaPublicKey;
+
+      // denomination key
+      denom_pub: RsaPublicKey;
+
+      // exchange's signature over this coin's public key
+      ub_sig: RsaSignature;
+      
+      // the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See section `Signatures` on the exchange's API page.
+      coin_sig: EddsaSignature;
+  }
+
+  **Success Response:**
+
+  :status 301 Redirection: the merchant should redirect the client to his fullfillment page, where the good outcome of the purchase must be shown to the user.
+
+  **Failure Responses:**
+
+  The error codes and data sent to the wallet are a mere copy of those gotten from the exchange when attempting to pay. The section about :ref:`deposit <deposit>` explains them in detail.
+
+
+.. http:post:: fulfillment_url
+
+  Returns a cooperative merchant page (called the execution page) that will
+  send the ``taler-execute-payment`` to the wallet and react to failure or
+  success of the actual payment. ``fulfillment_url`` is included in the `contract`_.
+  Furthermore, :ref:`payprot` documents the payment protocol between wallets and
+  merchants.
+
+  The wallet will inject an ``XMLHttpRequest`` request to the merchant's
+  ``$pay_url`` in the context of the execution page.  This mechanism is
+  necessary since the request to ``$pay_url`` must be made from the merchant's
+  origin domain in order to preserve information (e.g. cookies, origin header).
+
+------------------------------
+The Merchant Backend HTTP API
+------------------------------
+
+The following API are made available by the merchant's `backend` to the merchant's `frontend`.
+
+.. http:post:: /contract
+
+  Ask the backend to add some missing (mostly related to cryptography) information to the contract.
+
+  **Request:**
+
+  The `proposition` that is to be sent from the frontend is a `contract` object without the fields
+
+  * `exchanges`
+  * `auditors`
+  * `H_wire`
+  * `merchant_pub`
+
+  The `backend` then completes this information based on its configuration.
+
+  **Response**
+
+  :status 200 OK:
+    The backend has successfully created the contract.  It responds with an :ref:`offer <offer>`. This request should virtually always be successful.
+  On success, the `frontend` should pass this response verbatim to the wallet.
+
+  :status 403 Forbidden:
+    The frontend used the same transaction ID twice.  This is only allowed if the response from the backend was lost ("instant" replay), but to assure that frontends usually create fresh transaction IDs this is forbidden if the contract was already paid.  So attempting to have the backend sign a contract for a contract that was already paid by a wallet (and thus was generated by the frontend a "long" time ago), is forbidden and results in this error.  Frontends must make sure that they increment the transaction ID properly and persist the largest value used so far.
+
+.. http:post:: /pay
+
+  Asks the `backend` to execute the transaction with the exchange and deposit the coins.
+
+  **Request:**
+
+  The `frontend` passes the :ref:`deposit permission <deposit-permission>`
+  received from the wallet, and optionally adding a field named `pay_deadline`,
+  indicating a deadline by which he would expect to receive the bank transfer
+  for this deal.  Note that the `pay_deadline` must be after the `refund_deadline`.
+  The backend calculates the `pay_deadline` by adding the `wire_transfer_delay`
+  value found in the configuration to the current time.
+
+  **Response:**
+
+  :status 200 OK:
+    The exchange accepted all of the coins. The `frontend` should now fullfill the
+    contract.  This response has no meaningful body, the frontend needs to
+    generate the fullfillment page.
+  :status 412 Precondition Failed:
+    The given exchange is not acceptable for this merchant, as it is not in the
+    list of accepted exchanges and not audited by an approved auditor.
+  :status 403 Forbidden:
+    The exchange rejected the payment because a coin was already spent before.
+    The response will include the `coin_pub` for which the payment failed,
+    in addition to the response from the exchange to the `/deposit` request.
+
+  The `backend` will return verbatim the error codes received from the exchange's
+  :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
+  double-spending for example, the `frontend` should pass the reply verbatim to
+  the browser/wallet. This should be the expected case, as the `frontend`
+  cannot really make mistakes; the only reasonable exception is if the
+  `backend` is unavailable, in which case the customer might appreciate some
+  reassurance that the merchant is working on getting his systems back online.
 
 ---------
 Encodings
@@ -58,14 +217,14 @@ that is legally non-binding:
       // The hash of the contract, encoded in base32, provided
       // as a convenience.  All components that do not fully trust
       // the merchant must verify this field.
-      H_contract: string;
+      H_contract: HashCode ;
 
       // Signature over the contract made by the merchant.
       // Must confirm to the `Signature specification`_ below.
-      sig: string;
+      merchant_sig: EddsaSignature;
     }
 
-The contract must have the following structure:
+The `contract` must have the following structure:
 
   .. _tsref-type-Contract:
   .. code-block:: tsref
@@ -258,93 +417,3 @@ should be set to ``TALER_SIGNATURE_MERCHANT_CONTRACT``.
      struct GNUNET_HashCode h_contract;
    }
 
-
----------------------
-The Merchant HTTP API
----------------------
-
-In the following requests, ``$``-variables refer to the variables in the
-merchant's offer.
-
-.. _pay:
-.. http:post:: $pay_url
-
-  Send the deposit permission to the merchant. Note that the URL may differ between
-  merchants. The client should POST a `deposit-permission`_ object
-
-  .. _deposit-permission:
-  .. code-block:: tsref
-
-    interface DepositPermission {
-      // the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
-      H_wire: string;
-
-      // the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value obtained from the field `h_contract`, or regenerating one starting from the values it gets within the contract
-      H_contract: string;
-
-      // a 53-bit number corresponding to the contract being agreed on
-      transaction_id: number;
-    
-      // total amount being paid as per the contract (the sum of the amounts from the `coins` may be larger to cover deposit fees not covered by the merchant)
-      total_amount: Amount;
-
-      // maximum fees merchant agreed to cover as per the contract
-      max_fee: Amount;
-
-      // signature by the merchant over the contract, must match signed data of purpose TALER_SIGNATURE_MERCHANT_CONTRACT
-      merchant_sig: string;
-
-      // a timestamp of this deposit permission. It equals just the contract's timestamp
-      timestamp: Timestamp;
-
-      // same value held in the contract's `refund` field
-      refund_deadline: Timestamp;
-
-      // the chosen exchange's base URL
-      exchange: string;
-
-      // the coins used to sign the contract
-      coins: DepositedCoin[];
-
-    }
-
-  .. _`tsref-type-DepositedCoin`:
-
-  .. code-block:: tsref
-
-    interface DepositedCoin {
-      // the amount this coin is paying for
-      amount: Amount;
-
-      // coin's public key
-      coin_pub: RsaPublicKey;
-
-      // denomination key
-      denom_pub: RsaPublicKey;
-
-      // exchange's signature over this coin's public key
-      ub_sig: RsaSignature;
-      
-      // the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See section `Signatures` on the exchange's API page.
-      coin_sig: EddsaSignature;
-  }
-
-  **Success Response:**
-
-  :status 301 Redirection: the merchant should redirect the client to his fullfillment page, where the good outcome of the purchase must be shown to the user.
-
-  **Failure Responses:**
-
-  The error codes and data sent to the wallet are a mere copy of those gotten from the exchange when attempting to pay. The section about :ref:`deposit <deposit>` explains them in detail.
-
-
-.. http:post:: $exec_url
-
-  Returns a cooperative merchant page (called the execution page) that will
-  send the ``taler-execute-payment`` to the wallet and react to failure or
-  success of the actual payment.
-
-  The wallet will inject an ``XMLHttpRequest`` request to the merchant's
-  ``$pay_url`` in the context of the execution page.  This mechanism is
-  necessary since the request to ``$pay_url`` must be made from the merchant's
-  origin domain in order to preserve information (e.g. cookies, origin header).
