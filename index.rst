@@ -50,7 +50,7 @@ It focuses on how to install, configure and run the required software.
   global_licensing
   impl-exchange
   impl-merchant
-
+  versioning
 
 ------------------------
 Web Integration Handbook
