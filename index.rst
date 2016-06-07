@@ -1,12 +1,15 @@
 ..
   This file is part of GNU TALER.
   Copyright (C) 2014, 2015, 2016 GNUnet e.V.
+
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
   Foundation; either version 2.1, or (at your option) any later version.
+
   TALER is distributed in the hope that it will be useful, but WITHOUT ANY
   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
   A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
+
   You should have received a copy of the GNU Lesser General Public License along with
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
 
@@ -29,12 +32,16 @@ while providing anonymity for Customers.
 Cryptography is used to ensure that none of the participants can
 defraud the others without being detected immediately; however, in
 practice a fradulent Exchange might go bankrupt instead of paying the
-Merchants and thus the Exchange will need to be audited regularly like any
-other banking institution.
+Merchants and thus the Exchange will need to be audited regularly like
+any other banking institution.
 
 The system will be based on free software and open protocols.
-In this document, we describe the REST-based API of the Exchange,
-which is at the heart of the system.
+
+In this document, we describe the REST-based APIs between the various
+components, as well as the internal architecture of key components.
+However, you do not have to re-implement these APIs to use Taler: the
+project includes free software reference implementations of the
+various components.
 
 
 -----------------
