@@ -955,12 +955,8 @@ situation is revealed to an adversary. (This is not a major issue, as
 an adversary that has access to the line-items of bank statements can
 typically also view the balance.)
 
-  .. note::
 
-     Wire transfer tracking is currently not implemented (#3888).
-
-
-.. http:get:: /wire/deposits
+.. http:get:: /track/transfer
 
   Provides deposits associated with a given wire transfer.
 
@@ -972,14 +968,14 @@ typically also view the balance.)
 
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
-    The body of the response is a `WireDepositsResponse`_.
+    The body of the response is a `TrackTransferResponse`_.
   :status 404 Not Found:
     The wire transfer identifier is unknown to the exchange.
 
-  .. _WireDepositsResponse:
+  .. _TrackTransferResponse:
   .. code-block:: tsref
 
-    interface WireDepositsResponse {
+    interface TrackTransferResponse {
       // Total amount transferred
       total: Amount;
 
@@ -990,7 +986,7 @@ typically also view the balance.)
       H_wire: HashCode;
 
       // details about the deposits
-      deposits: DepositDetail[];
+      deposits: TrackTransferDetail[];
 
       // signature from the exchange made with purpose
       // `TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT`
@@ -1003,7 +999,7 @@ typically also view the balance.)
       exchange_pub: EddsaSignature;
     }
 
-  .. _tsref-type-DepositDetail:
+  .. _tsref-type-TrackTransferDetail:
   .. code-block:: tsref
 
     interface WireDepositDetail {
@@ -1025,32 +1021,32 @@ typically also view the balance.)
 
     }
 
-.. http:post:: /deposit/wtid
+.. http:post:: /track/transaction
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 
-  **Request:** The request body must be a `WtidRequest`_ JSON object.
+  **Request:** The request body must be a `TrackTransactionRequest`_ JSON object.
 
   **Response:**
 
   :status 200 OK:
     The deposit has been executed by the exchange and we have a wire transfer identifier.
-    The response body is a `WtidResponse`_ object.
+    The response body is a `TrackTransactionResponse`_ object.
   :status 202 Accepted:
     The deposit request has been accepted for processing, but was not yet
     executed.  Hence the exchange does not yet have a wire transfer identifier.  The
     merchant should come back later and ask again.
-    The response body is a `WtidAcceptedResponse`_.
+    The response body is a `TrackTransactionAcceptedResponse`_.
   :status 401 Unauthorized: The signature is invalid.
   :status 404 Not Found: The deposit operation is unknown to the exchange
 
   **Details:**
 
-  .. _tsref-type-WtidRequest:
-  .. _WtidRequest:
+  .. _tsref-type-TrackTransactionRequest:
+  .. _TrackTransactionRequest:
   .. code-block:: tsref
 
-    interface WtidRequest {
+    interface TrackTransactionRequest {
       // SHA-512 hash of the merchant's payment details.
       H_wire: HashCode;
 
@@ -1068,17 +1064,17 @@ typically also view the balance.)
       merchant_pub: EddsaPublicKey;
 
       // the EdDSA signature of the merchant made with purpose
-      // `TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID` , affirming that it is really the
+      // `TALER_SIGNATURE_MERCHANT_TRACK_TRANSACTION` , affirming that it is really the
       // merchant who requires obtaining the wire transfer identifier.
       merchant_sig: EddsaSignature;
     }
 
 
-  .. _tsref-type-WtidResponse:
-  .. _WtidResponse:
+  .. _tsref-type-TrackTransactionResponse:
+  .. _TrackTransactionResponse:
   .. code-block:: tsref
 
-    interface WtidResponse {
+    interface TrackTransactionResponse {
       // raw wire transfer identifier of the deposit.
       wtid: Base32;
 
@@ -1102,11 +1098,11 @@ typically also view the balance.)
       exchange_pub: EddsaPublicKey;
     }
 
-  .. _tsref-type-WtidAcceptedResponse:
-  .. _WtidAcceptedResponse:
+  .. _tsref-type-TrackTransactionAcceptedResponse:
+  .. _TrackTransactionAcceptedResponse:
   .. code-block:: tsref
 
-    interface WtidAcceptedResponse {
+    interface TrackTransactionAcceptedResponse {
       // time by which the exchange currently thinks the deposit will be executed.
       execution_time: Timestamp;
     }
