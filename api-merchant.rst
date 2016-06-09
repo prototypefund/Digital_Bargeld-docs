@@ -23,7 +23,7 @@ Before reading the API reference documentation, it is suggested to read the :ref
 The Frontent HTTP API
 ------------------------------
 
-.. http:get:: /taler/contract
+.. http:get:: contract_url
 
   Triggers the contract generation. Note that the URL may differ between
   merchants.
@@ -42,7 +42,7 @@ The Frontent HTTP API
 
 .. _pay:
 .. http:post:: pay_url
-  
+
 
   Send the deposit permission to the merchant. The client should POST a `deposit-permission`_
   object. Note that ``pay_url`` is make known by the frontent to the wallet via the DOM event
@@ -60,7 +60,7 @@ The Frontent HTTP API
 
       // a 53-bit number corresponding to the contract being agreed on
       transaction_id: number;
-    
+
       // total amount being paid as per the contract (the sum of the amounts from the `coins` may be larger to cover deposit fees not covered by the merchant)
       total_amount: Amount;
 
@@ -100,7 +100,7 @@ The Frontent HTTP API
 
       // exchange's signature over this coin's public key
       ub_sig: RsaSignature;
-      
+
       // the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See section `Signatures` on the exchange's API page.
       coin_sig: EddsaSignature;
   }
@@ -191,6 +191,55 @@ The following API are made available by the merchant's `backend` to the merchant
   cannot really make mistakes; the only reasonable exception is if the
   `backend` is unavailable, in which case the customer might appreciate some
   reassurance that the merchant is working on getting his systems back online.
+
+
+
+.. http:get:: /track/transfer
+
+  Provides deposits associated with a given wire transfer.
+
+  **Request:**
+
+  :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
+  :query exchange_uri: base URI of the exchange that made the wire transfer
+
+  **Response:**
+
+  :status 200 OK:
+    The wire transfer is known to the exchange, details about it follow in the body.
+    The body of the response is a `TrackTransferResponse`_.  Note that
+    the similarity to the response given by the exchange for a /track/transfer
+    is completely intended.
+
+  :status 404 Not Found:
+    The wire transfer identifier is unknown to the exchange.
+
+.. http:get:: /track/transaction
+
+  Provide the wire transfer identifier associated with an (existing) deposit operation.
+
+  **Request:**
+
+  :query transaction_id: ID of the transaction we want to trace (an integer)
+
+  **Response:**
+
+  :status 200 OK:
+    The deposit has been executed by the exchange and we have a wire transfer identifier.
+    The response body is a `TrackTransactionResponse`_ object.  Note that
+    the similarity to the response given by the exchange for a /track/transaction
+     is completely intended.
+
+  :status 202 Accepted:
+    The deposit request has been accepted for processing, but was not yet
+    executed.  Hence the exchange does not yet have a wire transfer identifier.
+    The merchant should come back later and ask again.
+    The response body is a `TrackTransactionAcceptedResponse`_.  Note that
+    the similarity to the response given by the exchange for a /track/transaction
+    is completely intended.
+
+  :status 404 Not Found: The transaction is unknown to the backend.
+
 
 ---------
 Encodings
@@ -416,4 +465,3 @@ should be set to ``TALER_SIGNATURE_MERCHANT_CONTRACT``.
       */
      struct GNUNET_HashCode h_contract;
    }
-

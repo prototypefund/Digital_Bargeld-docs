@@ -1013,7 +1013,7 @@ typically also view the balance.)
       // coin's public key, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
 
-    // The total amount the original deposit was worth.
+      // The total amount the original deposit was worth.
       deposit_value: Amount;
 
       // applicable fees for the deposit
@@ -1021,7 +1021,7 @@ typically also view the balance.)
 
     }
 
-.. http:post:: /track/transaction
+.. http:get:: /track/transaction
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 
