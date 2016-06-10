@@ -1021,7 +1021,7 @@ typically also view the balance.)
 
     }
 
-.. http:get:: /track/transaction
+.. http:post:: /track/transaction
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 

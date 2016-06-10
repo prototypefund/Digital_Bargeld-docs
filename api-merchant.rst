@@ -230,9 +230,8 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 200 OK:
     The deposit has been executed by the exchange and we have a wire transfer identifier.
-    The response body is a `TrackTransactionResponse`_ object.  Note that
-    the similarity to the response given by the exchange for a /track/transaction
-     is completely intended.
+     The response body is a JSON array of `TransactionWireTransfer`_ objects.
+
 
   :status 202 Accepted:
     The deposit request has been accepted for processing, but was not yet
@@ -244,6 +243,35 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 404 Not Found: The transaction is unknown to the backend.
 
+
+  **Details:**
+
+  .. _tsref-type-TransactionWireTransfer:
+  .. _TransactionWireTransfer:
+  .. code-block:: tsref
+
+    interface TransactionWireTransfer {
+      // 32-byte wire transfer identifier
+      wtid: Base32;
+
+      // Array of data about coins
+      coins: CoinWireTransfer[];
+    }
+
+  .. _tsref-type-CoinWireTransfer:
+  .. _CoinWireTransfer:
+  .. code-block:: tsref
+
+    interface CoinWireTransfer {
+      // public key of the coin that was deposited
+      coin_pub: EddsaPublicKey;
+
+      // Amount the coin was worth (including deposit fee)
+      amount_with_fee: Amount;
+
+      // Deposit fee retained by the exchange for the coin
+      deposit_fee: Amount;
+    }
 
 ---------
 Encodings
