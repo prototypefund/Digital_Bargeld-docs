@@ -254,6 +254,9 @@ The following API are made available by the merchant's `backend` to the merchant
       // 32-byte wire transfer identifier
       wtid: Base32;
 
+      // execution time of the wire transfer
+      execution_time: Timestamp;
+
       // Array of data about coins
       coins: CoinWireTransfer[];
     }
@@ -341,13 +344,13 @@ The `contract` must have the following structure:
       products: Product[];
 
       // Time when this contract was generated
-      timestamp: number;
+      timestamp: Timestamp;
 
       // After this deadline has passed, no refunds will be accepted.
-      refund_deadline: number;
+      refund_deadline: Timestamp;
 
       // After this deadline, the merchant won't accept payments for the contact
-      expiry: number;
+      expiry: Timestamp;
 
       // Merchant's public key used to sign this contract; this information is typically added by the backend
       // Note that this can be an ephemeral key.
@@ -393,8 +396,8 @@ The `contract` must have the following structure:
       // a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
       taxes?: any[];
 
-      // human-readable date indicating when this product should be delivered
-      delivery_date: string;
+      // time indicating when this product should be delivered
+      delivery_date: Timestamp;
 
       // where to deliver this product. This may be an URI for online delivery
       // (i.e. `http://example.com/download` or `mailto:customer@example.com`),
