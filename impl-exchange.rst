@@ -20,21 +20,43 @@ The Exchange Reference Implementation
 The Configuration File
 ----------------------
 
+The section `[taler]` contains global options for the exchange:
+
+* `currency`: The currency supported by the exchange (i.e. "EUR")
+
+
 The section `[exchange]` contains various global options for the exchange:
 
 * `master_public_key`: Must specify the exchange's master public key.
 * `wireformat`: The wireformat supported by the exchange (i.e. "SEPA")
-* `currency`: The currency supported by the exchange (i.e. "EUR")
 
 
-^^^^^^^^^^^^^^^^^^^^^^
-SEPA accounts
-^^^^^^^^^^^^^^^^^^^^^^
+The network configuration for the exchange's HTTP server is configured
+with four options:
 
-The command line tool `taler-exchange-sepa` is used to create a file with
-the JSON response to /wire/sepa requests using the exchange's offline
-master key.  This file needs to be created and added to the configuration under SEPA_RESPONSE_FILE in section [exchange-wire-sepa] when the
-`wireformat` option in the configuration file allows SEPA transactions.
+* `SERVE`: must be set to `tcp` to serve HTTP over TCP, or `unix` to serve HTTP over a UNIX domain socket
+* `PORT`: set to the TCP port to listen on if `SERVE` is `tcp`.
+* `UNIXPATH`: set to the UNIX domain socket path to listen on if `SERVE` is `unix`
+* `UNIXPATH_MODE`: number giving the mode with the access permission mask for the `UNIXPATH` (i.e. 660 = rw-rw----).
+
+These four options are typically given twice: first in the `[exchange]` section
+for the public Rest API of the exchange, and again in the `[exchange-admin]`
+section for the administrative (/admin) and testing (/test) API of the exchange.
+The exchange can be started with the `-D` option to disable the administrative
+functions entirely.  It is recommended that the administrative API is only
+accessible via a properly protected UNIX domain socket.
+
+
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+Bank account configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The command line tool `taler-exchange-wire` is used to create a file with
+the JSON response to /wire requests using the exchange's offline
+master key.  The resulting file needs to be added to the configuration
+under the respective option for the wire transfer method, i.e.
+`SEPA_RESPONSE_FILE` in section `[exchange-wire-incoming-sepa]` when the
+`wireformat` option in the configuration file allows `sepa` transactions.
 
 
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -76,6 +98,15 @@ The command line tool `taler-exchange-reservemod` allows create and add money to
 -------------------
 Database Scheme
 -------------------
+
+The exchange database must be initialized using `taler-exchange-dbinit`.  This
+tool creates the tables required by the Taler exchange to operate.  The
+tool also allows you to reset the Taler exchange database, which is useful
+for test cases but should never be used in production.  Finally,
+`taler-exchange-dbinit` has a function to garbage collect a database,
+allowing administrators to purge records that are no longer required.
+
+The database scheme used by the exchange look as follows:
 
 .. image:: exchange-db.png
 

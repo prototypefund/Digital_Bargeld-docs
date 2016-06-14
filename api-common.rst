@@ -68,7 +68,11 @@ handle the error as if an internal error (500) had been returned.
   .. code-block:: tsref
 
     interface ErrorDetail {
-      // Description of the error, i.e. "missing parameter", "commitment violation", ...
+
+      // Numeric error code. See "taler_error_codes.h".
+      error_code: number;
+
+      // Human-readable description of the error, i.e. "missing parameter", "commitment violation", ...
       // The other arguments are specific to the error value reported here.
       error: string;
 
@@ -227,9 +231,14 @@ value and the denomination of the currency:
 
 .. sourcecode:: c
 
-  struct TALER_AmountNBO {
+  struct TALER_Amount {
     uint64_t value;
     uint32_t fraction;
+    uint8_t currency_code[12]; // i.e. "EUR" or "USD"
+  };
+  struct TALER_AmountNBO {
+    uint64_t value;            // in network byte order
+    uint32_t fraction;         // in network byte order
     uint8_t currency_code[12];
   };
 
@@ -243,8 +252,11 @@ denoting microseconds since the UNIX Epoch.  `UINT64_MAX` represents "never"
 
 .. sourcecode:: c
 
-  struct GNUNET_TIME_AbsoluteNBO {
+  struct GNUNET_TIME_Absolute {
     uint64_t timestamp_us;
+  };
+  struct GNUNET_TIME_AbsoluteNBO {
+    uint64_t abs_value_us__;       // in network byte order
   };
 
 Cryptographic primitives
@@ -257,7 +269,7 @@ uses 512-bit hash codes (64 bytes).
 .. sourcecode:: c
 
    struct GNUNET_HashCode {
-     uint8_t hash[64];
+     uint8_t hash[64];      // usually SHA-512
    };
 
    struct TALER_ReservePublicKeyP {
