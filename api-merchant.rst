@@ -230,9 +230,8 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 200 OK:
     The deposit has been executed by the exchange and we have a wire transfer identifier.
-    The response body is a `TrackTransactionResponse`_ object.  Note that
-    the similarity to the response given by the exchange for a /track/transaction
-     is completely intended.
+     The response body is a JSON array of `TransactionWireTransfer`_ objects.
+
 
   :status 202 Accepted:
     The deposit request has been accepted for processing, but was not yet
@@ -244,6 +243,38 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 404 Not Found: The transaction is unknown to the backend.
 
+
+  **Details:**
+
+  .. _tsref-type-TransactionWireTransfer:
+  .. _TransactionWireTransfer:
+  .. code-block:: tsref
+
+    interface TransactionWireTransfer {
+      // 32-byte wire transfer identifier
+      wtid: Base32;
+
+      // execution time of the wire transfer
+      execution_time: Timestamp;
+
+      // Array of data about coins
+      coins: CoinWireTransfer[];
+    }
+
+  .. _tsref-type-CoinWireTransfer:
+  .. _CoinWireTransfer:
+  .. code-block:: tsref
+
+    interface CoinWireTransfer {
+      // public key of the coin that was deposited
+      coin_pub: EddsaPublicKey;
+
+      // Amount the coin was worth (including deposit fee)
+      amount_with_fee: Amount;
+
+      // Deposit fee retained by the exchange for the coin
+      deposit_fee: Amount;
+    }
 
 ---------
 Encodings
@@ -313,13 +344,13 @@ The `contract` must have the following structure:
       products: Product[];
 
       // Time when this contract was generated
-      timestamp: number;
+      timestamp: Timestamp;
 
       // After this deadline has passed, no refunds will be accepted.
-      refund_deadline: number;
+      refund_deadline: Timestamp;
 
       // After this deadline, the merchant won't accept payments for the contact
-      expiry: number;
+      expiry: Timestamp;
 
       // Merchant's public key used to sign this contract; this information is typically added by the backend
       // Note that this can be an ephemeral key.
@@ -365,8 +396,8 @@ The `contract` must have the following structure:
       // a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
       taxes?: any[];
 
-      // human-readable date indicating when this product should be delivered
-      delivery_date: string;
+      // time indicating when this product should be delivered
+      delivery_date: Timestamp;
 
       // where to deliver this product. This may be an URI for online delivery
       // (i.e. `http://example.com/download` or `mailto:customer@example.com`),

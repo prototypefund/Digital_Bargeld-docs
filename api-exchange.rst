@@ -61,7 +61,7 @@ possibly by using HTTPS.
       denoms: Denom[];
 
       // The date when the denomination keys were last updated.
-      list_issue_date: string;
+      list_issue_date: Timestamp;
 
       // Auditors of the exchange.
       auditors: Auditor[];
@@ -1021,7 +1021,7 @@ typically also view the balance.)
 
     }
 
-.. http:get:: /track/transaction
+.. http:post:: /track/transaction
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 
