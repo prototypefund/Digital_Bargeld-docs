@@ -53,8 +53,6 @@ clean:
 # remove all cached state first.
 html:
 	$(SPHINXBUILD) -b html-linked $(ALLSPHINXOPTS) $(BUILDDIR)/html
-	@cp favicon.ico $(BUILDDIR)/html
-	@cp robots.txt $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
