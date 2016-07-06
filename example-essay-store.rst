@@ -76,19 +76,19 @@ some general insight on terms and interactions between components.
 
 This section describes how the demonstrator essay store interacts with the Taler system.  As for Taler's
 terminology, the demonstrator essay store is an example of `frontend`.
-This demonstrator lies in `examples/blog` of `git://taler.net/merchant/examples/blog`
+This demonstrator's code lies in `examples/blog` of `git://taler.net/merchant/examples/blog`
 
 The essay store, available at https://blog.demo.taler.net, is such that its homepage
 is a list of buyable articles and each article is a reference to an `offering
-URL` (see :ref:`byoffer`).  In particular, this offering URL has the following format:
+URL`.  In particular, this offering URL has the following format:
 
   `https://blog.demo.taler.net/essay_fulfillment.php?article=articleId`
 
 It is worth noting that in our implementation the `offering` and the `fulfillment` URLs
-differ only respect to the parameters given to the path `/essay_fulfillment.php`.  Namely,
-the offering URL becomes a fulfillment URL whenever the user adds the parameters needed to
-reconstruct the contract, which are `tid` (transaction id) and `timestamp`
-(see :ref:`contract`, and :ref:`ffil`).  For the sake of completeness,
+differ only respect to the parameters given to the path `/essay_fulfillment.php`, therefore
+are served by the same script.  In detail, the offering URL becomes a fulfillment URL whenever
+the user adds the parameters needed to reconstruct the contract, which are `tid` (transaction id)
+and `timestamp`.  For the sake of completeness,
 
 
   `https://blog.demo.taler.net/essay_fulfillment.php?article=articleId&tid=3489&timestamp=8374738`
@@ -97,37 +97,22 @@ would be a fulfillment URL.
 
 Once the user visits the offering URL by clicking on some article's title, the merchant
 
-1. checks if the state associated to this article corresponds to "payed".  If this is the
-   case, point 7. is triggered, which is what happens when point 0 of :ref:`byoffer` is true.
+1. checks if the state associated to this article corresponds to ``payed``.  If this is the
+   case, just return to the user the article.
 
-2. checks if the user gave additional parameters to the URL above, actually making it a
-   fulfillment URL.  If so, jump to point `y`.
+2. figures out whether the user is visiting a offering or a fulfillment URL
 
-3. returns a page which can detect if a Taler wallet is installed in the user's browser and,
-   if so, automatically downloads the contract from the merchant; if not, displays a paywall
-   for credit card payment.  Note that the contract's request is entirely managed by the page's
-   JavaScript and not by the wallet; that gives more flexibility to the merchants by reducing
-   the communication between wallets and shops. The wallet gets involved once the
-   contract arrives and the JavaScript fires a `taler-confirm-contract` event containing the
-   contract, see point 1. of :ref:`byoffer`.
+3. if it is a offering URL being visited then return a certain page offering the contract via
+   `taler-confirm-contract` event (FIXME link); if it is a fulfillment URL, then return the same
+   page which offers a `taler-execute-contract` event (FIXME link) instead. In both cases, the page
+   returned to the browser can detect if there is no wallet active, and will abort the payment in
+   that case.
 
-4. the wallet visits the fulfillment URL associated with this purchase (the fulfillment
-   URL's path is indicated in the contract, so the wallet has to just add `tid` and `timestamp`
-   to it).
+4. the wallet now points the user's browser to the fulfillment URL associated with this purchase
+   (the fulfillment URL is indicated in the contract)
 
-5. the same script as in point 1. gets executed, but this time it detects that the user is visiting
-   a fulfillment URL.  The script can now reconstruct the contract and store its hash in the state.
-   The hash is stored in an associative array having resource names as keys; in this case the key
-   `articleId` points to the contract's hash.  This way is easier to detect if a resource which is
-   to be payed is actually mentioned in the deposit permission.  Without this control, a malicious
-   wallet can send a deposit permission for `articleA` and get the resource `articleB`, see point 6.
-   As a last step, the script returns a page which fires a `taler-execute-payment` event in the user's
-   browser carrying the same data structure as in point 4. of :ref:`byoffer`.
-   Note that both in point 3. and 5. the HTML page returned is the same, namely it is the page showing
-   the credit card payment.  It is designed so that it is possible to `inject` the event to fire at the
-   user's browser.  So in point 3. the injected event is `taler-confirm-contract`, and in point 5. is
-   `taler-execute-payment`.  This way if the Taler wallet responds to the event, then the payment is
-   kept Taler-style, otherwise the user just sees a credit card form (without making further requests).
+5. the website detects that the user is visiting now a fulfillment URL and creates an entry in
+   the session state about `articleId`. FIXME To be finished.
 
 6. the wallet POSTs the deposit permission to `pay_url`, which is
 
