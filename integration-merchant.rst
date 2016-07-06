@@ -50,9 +50,11 @@ Payment details
 ---------------
 
 A payment process is triggered whenever the user visits a fulfillment URL and he has no rights
-in the session state to get the items accounted in the fulfillment URL. Since each fulfillment
-URL carries all the details useful to reconstruct a contract, the merchant reconstructs the contract
-and sends back to the user's browser a `taler-execute-payment` DOM event, defined as follows: 
+in the session state to get the items accounted in the fulfillment URL. Note that when the user is
+not visiting a fulfillment URL he got from someone else, it is the wallet which points the browser
+to a fulfillment URL after the user accepts the contract. Since each fulfillment URL carries all the
+details useful to reconstruct a contract, the merchant reconstructs the contract and sends back to
+the user's browser a `taler-execute-payment` DOM event, defined as follows:
 
   .. code-block:: tsref
 
@@ -76,3 +78,22 @@ state for the claimed item(s) to ``payed`` and now the wallet can point again th
 fulfillment URL and finally get the claimed item(s). It's worth noting that each deposit permission
 is associated with a contract and the wallet can reuse the same deposit permission to get the item(s)
 mentioned in the contract without spending new coins.
+
+------------
+The contract
+------------
+
+As said, the offering URL is a location where the user must pass by in order to get a contract, and
+the contract is handed by the merchant to the browser by the mean of a `taler-confirm-contract` DOM
+event, defined as follows:
+
+  .. code-block:: tsref
+
+    {
+      // The contract as returned by the merchant backend,
+      // having the following fields:
+      // 'contract': the contract itself (FIXME link this definition to where contract is defined)
+      // 'H_contract': the hash of 'contract'
+      // 'merchant_sig': the signature over the contract made by the merchant
+      contract_wrapper: Object;
+    }
