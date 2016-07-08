@@ -92,5 +92,3 @@ event, defined as follows:
     {
       contract_wrapper: Offer;
     }
-
-Check at :ref:`contract` how the `Offer` interface is defined.
