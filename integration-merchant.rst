@@ -90,10 +90,7 @@ event, defined as follows:
   .. code-block:: tsref
 
     {
-      // The contract as returned by the merchant backend,
-      // having the following fields:
-      // 'contract': the contract itself (FIXME link this definition to where contract is defined)
-      // 'H_contract': the hash of 'contract'
-      // 'merchant_sig': the signature over the contract made by the merchant
-      contract_wrapper: Object;
+      contract_wrapper: Offer;
     }
+
+Check at :ref:`contract` how the `Offer` interface is defined.
