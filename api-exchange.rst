@@ -442,6 +442,7 @@ exchange.
       history: TransactionHistoryItem[]
     }
 
+.. _deposit-par:
 
 --------------------
 Deposit
@@ -456,6 +457,7 @@ denomination.
 
 
 .. _deposit:
+
 .. http:POST:: /deposit
 
   Deposit the given coin and ask the exchange to transfer the given :ref:`amount`
