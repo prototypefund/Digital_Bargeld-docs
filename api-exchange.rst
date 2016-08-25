@@ -651,8 +651,8 @@ the API during normal operation.
       // Array of `n` new denominations to order.
       new_denoms: RsaPublicKey[];
 
-      // List of `m` coins to melt.
-      melt_coins: MeltCoin[];
+      // Information about coin being melted.
+      melt_coin: MeltCoin;
 
       // For each of the `n` new coins, `kappa` transfer keys.
       // coin_evs[j][k] is the k-th blank (of kappa) for the k-th new coin (of n).
@@ -661,25 +661,12 @@ the API during normal operation.
       // `kappa` transfer public keys (ephemeral ECDHE keys)
       transfer_pubs: EddsaPublicKey[];
 
-      // `kappa` link encryptions with an ECDHE-encrypted SHA-512 hash code.
-      // The ECDHE encryption is done using
-      // the private key of the old coin and the corresponding transfer
-      // public key.  Given the
-      // private key of the old coin, it is thus possible to decrypt the
-      // `secret_encs` and obtain the SHA-512 hash that was used to
-      // symetrically encrypt the `link_encs` of all of the new coins.
-      secret_encs: string[];
-
-      // For each of the `n` new coins, `kappa` symmetrically encrypted tuples
-      // consisting of the EdDSA/ECDHE-private key of the new coin and the
-      // corresponding blinding factor, encrypted using the corresponding SHA-512
-      // hash that is encrypted in `secret_encs`.
-      link_encs: string[][];
     }
 
-  For details about the HKDF used to derive the symmetric encryption keys from
-  ECDHE and the symmetric encryption (AES+Twofish) used, please refer to the
-  implementation in `libtalerutil`. The `melt_coins` field is a list of JSON
+  For details about the HKDF used to derive the new coin private keys and
+  the blinding factors from ECDHE between the transfer public keys and
+  the private key of the melted coin, please refer to the
+  implementation in `libtalerutil`. The `melt_coin` field is a list of JSON
   objects with the following fields:
 
 
@@ -852,8 +839,6 @@ the API during normal operation.
       // the transfer ECDHE public key
       transfer_pub: EddsaPublicKey;
 
-      // the encrypted shared secret
-      shared_secret_enc: string;
     }
 
   .. _tsref-type-CommitInfo:
@@ -862,11 +847,6 @@ the API during normal operation.
     interface CommitInfo {
       coin_ev: BlindedRsaSignature;
 
-      // the encrypted private key of the coin
-      coin_priv_env: string;
-
-      // the encrypted blinding key
-      blinding_key_enc: string;
     }
 
 
@@ -912,9 +892,6 @@ the API during normal operation.
   .. code-block:: tsref
 
     interface NewCoinInfo {
-      // Encrypted private key and blinding factor information of the fresh coin
-      link_enc: Base32;
-
       // RSA public key of the exchangeed coin.
       denom_pub: RsaPublicKey;
 
@@ -1528,9 +1505,6 @@ binary-compatible with the implementation of the exchange.
   .. code-block:: tsref
 
     {
-      // Encrypted transfer secret
-      secret_enc: string;
-
       // Private transfer key
       trans_priv: string;
 
