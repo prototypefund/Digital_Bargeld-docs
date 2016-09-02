@@ -21,7 +21,7 @@ Example: Essay Store
 ==================================
 
 To properly understand this example, the reader should be familiar with Taler's terminology;
-in particular, definitions like `contract`, `fulfillment URL`, `offering URL`, `IIG` and `deposit permission`,
+in particular, definitions like `contract`, `fulfillment URL`, `offering URL`, and `deposit permission`,
 are assumed to be known.  Refer to :ref:`contract`, :ref:`payprot` and :ref:`deposit-par` in order to get
 some general insight on terms and interactions between components.
 
@@ -41,7 +41,7 @@ The offer URLs trigger the expected interaction with the wallet.
   FIXME: give the pay URL.
 
 For the essay store, the fulfillment URL matches the initial part of
-an offering URL, but contains the additional parameters needed to
+an offer URL, but contains the additional parameters needed to
 reconstruct the contract, in this case the `tid` (transaction id) and
 a `timestamp`. Hence, a fulfillment URL for the essay store looks like:
 
