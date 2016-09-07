@@ -1,6 +1,14 @@
+.. _integration-general:
+
 ================================
 Taler Wallet Website Integration
 ================================
+
+.. note::
+ The wallet-Websites communication is switching to a new policy which
+ is NOT based on DOM events, therefore obsoleting this page. To be soon
+ documented.
+
 
 Websites (such as banks and online shops) can communicate with
 the Taler wallet by a standardized protocol.
