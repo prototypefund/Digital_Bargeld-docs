@@ -208,7 +208,7 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
-  :query exchange_uri: base URI of the exchange that made the wire transfer
+  :query exchange: base URI of the exchange that made the wire transfer
 
   **Response:**
 
