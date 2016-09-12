@@ -301,8 +301,9 @@ money receiver, see :ref:`deposit-par`.
 
 .. _contract:
 
+------------------
 Offer and Contract
-^^^^^^^^^^^^^^^^^^
+------------------
 
 An `offer` is a wrapper around a contract with some additional information
 that is legally non-binding:
