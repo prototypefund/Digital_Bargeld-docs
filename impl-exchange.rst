@@ -12,13 +12,17 @@
 
   @author Christian Grothoff
 
-===================================
+=====================================
 The Exchange Reference Implementation
-===================================
+=====================================
 
 ----------------------
 The Configuration File
 ----------------------
+
+.. note::
+  Get the ``git://taler.net/deployment`` codebase, and see the file ``deployment/config/test.taler.net/taler.conf``
+  in order to get an insight of how to configure Taler components.
 
 The section `[taler]` contains global options for the exchange:
 
@@ -27,6 +31,7 @@ The section `[taler]` contains global options for the exchange:
 
 The section `[exchange]` contains various global options for the exchange:
 
+* `master_priv_file`: Path to the exchange's master private file.
 * `master_public_key`: Must specify the exchange's master public key.
 * `wireformat`: The wireformat supported by the exchange (i.e. "SEPA")
 
