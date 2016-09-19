@@ -22,7 +22,7 @@ The following data and facilities have to be set up, in order to run an exchange
 * Serving
 * Currency
 * Bank account
-* Coins (= `denomination keys`)
+* Coins (= `denomination keys`) (FIXME: mention option `[exchange]/keydir`)
 * Database
 
 In this document, we assume that ``$HOME/.config/taler.conf`` is being customized.
