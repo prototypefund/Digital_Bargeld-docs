@@ -12,61 +12,85 @@
 
   @author Christian Grothoff
 
-=====================================
-The Exchange Reference Implementation
-=====================================
+======================
+Operating the Exchange
+======================
 
-----------------------
-The Configuration File
-----------------------
+The following data and facilities have to be set up, in order to run an exchange:
 
-.. note::
-  Get the ``git://taler.net/deployment`` codebase, and see the file ``deployment/config/test.taler.net/taler.conf``
-  in order to get an insight of how to configure Taler components.
+* Keying
+* Serving
+* Currency
+* Bank account
+* Coins (= `denomination keys`)
+* Database
 
-The section `[taler]` contains global options for the exchange:
+In this document, we assume that ``$HOME/.config/taler.conf`` is being customized.
 
-* `currency`: The currency supported by the exchange (i.e. "EUR")
+------
+Keying
+------
 
+The exchange works with three types of keys:
 
-The section `[exchange]` contains various global options for the exchange:
+* `master key`
+* `sign keys`
+* `denomination keys` (see section `Coins`)
+
+`master key`: in section `[exchange]`, edit the two following values:
 
 * `master_priv_file`: Path to the exchange's master private file.
 * `master_public_key`: Must specify the exchange's master public key.
-* `wireformat`: The wireformat supported by the exchange (i.e. "SEPA")
 
+`sign keys` do not need any configuration.
 
-The network configuration for the exchange's HTTP server is configured
-with four options:
+-------
+Serving
+-------
+
+The exchange can serve HTTP over both TCP and UNIX domain socket. It needs this
+configuration *twice*, because it opens one connection for ordinary REST calls, and one
+for "/admin" and "/test" REST calls, because the operator may want to restrict the access to "/admin".
+
+The following values are to be configured under the section `[exchange]` and `[exchange-admin]`:
 
 * `SERVE`: must be set to `tcp` to serve HTTP over TCP, or `unix` to serve HTTP over a UNIX domain socket
 * `PORT`: set to the TCP port to listen on if `SERVE` is `tcp`.
 * `UNIXPATH`: set to the UNIX domain socket path to listen on if `SERVE` is `unix`
 * `UNIXPATH_MODE`: number giving the mode with the access permission mask for the `UNIXPATH` (i.e. 660 = rw-rw----).
 
-These four options are typically given twice: first in the `[exchange]` section
-for the public Rest API of the exchange, and again in the `[exchange-admin]`
-section for the administrative (/admin) and testing (/test) API of the exchange.
 The exchange can be started with the `-D` option to disable the administrative
 functions entirely.  It is recommended that the administrative API is only
 accessible via a properly protected UNIX domain socket.
 
+--------
+Currency
+--------
 
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-Bank account configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+The exchange supports only one currency. This data is set under the respective
+option `currency` in section `[taler]`.
+
+------------
+Bank account
+------------
 
 The command line tool `taler-exchange-wire` is used to create a file with
 the JSON response to /wire requests using the exchange's offline
-master key.  The resulting file needs to be added to the configuration
+master key.  The resulting file's path needs to be added to the configuration
 under the respective option for the wire transfer method, i.e.
-`SEPA_RESPONSE_FILE` in section `[exchange-wire-incoming-sepa]` when the
-`wireformat` option in the configuration file allows `sepa` transactions.
+`sepa_response_file` in section `[exchange-wire-incoming-sepa]` when the
+`wireformat` option in the configuration file allows `sepa` transactions. For example,
+the utility may be invoked as follows::
+  
+  taler-exchange-wire -j '{"name": "The Exchange", "account_number": 10, "bank_uri": "https://bank.demo.taler.net", "type": "test"}' -t test -o exchange.json
 
+Note that the value given to option `-t` must match the value in the JSON's field ``"type"``. `exchange.json` will be the same JSON given to ``-j`` plus the field
+``"sig"``, which holds the signature of the JSON given in option ``-j`` made with exchange's master key. Finally, if `taler-exchange-wire` will not find any master
+key at the location mentioned in `master_priv_file`, it will automatically generate (and use) one.
 
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 Key Management Options
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 The command line tool `taler-exchange-keyup` updates the signing key and list of denominations offered by the exchange.  This process requires the exchange's master key, and should be done offline in order to protect the master key.  For this, `taler-exchange-keyup` uses additional configuration options.
 
