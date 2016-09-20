@@ -134,10 +134,9 @@ Sections specifying denomination (coin) information start with "coin\_".  By con
 Univarsal keys duration
 -----------------------
 
-Each key, regardless of whether it is a `signkey` or a `denom key`, has a starting date (FIXME needed elsewhere a paragraph on keys and
-how their starting time is calculated).
-The option `lookahead_provide`, under section `[exchange_keys]`, is such that only keys younger than `lookahead_provide` will be
-issued by the exchange.
+Each key, regardless of whether it is a `signkey` or a `denom key`, has a :ref:`starting date <keys>`.
+The option `lookahead_provide`, under section `[exchange_keys]`, is such that only keys whose starting date is younger than
+`lookahead_provide` will be issued by the exchange.
 
 +++++++++
 Utilities
@@ -149,33 +148,3 @@ Reserve management
 
 Incoming transactions to the exchange's provider result in the creation or update of reserves, identified by their withdrawal key.
 The command line tool `taler-exchange-reservemod` allows create and add money to reserves in the exchange's database.
-
-++++++
-Design
-++++++
-
----------------
-Database Scheme
----------------
-
-The exchange database must be initialized using `taler-exchange-dbinit`.  This
-tool creates the tables required by the Taler exchange to operate.  The
-tool also allows you to reset the Taler exchange database, which is useful
-for test cases but should never be used in production.  Finally,
-`taler-exchange-dbinit` has a function to garbage collect a database,
-allowing administrators to purge records that are no longer required.
-
-The database scheme used by the exchange look as follows:
-
-.. image:: exchange-db.png
-
-
-------------------
-Key Storage Format
-------------------
-
-The exchange's key directory contains the two subdirectories `signkeys` and `coinkeys`.
-
-The directory `signkeys` contains signkey files, where the name is the start date of the respective key.
-
-The `coinkeys` directory additionaly contains a subdirectory for each coin type alias.  These contain coinkey files, where the name is again the start timestamp of the respective key.

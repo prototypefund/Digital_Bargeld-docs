@@ -11,37 +11,30 @@
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
 
   @author Marcello Stanisci
-  @author Florian Dold
 
-==============================
-Operating the Merchant Backend
-==============================
+========
+Merchant
+========
 
-+++++++++++++
-Configuration
-+++++++++++++
+------------
+Introduction
+------------
+TBD
 
-The following data and facilities have to be set up, in order to run an exchange:
+.. _merchant-arch:
+------
+Design
+------
 
-* Keying
-* Currency
-* Database
-* Instances
-* Exchanges
+TO REVIEW::
 
-===============================
-Operating the Merchant Frontend
-===============================
-
-Do we really want to keep this in a "how to run a Taler component" section?
-A merchant FE is not really a Taler 'component'.
-
-+++++++++++++
-Configuration
-+++++++++++++
-
-The following data and facilities have to be set up, in order to run an exchange:
-
-* Backend
-* Refund deadline
-* Instances
+  The `frontend` is the existing shopping portal of the merchant.
+  The architecture tries to minimize the amount of modifications necessary
+  to the `frontend` as well as the trust that needs to be placed into the
+  `frontend` logic.  Taler requires the frontend to facilitate two
+  JSON-based interactions between the wallet and the `backend`, and
+  one of those is trivial.
+  
+  The `backend` is a standalone C application intended to implement all
+  the cryptographic routines required to interact with the Taler wallet
+  and a Taler exchange.

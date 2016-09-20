@@ -21,7 +21,7 @@
 Merchant API
 ============
 
-Before reading the API reference documentation, it is suggested to read the :ref:`merchant-arch`
+Before reading the API reference documentation, see the :ref:`merchant architecture<merchant-arch>` and :ref:`payprot`
 
 ---------------------
 The Frontent HTTP API
@@ -49,8 +49,7 @@ The Frontent HTTP API
 
 
   Send the deposit permission to the merchant. The client should POST a `deposit-permission`_
-  object. Note that ``pay_url`` is make known by the frontent to the wallet via the DOM event
-  ``taler-execute-payment``, documented in :ref:`byoffer`.
+  object.
 
   .. _deposit-permission:
   .. code-block:: tsref
@@ -110,7 +109,7 @@ The Frontent HTTP API
 
       // the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See section `Signatures` on the exchange's API page.
       coin_sig: EddsaSignature;
-  }
+    }
 
   **Success Response:**
 
@@ -214,7 +213,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
-    The body of the response is a `TrackTransferResponse`_.  Note that
+    The body of the response is a :ref:`TrackTransactionResponse <TrackTransferResponse>`.  Note that
     the similarity to the response given by the exchange for a /track/transfer
     is completely intended.
 
@@ -240,7 +239,7 @@ The following API are made available by the merchant's `backend` to the merchant
     The deposit request has been accepted for processing, but was not yet
     executed.  Hence the exchange does not yet have a wire transfer identifier.
     The merchant should come back later and ask again.
-    The response body is a `TrackTransactionAcceptedResponse`_.  Note that
+    The response body is a :ref:`TrackTransactionAcceptedResponse <TrackTransactionAcceptedResponse>`.  Note that
     the similarity to the response given by the exchange for a /track/transaction
     is completely intended.
 
@@ -287,9 +286,9 @@ Data such as dates, binary blobs, and other useful formats, are encoded as descr
 
 .. _instances:
 
-------------------
-Merchant Instances
-------------------
+------------------------------------------
+Merchant Instances (To be moved elsewhere)
+------------------------------------------
 
 Any backend can account for multiple bank accounts, and we call `instance` or `receiver` (interchangeably)
 any of those bank accounts. The backend needs that due to the ability we give to a merchant to route money

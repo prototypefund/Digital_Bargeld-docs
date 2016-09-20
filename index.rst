@@ -104,7 +104,8 @@ core components of the Taler reference implementation.
   :maxdepth: 2
 
   dev-wallet-wx
-
+  dev-exchange
+  dev-merchant
 
 ------------------
 Indices and tables
