@@ -42,7 +42,13 @@ The exchange works with three types of keys:
 * `master_priv_file`: Path to the exchange's master private file.
 * `master_public_key`: Must specify the exchange's master public key.
 
-`sign keys` do not need any configuration.
+`sign keys`: the following two options under `[exchange_keys]` section control `sign keys`:
+
+* `lookahead_sign`: How long should one signing key be used?
+* `signkey_duration`: How much time we want to cover with our `signkeys`? Note that if `signkey_duration` is bigger than `lookahead_sign`, `taler-exchange-keyup` will generate a quantity of `signkeys` which is sufficient to cover all the gap.
+
+.. note::
+  `signkeys` will be used in future versions of Taler.
 
 -------
 Serving
@@ -88,9 +94,26 @@ Note that the value given to option `-t` must match the value in the JSON's fiel
 ``"sig"``, which holds the signature of the JSON given in option ``-j`` made with exchange's master key. Finally, if `taler-exchange-wire` will not find any master
 key at the location mentioned in `master_priv_file`, it will automatically generate (and use) one.
 
-----------------------
-Key Management Options
-----------------------
+--------
+Database
+--------
+
+The option `db` under section `[exchange]` lets specify which DB backend the exchange
+is going to use. So far, only `db = postgres` is supported. After choosing the backend,
+it is mandatory to supply the connection string (namely, the database name). This is
+possible in two ways:
+
+* via an environment variable: `TALER_EXCHANGEDB_POSTGRES_CONFIG`.
+* via configuration option `db_conn_str`, under section `[exchangedb-BACKEND]`. For example, the demo exchange is configured as follows:
+
+.. code-block:: text
+
+  [exchange-postgres]
+  db_conn_str = postgres:///talerdemo
+
+---------------------------------
+Key Management Options (OBSOLETE)
+---------------------------------
 
 The command line tool `taler-exchange-keyup` updates the signing key and list of denominations offered by the exchange.  This process requires the exchange's master key, and should be done offline in order to protect the master key.  For this, `taler-exchange-keyup` uses additional configuration options.
 
