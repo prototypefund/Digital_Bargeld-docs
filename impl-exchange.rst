@@ -111,25 +111,14 @@ possible in two ways:
   [exchange-postgres]
   db_conn_str = postgres:///talerdemo
 
----------------------------------
-Key Management Options (OBSOLETE)
----------------------------------
-
-The command line tool `taler-exchange-keyup` updates the signing key and list of denominations offered by the exchange.  This process requires the exchange's master key, and should be done offline in order to protect the master key.  For this, `taler-exchange-keyup` uses additional configuration options.
-
-The section `[exchange_keys]` containts the following entries:
-
-* `signkey_duration`: How long should one signing key be used?
-* `lookahead_sign`:  For how far into the future should keys be issued?  This determines the frequency
-  of offline signing with the master key.
-* `lookahead_provide`: How far into the future should the exchange provide keys?  This determines the attack
-  window on keys.
-
+-------------------------
+Coins (denomination keys)
+-------------------------
 
 Sections specifying denomination (coin) information start with "coin\_".  By convention, the name continues with "$CURRENCY_[$SUBUNIT]_$VALUE", i.e. "[coin_eur_ct_10] for a 10 cent piece.  However, only the "coin\_" prefix is mandatory.  Each "coin\_"-section must then have the following options:
 
 * `value`: How much is the coin worth, the format is CURRENCY:VALUE.FRACTION.  For example, a 10 cent piece is "EUR:0.10".
-* `duration_withdraw`: How long can a coin of this type be withdrawn?  This limits the losses incured by the exchange when a denomination key is compromised.
+* `duration_withdraw`: How long can a coin of this type be withdrawn?  This limits the losses incurred by the exchange when a denomination key is compromised.
 * `duration_overlap`: What is the overlap of the withdrawal timespan for this coin type?
 * `duration_spend`: How long is a coin of the given type valid?  Smaller values result in lower storage costs for the exchange.
 * `fee_withdraw`: What does it cost to withdraw this coin? Specified using the same format as `value`.
@@ -137,6 +126,14 @@ Sections specifying denomination (coin) information start with "coin\_".  By con
 * `fee_refresh`: What does it cost to refresh this coin? Specified using the same format as `value`.
 * `rsa_keysize`: How many bits should the RSA modulus (product of the two primes) have for this type of coin.
 
+---------------------------------
+Key Management Options (OBSOLETE)
+---------------------------------
+
+FIXME: This value has to be described somewhere!
+
+* `lookahead_provide`: How far into the future should the exchange provide keys?  This determines the attack
+  window on keys.
 
 ------------------
 Reserve management
