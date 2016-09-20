@@ -16,13 +16,17 @@
 Operating the Exchange
 ======================
 
++++++++++++++
+Configuration
++++++++++++++
+
 The following data and facilities have to be set up, in order to run an exchange:
 
 * Keying
 * Serving
 * Currency
 * Bank account
-* Coins (= `denomination keys`) (FIXME: mention option `[exchange]/keydir`)
+* Coins
 * Database
 
 In this document, we assume that ``$HOME/.config/taler.conf`` is being customized.
@@ -115,7 +119,7 @@ possible in two ways:
 Coins (denomination keys)
 -------------------------
 
-Sections specifying denomination (coin) information start with "coin\_".  By convention, the name continues with "$CURRENCY_[$SUBUNIT]_$VALUE", i.e. "[coin_eur_ct_10] for a 10 cent piece.  However, only the "coin\_" prefix is mandatory.  Each "coin\_"-section must then have the following options:
+Sections specifying denomination (coin) information start with "coin\_".  By convention, the name continues with "$CURRENCY_[$SUBUNIT]_$VALUE", i.e. `[coin_eur_ct_10]` for a 10 cent piece.  However, only the "coin\_" prefix is mandatory.  Each "coin\_"-section must then have the following options:
 
 * `value`: How much is the coin worth, the format is CURRENCY:VALUE.FRACTION.  For example, a 10 cent piece is "EUR:0.10".
 * `duration_withdraw`: How long can a coin of this type be withdrawn?  This limits the losses incurred by the exchange when a denomination key is compromised.
@@ -126,27 +130,33 @@ Sections specifying denomination (coin) information start with "coin\_".  By con
 * `fee_refresh`: What does it cost to refresh this coin? Specified using the same format as `value`.
 * `rsa_keysize`: How many bits should the RSA modulus (product of the two primes) have for this type of coin.
 
----------------------------------
-Key Management Options (OBSOLETE)
----------------------------------
+-----------------------
+Univarsal keys duration
+-----------------------
 
-FIXME: This value has to be described somewhere!
+Each key, regardless of whether it is a `signkey` or a `denom key`, has a starting date (FIXME needed elsewhere a paragraph on keys and
+how their starting time is calculated).
+The option `lookahead_provide`, under section `[exchange_keys]`, is such that only keys younger than `lookahead_provide` will be
+issued by the exchange.
 
-* `lookahead_provide`: How far into the future should the exchange provide keys?  This determines the attack
-  window on keys.
++++++++++
+Utilities
++++++++++
 
 ------------------
 Reserve management
 ------------------
 
 Incoming transactions to the exchange's provider result in the creation or update of reserves, identified by their withdrawal key.
-
 The command line tool `taler-exchange-reservemod` allows create and add money to reserves in the exchange's database.
 
+++++++
+Design
+++++++
 
--------------------
+---------------
 Database Scheme
--------------------
+---------------
 
 The exchange database must be initialized using `taler-exchange-dbinit`.  This
 tool creates the tables required by the Taler exchange to operate.  The
