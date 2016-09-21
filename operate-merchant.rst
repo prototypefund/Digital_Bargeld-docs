@@ -21,7 +21,7 @@ Operating the Merchant Backend
 Configuration
 +++++++++++++
 
-The following data and facilities have to be set up, in order to run an exchange:
+The following data and facilities have to be set up, in order to run a merchant backend:
 
 * Serving
 * Currency
