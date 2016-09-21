@@ -17,6 +17,8 @@
   @author Florian Dold
   @author Christian Grothoff
 
+.. _merchant-api:
+
 ============
 Merchant API
 ============
@@ -70,7 +72,7 @@ The Frontent HTTP API
       // maximum fees merchant agreed to cover as per the contract
       max_fee: Amount;
 
-      // The merchant instance which is going to receive the final wire transfer. See paragraph `Merchant Instances`
+      // The merchant instance which is going to receive the final wire transfer. See :ref:`instances-lab`
       receiver: string;
 
       // signature by the merchant over the contract, must match signed data of purpose TALER_SIGNATURE_MERCHANT_CONTRACT
@@ -227,7 +229,7 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   :query id: ID of the transaction we want to trace (an integer)
-  :query receiver: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances`.
+  :query receiver: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances-lab`. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
 
   **Response:**
 
@@ -284,20 +286,6 @@ Encodings
 ---------
 
 Data such as dates, binary blobs, and other useful formats, are encoded as described in :ref:`encodings-ref`.
-
-.. _instances:
-
-------------------------------------------
-Merchant Instances (To be moved elsewhere)
-------------------------------------------
-
-Any backend can account for multiple bank accounts, and we call `instance` or `receiver` (interchangeably)
-any of those bank accounts. The backend needs that due to the ability we give to a merchant to route money
-(he earns through Taler) to multiple bank accounts, depending on his will. For example, a donation shop using
-Taler needs to know any bank account of any entity which is going to receive money through his website. That
-happens because when the merchant deposits coins to the exchange, he must provide bank details to it about the
-money receiver, see :ref:`deposit-par`.
-
 
 .. _contract:
 

@@ -23,15 +23,19 @@ Configuration
 
 The following data and facilities have to be set up, in order to run an exchange:
 
-* Keying
+* Serving
 * Currency
 * Database
-* Instances
 * Exchanges
+* Keying
+* Bank account
+* Instances
 
-------
-Keying
-------
+In this document, we assume that ``$HOME/.config/taler.conf`` is being customized.
+
+-------
+Serving
+-------
 
 The merchant backend can serve HTTP over both TCP and UNIX domain socket.
 
@@ -70,3 +74,96 @@ possible in two ways:
 
   [merchantdb-postgres]
   config = postgres:///talerdemo
+
+---------
+Exchanges
+---------
+
+------
+Keying
+------
+
+The option `keyfile` under section `[merchant-instance-default]` is the path to the
+merchant's :ref:`default instance <instances-lab>` private key. This key is needed to
+sign certificates and other messages sent to wallets and exchanges.
+To generate a 100% compatible key, it is recommended to use the ``gnunet-ecc`` tool.
+
+------------
+Bank account
+------------
+
+This piece of information is used when the merchant redeems coins to the exchange.
+That way, the exchange will know to which bank account it has to transfer real money.
+The merchant must specify which system it wants receive wire transfers with. We support
+a `test` wire format so far, and supporting `SEPA` is among our priorities.
+
+The wire format is specified in the option `wireformat` under section `[merchant]`,
+and the wire details are given via a JSON file, whose path must be indicated in the
+option `X_response_file` under section `[default-wireformat]`, where `X` matches
+the chosen wireformat. In our demo, we have::
+
+  [merchant]
+  ..
+  wireformat = test
+  ..
+
+  [default-wireforma]
+  test_response_file = ${TALER_CONFIG_HOME}/merchant/wire/test.json
+
+The file `test.json` obeys to the following specification
+
+.. code-block:: tsref
+
+  interface WireDetails {
+    // matches wireformat
+    type: string; 
+
+    // base URL of the merchant's bank
+    bank_uri: string;
+
+    // merchant's signature (unused, can be any value)
+    signature: string; 
+
+    // merchant's account number at the bank
+    account_number: Integer;
+    
+    // the salt (unused, can be any value)
+    salt: any;
+  }
+
+As an example, `test.json` used in our demo is shown below::
+
+  {
+  "type": "test",
+  "bank_uri": "https://bank.test.taler.net/",
+  "sig": "MERCHANTSIGNATURE",
+  "account_number": 6,
+  "salt": "SALT"
+  }
+
+
+
+.. _instances-lab:
+
+---------
+Instances
+---------
+
+In Taler, multiple shops can rely on the same :ref:`merchant backend <merchant-arch>`.
+In Taler terminology, each of those shops is called `(merchant) instance`. Any instance
+is defined by its private key and its wire details. In order to add the instance `X` to
+the merchant backend, we have to add the sections `[merchant-instance-X]` and `[X-wireformat]`,
+and edit them as we did for the `default` instance. For example, in our demo we add the
+instance `Tor` as follows::
+  
+  [merchant-instance-Tor]
+  KEYFILE = ${TALER_DATA_HOME}/merchant/tor.priv
+  
+  ..
+
+  [Tor-wireformat]
+  TEST_RESPONSE_FILE = ${TALER_CONFIG_HOME}/merchant/wire/tor.json
+
+Please note that :ref:`Taler messagging<merchant-api>` is designed so that the merchant
+frontend can instruct the backend on which instance has to be used in the various operations.
+This information is optional, and if not given, the backend will act as the `default` instance.
