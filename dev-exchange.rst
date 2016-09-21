@@ -11,22 +11,33 @@
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
 
   @author Christian Grothoff
+  @author Marcello Stanisci
 
 ========
 Exchange
 ========
 
-------------
-Introduction
-------------
-TBD
+.. _keys-duration:
 
-.. _keys:
+-------------
+Keys duration
+-------------
 
-----
-Keys
-----
-TBD (do mention "starting date")
+`signkeys`. The option `lookahead_sign` is such that, being `t` the time when `taler-exchange-keyup`
+is run, `taler-exchange-keyup` will generate `n` `signkeys`, where `t + (n * signkey_duration) = t +
+lookahead_sign`. In other words, we generate a number of keys which is sufficient to cover a period of
+`lookahead_sign`. As for the starting date, the first generated key will get a starting time of `t`,
+and the `j`-th key will get a starting time of `x + signkey_duration`, where `x` is the starting time
+of the `(j-1)`-th key.
+
+`denom keys`. The option `lookahead_sign` is such that, being `t` the time when `taler-exchange-keyup`
+is run, `taler-exchange-keyup` will generate `n` `denom keys` for each denomination, where
+`t + (n * duration_withdraw) = t + lookahead_sign`. In other words, for each denomination, we generate a
+number of keys which is sufficient to cover a period of `lookahead_sign`. As for the starting date, the
+first generated key will get a starting time of `t`, and the `j`-th key will get a starting time of
+`x + duration_withdraw`, where `x` is the starting time of the `(j-1)`-th key. 
+
+
 
 ---------------
 Database Scheme

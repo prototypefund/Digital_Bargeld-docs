@@ -131,12 +131,12 @@ Sections specifying denomination (coin) information start with "coin\_".  By con
 * `rsa_keysize`: How many bits should the RSA modulus (product of the two primes) have for this type of coin.
 
 -----------------------
-Univarsal keys duration
+Keys duration
 -----------------------
 
-Each key, regardless of whether it is a `signkey` or a `denom key`, has a :ref:`starting date <keys>`.
-The option `lookahead_provide`, under section `[exchange_keys]`, is such that only keys whose starting date is younger than
-`lookahead_provide` will be issued by the exchange.
+Both `signkeys` and `denom keys` have a :ref:`starting date <keys>` (see :ref:`how <keys-duration>` this date is calculated).
+The option `lookahead_provide`, under section `[exchange_keys]`, is such that only keys whose starting date is
+younger than `lookahead_provide` will be issued by the exchange.
 
 +++++++++
 Utilities
