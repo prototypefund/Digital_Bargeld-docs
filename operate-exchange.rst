@@ -139,7 +139,7 @@ Sections specifying denomination (coin) information start with "coin\_".  By con
 Keys duration
 -----------------------
 
-Both `signkeys` and `denom keys` have a :ref:`starting date <keys>` (see :ref:`how <keys-duration>` this date is calculated).
+Both `signkeys` and `denom keys` have a :ref:`starting date <keys-duration>`.
 The option `lookahead_provide`, under section `[exchange_keys]`, is such that only keys whose starting date is
 younger than `lookahead_provide` will be issued by the exchange.
 

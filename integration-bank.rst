@@ -26,11 +26,11 @@ As a result of the reserve creation request, the following steps will happen in 
  2. Upon confirmation, the wallet fetches the desired amount from the user-filled form and
     prompts the user for the *exchange base URL*. Then ask the user to confirm creating the
     reserve.
- 2. The wallet will create a key pair for the reserve.
- 3. The wallet will request the CAPTCHA page to the bank. In that request's parameters it
+ 3. The wallet will create a key pair for the reserve.
+ 4. The wallet will request the CAPTCHA page to the bank. In that request's parameters it
     communicates the desired amount, the reserve's public key and the exchange base URL to the
     bank
- 4. Upon successful resolution of the CAPTCHA by the user, the bank initiates the reserve
+ 5. Upon successful resolution of the CAPTCHA by the user, the bank initiates the reserve
     creation according to the gotten parameters. Together with `200 OK` status code sent back
     to the wallet, it gets also a `ReserveCreated`_ object.
 

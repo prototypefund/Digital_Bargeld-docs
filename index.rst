@@ -53,8 +53,8 @@ It focuses on how to install, configure and run the required software.
 
   global_licensing
   configuration-basics
-  impl-exchange
-  impl-merchant
+  operate-exchange
+  operate-merchant
   versioning
 
 ------------------------

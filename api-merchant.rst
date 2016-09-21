@@ -228,6 +228,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :query id: ID of the transaction we want to trace (an integer)
   :query receiver: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances`.
+
   **Response:**
 
   :status 200 OK:

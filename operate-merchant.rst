@@ -59,8 +59,7 @@ it is mandatory to supply the connection string (namely, the database name). Thi
 possible in two ways:
 
 * via an environment variable: `TALER_MERCHANTDB_POSTGRES_CONFIG`.
-* via configuration option `config`, under section `[merchantdb-BACKEND]`. For example,
-the demo merchant is configured as follows:
+* via configuration option `config`, under section `[merchantdb-BACKEND]`. For example, the demo merchant is configured as follows:
 
 .. code-block:: text
 

@@ -22,6 +22,7 @@ Introduction
 TBD
 
 .. _merchant-arch:
+
 ------
 Design
 ------

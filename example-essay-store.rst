@@ -41,7 +41,9 @@ offer URL returns a HTML page that can either show a pay-form in case Taler is n
 in the user's browser or download the contract from the merchant.
 If the user has Taler installed and wants to pay, the wallet will POST the coins to a URL
 of the form:
+
   `https://blog.demo.taler.net/pay?uuid=${contract_hashcode}`
+
 The URL comes with the contract's hashcode because each contract is an entry in
 the merchant's state, so it can mark it as ``payed`` whenever it receives coins.
 
