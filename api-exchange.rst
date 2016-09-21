@@ -15,16 +15,17 @@
 
   @author Christian Grothoff
 
-=========================
+=============================
 The Exchange RESTful JSON API
-=========================
+=============================
 
 The API specified here follows the :ref:`general conventions <http-common>`
-for all details not specified in the individual requests.
+for all details not specified in the individual requests. The :ref:`glossary`
+defines all specific terms used in this section.
 
--------------------
+-----------------------
 Obtaining Exchange Keys
--------------------
+-----------------------
 
 This API is used by wallets and merchants to obtain global information about
 the exchange, such as online signing keys, available denominations and the fee

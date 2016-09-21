@@ -29,19 +29,45 @@ The following data and facilities have to be set up, in order to run an exchange
 * Instances
 * Exchanges
 
-===============================
-Operating the Merchant Frontend
-===============================
+------
+Keying
+------
 
-Do we really want to keep this in a "how to run a Taler component" section?
-A merchant FE is not really a Taler 'component'.
+The merchant backend can serve HTTP over both TCP and UNIX domain socket.
 
-+++++++++++++
-Configuration
-+++++++++++++
+The following values are to be configured under the section `[merchant]`:
 
-The following data and facilities have to be set up, in order to run an exchange:
+* `SERVE`: must be set to `tcp` to serve HTTP over TCP, or `unix` to serve HTTP over a UNIX domain socket
+* `PORT`: set to the TCP port to listen on if `SERVE` is `tcp`.
+* `UNIXPATH`: set to the UNIX domain socket path to listen on if `SERVE` is `unix`
+* `UNIXPATH_MODE`: number giving the mode with the access permission mask for the `UNIXPATH` (i.e. 660 = rw-rw----).
 
-* Backend
-* Refund deadline
-* Instances
+--------
+Currency
+--------
+
+The merchant backend supports only one currency. This data is set under the respective
+option `currency` in section `[taler]`.
+
+--------
+Database
+--------
+
+The option `db` under section `[merchant]` gets the DB backend's name the merchant
+is going to use. So far, only `db = postgres` is supported. After choosing the backend,
+it is mandatory to supply the connection string (namely, the database name). This is
+possible in two ways:
+
+* via an environment variable: `TALER_MERCHANTDB_POSTGRES_CONFIG`.
+* via configuration option `config`, under section `[merchantdb-BACKEND]`. For example,
+the demo merchant is configured as follows:
+
+.. code-block:: text
+
+  [merchant]
+  ...
+  db = postgres
+  ...
+
+  [merchantdb-postgres]
+  config = postgres:///talerdemo

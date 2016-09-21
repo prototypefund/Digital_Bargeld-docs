@@ -102,7 +102,7 @@ key at the location mentioned in `master_priv_file`, it will automatically gener
 Database
 --------
 
-The option `db` under section `[exchange]` lets specify which DB backend the exchange
+The option `db` under section `[exchange]` gets the DB backend's name the exchange
 is going to use. So far, only `db = postgres` is supported. After choosing the backend,
 it is mandatory to supply the connection string (namely, the database name). This is
 possible in two ways:
@@ -111,6 +111,11 @@ possible in two ways:
 * via configuration option `db_conn_str`, under section `[exchangedb-BACKEND]`. For example, the demo exchange is configured as follows:
 
 .. code-block:: text
+
+  [exchange]
+  ...
+  db = postgres
+  ...
 
   [exchange-postgres]
   db_conn_str = postgres:///talerdemo
