@@ -117,7 +117,7 @@ possible in two ways:
   db = postgres
   ...
 
-  [exchange-postgres]
+  [exchangedb-postgres]
   db_conn_str = postgres:///talerdemo
 
 -------------------------
