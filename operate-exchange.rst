@@ -51,9 +51,6 @@ The exchange works with three types of keys:
 * `signkey_duration`: How long should one signing key be used?
 * `lookahead_sign`: How much time we want to cover with our `signkeys`? Note that if `signkey_duration` is bigger than `lookahead_sign`, `taler-exchange-keyup` will generate a quantity of `signkeys` which is sufficient to cover all the gap. See :ref:`keys-duration`.
 
-.. note::
-  `signkeys` will be used in future versions of Taler.
-
 -------
 Serving
 -------
