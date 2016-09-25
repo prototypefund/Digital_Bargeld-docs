@@ -79,6 +79,22 @@ possible in two ways:
 Exchanges
 ---------
 
+The options `uri` and `master_key`, under section `[merchant-exchange-MYEXCHANGE]`, let
+the merchant add the exchange `MYEXCHANGE` among the exchanges the merchant wants to work
+with. `MYEXCHAGE` is just a mnemonic name chosen by the merchant (which is not currently used
+in any computation), and the merchant can add as many exchanges as it is needed.
+`uri` is the exchange's base URL. Please note that a valid `uri` complies with the following
+pattern::
+
+   schema://hostname/
+
+`master_key` is the base32 encoding of the exchange's master key (see :ref:`/keys <keys>`).
+In our demo, we use the following configuration::
+
+   [merchant-exchange-test]
+   URI = https://exchange.test.taler.net/
+   MASTER_KEY = CQQZ9DY3MZ1ARMN5K1VKDETS04Y2QCKMMCFHZSWJWWVN82BTTH00
+
 ------
 Keying
 ------
