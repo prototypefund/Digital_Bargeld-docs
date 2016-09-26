@@ -964,6 +964,9 @@ typically also view the balance.)
       // hash of the wire details (identical for all deposits)
       H_wire: HashCode;
 
+      // Time of the execution of the wire transfer by the exchange
+      execution_time: Timestamp;
+
       // details about the deposits
       deposits: TrackTransferDetail[];
 
