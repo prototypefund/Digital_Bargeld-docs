@@ -35,10 +35,10 @@ namely exchanges.
 
 **Response:**
 
-:status 200 OK: The request has been correctly handled, so the funds have been transferred to
-the recipient's account
+:status 200 OK: The request has been correctly handled, so the funds have been transferred to the recipient's account
 
 :status 400 Bad Request: The bank replies a `BankIncomingError`_ object
+
 **Details:**
 
 .. _BankDepositRequest:

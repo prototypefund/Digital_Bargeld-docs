@@ -16,6 +16,8 @@
   @author Florian Dold
   @author Christian Grothoff
 
+.. _glossary:
+
 ==============
 Taler Glossary
 ==============

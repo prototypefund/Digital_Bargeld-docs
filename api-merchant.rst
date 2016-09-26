@@ -17,11 +17,13 @@
   @author Florian Dold
   @author Christian Grothoff
 
+.. _merchant-api:
+
 ============
 Merchant API
 ============
 
-Before reading the API reference documentation, it is suggested to read the :ref:`merchant-arch`
+Before reading the API reference documentation, see the :ref:`merchant architecture<merchant-arch>` and :ref:`payprot`
 
 ---------------------
 The Frontent HTTP API
@@ -49,8 +51,7 @@ The Frontent HTTP API
 
 
   Send the deposit permission to the merchant. The client should POST a `deposit-permission`_
-  object. Note that ``pay_url`` is make known by the frontent to the wallet via the DOM event
-  ``taler-execute-payment``, documented in :ref:`byoffer`.
+  object.
 
   .. _deposit-permission:
   .. code-block:: tsref
@@ -71,7 +72,7 @@ The Frontent HTTP API
       // maximum fees merchant agreed to cover as per the contract
       max_fee: Amount;
 
-      // The merchant instance which is going to receive the final wire transfer. See paragraph `Merchant Instances`
+      // The merchant instance which is going to receive the final wire transfer. See :ref:`instances-lab`
       receiver: string;
 
       // signature by the merchant over the contract, must match signed data of purpose TALER_SIGNATURE_MERCHANT_CONTRACT
@@ -110,7 +111,7 @@ The Frontent HTTP API
 
       // the signature made by the coin's private key on a `struct TALER_DepositRequestPS`. See section `Signatures` on the exchange's API page.
       coin_sig: EddsaSignature;
-  }
+    }
 
   **Success Response:**
 
@@ -208,13 +209,13 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
-  :query exchange_uri: base URI of the exchange that made the wire transfer
+  :query exchange: base URI of the exchange that made the wire transfer
 
   **Response:**
 
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
-    The body of the response is a `TrackTransferResponse`_.  Note that
+    The body of the response is a :ref:`TrackTransactionResponse <TrackTransferResponse>`.  Note that
     the similarity to the response given by the exchange for a /track/transfer
     is completely intended.
 
@@ -228,7 +229,8 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   :query id: ID of the transaction we want to trace (an integer)
-  :query receiver: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances`.
+  :query receiver: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances-lab`. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
+
   **Response:**
 
   :status 200 OK:
@@ -240,7 +242,7 @@ The following API are made available by the merchant's `backend` to the merchant
     The deposit request has been accepted for processing, but was not yet
     executed.  Hence the exchange does not yet have a wire transfer identifier.
     The merchant should come back later and ask again.
-    The response body is a `TrackTransactionAcceptedResponse`_.  Note that
+    The response body is a :ref:`TrackTransactionAcceptedResponse <TrackTransactionAcceptedResponse>`.  Note that
     the similarity to the response given by the exchange for a /track/transaction
     is completely intended.
 
@@ -285,24 +287,11 @@ Encodings
 
 Data such as dates, binary blobs, and other useful formats, are encoded as described in :ref:`encodings-ref`.
 
-.. _instances:
-
-------------------
-Merchant Instances
-------------------
-
-Any backend can account for multiple bank accounts, and we call `instance` or `receiver` (interchangeably)
-any of those bank accounts. The backend needs that due to the ability we give to a merchant to route money
-(he earns through Taler) to multiple bank accounts, depending on his will. For example, a donation shop using
-Taler needs to know any bank account of any entity which is going to receive money through his website. That
-happens because when the merchant deposits coins to the exchange, he must provide bank details to it about the
-money receiver, see :ref:`deposit-par`.
-
-
 .. _contract:
 
+------------------
 Offer and Contract
-^^^^^^^^^^^^^^^^^^
+------------------
 
 An `offer` is a wrapper around a contract with some additional information
 that is legally non-binding:

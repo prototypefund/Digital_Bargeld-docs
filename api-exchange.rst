@@ -15,16 +15,18 @@
 
   @author Christian Grothoff
 
-=========================
+=============================
 The Exchange RESTful JSON API
-=========================
+=============================
 
 The API specified here follows the :ref:`general conventions <http-common>`
-for all details not specified in the individual requests.
+for all details not specified in the individual requests. The :ref:`glossary`
+defines all specific terms used in this section.
 
--------------------
+.. _keys:
+-----------------------
 Obtaining Exchange Keys
--------------------
+-----------------------
 
 This API is used by wallets and merchants to obtain global information about
 the exchange, such as online signing keys, available denominations and the fee
@@ -232,8 +234,7 @@ Obtaining wire-transfer information
       // A single /wire response can contain an arbitrary number of these
       // string-object pairs.  However, the keys must be unique.
       string : Object;
-
-    }
+     }
 
   Possible encodings for the objects are right now the following:
 
@@ -241,7 +242,7 @@ Obtaining wire-transfer information
   .. _tsref-type-WireTestResponse:
   .. code-block:: tsref
 
-  interface WireTestResponse {
+    interface WireTestResponse {
       // Mandatory indicator that this is a TEST wire response.
       type: "test";
 
@@ -250,14 +251,13 @@ Obtaining wire-transfer information
 
       // URI of the bank
       bank_uri: string;
-
     }
 
-      .. _WireSepaResponse:
+  .. _WireSepaResponse:
   .. _tsref-type-WireSepaResponse:
   .. code-block:: tsref
 
-  interface WireSepaResponse {
+    interface WireSepaResponse {
       // Mandatory indicator that this is a SEPA wire response.
       type: "sepa";
 
@@ -270,12 +270,11 @@ Obtaining wire-transfer information
       // BIC of the bank.
       bic: string;
 
-      // the EdDSA signature_ (binary-only) with purpose
+      // the EdDSA signature (binary-only) with purpose
       // `TALER_SIGNATURE_EXCHANGE_PAYMENT_METHOD_SEPA` signing over the hash over the
       // 0-terminated strings representing the receiver's name, IBAN and the BIC.
       sig: EddsaSignature;
     }
-
 
 ------------------
 Withdrawal
@@ -444,9 +443,9 @@ exchange.
 
 .. _deposit-par:
 
---------------------
+-------
 Deposit
---------------------
+-------
 
 Deposit operations are requested by a merchant during a transaction. For the
 deposit operation, the merchant has to obtain the deposit permission for a coin
@@ -542,9 +541,9 @@ denomination.
   has enough residual value that has not already been deposited or melted.
 
 
+  .. _DepositSuccess:
   .. code-block:: tsref
 
-     .. _DepositSuccess:
      interface DepositSuccess {
       // The string constant "DEPOSIT_OK"
       status: string;
@@ -561,7 +560,7 @@ denomination.
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
       pub: EddsaPublicKey;
-    }
+      }
 
   .. _DepositDoubleSpendError:
   .. code-block:: tsref
@@ -1152,10 +1151,10 @@ Refunds
 
     }
 
+  .. _RefundSuccess:
   .. code-block:: tsref
 
-     .. _RefundSuccess:
-     interface RefundSuccess {
+    interface RefundSuccess {
       // The string constant "REFUND_OK"
       status: string;
 
@@ -1169,7 +1168,7 @@ Refunds
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
       pub: EddsaPublicKey;
-    }
+   }
 
 ------------------------------
 Administrative API: Key update

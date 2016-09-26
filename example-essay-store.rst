@@ -21,7 +21,7 @@ Example: Essay Store
 ==================================
 
 To properly understand this example, the reader should be familiar with Taler's terminology;
-in particular, definitions like `contract`, `fulfillment URL`, `offering URL`, `IIG` and `deposit permission`,
+in particular, definitions like `contract`, `fulfillment URL`, `offering URL`, and `deposit permission`,
 are assumed to be known.  Refer to :ref:`contract`, :ref:`payprot` and :ref:`deposit-par` in order to get
 some general insight on terms and interactions between components.
 
@@ -36,12 +36,20 @@ In particular, the offer URLs have the following format:
 
   `https://blog.demo.taler.net/essay/article_title`
 
-The offer URLs trigger the expected interaction with the wallet.
-  FIXME: describe where the contract is generated!
-  FIXME: give the pay URL.
+The offer URLs trigger the expected interaction with the wallet. In practical terms, the
+offer URL returns a HTML page that can either show a pay-form in case Taler is not installed
+in the user's browser or download the contract from the merchant.
+If the user has Taler installed and wants to pay, the wallet will POST the coins to a URL
+of the form:
+
+  `https://blog.demo.taler.net/pay?uuid=${contract_hashcode}`
+
+The URL comes with the contract's hashcode because each contract is an entry in
+the merchant's state, so it can mark it as ``payed`` whenever it receives coins.
+
 
 For the essay store, the fulfillment URL matches the initial part of
-an offering URL, but contains the additional parameters needed to
+an offer URL, but contains the additional parameters needed to
 reconstruct the contract, in this case the `tid` (transaction id) and
 a `timestamp`. Hence, a fulfillment URL for the essay store looks like:
 

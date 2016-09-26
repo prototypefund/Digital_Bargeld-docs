@@ -38,11 +38,8 @@ any other banking institution.
 The system will be based on free software and open protocols.
 
 In this document, we describe the REST-based APIs between the various
-components, as well as the internal architecture of key components.
-However, you do not have to re-implement these APIs to use Taler: the
-project includes free software reference implementations of the
-various components.
-
+components, internal architecture of key components, and how to get them
+installed.
 
 -----------------
 Operator Handbook
@@ -55,8 +52,9 @@ It focuses on how to install, configure and run the required software.
   :maxdepth: 2
 
   global_licensing
-  impl-exchange
-  impl-merchant
+  configuration-basics
+  operate-exchange
+  operate-merchant
   versioning
 
 ------------------------
@@ -106,7 +104,8 @@ core components of the Taler reference implementation.
   :maxdepth: 2
 
   dev-wallet-wx
-
+  dev-exchange
+  dev-merchant
 
 ------------------
 Indices and tables
