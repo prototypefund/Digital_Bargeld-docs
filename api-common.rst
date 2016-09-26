@@ -496,6 +496,26 @@ size of `FIELDS`.
     }
   };
 
+  struct TALER_WireDepositDetailP
+  {
+    struct GNUNET_HashCode h_contract;
+    struct GNUNET_TIME_AbsoluteNBO execution_time;
+    uint64_t transaction_id GNUNET_PACKED;
+    struct TALER_CoinSpendPublicKeyP coin_pub;
+    struct TALER_AmountNBO deposit_value;
+    struct TALER_AmountNBO deposit_fee;
+  };
+
+
+  struct TALER_WireDepositDataPS {
+     signed (purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT) {
+       struct TALER_AmountNBO total;
+       struct TALER_MerchantPublicKeyP merchant_pub;
+       struct GNUNET_HashCode h_wire;
+       struct GNUNET_HashCode h_details;
+     }
+  };
+
   struct TALER_ExchangeKeyValidityPS {
     signed (purpose = TALER_SIGNATURE_AUDITOR_EXCHANGE_KEYS) {
       struct GNUNET_HashCode auditor_url_hash;
@@ -508,6 +528,27 @@ size of `FIELDS`.
       struct TALER_AmountNBO fee_withdraw;
       struct TALER_AmountNBO fee_deposit;
       struct TALER_AmountNBO fee_refresh;
-      struct GNUNET_HashCode denom_hash GNUNET_PACKED;
+      struct GNUNET_HashCode denom_hash;
     }
   };
+
+  struct TALER_ContractPS {
+    signed (purpose = TALER_SIGNATURE_MERCHANT_CONTRACT) {
+      uint64_t transaction_id;
+      struct TALER_AmountNBO total_amount;
+      struct TALER_AmountNBO max_fee;
+      struct GNUNET_HashCode h_contract;
+    }
+  };
+
+  struct TALER_ConfirmWirePS {
+     signed (purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE) {
+       struct GNUNET_HashCode h_wire;
+       struct GNUNET_HashCode h_contract;
+       struct TALER_WireTransferIdentifierRawP wtid;
+       struct TALER_CoinSpendPublicKeyP coin_pub;
+       uint64_t transaction_id;
+       struct GNUNET_TIME_AbsoluteNBO execution_time;
+       struct TALER_AmountNBO coin_contribution;
+     }
+   };
