@@ -8,15 +8,15 @@ Wallet
 
 .. code-block:: none
 
-  cd wallet-webex
+  $ cd wallet-webex
 
   # check dependencies
-  ./configure
+  $ ./configure
 
   # edit version and version_name
-  $EDITOR manifest.json
+  $ $EDITOR manifest.json
 
-  make package-stable
+  $ make package-stable
 
 The built wallet is now ready in `taler-wallet-stable-${version_name}${version}.zip`.  
 
@@ -39,19 +39,42 @@ merchant.git, merchant-frontends.git, bank.git, landing.git) do:
 
 .. code-block:: none
 
-  cd $REPO
-  git pull
-  git checkout stable
+  $ cd $REPO
+  $ git pull origin master stable
+  $ git checkout stable
   
   # option a: resolve conflicts resulting from hotfixes
-  git merge master
-  ...
+  $ git merge master
+  $ ...
 
   # option b: force stable to master
-  git update-ref refs/heads/stable master
+  $ git update-ref refs/heads/stable master
 
-  git push # possible with --force
+  $ git push # possible with --force
 
   # continue development
-  git checkout master
+  $ git checkout master
 
+
+Log into taler.net with the account that is *not* active by looking
+at the `sockets` symlink of the `demo` account.
+
+The following instructions wipe out the old deployment completely.
+
+.. code-block:: none
+  $ ls -l ~demo/sockets
+  
+  [...] sockets -> /home/demo-green/sockets/
+
+In this case, `demo-green` is the active deployment, and `demo-blue` should be updated.
+After the update is over, the symlink will be pointed to `demo-blue`.
+
+.. code-block:: none
+  $ rm -rf $HOME
+  $ git clone /var/git/deployment.git
+  $ ./deployment/bootstrap-bluegreen demo
+
+  # set environment appropriately
+  $ . activate
+  $ taler-deployment-build
+  $ 
