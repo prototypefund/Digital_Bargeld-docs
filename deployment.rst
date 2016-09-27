@@ -34,6 +34,24 @@ FIXME:  include instructions for other app stores
 Deploying to stable
 --------------------
 
+For all repositories that have a separate stable branch (currently exchange.git,
+merchant.git, merchant-frontends.git, bank.git, landing.git) do:
+
 .. code-block::
 
-  foo
+  cd $REPO
+  git pull
+  git checkout stable
+  
+  # option a: resolve conflicts resulting from hotfixes
+  git merge master
+  ...
+
+  # option b: force stable to master
+  git update-ref refs/heads/stable master
+
+  git push # possible with --force
+
+  # continue development
+  git checkout master
+
