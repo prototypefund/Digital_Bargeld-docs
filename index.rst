@@ -106,6 +106,7 @@ core components of the Taler reference implementation.
   dev-wallet-wx
   dev-exchange
   dev-merchant
+  deployment.rst
 
 ------------------
 Indices and tables
