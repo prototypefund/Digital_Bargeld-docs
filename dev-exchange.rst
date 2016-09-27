@@ -70,6 +70,7 @@ since the Epoch.  The file format is defined by the `struct
 TALER_EXCHANGEDB_PrivateSigningKeyInformationP`:
 
 .. sourcecode:: c
+
   struct TALER_EXCHANGEDB_PrivateSigningKeyInformationP {
      struct TALER_ExchangePrivateKeyP signkey_priv;
      struct TALER_ExchangeSigningKeyValidityPS issue;
@@ -103,6 +104,7 @@ the attributes of the denomination key and the associated
 signature with the exchange's long-term offline key:
 
 .. sourcecode:: c
+
   struct TALER_EXCHANGEDB_DenominationKeyInformationP {
     struct TALER_MasterSignatureP signature;
     struct TALER_DenominationKeyValidityPS properties;
@@ -127,6 +129,7 @@ of the auditor, the master public key of the exchange, and
 the number of signed denomination keys:
 
 .. sourcecode:: c
+
   struct AuditorFileHeaderP {
     struct TALER_AuditorPublicKeyP apub;
     struct TALER_MasterPublicKeyP mpub;

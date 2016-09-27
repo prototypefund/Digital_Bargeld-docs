@@ -6,7 +6,7 @@ Deployment Protocol
 Wallet
 ------
 
-.. code-block::
+.. code-block:: none
 
   cd wallet-webex
 
@@ -37,7 +37,7 @@ Deploying to stable
 For all repositories that have a separate stable branch (currently exchange.git,
 merchant.git, merchant-frontends.git, bank.git, landing.git) do:
 
-.. code-block::
+.. code-block:: none
 
   cd $REPO
   git pull
