@@ -67,7 +67,7 @@ The following instructions wipe out the old deployment completely.
   [...] sockets -> /home/demo-green/sockets/
 
 In this case, `demo-green` is the active deployment, and `demo-blue` should be updated.
-After the update is over, the symlink will be pointed to `demo-blue`.
+After the update is over, the `/home/demo/sockets` symlink will be pointed to `demo-blue`.
 
 .. code-block:: none
   $ rm -rf $HOME
@@ -77,4 +77,12 @@ After the update is over, the symlink will be pointed to `demo-blue`.
   # set environment appropriately
   $ . activate
   $ taler-deployment-build
-  $ 
+
+  # upgrade the database!  this
+  # process depends on the specific version
+
+  $ taler-deployment-start
+
+  # look at the logs, verify that everything is okay
+
+Now the symlink can be updated.
