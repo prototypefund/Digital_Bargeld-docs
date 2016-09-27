@@ -7,6 +7,7 @@ Wallet
 ------
 
 .. code-block::
+
   cd wallet-webex
 
   # check dependencies
@@ -29,3 +30,10 @@ FIXME:  include asset links and descriptions we use in the webstore in this docu
 FIXME:  include instructions for other app stores
 
 
+--------------------
+Deploying to stable
+--------------------
+
+.. code-block::
+
+  foo
