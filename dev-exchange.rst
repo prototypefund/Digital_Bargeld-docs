@@ -114,8 +114,7 @@ This is then followed by the variable-size RSA private key in
 libgcrypt's S-expression format, which can be decoded using
 `GNUNET_CRYPTO_rsa_private_key_decode()`.
 
-
-------------------------
+-------------------------
 Auditor signature storage
 -------------------------
 

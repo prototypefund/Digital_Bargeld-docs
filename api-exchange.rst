@@ -208,6 +208,8 @@ possibly by using HTTPS.
     Both the individual denominations *and* the denomination list is signed,
     allowing customers to prove that they received an inconsistent list.
 
+.. _wire-req:
+
 -----------------------------------
 Obtaining wire-transfer information
 -----------------------------------
@@ -277,9 +279,9 @@ Obtaining wire-transfer information
       sig: EddsaSignature;
     }
 
-------------------
+----------
 Withdrawal
-------------------
+----------
 
 This API is used by the wallet to obtain digital coins.
 

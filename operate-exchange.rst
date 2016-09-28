@@ -61,10 +61,10 @@ for "/admin" and "/test" REST calls, because the operator may want to restrict t
 
 The following values are to be configured under the section `[exchange]` and `[exchange-admin]`:
 
-* `SERVE`: must be set to `tcp` to serve HTTP over TCP, or `unix` to serve HTTP over a UNIX domain socket
-* `PORT`: set to the TCP port to listen on if `SERVE` is `tcp`.
-* `UNIXPATH`: set to the UNIX domain socket path to listen on if `SERVE` is `unix`
-* `UNIXPATH_MODE`: number giving the mode with the access permission mask for the `UNIXPATH` (i.e. 660 = rw-rw----).
+* `serve`: must be set to `tcp` to serve HTTP over TCP, or `unix` to serve HTTP over a UNIX domain socket
+* `port`: Set to the TCP port to listen on if `serve` Is `tcp`.
+* `unixpath`: set to the UNIX domain socket path to listen on if `serve` Is `unix`
+* `unixpath_mode`: number giving the mode with the access permissiON MASK for the `unixpath` (i.e. 660 = rw-rw----).
 
 The exchange can be started with the `-D` option to disable the administrative
 functions entirely.  It is recommended that the administrative API is only
@@ -81,19 +81,47 @@ option `currency` in section `[taler]`.
 Bank account
 ------------
 
-The command line tool `taler-exchange-wire` is used to create a file with
-the JSON response to /wire requests using the exchange's offline
-master key.  The resulting file's path needs to be added to the configuration
-under the respective option for the wire transfer method, i.e.
-`sepa_response_file` in section `[exchange-wire-incoming-sepa]` when the
-`wireformat` option in the configuration file allows `sepa` transactions. For example,
-the utility may be invoked as follows::
-  
-  taler-exchange-wire -j '{"name": "The Exchange", "account_number": 10, "bank_uri": "https://bank.demo.taler.net", "type": "test"}' -t test -o exchange.json
+Wireformat
+^^^^^^^^^^
 
-Note that the value given to option `-t` must match the value in the JSON's field ``"type"``. `exchange.json` will be the same JSON given to ``-j`` plus the field
-``"sig"``, which holds the signature of the JSON given in option ``-j`` made with exchange's master key. Finally, if `taler-exchange-wire` will not find any master
-key at the location mentioned in `master_priv_file`, it will automatically generate (and use) one.
+The wireformat is the protocol to be used between the exchange and the banks.
+The option is `wireformat`, under section `[exchange]`. The exchange currently supports
+the `test` wireformat. This wireformat is used for testing the system against a fictional bank.
+
+.. note::
+  The SEPA wireformat is work in progress.
+
+Incoming
+^^^^^^^^
+The bank account where the exchange gets money from customers is configured under
+the section `[exchange-wire-incoming-X]`, where `X` matches the value given to the
+option `wireformat`. This section contains only one option: `X_response_file`, which
+takes the path to a text file containing the exchange's bank account details in JSON
+format.
+
+The command line tool `taler-exchange-wire` is used to create such a file.
+For example, the utility may be invoked as follows::
+  
+  $ taler-exchange-wire -j '{"name": "The Exchange", "account_number": 10, "bank_uri": "https://bank.demo.taler.net", "type": "test"}' -t test -o exchange.json
+
+Note that the value given to option `-t` must match the value in the JSON's field ``"type"``.
+
+The generated file will be echoed by the exchange when serving :ref:`/wire <wire-req>` requests.
+
+Outgoing
+^^^^^^^^
+
+This exchange's bank account is used to give money to merchants, after successful :ref:`deposits <deposit-par>`
+operations. If `test` is the chosen wireformat, the outcoming bank account is configured by the following
+options under `[exchange-wire-outcoming-test]`:
+  
+  * `exchange_account_numer`: which bank account number has the exchange
+  * `bank_uri`: base URL of the bank hosting the exchange bank account
+
+.. note::
+  The rationale behind having two bank accounts is that the exchange operator, as a security
+  measure, may want to instruct the bank that the incoming bank account is only supposed to
+  *receive* money.
 
 --------
 Database
@@ -139,9 +167,9 @@ Keys duration
 Both `signkeys` and `denom keys` have a :ref:`starting date <keys-duration>`. The option `lookahead_provide`, under section `[exchange_keys]`, is such that only keys
 whose starting date is younger than `lookahead_provide` will be issued by the exchange.
 
-+++++++++
-Utilities
-+++++++++
++++++
+Other
++++++
 
 ------------------
 Reserve management
