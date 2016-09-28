@@ -95,11 +95,11 @@ Now the symlink can be updated.
 
 ------------------
 Database upgrades
------------------
+------------------
 
 The exchange db can be re-initialized with
 
-.. code-block::
+.. code-block:: none
 
   $ taler-exchange-dbinit -r
 
