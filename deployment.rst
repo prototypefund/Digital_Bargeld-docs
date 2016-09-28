@@ -34,6 +34,8 @@ FIXME:  include instructions for other app stores
 Deploying to stable
 --------------------
 
+First, make sure that the deployment *AND* the deployment scripts work on the `test.taler.net` deployment.
+
 For all repositories that have a separate stable branch (currently exchange.git,
 merchant.git, merchant-frontends.git, bank.git, landing.git) do:
 
@@ -62,6 +64,7 @@ at the `sockets` symlink of the `demo` account.
 The following instructions wipe out the old deployment completely.
 
 .. code-block:: none
+
   $ ls -l ~demo/sockets
   
   [...] sockets -> /home/demo-green/sockets/
@@ -70,6 +73,7 @@ In this case, `demo-green` is the active deployment, and `demo-blue` should be u
 After the update is over, the `/home/demo/sockets` symlink will be pointed to `demo-blue`.
 
 .. code-block:: none
+
   $ rm -rf $HOME
   $ git clone /var/git/deployment.git
   $ ./deployment/bootstrap-bluegreen demo
@@ -86,3 +90,18 @@ After the update is over, the `/home/demo/sockets` symlink will be pointed to `d
   # look at the logs, verify that everything is okay
 
 Now the symlink can be updated.
+
+
+
+------------------
+Database upgrades
+-----------------
+
+The exchange db can be re-initialized with
+
+.. code-block::
+
+  $ taler-exchange-dbinit -r
+
+CAUTION: YOU WILL LOSE ALL DATA WITH THIS!
+
