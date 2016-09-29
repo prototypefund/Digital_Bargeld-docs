@@ -52,7 +52,7 @@ merchant.git, merchant-frontends.git, bank.git, landing.git) do:
   # option b: force stable to master
   $ git update-ref refs/heads/stable master
 
-  $ git push # possible with --force
+  $ git push # possibly with --force
 
   # continue development
   $ git checkout master
