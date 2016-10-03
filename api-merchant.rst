@@ -50,10 +50,10 @@ The Frontent HTTP API
 .. http:post:: pay_url
 
 
-  Send the deposit permission to the merchant. The client should POST a `deposit-permission`_
+  Send the deposit permission to the merchant. The client should POST a `DepositPermission`_
   object.
 
-  .. _deposit-permission:
+  .. _DepositPermission:
   .. code-block:: tsref
 
     interface DepositPermission {
@@ -171,7 +171,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   **Request:**
 
-  The `frontend` passes the :ref:`deposit permission <deposit-permission>`
+  The `frontend` passes the :ref:`deposit permission <DepositPermission>`
   received from the wallet, and optionally adding a field named `pay_deadline`,
   indicating a deadline by which he would expect to receive the bank transfer
   for this deal.  Note that the `pay_deadline` must be after the `refund_deadline`.
@@ -181,9 +181,8 @@ The following API are made available by the merchant's `backend` to the merchant
   **Response:**
 
   :status 200 OK:
-    The exchange accepted all of the coins. The `frontend` should now fullfill the
-    contract.  This response has no meaningful body, the frontend needs to
-    generate the fullfillment page.
+    The exchange accepted all of the coins. The body is a `PaymentResponse`_.
+    The `frontend` should now fullfill the contract.
   :status 412 Precondition Failed:
     The given exchange is not acceptable for this merchant, as it is not in the
     list of accepted exchanges and not audited by an approved auditor.
@@ -200,7 +199,13 @@ The following API are made available by the merchant's `backend` to the merchant
   `backend` is unavailable, in which case the customer might appreciate some
   reassurance that the merchant is working on getting his systems back online.
 
+  .. _PaymentResponse:
+  .. code-block:: tsref
 
+    interface PaymentResponse {
+      // Signature of TALER_SIGNATURE_MERCHANT_PAYMENT_OK made by the merchant
+      merchant_sig: EddsaSignature;
+    }
 
 .. http:get:: /track/transfer
 

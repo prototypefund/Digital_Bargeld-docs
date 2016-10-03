@@ -609,9 +609,9 @@ denomination.
       signature: EddsaSignature;
     }
 
-------------------
+----------
 Refreshing
-------------------
+----------
 
 Refreshing creates `n` new coins from `m` old coins, where the sum of
 denominations of the new coins must be smaller than the sum of the old coins'
