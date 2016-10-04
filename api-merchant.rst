@@ -286,6 +286,32 @@ The following API are made available by the merchant's `backend` to the merchant
       deposit_fee: Amount;
     }
 
+.. http:get:: /history
+
+  Returns transactions up to some point in the past
+
+  **Request**
+
+  :query date: only transactions *jounger* than this parameter will be returned. It's a timestamp, given in seconds.
+
+  **Response**
+  :status 200 OK:
+    The response is a JSON `array` of  `TransactionHistory`_
+
+  .. _tsref-type-TransactionHistory:
+  .. _TransactionHistory:
+  .. code-block:: tsref
+
+    interface TransactionHistory {
+      // transaction id
+      transaction_id: number;
+
+      // Hashcode of the relevant contract
+      TBD FIXME
+    
+    
+    }
+
 ---------
 Encodings
 ---------
