@@ -122,7 +122,12 @@ but also decodes to "V" to make OCR easy.  We will still simply use the JSON
 type "base32" and the term "Crockford Base32" in the text to refer to the
 resulting encoding.
 
+.. _tsref-type-HashCode:
 
+Hash codes
+^^^^^^^^^^
+Hashcodes are strings representing base32 encoding of the respective hashed
+data. See `base32`_.
 
 Large numbers
 ^^^^^^^^^^^^^

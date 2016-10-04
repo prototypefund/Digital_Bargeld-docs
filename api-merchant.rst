@@ -295,8 +295,7 @@ The following API are made available by the merchant's `backend` to the merchant
   :query date: only transactions *jounger* than this parameter will be returned. It's a timestamp, given in seconds.
 
   **Response**
-  :status 200 OK:
-    The response is a JSON `array` of  `TransactionHistory`_
+  :status 200 OK: The response is a JSON `array` of  `TransactionHistory`_.
 
   .. _tsref-type-TransactionHistory:
   .. _TransactionHistory:
@@ -307,9 +306,16 @@ The following API are made available by the merchant's `backend` to the merchant
       transaction_id: number;
 
       // Hashcode of the relevant contract
-      TBD FIXME
+      h_contract: HashCode;
     
-    
+      // Exchange's base URL
+      exchange: string;
+
+      // Transaction's timestamp
+      timestamp: Timestamp;
+
+      // Price payed for this transaction
+      total_amount: Amount;
     }
 
 ---------
