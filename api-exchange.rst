@@ -124,9 +124,7 @@ possibly by using HTTPS.
       // Fee charged by the exchange for refunding a coin of this denomination
       fee_refund: Amount;
 
-      // Signature with purpose
-      // `TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY` over the expiration
-      // dates, value and the key, created with the exchange's master key.
+      // Signature of `TALER_DenominationKeyValidityPS`_
       master_sig: EddsaSignature;
     }
 

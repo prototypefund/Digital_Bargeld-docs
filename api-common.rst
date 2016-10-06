@@ -156,26 +156,52 @@ Timestamps
 Public Keys
 ^^^^^^^^^^^
 
-EdDSA and ECDHE public keys are always points on Curve25519 and represented
-using the standard 256 bits Ed25519 compact format, converted to Crockford
-Base32_.
+.. _`tsref-type-EddsaPublicKey`:
+.. _`tsref-type-EddsaPrivateKey`:
+
+.. code-block:: tsref
+
+   // EdDSA public keys are always points on Curve25519 (FIXME does that hold for private keys as well?) and represented
+   // using the standard 256 bits Ed25519 compact format, converted to Crockford
+   // `Base32`_.
+   type EddsaPublicKey = string;
+   type EddsaPrivateKey = string;
+
+.. _`tsref-type-RsaPublicKey`:
+
+.. code-block:: tsref
+
+   // RSA public key converted to Crockford `Base32`_.
+   type RsaPublicKey = string;
+
 
 .. _signature:
 
 Signatures
 ^^^^^^^^^^
 
-The specific signature scheme in use, like RSA blind signatures or EdDSA,
-depends on the context.  RSA blind signatures are only used for coins and
-always simply base32_ encoded.
+.. _`tsref-type-EddsaSignature`:
 
-EdDSA signatures are transmitted as 64-byte base32_ binary-encoded objects with
-just the R and S values (base32_ binary-only).  These signed objects always
-contain a purpose number unique to the context in which the signature is used,
-but frequently the actual binary-object must be reconstructed locally from
-information available only in context, such as recent messages or account
-detals.  These objects are described in detail in :ref:`Signatures`.
+.. code-block:: tsref
+  
+  // EdDSA signatures are transmitted as 64-byte `base32`_
+  // binary-encoded objects with just the R and S values (base32_ binary-only)
+  type EddsaSignature = string;
 
+
+.. _`tsref-type-RsaSignature`:
+
+.. code-block:: tsref
+  
+  // `base32`_ encoded RSA signature
+  type RsaSignature = string;
+
+.. _`tsref-type-BlindedRsaSignature`:
+
+.. code-block:: tsref
+  
+  // `base32`_ encoded RSA blinded signature
+  type BlindedRsaSignature = string;
 
 .. _amount:
 
@@ -479,6 +505,10 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct GNUNET_TIME_AbsoluteNBO list_issue_date;
       struct GNUNET_HashCode hc;
   };
+
+.. _TALER_DenominationKeyValidityPS:
+
+.. sourcecode:: c
 
   struct TALER_DenominationKeyValidityPS {
       /**
