@@ -11,6 +11,7 @@
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
 
   @author Christian Grothoff
+  @author Marcello Stanisci
 
 .. _http-common:
 
@@ -212,16 +213,16 @@ Binary Formats
 
   .. note::
 
-     This section largely corresponds to the definitions in taler_signatures.h.
-     You may also want to refer to this code, as it offers additional details
-     on each of the members of the structs.
-
-  .. note::
-
      Due to the way of handling `big` numbers by some platforms (such as
      `JavaScript`, for example), wherever the following specification mentions
      a 64-bit value, the actual implementations are strongly advised to rely on
      arithmetic up to 53 bits.
+
+  .. note::
+     
+     Taler uses `libgnunetutil` for interfacing itself with the operating system,
+     doing crypto work, and other "low level" actions, therefore it is strongly
+     connected with the `GNUnet project <https://gnunet.org>`_.
 
 This section specifies the binary representation of messages used in Taler's
 protocols. The message formats are given in a C-style pseudocode notation.
@@ -252,8 +253,7 @@ Time
 ^^^^
 
 In signed messages, time is represented using 64-bit big-endian values,
-denoting microseconds since the UNIX Epoch.  `UINT64_MAX` represents "never"
-(distant future, eternity).
+denoting microseconds since the UNIX Epoch.  `UINT64_MAX` represents "never".
 
 .. sourcecode:: c
 
@@ -359,58 +359,60 @@ uses 512-bit hash codes (64 bytes).
 
 Signatures
 ^^^^^^^^^^
-
-Please note that any RSA signature is processed by a function called
-`GNUNET_CRYPTO_rsa_signature_encode (..)` **before** being sent over the
-network, so the receiving party must run `GNUNET_CRYPTO_rsa_signature_decode
-(..)` before verifying it. See their implementation in `src/util/crypto_rsa.c`,
-in GNUNET's code base. Finally, they are defined in
-`gnunet/gnunet_crypto_lib.h`.
-
-EdDSA signatures are always made on the hash of a block of the same generic
-format, the `struct SignedData` given below.  In our notation, the type of a
-field can depend on the value of another field. For the following message, the
-length of the `payload` array must match the value of the `size` field:
+Any piece of signed data, complies to the abstract data structure given below.
 
 .. sourcecode:: c
 
-  struct SignedData {
-    uint32_t size;
-    uint32_t purpose;
-    uint8_t payload[size - sizeof (struct SignedData)];
+  struct Data {
+    struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+    type1_t payload1;
+    type2_t payload2;
+    ...
   };
 
-The `purpose` field in `struct SignedData` is used to express the context in
-which the signature is made, ensuring that a signature cannot be lifted from
-one part of the protocol to another.  The various `purpose` constants are
-defined in `taler_signatures.h`.  The `size` field prevents padding attacks.
+  /*From gnunet_crypto_lib.h*/
+  struct GNUNET_CRYPTO_EccSignaturePurpose {
+    /**
+     * This field is used to express the context in
+     * which the signature is made, ensuring that a
+     * signature cannot be lifted from one part of the protocol
+     * to another. See `src/include/taler_signatures.h` within the
+     * exchange's codebase (git://taler.net/exchange)
+     */
+    uint32_t purpose;
+    /**
+     * This field equals the number of bytes being signed,
+     * namely 'sizeof (struct Data)'
+     */
+    uint32_t size;
+  };
 
-In the subsequent messages, we use the following notation for signed data
-described in `FIELDS` with the given purpose.
 
-.. sourcecode:: c
 
-  signed (purpose = SOME_CONSTANT) {
-    FIELDS
-  } msg;
 
-The `size` field of the corresponding `struct SignedData` is determined by the
-size of `FIELDS`.
+The following list contains all the data structure that can be signed in
+Taler. Their definition is typically found in `src/include/taler_signatures.h`,
+within the :ref:`exchange's codebase <exchange-repo>`.
 
 .. sourcecode:: c
 
   struct TALER_WithdrawRequestPS {
-    signed (purpose = TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct TALER_ReservePublicKeyP reserve_pub;
       struct TALER_AmountNBO amount_with_fee;
       struct TALER_AmountNBO withdraw_fee;
       struct GNUNET_HashCode h_denomination_pub;
       struct GNUNET_HashCode h_coin_envelope;
-    }
   };
 
   struct TALER_DepositRequestPS {
-    signed (purpose = TALER_SIGNATURE_WALLET_COIN_DEPOSIT) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_WALLET_COIN_DEPOSIT
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct GNUNET_HashCode h_contract;
       struct GNUNET_HashCode h_wire;
       struct GNUNET_TIME_AbsoluteNBO timestamp;
@@ -420,11 +422,13 @@ size of `FIELDS`.
       struct TALER_AmountNBO deposit_fee;
       struct TALER_MerchantPublicKeyP merchant;
       union TALER_CoinSpendPublicKeyP coin_pub;
-    }
   };
 
   struct TALER_DepositConfirmationPS {
-    signed (purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_DEPOSIT) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_WALLET_CONFIRM_DEPOSIT
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct GNUNET_HashCode h_contract;
       struct GNUNET_HashCode h_wire;
       uint64_t transaction_id GNUNET_PACKED;
@@ -433,44 +437,54 @@ size of `FIELDS`.
       struct TALER_AmountNBO amount_without_fee;
       union TALER_CoinSpendPublicKeyP coin_pub;
       struct TALER_MerchantPublicKeyP merchant;
-    }
   };
 
   struct TALER_RefreshMeltCoinAffirmationPS {
-    signed (purpose = TALER_SIGNATURE_WALLET_COIN_MELT) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_WALLET_COIN_MELT
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct GNUNET_HashCode session_hash;
       struct TALER_AmountNBO amount_with_fee;
       struct TALER_AmountNBO melt_fee;
       union TALER_CoinSpendPublicKeyP coin_pub;
-    }
   };
 
   struct TALER_RefreshMeltConfirmationPS {
-    signed (purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_MELT) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_MELT
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct GNUNET_HashCode session_hash;
       uint16_t noreveal_index;
-    }
   };
 
   struct TALER_ExchangeSigningKeyValidityPS {
-    signed (purpose = TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct TALER_MasterPublicKeyP master_public_key;
       struct GNUNET_TIME_AbsoluteNBO start;
       struct GNUNET_TIME_AbsoluteNBO expire;
       struct GNUNET_TIME_AbsoluteNBO end;
       struct TALER_ExchangePublicKeyP signkey_pub;
-    }
   };
 
   struct TALER_ExchangeKeySetPS {
-    signed (purpose=TALER_SIGNATURE_EXCHANGE_KEY_SET) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_EXCHANGE_KEY_SET
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct GNUNET_TIME_AbsoluteNBO list_issue_date;
       struct GNUNET_HashCode hc;
-    }
   };
 
   struct TALER_DenominationKeyValidityPS {
-    signed (purpose = TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_MASTER_DENOMINATION_KEY_VALIDITY
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct TALER_MasterPublicKeyP master;
       struct GNUNET_TIME_AbsoluteNBO start;
       struct GNUNET_TIME_AbsoluteNBO expire_withdraw;
@@ -481,48 +495,58 @@ size of `FIELDS`.
       struct TALER_AmountNBO fee_deposit;
       struct TALER_AmountNBO fee_refresh;
       struct GNUNET_HashCode denom_hash;
-    }
   };
 
   struct TALER_MasterWireDetailsPS {
-    signed (purpose = (TALER_SIGNATURE_MASTER_SEPA_DETAILS ||
-                       TALER_SIGNATURE_MASTER_TEST_DETAILS ) ) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_MASTER_SEPA_DETAILS || TALER_SIGNATURE_MASTER_TEST_DETAILS
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct GNUNET_HashCode h_sepa_details;
-    }
   };
 
   struct TALER_DepositTrackPS {
-    signed (purpose = TALER_SIGNATURE_MERCHANT_DEPOSIT_WTID) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_MASTER_SEPA_DETAILS || TALER_SIGNATURE_MASTER_TEST_DETAILS
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct GNUNET_HashCode h_contract;
       struct GNUNET_HashCode h_wire;
       uint64_t transaction_id;
       struct TALER_MerchantPublicKeyP merchant;
       struct TALER_CoinSpendPublicKeyP coin_pub;
-    }
   };
 
-  struct TALER_WireDepositDetailP
-  {
-    struct GNUNET_HashCode h_contract;
-    struct GNUNET_TIME_AbsoluteNBO execution_time;
-    uint64_t transaction_id GNUNET_PACKED;
-    struct TALER_CoinSpendPublicKeyP coin_pub;
-    struct TALER_AmountNBO deposit_value;
-    struct TALER_AmountNBO deposit_fee;
+  /**
+   * Format internally used for packing the detailed information
+   * to generate the signature for /track/transfer signatures.
+   */
+  struct TALER_WireDepositDetailP {
+      struct GNUNET_HashCode h_contract;
+      struct GNUNET_TIME_AbsoluteNBO execution_time;
+      uint64_t transaction_id GNUNET_PACKED;
+      struct TALER_CoinSpendPublicKeyP coin_pub;
+      struct TALER_AmountNBO deposit_value;
+      struct TALER_AmountNBO deposit_fee;
   };
 
 
   struct TALER_WireDepositDataPS {
-     signed (purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT) {
-       struct TALER_AmountNBO total;
-       struct TALER_MerchantPublicKeyP merchant_pub;
-       struct GNUNET_HashCode h_wire;
-       struct GNUNET_HashCode h_details;
-     }
+      /**
+       * purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT 
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+      struct TALER_AmountNBO total;
+      struct TALER_MerchantPublicKeyP merchant_pub;
+      struct GNUNET_HashCode h_wire;
+      struct GNUNET_HashCode h_details;
   };
 
   struct TALER_ExchangeKeyValidityPS {
-    signed (purpose = TALER_SIGNATURE_AUDITOR_EXCHANGE_KEYS) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_AUDITOR_EXCHANGE_KEYS
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       struct GNUNET_HashCode auditor_url_hash;
       struct TALER_MasterPublicKeyP master;
       struct GNUNET_TIME_AbsoluteNBO start;
@@ -534,20 +558,24 @@ size of `FIELDS`.
       struct TALER_AmountNBO fee_deposit;
       struct TALER_AmountNBO fee_refresh;
       struct GNUNET_HashCode denom_hash;
-    }
   };
 
   struct TALER_ContractPS {
-    signed (purpose = TALER_SIGNATURE_MERCHANT_CONTRACT) {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_MERCHANT_CONTRACT
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
       uint64_t transaction_id;
       struct TALER_AmountNBO total_amount;
       struct TALER_AmountNBO max_fee;
       struct GNUNET_HashCode h_contract;
-    }
-  };
+    };
 
   struct TALER_ConfirmWirePS {
-     signed (purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE) {
+       /**
+        * purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE
+        */
+       struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
        struct GNUNET_HashCode h_wire;
        struct GNUNET_HashCode h_contract;
        struct TALER_WireTransferIdentifierRawP wtid;
@@ -555,5 +583,4 @@ size of `FIELDS`.
        uint64_t transaction_id;
        struct GNUNET_TIME_AbsoluteNBO execution_time;
        struct TALER_AmountNBO coin_contribution;
-     }
-   };
+     };

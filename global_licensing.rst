@@ -176,6 +176,8 @@ project, and gives the copyright holder for each of them:
 * PHP:   PHP License, AGPL-Compatible, owned by The PHP Group
 
 
+.. _exchange-repo:
+
 +++++++++++++++++++++++++++++++++++
 Exchange (git://taler.net/exchange)
 +++++++++++++++++++++++++++++++++++
