@@ -81,13 +81,13 @@ possibly by using HTTPS.
       // is sabotaging end-user anonymity by giving disjoint denomination keys to
       // different users.  If a exchange were to do this, this signature allows the
       // clients to demonstrate to the public that the exchange is dishonest.
-      eddsa_sig: string;
+      eddsa_sig: EddsaSignature;
 
       // Public EdDSA key of the exchange that was used to generate the signature.
       // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
-      eddsa_pub: string;
+      eddsa_pub: EddsaPublicKey;
     }
 
   .. _tsref-type-Denom:
@@ -109,8 +109,8 @@ possibly by using HTTPS.
       // transactions involving this coin.
       stamp_expire_legal: Timestamp;
 
-      // Public (RSA) key for the denomination in base32 encoding.
-      denom_pub: string;
+      // Public (RSA) key for the denomination.
+      denom_pub: RsaPublicKey;
 
       // Fee charged by the exchange for withdrawing a coin of this denomination
       fee_withdraw: Amount;
@@ -169,7 +169,7 @@ possibly by using HTTPS.
       auditor_pub: EddsaPublicKey;
 
       // The auditor's URL.
-      auditor_url: String;
+      auditor_url: string;
 
       // An array of denomination keys the auditor affirms with its signature.
       // Note that the message only includes the hash of the public key, while the
@@ -188,10 +188,7 @@ possibly by using HTTPS.
       // thus not repeated here.
       denom_pub_h: HashCode;
 
-      // A signature_ (binary-only) with purpose
-      // `TALER_SIGNATURE_AUDITOR_EXCHANGE_KEYS` over the exchange's public key and the
-      // denomination key information. To verify the signature, the `denom_pub_h`
-      // must be resolved with the information from `denoms`
+      // Signature of `TALER_ExchangeKeyValidityPS`_
       auditor_sig: EddsaSignature;
     }
 
@@ -234,7 +231,7 @@ Obtaining wire-transfer information
       //
       // A single /wire response can contain an arbitrary number of these
       // string-object pairs.  However, the keys must be unique.
-      string : Object;
+      string : Object; // <- FIXME: is this key-value notation correct?
      }
 
   Possible encodings for the objects are right now the following:
@@ -248,10 +245,21 @@ Obtaining wire-transfer information
       type: "test";
 
       // Account number at the bank
-      account_number: Integer;
+      account_number: number;
 
       // URI of the bank
       bank_uri: string;
+
+      // Name of the account's owner
+      name: string;
+
+      // Salt used to sign, `base32`_ encoded
+      salt: string;
+
+      // Signaure of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_TEST_DETAILS
+      // FIXME: Specify how to compute the hash which then
+      // gets signed over
+      sig: EddsaSignature;
     }
 
   .. _WireSepaResponse:
@@ -271,9 +279,9 @@ Obtaining wire-transfer information
       // BIC of the bank.
       bic: string;
 
-      // the EdDSA signature (binary-only) with purpose
-      // `TALER_SIGNATURE_EXCHANGE_PAYMENT_METHOD_SEPA` signing over the hash over the
-      // 0-terminated strings representing the receiver's name, IBAN and the BIC.
+      // Signaure of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_SEPA_DETAILS
+      // FIXME: Specify how to compute the hash which then
+      // gets signed over
       sig: EddsaSignature;
     }
 
@@ -349,13 +357,11 @@ exchange.
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
       transfer_details?: any;
 
-      // binary encoding of the transaction data as a `TALER_WithdrawRequestPS`
-      // struct described in :ref:`Signatures`, only present if the `type` was
-      // "WITHDRAW".  Its `purpose` should match our `type`, `amount_with_fee`,
-      // should match our `amount`, and its `size` should be consistent.
-      string?: details;
+      // `base32`_ encoding of `TALER_WithdrawRequestPS`_. This field appears only if `type`
+      // is "WITHDRAW".
+      details?: string;
 
-      // Signature over the transaction details.
+      // Signature over the transaction `details`.
       // Purpose: TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW
       signature?: EddsaSignature;
     }

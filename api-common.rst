@@ -507,7 +507,6 @@ within the :ref:`exchange's codebase <exchange-repo>`.
   };
 
 .. _TALER_DenominationKeyValidityPS:
-
 .. sourcecode:: c
 
   struct TALER_DenominationKeyValidityPS {
@@ -526,6 +525,9 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct TALER_AmountNBO fee_refresh;
       struct GNUNET_HashCode denom_hash;
   };
+
+.. _TALER_MasterWireDetailsPS:
+.. sourcecode:: c
 
   struct TALER_MasterWireDetailsPS {
       /**
@@ -572,6 +574,9 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct GNUNET_HashCode h_details;
   };
 
+.. _TALER_ExchangeKeyValidityPS:
+.. sourcecode:: c
+
   struct TALER_ExchangeKeyValidityPS {
       /**
        * purpose.purpose = TALER_SIGNATURE_AUDITOR_EXCHANGE_KEYS
@@ -589,6 +594,9 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct TALER_AmountNBO fee_refresh;
       struct GNUNET_HashCode denom_hash;
   };
+
+
+.. sourcecode:: c
 
   struct TALER_ContractPS {
       /**

@@ -231,6 +231,3 @@ def setup(app):
     app.add_lexer('tsref', lexer)
     app.add_builder(MyHtmlBuilder)
     app.connect("doctree-read", remember_targets)
-
-
-

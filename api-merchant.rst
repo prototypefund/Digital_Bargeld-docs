@@ -58,7 +58,8 @@ The Frontent HTTP API
 
     interface DepositPermission {
       // the hashed :ref:`wire details <wireformats>` of this merchant. The wallet takes this value as-is from the contract
-      H_wire: HashCode;
+      // `MyStruct`_
+      H_wire: MyStruct;
 
       // the base32 encoding of the field `h_contract` of the contract `blob <contract-blob>`. The wallet can choose whether to take this value obtained from the field `h_contract`, or regenerating one starting from the values it gets within the contract
       H_contract: HashCode;
