@@ -206,6 +206,9 @@ The following API are made available by the merchant's `backend` to the merchant
     interface PaymentResponse {
       // Signature of TALER_SIGNATURE_MERCHANT_PAYMENT_OK made by the merchant
       merchant_sig: EddsaSignature;
+
+      // Contract's hash being signed over
+      h_contract: HashCode;
     }
 
 .. http:get:: /track/transfer
