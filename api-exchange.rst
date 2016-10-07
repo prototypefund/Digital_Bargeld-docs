@@ -357,12 +357,10 @@ exchange.
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
       transfer_details?: any;
 
-      // `base32`_ encoding of `TALER_WithdrawRequestPS`_. This field appears only if `type`
-      // is "WITHDRAW".
+      // `base32`_ encoding of `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW. This field appears only if `type` is "WITHDRAW".      
       details?: string;
 
       // Signature over the transaction `details`.
-      // Purpose: TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW
       signature?: EddsaSignature;
     }
 
@@ -413,14 +411,12 @@ exchange.
       // denomination private key
       coin_ev: CoinEnvelope;
 
-      // public (EdDSA) key of the reserve from which the coin should be
+      // `public (EdDSA) key <reserve-pub>`_ of the reserve from which the coin should be
       // withdrawn.  The total amount deducted will be the coin's value plus the
       // withdrawal fee as specified with the denomination information.
       reserve_pub: EddsaPublicKey;
 
-      // Signature (binary-only) of purpose
-      // `TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW` created with the reserves's
-      // private key
+      // Signature of `TALER_WithdrawRequestPS`_ created with the `reserves's private key <reserve-priv>`_
       reserve_sig: EddsaSignature;
     }
 
@@ -500,7 +496,7 @@ denomination.
       // The merchant's account details. This must be a JSON object whose format
       // must correspond to one of the supported wire transfer formats of the exchange.
       // See `wireformats`_.
-      wire: WireFormat;
+      wire: Object;
 
       // SHA-512 hash of the merchant's payment details from `wire`.  Although
       // strictly speaking redundant, this helps detect inconsistencies.
@@ -510,7 +506,7 @@ denomination.
       // details are never disclosed to the exchange.
       H_contract: HashCode;
 
-      // coin's public key, both ECDHE and EdDSA.
+      // `coin's public key <eddsa-coin-pub>`_, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
 
       // denomination RSA key with which the coin is signed
@@ -530,7 +526,7 @@ denomination.
       // 64-bit transaction id for the transaction between merchant and customer
       transaction_id: number;
 
-      // EdDSA public key of the merchant, so that the client can identify the
+      // EdDSA `public key of the merchant <merchant-pub>`_, so that the client can identify the
       // merchant for refund requests.
       merchant_pub: EddsaPublicKey;
 
@@ -538,9 +534,7 @@ denomination.
       // exchange, possibly zero if refunds are not allowed.
       refund_deadline: Timestamp;
 
-      // The EdDSA signature (binary-only) made with purpose
-      // `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` made by the customer with the coin's
-      // private key.
+      // Signature of `TALER_DepositRequestPS`_, made by the customer with the `coin's private key <coin-priv>`_
       coin_sig: EddsaSignature;
     }
 
@@ -555,14 +549,14 @@ denomination.
       // The string constant "DEPOSIT_OK"
       status: string;
 
-      // the EdDSA :ref:`signature` (binary-only) with purpose
-      // `TALER_SIGNATURE_EXCHANGE_CONFIRM_DEPOSIT` using a current signing key of the
-      // exchange affirming the successful deposit and that the exchange will transfer the
-      // funds after the refund deadline, or as soon as possible if the refund
-      // deadline is zero.
+      // the EdDSA signature of `TALER_DepositConfirmation`_ using a current
+      // `signing key of the exchange <sign-key-priv>`_ affirming the successful
+      // deposit and that the exchange will transfer the funds after the refund
+      // deadline, or as soon as possible if the refund deadline is zero.
       sig: EddsaSignature;
 
-      // public EdDSA key of the exchange that was used to generate the signature.
+      // `public EdDSA key of the exchange <sign-key-pub>`_ that was used to
+      // generate the signature.
       // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
@@ -581,6 +575,7 @@ denomination.
       history: CoinSpendHistoryItem[];
     }
 
+  .. _`tsref-type-CoinSpendHistoryItem`:
   .. _CoinSpendHistoryItem:
   .. code-block:: tsref
 
@@ -596,20 +591,14 @@ denomination.
       // the coin's denomination value.
       amount: Amount;
 
-      // base32 binary encoding of the transaction data as a
-      // `TALER_DepositRequestPS` or `TALER_RefreshMeltCoinAffirmationPS`
-      // or `TALER_RefundRequestPS`
-      // struct described in :ref:`Signatures`.  Its `purpose` should match our
-      // `type`, `amount_with_fee`, should match our `amount`, and its `size`
-      // should be consistent with the respective struct type.
+      // `base32`_ binary encoding of the transaction data as a
+      // `TALER_DepositRequestPS`_ or `TALER_RefreshMeltCoinAffirmationPS`_
+      // or `TALER_RefundRequestPS`_
       details: string;
 
-      // the EdDSA :ref:`signature` (binary-only) made with purpose
-      // `TALER_SIGNATURE_WALLET_COIN_DEPOSIT` or
-      // `TALER_SIGNATURE_WALLET_COIN_MELT` or
-      // `TALER_SIGNATURE_MERCHANT_REFUND` over the transaction's details.
+      // `EdDSA Signature <eddsa-sig>`_ of what we got in `details`.
       // Note that in the case of a 'refund', the signature is made with
-      // the public key of the merchant, and not that of the coin.
+      // the `public key of the merchant <merchant-pub>`_, and not `that of the coin <eddsa-coin-pub>`_
       signature: EddsaSignature;
     }
 
@@ -664,7 +653,7 @@ the API during normal operation.
 
       // For each of the `n` new coins, `kappa` transfer keys.
       // coin_evs[j][k] is the k-th blank (of kappa) for the k-th new coin (of n).
-      coin_evs: CoinBlank[][]
+      coin_evs: CoinBlank[][]; // FIXME TBD
 
       // `kappa` transfer public keys (ephemeral ECDHE keys)
       transfer_pubs: EddsaPublicKey[];
@@ -682,16 +671,16 @@ the API during normal operation.
   .. code-block:: tsref
 
     interface MeltCoin {
-      // Coin public key, uniquely identifies the coin
+      // `Coin public key <eddsa-coin-pub>`_, uniquely identifies the coin
       coin_pub: string;
 
       // The denomination public key allows the exchange to determine total coin value.
       denom_pub: RsaPublicKey;
 
-      // Signature over the coin public key by the denomination.
+      // Signature over the `coin public key <eddsa-coin-pub>`_ by the denomination.
       denom_sig: RsaSignature;
 
-      // Signature by the coin over the session public key
+      // Signature by the `coin <coin-priv>`_ over the session public key (FIXME: put link to some C definition of this key?)
       confirm_sig: EddsaSignature;
 
       // Amount of the value of the coin that should be melted as part of
@@ -716,12 +705,11 @@ the API during normal operation.
       // Which of the `kappa` indices does the client not have to reveal.
       noreveal_index: number;
 
-      // binary-only Signature_ for purpose `TALER_SIGNATURE_EXCHANGE_CONFIRM_MELT`
-      // whereby the exchange affirms the successful melt and confirming the
-      // `noreveal_index`
+      // Signature of `TALER_RefreshMeltConfirmationPS`_ whereby the exchange
+      // affirms the successful melt and confirming the `noreveal_index`
       exchange_sig: EddsaSignature;
 
-      // public EdDSA key of the exchange that was used to generate the signature.
+      // `public EdDSA key <sign-key-pub>`_ of the exchange that was used to generate the signature.
       // Should match one of the exchange's signing keys from /keys.  Again given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
@@ -823,7 +811,7 @@ the API during normal operation.
       object: string;
 
       // Information about each melted coin
-      refresh_melt_info: OldCoinInfo;
+      refresh_melt_info: OldCoinInfo; // FIXME
 
       // array with RSA denomination public keys of the coins the original
       // refresh request asked to be exchangeed

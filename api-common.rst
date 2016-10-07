@@ -142,22 +142,23 @@ as other binary data in Crockford Base32 encoding.
 Timestamps
 ^^^^^^^^^^
 
-  Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`,
-  where `x` is the decimal representation of the number of seconds past the
-  Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in
-  JSON simply as a normal slash, but distinguishes the timestamp from a normal
-  string literal.  We use the type "date" in the documentation below.
-  Additionally, the special strings "\\/never\\/" and "\\/forever\\/" are
-  recognized to represent the end of time.
+Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`,
+where `x` is the decimal representation of the number of seconds past the
+Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in
+JSON simply as a normal slash, but distinguishes the timestamp from a normal
+string literal.  We use the type "date" in the documentation below.
+Additionally, the special strings "\\/never\\/" and "\\/forever\\/" are
+recognized to represent the end of time.
 
 
 .. _public\ key:
 
-Public Keys
-^^^^^^^^^^^
+Keys
+^^^^
 
 .. _`tsref-type-EddsaPublicKey`:
 .. _`tsref-type-EddsaPrivateKey`:
+.. _`tsref-type-CoinPublicKey`:
 
 .. code-block:: tsref
 
@@ -174,6 +175,17 @@ Public Keys
    // RSA public key converted to Crockford `Base32`_.
    type RsaPublicKey = string;
 
+.. _blinded-coin:
+
+Blinded coin
+^^^^^^^^^^^^
+
+.. _`tsref-type-CoinEnvelope`:
+
+.. code-block:: tsref
+
+  // Blinded coin's `public EdDSA key <eddsa-coin-pub>`_, `base32`_ encoded
+  type CoinEnvelope = string;
 
 .. _signature:
 
@@ -303,9 +315,15 @@ uses 512-bit hash codes (64 bytes).
      uint8_t hash[64];      // usually SHA-512
    };
 
+.. _reserve-pub:
+.. sourcecode:: c
+
    struct TALER_ReservePublicKeyP {
      uint8_t eddsa_pub[32];
    };
+
+.. _reserve-priv:
+.. sourcecode:: c
 
    struct TALER_ReservePrivateKeyP {
      uint8_t eddsa_priv[32];
@@ -314,6 +332,9 @@ uses 512-bit hash codes (64 bytes).
    struct TALER_ReserveSignatureP {
      uint8_t eddsa_signature[64];
    };
+
+.. _merchant-pub:
+.. sourcecode:: c
 
    struct TALER_MerchantPublicKeyP {
      uint8_t eddsa_pub[32];
@@ -331,13 +352,22 @@ uses 512-bit hash codes (64 bytes).
      uint8_t ecdhe_priv[32];
    };
 
+.. _sign-key-pub:
+.. sourcecode:: c
+
    struct TALER_ExchangePublicKeyP {
      uint8_t eddsa_pub[32];
    };
 
+.. _sign-key-priv:
+.. sourcecode:: c
+
    struct TALER_ExchangePrivateKeyP {
      uint8_t eddsa_priv[32];
    };
+
+.. _eddsa-sig:
+.. sourcecode:: c
 
    struct TALER_ExchangeSignatureP {
      uint8_t eddsa_signature[64];
@@ -355,10 +385,16 @@ uses 512-bit hash codes (64 bytes).
      uint8_t eddsa_signature[64];
    };
 
+.. _eddsa-coin-pub:
+.. sourcecode:: c
+
    union TALER_CoinSpendPublicKeyP {
      uint8_t eddsa_pub[32];
      uint8_t ecdhe_pub[32];
    };
+
+.. _coin-priv:
+.. sourcecode:: c
 
    union TALER_CoinSpendPrivateKeyP {
      uint8_t eddsa_priv[32];
@@ -372,8 +408,6 @@ uses 512-bit hash codes (64 bytes).
    struct TALER_TransferSecretP {
      uint8_t key[sizeof (struct GNUNET_HashCode)];
    };
-
-   struct TALER_LinkSecretP {
      uint8_t key[sizeof (struct GNUNET_HashCode)];
    };
 
@@ -420,6 +454,7 @@ The following list contains all the data structure that can be signed in
 Taler. Their definition is typically found in `src/include/taler_signatures.h`,
 within the :ref:`exchange's codebase <exchange-repo>`.
 
+.. _TALER_WithdrawRequestPS:
 .. sourcecode:: c
 
   struct TALER_WithdrawRequestPS {
@@ -433,6 +468,9 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct GNUNET_HashCode h_denomination_pub;
       struct GNUNET_HashCode h_coin_envelope;
   };
+
+.. _TALER_DepositRequestPS:
+.. sourcecode:: c
 
   struct TALER_DepositRequestPS {
       /**
@@ -450,6 +488,9 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       union TALER_CoinSpendPublicKeyP coin_pub;
   };
 
+.. _TALER_DepositConfirmationPS:
+.. sourcecode:: c
+
   struct TALER_DepositConfirmationPS {
       /**
        * purpose.purpose = TALER_SIGNATURE_WALLET_CONFIRM_DEPOSIT
@@ -465,6 +506,9 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct TALER_MerchantPublicKeyP merchant;
   };
 
+.. _TALER_RefreshMeltCoinAffirmationPS:
+.. sourcecode:: c
+
   struct TALER_RefreshMeltCoinAffirmationPS {
       /**
        * purpose.purpose = TALER_SIGNATURE_WALLET_COIN_MELT
@@ -475,6 +519,9 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct TALER_AmountNBO melt_fee;
       union TALER_CoinSpendPublicKeyP coin_pub;
   };
+
+.. _TALER_RefreshMeltConfirmationPS:
+.. sourcecode:: c
 
   struct TALER_RefreshMeltConfirmationPS {
       /**
@@ -607,18 +654,35 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct TALER_AmountNBO total_amount;
       struct TALER_AmountNBO max_fee;
       struct GNUNET_HashCode h_contract;
-    };
+  };
 
   struct TALER_ConfirmWirePS {
-       /**
-        * purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE
-        */
-       struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-       struct GNUNET_HashCode h_wire;
-       struct GNUNET_HashCode h_contract;
-       struct TALER_WireTransferIdentifierRawP wtid;
-       struct TALER_CoinSpendPublicKeyP coin_pub;
-       uint64_t transaction_id;
-       struct GNUNET_TIME_AbsoluteNBO execution_time;
-       struct TALER_AmountNBO coin_contribution;
+      /**
+       * purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+      struct GNUNET_HashCode h_wire;
+      struct GNUNET_HashCode h_contract;
+      struct TALER_WireTransferIdentifierRawP wtid;
+      struct TALER_CoinSpendPublicKeyP coin_pub;
+      uint64_t transaction_id;
+      struct GNUNET_TIME_AbsoluteNBO execution_time;
+      struct TALER_AmountNBO coin_contribution;
+  };
+
+.. _TALER_RefundRequestPS:
+.. sourcecode:: c
+
+     struct TALER_RefundRequestPS {
+         /**
+          *  purpose.purpose = TALER_SIGNATURE_MERCHANT_REFUND
+          */
+         struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+         struct GNUNET_HashCode h_contract GNUNET_PACKED;
+         uint64_t transaction_id GNUNET_PACKED;
+         struct TALER_CoinSpendPublicKeyP coin_pub;
+         struct TALER_MerchantPublicKeyP merchant;
+         uint64_t rtransaction_id GNUNET_PACKED;
+         struct TALER_AmountNBO refund_amount;
+         struct TALER_AmountNBO refund_fee;
      };
