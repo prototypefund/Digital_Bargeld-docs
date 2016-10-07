@@ -184,7 +184,7 @@ Signatures
 
 .. code-block:: tsref
   
-  // EdDSA signatures are transmitted as 64-bit `base32`_
+  // EdDSA signatures are transmitted as 64-bytes `base32`_
   // binary-encoded objects with just the R and S values (base32_ binary-only)
   type EddsaSignature = string;
 
