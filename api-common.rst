@@ -161,7 +161,7 @@ Public Keys
 
 .. code-block:: tsref
 
-   // EdDSA public keys are always points on Curve25519 (FIXME does that hold for private keys as well?) and represented
+   // EdDSA public keys always point on Curve25519 (FIXME does that hold for private keys as well?) and represented
    // using the standard 256 bits Ed25519 compact format, converted to Crockford
    // `Base32`_.
    type EddsaPublicKey = string;
@@ -184,7 +184,7 @@ Signatures
 
 .. code-block:: tsref
   
-  // EdDSA signatures are transmitted as 64-byte `base32`_
+  // EdDSA signatures are transmitted as 64-bit `base32`_
   // binary-encoded objects with just the R and S values (base32_ binary-only)
   type EddsaSignature = string;
 
