@@ -512,7 +512,7 @@ denomination.
       // denomination RSA key with which the coin is signed
       denom_pub: RsaPublicKey;
 
-      // exchange's unblinded RSA `signature`_ of the coin
+      // exchange's unblinded RSA signature of the coin
       ub_sig: RsaSignature;
 
       // timestamp when the contract was finalized, must match approximately the
