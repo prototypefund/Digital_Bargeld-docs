@@ -568,7 +568,7 @@ denomination.
 
     interface DepositDoubleSpendError {
       // The string constant "insufficient funds"
-      string error;
+      error: string;
 
       // Transaction history for the coin that is
       // being double-spended
