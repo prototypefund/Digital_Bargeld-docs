@@ -643,6 +643,19 @@ within the :ref:`exchange's codebase <exchange-repo>`.
   };
 
 
+.. _TALER_PaymentResponsePS:
+.. sourcecode:: c
+
+  struct PaymentResponsePS {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_MERCHANT_PAYMENT_OK
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+      struct GNUNET_HashCode h_contract;
+  };
+
+
+.. _TALER_ContractPS:
 .. sourcecode:: c
 
   struct TALER_ContractPS {
@@ -654,6 +667,7 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct TALER_AmountNBO total_amount;
       struct TALER_AmountNBO max_fee;
       struct GNUNET_HashCode h_contract;
+      struct TALER_MerchantPublicKeyP merchant_pub;
   };
 
   struct TALER_ConfirmWirePS {

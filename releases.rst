@@ -29,20 +29,20 @@ The following components are published on the GNU mirrors
 * taler-wallet-webex (wallet-webex.git)
 
 
---------
+-------
 Tagging
 -------
 
 Tag releases with an *annotated* commit, like
 
-.. code-block: none
+::
 
   git tag -a v0.1.0 -m "Official release v0.1.0"
   git push origin v0.1.0
 
 ------------------
 Database for tests
------------------
+------------------
 
 For tests in the exchange and merchant to run, make sure that
 a database `talertest` is accessible by `$USER`.  Otherwise tests
@@ -58,7 +58,7 @@ should be the change of the version.
 For the exchange test cases to pass, `make install` must be run first.
 Without it, test cases will fail because plugins can't be located.
 
-.. code-block:
+::
 
   ./bootstrap
   ./configure # add required options for your system
@@ -75,7 +75,7 @@ The version of the wallet is in `manifest.json`.  The `version_name` should be
 adjusted, and `version` should be increased independently on every upload to
 the WebStore.
 
-.. code-block:
+::
 
   ./configure
   make dist
@@ -93,7 +93,7 @@ See https://www.gnu.org/prep/maintain/maintain.html#Automated-FTP-Uploads
 
 Directive file: 
 
-.. code-block:
+::
 
   version: 1.2
   directory: taler
