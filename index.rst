@@ -107,6 +107,7 @@ core components of the Taler reference implementation.
   dev-exchange
   dev-merchant
   deployment.rst
+  releases.rst
 
 ------------------
 Indices and tables
