@@ -49,9 +49,7 @@ Alpha and Beta releases
 Before Taler is considered reasonably stable for actual use, we will
 prefix the number "0." to the release version.  Thus, all alpha and
 beta releases will have a three-digit release number of the form
-"0.MAJOR.MINOR"; here, the "0."  indicates that the software may not
-yet be stable enough for real world applications.
-
+"0.MAJOR.MINOR".
 
 -----------------------
 Roadmap
