@@ -231,7 +231,7 @@ Obtaining wire-transfer information
       //
       // A single /wire response can contain an arbitrary number of these
       // string-object pairs.  However, the keys must be unique.
-      string : Object; // <- FIXME: is this key-value notation correct?
+      string: Object;
      }
 
   Possible encodings for the objects are right now the following:
@@ -357,7 +357,7 @@ exchange.
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
       transfer_details?: any;
 
-      // `base32`_ encoding of `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW. This field appears only if `type` is "WITHDRAW".      
+      // `base32`_ encoding of `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW. This field appears only if `type` is "WITHDRAW".
       details?: string;
 
       // Signature over the transaction `details`.
@@ -651,9 +651,11 @@ the API during normal operation.
       // Information about coin being melted.
       melt_coin: MeltCoin;
 
-      // For each of the `n` new coins, `kappa` transfer keys.
-      // coin_evs[j][k] is the k-th blank (of kappa) for the k-th new coin (of n).
-      coin_evs: CoinBlank[][]; // FIXME TBD
+      // The outer dimension of the 2d array has `kappa` entries
+      // for the cut-and-choose protocol.
+      // The inner array contains `n` entries with blinded coins,
+      // matching the respective entries in `new_denoms`.
+      coin_evs: CoinEnvelope[][];
 
       // `kappa` transfer public keys (ephemeral ECDHE keys)
       transfer_pubs: EddsaPublicKey[];
@@ -798,33 +800,31 @@ the API during normal operation.
       // Constant "commitment violation"
       error: string;
 
-      // offset of in the array of `kappa` commitments where the error
-      // was detected
-      offset: number;
+      // Signature of the coin over the melting operation.
+      coin_sig: EddsaSignature;
 
-      // index of in the with respect to the new coin where the error was
-      // detected, or 2^32-1 if the error is not dependnet on an offeset
-      // related to the new coins.
-      index: number;
+      // Coin that we failed to successfully melt.
+      coin_pub: EddsaPublicKey;
 
-      // name of the entity that failed the check (i.e. "transfer key")
-      object: string;
+      // Amount of the value of the coin to be melted in the refresh session.
+      melt_amount_with_fee: Amount;
 
-      // Information about each melted coin
-      refresh_melt_info: OldCoinInfo; // FIXME
+      // Fee that was due for the melting for the coin.
+      melt_fee: Amount;
 
-      // array with RSA denomination public keys of the coins the original
-      // refresh request asked to be exchangeed
-      newcoins_infos: RsaPublicKey[];
+      // Denomination keys to be used for the coins to be withdrawn.
+      newcoin_infos: RsaPublicKey[];
 
-      // array with `kappa` entries containing as elements
-      // objects with the linkage information
-      link_infos: LinkInfo[];
+      // Array of blinded coins to be withdrawn.  Same length as
+      // `newcoin_infos`.
+      commit_infos: CoinEnvelope[];
 
-      // 2D array with `kappa` entries in the first dimension and the same
-      // length as `newcoin_infos` in the 2nd dimension containing as elements
-      // objects with the commitment information
-      commit_infos: CommitInfo[][];
+      // Transfer public key at index `gamma`.
+      gamma_tp: EddsaPublicKey;
+
+      // Specific `gamma` value chosen by the exchange.
+      gamma: Integer;
+
     }
 
 
