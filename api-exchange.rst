@@ -1298,8 +1298,8 @@ Administrative API: Bank transactions
       // Transaction identifier in the wire details
       transaction: number;
 
-      // Wire transaction details, as originally specified by the merchant
-      wire: any;
+      // `Wire transaction details <wireformats>`_, as originally specified by the merchant
+      wire: Object;
     }
 
   **Response**
@@ -1507,8 +1507,8 @@ binary-compatible with the implementation of the exchange.
       // Private transfer key
       trans_priv: string;
 
-      // Coin public ket
-      coin_pub: string;
+      // `Coin public key <eddsa-coin-pub>`_
+      coin_pub: EddsaPublicKey;
     }
 
   **Response:**
