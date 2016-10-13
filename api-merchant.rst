@@ -366,6 +366,9 @@ The `contract` must have the following structure:
   .. code-block:: tsref
 
     interface Contract {
+      // Human-readable description of the whole purchase
+      summary: string;
+
       // Total price for the transaction.
       // The exchange will subtract deposit fees from that amount
       // before transfering it to the merchant.
