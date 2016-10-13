@@ -978,7 +978,7 @@ typically also view the balance.)
   .. _tsref-type-TrackTransferDetail:
   .. code-block:: tsref
 
-    interface WireDepositDetail {
+    interface TrackTransferDetail {
       // SHA-512 hash of the contact of the merchant with the customer.
       H_contract: HashCode;
 
