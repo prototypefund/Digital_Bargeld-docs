@@ -823,7 +823,7 @@ the API during normal operation.
       gamma_tp: EddsaPublicKey;
 
       // Specific `gamma` value chosen by the exchange.
-      gamma: Integer;
+      gamma: number;
 
     }
 
