@@ -367,6 +367,7 @@ The `contract` must have the following structure:
 
     interface Contract {
       // Human-readable description of the whole purchase
+      // NOTE: still not implemented
       summary: string;
 
       // Total price for the transaction.
