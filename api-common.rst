@@ -157,12 +157,15 @@ Keys
 ^^^^
 
 .. _`tsref-type-EddsaPublicKey`:
+.. _`tsref-type-EcdhePublicKey`:
+.. _`tsref-type-EcdhePrivateKey`:
 .. _`tsref-type-EddsaPrivateKey`:
 .. _`tsref-type-CoinPublicKey`:
 
 .. code-block:: tsref
 
-   // EdDSA public keys always point on Curve25519 (FIXME does that hold for private keys as well?) and represented
+   // EdDSA and ECDHE public keys always point on Curve25519 (FIXME does that hold for private
+   // keys as well?) and represented
    // using the standard 256 bits Ed25519 compact format, converted to Crockford
    // `Base32`_.
    type EddsaPublicKey = string;
@@ -643,6 +646,19 @@ within the :ref:`exchange's codebase <exchange-repo>`.
   };
 
 
+.. _TALER_PaymentResponsePS:
+.. sourcecode:: c
+
+  struct PaymentResponsePS {
+      /**
+       * purpose.purpose = TALER_SIGNATURE_MERCHANT_PAYMENT_OK
+       */
+      struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+      struct GNUNET_HashCode h_contract;
+  };
+
+
+.. _TALER_ContractPS:
 .. sourcecode:: c
 
   struct TALER_ContractPS {
@@ -654,6 +670,7 @@ within the :ref:`exchange's codebase <exchange-repo>`.
       struct TALER_AmountNBO total_amount;
       struct TALER_AmountNBO max_fee;
       struct GNUNET_HashCode h_contract;
+      struct TALER_MerchantPublicKeyP merchant_pub;
   };
 
   struct TALER_ConfirmWirePS {

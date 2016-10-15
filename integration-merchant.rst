@@ -47,38 +47,23 @@ By design, the Taler payment process ensures the following three properties:
    typically allow the other user to perform the same purchase (assuming the item
    is still available).
 
-We call an *offer URL* the user-visible URL of the merchant's Web site
-that triggers the generation of a contract, and the display of the
-contract to the user via the wallet.  The offer URL may include support
-for payment systems other than Taler, for example by including a credit
-card form in the body.  The interaction with the wallet can be started
-over JavaScript or by returning a "402 Payment Required" status code
-with Taler-specific headers. Detailed documentation about involved headers
-is found in a dedicated article, hosted in the wallet git repository, at
-the path `articles/ui/ui.pdf`. It is merchant's choice to initiate the
-communication via JavaScript or "402 Payment Required", but they need to
-take into account that the user may have JavaScript disabled. As for the
-JavaScript tecnique of initiating a communication, please refer to the
-page :ref:`integration-general`.
+We call an *offer URL* any URL at the merchant's Web site that notifies the
+wallet that the user needs to pay for something. The offer URL must take into
+account that the user has no wallet installed, and manage the situation accordingly
+(for example, by showing a credit card paywall).
 
-The merchant may have a *contract URL* which generates the contract
-in JSON format for Taler.  Alternatively, the contract may be embedded
+The merchant needs to have a *contract URL* which generates the JSON
+contract for Taler.  Alternatively, the contract may be embedded
 within the page returned by the offer URL and given to the wallet
 via JavaScript or via an HTTP header.
 
 The merchant must also provide a *pay URL* to which the wallet can
-transmit the payment, which is HTTP POSTing coins. Again, how this
-URL is make known from the merchant to the wallet, it is managed by
-the HTTP headers- or JavaScript-based protocol.
+transmit the payment. Again, how this URL is made known from the merchant
+to the wallet, it is managed by the HTTP headers- or JavaScript-based protocol.
 
-The merchant must have a *fulfillment URL* which checks whether the
-customer has paid.  When the fulfillment URL is triggered the first
-time (which happens when the user accepts the contract), this will not
-(yet) be the case.  In this case, the merchant generates another "402
-Payment Required" status code which will trigger the actual payment from
-the wallet to the *pay URL*.  The wallet will then reload the fulfillment
-URL, and this time the merchant should return the online resource the customer
-paid for (or the shipping status for physical goods).
+The merchant must have a *fulfillment URL* which is in charge of doing
+two thigs: give to the user what he paid for, or redirect the user
+to the offer URL in case he did not pay.
 
 -------
 Example
@@ -87,8 +72,9 @@ Example
 For example, suppose Alice wants to pay for a movie.  She will first
 select the movie from the catalog, which directs her to the offer URL
 *https://merchant/offer?x=8ru42*.  This URL generates a "402 Payment
-Required" response, with a contract stating that Alice is about to buy
-some movie.  The contract includes a fresh transaction ID, say 62.
+Required" response, and will instruct the wallet about the contract's
+URL. Then the wallet downloads the contract that states that Alice is
+about to buy a movie.  The contract includes a fresh transaction ID, say 62.
 Alice's browser detects the response code and displays the contract
 for Alice.
 
@@ -111,7 +97,7 @@ successful, and then reload the fulfillment URL.
 This time (and every time in the future where Alice visits the
 fulfillment URL), she receives the movie.  If the browser has lost the
 session state, the merchant will again ask her to pay (as it happened the
-very first time she visited the fulfillment URK), and she will authenticate
+very first time she visited the fulfillment URL), and she will authenticate
 by replaying the payment.
 
 If Alice decides to share the fulfillment URL with Bob and he visits
@@ -124,17 +110,12 @@ purchase the movie himself.
 Making an offer
 ---------------
 
-The offer URL is a location where the user must pass by in order to get a contract.
-Note that this URL is not strictly asked to initiate the interaction with the
-wallet. For example, if a Website lets first pick the item to buy and *then* the
-payment method in a second page, then we call offer URL only the first page,
-although the communication with the wallet will be initialized by the second page.
-Note that, whenever a user accepts a contract, the wallet will automatically store
-that contract's hash in an internal database. That happens for three reasons:
-
-* to have a cryptographic proof of the user's (and merchant's) activity
-* to not show again the same contract to the user when visiting the fulfillment page
-* to associate the same set of coins with this contract, in order to replay payments
+When a user visits a offer URL, the merchant returns a page that can interact
+with the wallet either via JavaScript or by returning a "402 Payment Required".
+This page's main objective is to inform the wallet on where it should get the
+contract. In case of JavaScript interaction, this is done by FIXME, whereas
+in case of "402 Payment Required", a `X-Taler-contract-url` HTTP header will
+be set to the contract's location. (FIXME: is that right?).
 
 -------------------------------
 Fulfillment interaction details
@@ -169,4 +150,4 @@ By looking at `X-taler-contract-hash`, the wallet can face two situations:
 1. This hashcode is already present in the wallet's database, so the wallet can send the payment to `X-taler-pay-URL`.  During this operation, the wallet associates the data it sent to `X-taler-pay-URL` with the received hashcode, so that it can replay payments whenever it gets this hashcode again.
 2. This hashcode is unknown to the wallet, so the wallet can point the browser to `X-taler-offer-URL`, so the user will get the contract and decide to accept it or not.  This happens when the user gets the fulfillment URL from someone else.
 
-FIXME: explain the JavaScript way ..
+FIXME: explain the JavaScript way
