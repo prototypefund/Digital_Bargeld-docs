@@ -229,7 +229,33 @@ The following API are made available by the merchant's `backend` to the merchant
     is completely intended.
 
   :status 404 Not Found:
-    The wire transfer identifier is unknown to the exchange.
+     The wire transfer identifier is unknown to the exchange.
+
+  :status 409 Conflict:
+  The exchange previously claimed that a deposit was not included in a wire transfer, and now claims that it is.  This means that the exchange is dishonest.  The response contains the cryptographic proof that the exchange is misbehaving in the form of a `TransactionConflictProof`_.
+
+   **Details:**
+  .. _tsref-type-TransactionConflictProof:
+  .. _TransactionConflictProof:
+  .. code-block:: tsref
+
+    interface TransactionConflictProof {
+      // A claim by the exchange about the transfers associated
+      // with a given wire transfer; it does not list the
+      // transaction that `transaction_tracking_claim` says is part
+      // of the aggregate.  This is
+      // a `/track/transfer` response from the exchange.
+      wtid_tracking_claim: TrackTransferResponse;
+
+      // The current claim by the exchange that the given
+      // transaction is included in the above WTID.
+      // (A response from `/track/transaction`).
+      transaction_tracking_claim: TrackTransactionResponse;
+
+      // Public key of the coin for which we got conflicting information.
+      coin_pub: CoinPublicKey;
+
+    }
 
 .. http:get:: /track/transaction
 
@@ -256,6 +282,9 @@ The following API are made available by the merchant's `backend` to the merchant
     is completely intended.
 
   :status 404 Not Found: The transaction is unknown to the backend.
+
+  :status 409 Conflict: The exchange provided conflicting information about the transfer.
+    The response body contains the :ref:`TrackTransferConflictDetails`.
 
 
   **Details:**
@@ -290,6 +319,42 @@ The following API are made available by the merchant's `backend` to the merchant
       deposit_fee: Amount;
     }
 
+  .. _tsref-type-TrackTransferConflictDetails:
+  .. _TrackTransferConflictDetails:
+  .. code-block:: tsref
+
+    interface TrackTransferConflictDetails {
+      // Text describing the issue for humans.
+      hint: String;
+
+      // A /deposit response matching `coin_pub` showing that the
+      // exchange accepted `coin_pub` for `amount_with_fee`.
+      exchange_deposit_proof: DepositSuccess;
+
+      // Offset in the `exchange_transfer_proof` where the
+      // exchange's response fails to match the `exchange_deposit_proof`.
+      conflict_offset: number;
+
+      // The response from the exchange which tells us when the
+      // coin was returned to us, except that it does not match
+      // the expected value of the coin.
+      exchange_transfer_proof: TrackTransferResponse;
+
+      // Public key of the coin for which we have conflicting information.
+      coin_pub: EddsaPublicKey;
+
+      // Merchant transaction in which `coin_pub` was involved for which
+      // we have conflicting information.
+      transaction_id: number;
+
+      // Expected value of the coin.
+      amount_with_fee: Amount;
+
+      // Expected deposit fee of the coin.
+      deposit_fee: Amount;
+
+    }
+
 .. http:get:: /history
 
   Returns transactions up to some point in the past
@@ -311,7 +376,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
       // Hashcode of the relevant contract
       h_contract: HashCode;
-    
+
       // Exchange's base URL
       exchange: string;
 
