@@ -222,6 +222,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
   :query exchange: base URI of the exchange that made the wire transfer
+  :query receiver: identificative token of the merchant :ref:`instance <instances-lab>` which is being tracked.
 
   **Response:**
 
