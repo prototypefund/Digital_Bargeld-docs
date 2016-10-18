@@ -360,7 +360,7 @@ exchange.
       // `base32`_ encoding of `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW. This field appears only if `type` is "WITHDRAW".
       details?: string;
 
-      // Signature over the transaction `details`.
+      // Signature over the transaction `details` (FIXME: Which transaction, which details?).
       signature?: EddsaSignature;
     }
 
