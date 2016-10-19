@@ -90,7 +90,9 @@ The Frontent HTTP API
 
       // Deadline for the customer to pay for this purchase. Note that is up to the frontend
       // to make sure that this value matches the one the backend signed over when the contract
-      // was generated.
+      // was generated. The frontend should never verify if the payment is still on time,
+      // because when payments are replayed it is expxectable that this deadline is expired,
+      // and only the backend can detect if a payment is a reply or not. 
       pay_deadline: Timestamp;
 
       // the chosen exchange's base URL
