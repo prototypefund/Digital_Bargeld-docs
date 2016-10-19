@@ -85,8 +85,13 @@ The Frontent HTTP API
       // a timestamp of this deposit permission. It equals just the contract's timestamp
       timestamp: Timestamp;
 
-      // same value held in the contract's `refund` field
+      // Deadline for the customer to be refunded for this purchase
       refund_deadline: Timestamp;
+
+      // Deadline for the customer to pay for this purchase. Note that is up to the frontend
+      // to make sure that this value matches the one the backend signed over when the contract
+      // was generated.
+      pay_deadline: Timestamp;
 
       // the chosen exchange's base URL
       exchange: string;
@@ -176,10 +181,10 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   The `frontend` passes the :ref:`deposit permission <DepositPermission>`
-  received from the wallet, and optionally adding a field named `pay_deadline`,
+  received from the wallet, and optionally adding a field named `wire_transfer_deadline`,
   indicating a deadline by which he would expect to receive the bank transfer
-  for this deal.  Note that the `pay_deadline` must be after the `refund_deadline`.
-  The backend calculates the `pay_deadline` by adding the `wire_transfer_delay`
+  for this deal.  Note that the `wire_transfer_deadline` must be after the `refund_deadline`.
+  The backend calculates the `wire_transfer_deadline` by adding the `wire_transfer_delay`
   value found in the configuration to the current time.
 
   **Response:**
@@ -233,12 +238,13 @@ The following API are made available by the merchant's `backend` to the merchant
     is completely intended.
 
   :status 404 Not Found:
-     The wire transfer identifier is unknown to the exchange.
+    The wire transfer identifier is unknown to the exchange.
 
   :status 409 Conflict:
-  The exchange previously claimed that a deposit was not included in a wire transfer, and now claims that it is.  This means that the exchange is dishonest.  The response contains the cryptographic proof that the exchange is misbehaving in the form of a `TransactionConflictProof`_.
+    The exchange previously claimed that a deposit was not included in a wire transfer, and now claims that it is.  This means that the exchange is dishonest.  The response contains the cryptographic proof that the exchange is misbehaving in the form of a `TransactionConflictProof`_.
 
-   **Details:**
+  **Details:**
+
   .. _TransactionConflictProof:
   .. _tsref-type-TransactionConflictProof:
   .. code-block:: tsref
