@@ -70,8 +70,8 @@ handle the error as if an internal error (500) had been returned.
 
     interface ErrorDetail {
 
-      // Numeric error code. See "taler_error_codes.h".
-      error_code: number;
+      // Numeric error code unique to the condition. See "taler_error_codes.h".
+      code: number;
 
       // Human-readable description of the error, i.e. "missing parameter", "commitment violation", ...
       // The other arguments are specific to the error value reported here.

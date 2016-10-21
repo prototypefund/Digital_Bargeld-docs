@@ -360,7 +360,7 @@ exchange.
       // `base32`_ encoding of `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW. This field appears only if `type` is "WITHDRAW".
       details?: string;
 
-      // Signature over the transaction `details`.
+      // Signature over the transaction `details` (FIXME: Which transaction, which details?).
       signature?: EddsaSignature;
     }
 
@@ -392,7 +392,7 @@ exchange.
     not yet have completed and might be known to the exchange in the near future.
     In this case, the wallet should repeat the exact same request later again
     using exactly the same blinded coin.
-  :status 402 Payment Required:
+  :status 403 Forbidden:
     The balance of the reserve is not sufficient to withdraw a coin of the indicated denomination.
     The response is `WithdrawError`_ object.
 
@@ -475,7 +475,7 @@ denomination.
     The operation succeeded, the exchange confirms that no double-spending took place.  The response will include a `DepositSuccess`_ object.
   :status 401 Unauthorized:
     One of the signatures is invalid.
-  :status 403:
+  :status 403 Forbidden:
     The deposit operation has failed because the coin has insufficient
     residual value; the request should not be repeated again with this coin.
     In this case, the response is a `DepositDoubleSpendError`_.
@@ -823,7 +823,7 @@ the API during normal operation.
       gamma_tp: EddsaPublicKey;
 
       // Specific `gamma` value chosen by the exchange.
-      gamma: Integer;
+      gamma: number;
 
     }
 
