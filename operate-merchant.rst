@@ -123,7 +123,7 @@ the chosen wireformat. In our demo, we have::
   wireformat = test
   ..
 
-  [default-wireforma]
+  [merchant-instance-wireformat-default]
   test_response_file = ${TALER_CONFIG_HOME}/merchant/wire/test.json
 
 The file `test.json` obeys to the following specification
