@@ -183,3 +183,9 @@ instance `Tor` as follows::
 Please note that :ref:`Taler messagging<merchant-api>` is designed so that the merchant
 frontend can instruct the backend on which instance has to be used in the various operations.
 This information is optional, and if not given, the backend will act as the `default` instance.
+
+++++++++++++
+Installation
+++++++++++++
+
+TBD
