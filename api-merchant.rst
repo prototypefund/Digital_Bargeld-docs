@@ -77,7 +77,7 @@ The Frontent HTTP API
 
       // The merchant instance which is going to receive the final wire transfer.
       // See `instances-lab`_
-      receiver: string;
+      instance: string;
 
       // Signature of `TALER_ContractPS`_
       merchant_sig: EddsaSignature;
@@ -165,8 +165,8 @@ The following API are made available by the merchant's `backend` to the merchant
   * `H_wire`
   * `merchant_pub`
 
-  The frontend may or may not provide a `receiver` field in the proposition, depending on its logic.
-  The ``default`` instance will be used if no `receiver` field is found by the backend.
+  The frontend may or may not provide a `instance` field in the proposition, depending on its logic.
+  The ``default`` instance will be used if no `instance` field is found by the backend.
 
   **Response**
 
@@ -229,7 +229,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
   :query exchange: base URI of the exchange that made the wire transfer
-  :query receiver: identificative token of the merchant :ref:`instance <instances-lab>` which is being tracked.
+  :query instance: identificative token of the merchant :ref:`instance <instances-lab>` which is being tracked.
 
   **Response:**
 
@@ -276,7 +276,7 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   :query id: ID of the transaction we want to trace (an integer)
-  :query receiver: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances-lab`. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
+  :query instance: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances-lab`. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
 
   **Response:**
 
@@ -490,8 +490,8 @@ The `contract` must have the following structure:
       merchant: Merchant;
 
       // Which instance is participating in this contract. See the paragraph `Merchant Instances`.
-      // This field is optional, as the "default" instance is not forced to provide any `receiver` identificator.
-      receiver: string;
+      // This field is optional, as the "default" instance is not forced to provide any `instance` identificator.
+      instance: string;
 
       // The hash of the merchant instance's wire details.
       H_wire: HashCode;
