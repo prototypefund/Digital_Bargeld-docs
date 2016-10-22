@@ -123,7 +123,7 @@ the chosen wireformat. In our demo, we have::
   wireformat = test
   ..
 
-  [default-wireforma]
+  [merchant-instance-wireformat-default]
   test_response_file = ${TALER_CONFIG_HOME}/merchant/wire/test.json
 
 The file `test.json` obeys to the following specification
@@ -177,7 +177,7 @@ instance `Tor` as follows::
   
   ..
 
-  [Tor-wireformat]
+  [merchant-instance-wireformat-Tor]
   TEST_RESPONSE_FILE = ${TALER_CONFIG_HOME}/merchant/wire/tor.json
 
 Please note that :ref:`Taler messagging<merchant-api>` is designed so that the merchant
