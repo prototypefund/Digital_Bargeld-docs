@@ -470,7 +470,7 @@ The `contract` must have the following structure:
       // 53-bit number chosen by the merchant to uniquely identify the contract.
       transaction_id: number;
 
-      // List of products that are part of the purchase (see `below)
+      // List of products that are part of the purchase (see `below <Product>`_)
       products: Product[];
 
       // Time when this contract was generated
@@ -510,6 +510,7 @@ The `contract` must have the following structure:
 
   The `product` object describes the product being purchased from the merchant. It has the following structure:
 
+  .. _Product:
   .. _tsref-type-Product:
   .. code-block:: tsref
 
