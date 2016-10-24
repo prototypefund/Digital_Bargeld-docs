@@ -235,7 +235,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
-    The body of the response is a :ref:`TrackTransactionResponse <TrackTransferResponse>`.  Note that
+    The body of the response is a :ref:`TrackTransferResponse <TrackTransferResponse>`.  Note that
     the similarity to the response given by the exchange for a /track/transfer
     is completely intended.
 

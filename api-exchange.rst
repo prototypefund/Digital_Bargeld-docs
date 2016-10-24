@@ -946,6 +946,7 @@ typically also view the balance.)
     The wire transfer identifier is unknown to the exchange.
 
   .. _TrackTransferResponse:
+  .. _tsref-type-TrackTransferResponse:
   .. code-block:: tsref
 
     interface TrackTransferResponse {
