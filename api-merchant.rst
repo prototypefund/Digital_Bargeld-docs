@@ -252,7 +252,7 @@ The following API are made available by the merchant's `backend` to the merchant
   .. code-block:: tsref
 
     interface TransactionConflictProof {
-      // A claim by the exchange about the transfers associated
+      // A claim by the exchange about the transactions associated
       // with a given wire transfer; it does not list the
       // transaction that `transaction_tracking_claim` says is part
       // of the aggregate.  This is
