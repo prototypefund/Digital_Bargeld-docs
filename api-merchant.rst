@@ -235,7 +235,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
-    The body of the response is a :ref:`TrackTransactionResponse <TrackTransferResponse>`.  Note that
+    The body of the response is a :ref:`TrackTransferResponse <TrackTransferResponse>`.  Note that
     the similarity to the response given by the exchange for a /track/transfer
     is completely intended.
 
@@ -252,7 +252,7 @@ The following API are made available by the merchant's `backend` to the merchant
   .. code-block:: tsref
 
     interface TransactionConflictProof {
-      // A claim by the exchange about the transfers associated
+      // A claim by the exchange about the transactions associated
       // with a given wire transfer; it does not list the
       // transaction that `transaction_tracking_claim` says is part
       // of the aggregate.  This is
@@ -470,7 +470,7 @@ The `contract` must have the following structure:
       // 53-bit number chosen by the merchant to uniquely identify the contract.
       transaction_id: number;
 
-      // List of products that are part of the purchase (see `below)
+      // List of products that are part of the purchase (see `below <Product>`_)
       products: Product[];
 
       // Time when this contract was generated
@@ -510,6 +510,7 @@ The `contract` must have the following structure:
 
   The `product` object describes the product being purchased from the merchant. It has the following structure:
 
+  .. _Product:
   .. _tsref-type-Product:
   .. code-block:: tsref
 
