@@ -489,7 +489,7 @@ The `contract` must have the following structure:
       // More info about the merchant, see below
       merchant: Merchant;
 
-      // Which instance is participating in this contract. See the paragraph `Merchant Instances`.
+      // Which instance is participating in this contract. See `Merchant Instances <instances-lab>`_.
       // This field is optional, as the "default" instance is not forced to provide any `instance` identificator.
       instance: string;
 
