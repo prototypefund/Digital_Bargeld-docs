@@ -549,7 +549,7 @@ denomination.
       // The string constant "DEPOSIT_OK"
       status: string;
 
-      // the EdDSA signature of `TALER_DepositConfirmation`_ using a current
+      // the EdDSA signature of `TALER_DepositConfirmationPS`_ using a current
       // `signing key of the exchange <sign-key-priv>`_ affirming the successful
       // deposit and that the exchange will transfer the funds after the refund
       // deadline, or as soon as possible if the refund deadline is zero.
@@ -946,6 +946,7 @@ typically also view the balance.)
     The wire transfer identifier is unknown to the exchange.
 
   .. _TrackTransferResponse:
+  .. _tsref-type-TrackTransferResponse:
   .. code-block:: tsref
 
     interface TrackTransferResponse {
