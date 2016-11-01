@@ -242,7 +242,9 @@ The following API are made available by the merchant's `backend` to the merchant
   :status 404 Not Found:
     The wire transfer identifier is unknown to the exchange.
 
-  :status 424 Failed Dependency: The exchange provided conflicting information about the transfer.
+  :status 424 Failed Dependency: The exchange provided conflicting information about the transfer. Namely,
+    there is at least one deposit among the deposits aggregated by `wtid` that accounts for a coin whose
+    details don't match the details stored in merchant's database about the same keyed coin.
     The response body contains the `TrackTransferConflictDetails`_.
 
 
