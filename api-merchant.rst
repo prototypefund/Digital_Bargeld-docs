@@ -242,8 +242,9 @@ The following API are made available by the merchant's `backend` to the merchant
   :status 404 Not Found:
     The wire transfer identifier is unknown to the exchange.
 
-  :status 424 Failed Dependency:
-    The exchange previously claimed that a deposit was not included in a wire transfer, and now claims that it is.  This means that the exchange is dishonest.  The response contains the cryptographic proof that the exchange is misbehaving in the form of a `TransactionConflictProof`_.
+  :status 424 Failed Dependency: The exchange provided conflicting information about the transfer.
+    The response body contains the `TrackTransferConflictDetails`_.
+
 
   **Details:**
 
@@ -310,8 +311,8 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 404 Not Found: The transaction is unknown to the backend.
 
-  :status 424 Failed Dependency: The exchange provided conflicting information about the transfer.
-    The response body contains the `TrackTransferConflictDetails`_.
+  :status 424 Failed Dependency:
+    The exchange previously claimed that a deposit was not included in a wire transfer, and now claims that it is.  This means that the exchange is dishonest.  The response contains the cryptographic proof that the exchange is misbehaving in the form of a `TransactionConflictProof`_.
 
   **Details:**
 
