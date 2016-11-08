@@ -106,6 +106,8 @@ his wallet will not be able to replay the payment. Instead, his wallet
 will automatically redirect Bob to the offer URL and allow him to
 purchase the movie himself.
 
+.. _offer:
+
 ---------------
 Making an offer
 ---------------
@@ -113,9 +115,11 @@ Making an offer
 When a user visits a offer URL, the merchant returns a page that can interact
 with the wallet either via JavaScript or by returning a "402 Payment Required".
 This page's main objective is to inform the wallet on where it should get the
-contract. In case of JavaScript interaction, this is done by FIXME, whereas
+contract. In case of JavaScript interaction, this is done by _FIXME_, whereas
 in case of "402 Payment Required", a `X-Taler-contract-url` HTTP header will
-be set to the contract's location. (FIXME: is that right?).
+be set to the contract's location. (_FIXME_: is that right?).
+
+.. _fulfillment:
 
 -------------------------------
 Fulfillment interaction details
@@ -151,3 +155,74 @@ By looking at `X-taler-contract-hash`, the wallet can face two situations:
 2. This hashcode is unknown to the wallet, so the wallet can point the browser to `X-taler-offer-URL`, so the user will get the contract and decide to accept it or not.  This happens when the user gets the fulfillment URL from someone else.
 
 FIXME: explain the JavaScript way
+
+--------------------
+Example: Essay Store
+--------------------
+
+This section is a high-level description of a merchant :ref:`frontend <merchant-arch>`,
+and is inspired by our demonstration essay store running at `https://blog.demo.taler.net/`.
+Basically, it tells how the frontend reacts to clients visiting `offer` and `fulfillment`
+URLs.
+
+The website is implemented in Python+Flask, and is available at
+https://git.taler.net/merchant-frontends.git/tree/talerfrontends/blog.
+
+The desired effect is that the homepage has a list of buyable articles, and once the
+user clicks on one of them, they will either get the Taler :ref:`contract <contract>`
+or a credit card paywall if they have no Taler wallet installed.
+
+In particular, any buyable article on the homepage links to an `offer URL`:
+
+.. sourcecode:: html
+
+  <html>
+    ...
+    <h3><a href="/essay/How_to_write_a_frontend">How to write a frontend</a></h3>
+    ...
+  </html>
+
+whence the offer URL design is as follows::
+
+  https://<BASEURL>/essay/<ARTICLE-NAME>
+
+`<ARTICLE-NAME>` is just a token that uniquely identifies the article within the shop.
+
+The server-side handler for the offer URL will return a special page to the client that
+will either HTTP GET the contract from the frontend, or show the credit card paywall. 
+See `above <offer>`_ how this special page works.
+
+It is interesting to note that the fulfillment URL is just the offer URL plus
+two additional parameters. It looks as follows::
+
+  https://<BASEURL>/essay/<ARTICLE-NAME>?tid=<TRANSACTION-ID>&timestamp=<TIMESTAMP>
+
+.. note::
+
+  Taler does not require that offer and fulfillment URL have this kind of relationship.
+  In fact, it is perfectly acceptable for the fulfillment URL to be hosted on a different
+  server under a different domain name.
+
+The fulfillment URL server-side handler implements the following logic: it checks the state
+to see if `<ARTICLE-NAME>` has been payed, and if so, returns the article to the user.
+If the user didn't pay, then it `executes` the contract by returning a special page to the
+browser. The contract execution is the order to pay that the frontend gives to the wallet.
+
+Basically, the frontend points the wallet to the hashcode of the contract which is to be paid
+and the wallet responds by giving coins to the frontend. Because the frontend doesn't perform
+any cryptographic work by design, it forwards `<ARTICLE-NAME>`, `<TRANSACTION-ID>` and
+`<TIMESTAMP>` to the frontend in order to get the contract's hashcode.
+
+See `above <fulfillment>`_ for a detailed description of how the frontend triggers the
+payment in the wallet.
+
+........
+Security
+........
+
+FIXME:
+
+* explain how the merchant prevents fake contracts reconstructions, AKA how it
+trusts the parameters given in fulfillment URL.
+* explain how the article shown is the original picked article, AKA how the wallet
+cannot lie about article name at /pay-ing time.
