@@ -77,7 +77,7 @@ The Frontent HTTP API
 
       // The merchant instance which is going to receive the final wire transfer.
       // See `instances-lab`_
-      receiver: string;
+      instance: string;
 
       // Signature of `TALER_ContractPS`_
       merchant_sig: EddsaSignature;
@@ -85,8 +85,15 @@ The Frontent HTTP API
       // a timestamp of this deposit permission. It equals just the contract's timestamp
       timestamp: Timestamp;
 
-      // same value held in the contract's `refund` field
+      // Deadline for the customer to be refunded for this purchase
       refund_deadline: Timestamp;
+
+      // Deadline for the customer to pay for this purchase. Note that is up to the frontend
+      // to make sure that this value matches the one the backend signed over when the contract
+      // was generated. The frontend should never verify if the payment is still on time,
+      // because when payments are replayed it is expxectable that this deadline is expired,
+      // and only the backend can detect if a payment is a reply or not. 
+      pay_deadline: Timestamp;
 
       // the chosen exchange's base URL
       exchange: string;
@@ -158,8 +165,8 @@ The following API are made available by the merchant's `backend` to the merchant
   * `H_wire`
   * `merchant_pub`
 
-  The frontend may or may not provide a `receiver` field in the proposition, depending on its logic.
-  The ``default`` instance will be used if no `receiver` field is found by the backend.
+  The frontend may or may not provide a `instance` field in the proposition, depending on its logic.
+  The ``default`` instance will be used if no `instance` field is found by the backend.
 
   **Response**
 
@@ -176,10 +183,10 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   The `frontend` passes the :ref:`deposit permission <DepositPermission>`
-  received from the wallet, and optionally adding a field named `pay_deadline`,
+  received from the wallet, and optionally adding a field named `wire_transfer_deadline`,
   indicating a deadline by which he would expect to receive the bank transfer
-  for this deal.  Note that the `pay_deadline` must be after the `refund_deadline`.
-  The backend calculates the `pay_deadline` by adding the `wire_transfer_delay`
+  for this deal.  Note that the `wire_transfer_deadline` must be after the `refund_deadline`.
+  The backend calculates the `wire_transfer_deadline` by adding the `wire_transfer_delay`
   value found in the configuration to the current time.
 
   **Response:**
@@ -222,17 +229,66 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
   :query exchange: base URI of the exchange that made the wire transfer
+  :query instance: identificative token of the merchant :ref:`instance <instances-lab>` which is being tracked.
 
   **Response:**
 
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
-    The body of the response is a :ref:`TrackTransactionResponse <TrackTransferResponse>`.  Note that
+    The body of the response is a :ref:`TrackTransferResponse <TrackTransferResponse>`.  Note that
     the similarity to the response given by the exchange for a /track/transfer
     is completely intended.
 
   :status 404 Not Found:
     The wire transfer identifier is unknown to the exchange.
+
+  :status 424 Failed Dependency: The exchange provided conflicting information about the transfer. Namely,
+    there is at least one deposit among the deposits aggregated by `wtid` that accounts for a coin whose
+    details don't match the details stored in merchant's database about the same keyed coin.
+    The response body contains the `TrackTransferConflictDetails`_.
+
+
+  **Details:**
+
+  .. _tsref-type-TrackTransferConflictDetails:
+  .. _TrackTransferConflictDetails:
+  .. code-block:: tsref
+
+    interface TrackTransferConflictDetails {
+      // Numerical error code
+      code: number;
+
+      // Text describing the issue for humans.
+      hint: String;
+
+      // A /deposit response matching `coin_pub` showing that the
+      // exchange accepted `coin_pub` for `amount_with_fee`.
+      exchange_deposit_proof: DepositSuccess; // FIXME: define/link-to this object
+
+      // Offset in the `exchange_transfer_proof` where the
+      // exchange's response fails to match the `exchange_deposit_proof`.
+      conflict_offset: number;
+
+      // The response from the exchange which tells us when the
+      // coin was returned to us, except that it does not match
+      // the expected value of the coin.
+      exchange_transfer_proof: TrackTransferResponse;
+
+      // Public key of the coin for which we have conflicting information.
+      coin_pub: EddsaPublicKey;
+
+      // Merchant transaction in which `coin_pub` was involved for which
+      // we have conflicting information.
+      transaction_id: number;
+
+      // Expected value of the coin.
+      amount_with_fee: Amount;
+
+      // Expected deposit fee of the coin.
+      deposit_fee: Amount;
+
+    }
+
 
 .. http:get:: /track/transaction
 
@@ -241,7 +297,7 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   :query id: ID of the transaction we want to trace (an integer)
-  :query receiver: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances-lab`. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
+  :query instance: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances-lab`. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
 
   **Response:**
 
@@ -260,6 +316,8 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 404 Not Found: The transaction is unknown to the backend.
 
+  :status 424 Failed Dependency:
+    The exchange previously claimed that a deposit was not included in a wire transfer, and now claims that it is.  This means that the exchange is dishonest.  The response contains the cryptographic proof that the exchange is misbehaving in the form of a `TransactionConflictProof`_.
 
   **Details:**
 
@@ -293,6 +351,35 @@ The following API are made available by the merchant's `backend` to the merchant
       deposit_fee: Amount;
     }
 
+  .. _TransactionConflictProof:
+  .. _tsref-type-TransactionConflictProof:
+  .. code-block:: tsref
+
+    interface TransactionConflictProof {
+      // Numerical error code
+      code: number; // FIXME Point to some error codes list
+
+      // Human-readable error description
+      hint: string;
+
+      // A claim by the exchange about the transactions associated
+      // with a given wire transfer; it does not list the
+      // transaction that `transaction_tracking_claim` says is part
+      // of the aggregate.  This is
+      // a `/track/transfer` response from the exchange.
+      wtid_tracking_claim: TrackTransferResponse;
+
+      // The current claim by the exchange that the given
+      // transaction is included in the above WTID.
+      // (A response from `/track/transaction`).
+      transaction_tracking_claim: TrackTransactionResponse;
+
+      // Public key of the coin for which we got conflicting information.
+      coin_pub: CoinPublicKey;
+
+    }
+
+
 .. http:get:: /history
 
   Returns transactions up to some point in the past
@@ -314,7 +401,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
       // Hashcode of the relevant contract
       h_contract: HashCode;
-    
+
       // Exchange's base URL
       exchange: string;
 
@@ -396,7 +483,7 @@ The `contract` must have the following structure:
       // 53-bit number chosen by the merchant to uniquely identify the contract.
       transaction_id: number;
 
-      // List of products that are part of the purchase (see `below)
+      // List of products that are part of the purchase (see `below <Product>`_)
       products: Product[];
 
       // Time when this contract was generated
@@ -415,9 +502,9 @@ The `contract` must have the following structure:
       // More info about the merchant, see below
       merchant: Merchant;
 
-      // Which instance is participating in this contract. See the paragraph `Merchant Instances`.
-      // This field is optional, as the "default" instance is not forced to provide any `receiver` identificator.
-      receiver: string;
+      // Which instance is participating in this contract. See `Merchant Instances <instances-lab>`_.
+      // This field is optional, as the "default" instance is not forced to provide any `instance` identificator.
+      instance: string;
 
       // The hash of the merchant instance's wire details.
       H_wire: HashCode;
@@ -436,6 +523,7 @@ The `contract` must have the following structure:
 
   The `product` object describes the product being purchased from the merchant. It has the following structure:
 
+  .. _Product:
   .. _tsref-type-Product:
   .. code-block:: tsref
 
