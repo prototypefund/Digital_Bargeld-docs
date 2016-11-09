@@ -216,13 +216,53 @@ any cryptographic work by design, it forwards `<ARTICLE-NAME>`, `<TRANSACTION-ID
 See `above <fulfillment>`_ for a detailed description of how the frontend triggers the
 payment in the wallet.
 
-........
-Security
-........
+..................
+State and security
+..................
 
-FIXME:
+The server-side state gets updated in two situations, (1) when an article is
+"about" to be bought, which means when the user visits the fulfillment URL,
+and (2) when the user actually pays.  For (1), we use the contract hascode to
+access the state, whereas in (2) we just define a list of payed articles.
+For example:
 
-* explain how the merchant prevents fake contracts reconstructions, AKA how it
-trusts the parameters given in fulfillment URL.
-* explain how the article shown is the original picked article, AKA how the wallet
-cannot lie about article name at /pay-ing time.
+.. sourcecode:: python
+
+  session[<HASHCODE>] = {'article_name': 'How_to_write_a_frontend'} # (1)
+  session['payed_articles'] = ['How_to_write_a_frontend', 'How_to_install_a_backend'] # (2)
+
+The list of payed articles is used by the frontend to deliver the article to the user:
+if the article name is among ``session['payed_articles']``, then the user gets what they
+paid for.
+
+The reason for using `<HASHCODE>` as the key is to prevent the wallet to send bogus
+parameters along the fulfillment URL.  `<HASHCODE>` is the contract hashcode that
+the fulfillment handler gets from the backend using the fulfillment URL parameters.
+
+In fact, when the wallet sends the payment to the frontend pay handler, it has to provide
+both coins and contract hashcode.  That hascode is (1) verified by the backend when it
+receives the coins, (2) used by the frontend to update the list of payed articles.
+
+See below an example of pay handler:
+
+.. sourcecode:: python
+
+  ...
+
+  # 'deposit_permission' is the JSON object sent by the wallet
+  # which contains coins and the contract hashcode.
+  response = send_payment_to_backend(deposit_permission)
+
+  # The backend accepted the payment
+  if 200 == response.status_code:
+      # Here we pick the article name from the state defined at
+      # fulfillment time.
+      # deposit_permission['H_contract'] is the contract hashcode
+      payed_article = session[deposit_permission['H_contract']]['article_name']
+      session['payed_articles'].append(payed_article)
+      
+
+So the wallet is forced to send a valid contract hashcode along the payment,
+and since that hashcode is then used to update the list of payed articles,
+the wallet is forced to send fulfillment URL parameters that match that hashcode,
+therefore being valid parameters.
