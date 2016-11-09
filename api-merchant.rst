@@ -255,6 +255,9 @@ The following API are made available by the merchant's `backend` to the merchant
   .. code-block:: tsref
 
     interface TrackTransferConflictDetails {
+      // Numerical error code
+      code: number;
+
       // Text describing the issue for humans.
       hint: String;
 
@@ -353,6 +356,12 @@ The following API are made available by the merchant's `backend` to the merchant
   .. code-block:: tsref
 
     interface TransactionConflictProof {
+      // Numerical error code
+      code: number; // FIXME Point to some error codes list
+
+      // Human-readable error description
+      hint: string;
+
       // A claim by the exchange about the transactions associated
       // with a given wire transfer; it does not list the
       // transaction that `transaction_tracking_claim` says is part

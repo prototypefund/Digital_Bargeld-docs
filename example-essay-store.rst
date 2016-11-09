@@ -20,21 +20,17 @@
 Example: Essay Store
 ==================================
 
-To properly understand this example, the reader should be familiar with Taler's terminology;
-in particular, definitions like `contract`, `fulfillment URL`, `offering URL`, and `deposit permission`,
-are assumed to be known.  Refer to :ref:`contract`, :ref:`payprot` and :ref:`deposit-par` in order to get
-some general insight on terms and interactions between components.
+This section shows how to set up a merchant :ref:`frontend <merchant-arch>`, and is
+inspired by our demonstration shop running at `https://blog.demo.taler.net/`.
 
-This section describes how the demonstrator essay store interacts with the Taler system.  As for Taler's
-terminology, the demonstrator essay store is an example of `frontend`.
-This demonstrator's code is hosted at `git://taler.net/merchant-frontends/talerfrontends/blog/` and is
-implemented in Python.
+The code we are going to describe is available at
+https://git.taler.net/merchant-frontends.git/tree/talerfrontends/blog
+and is implemented in Python+Flask.
 
-The essay store, available at https://blog.demo.taler.net, is such that its homepage
-is a list of titles from buyable articles and each title links to an `offer URL`.
-In particular, the offer URLs have the following format:
+The desired effect is that the homepage has a list of buyable article, and once the
+user clicks on one of them, they will either get the Taler :ref:`contract <contract>`
+or a credit card paywall if they have no Taler wallet installed.
 
-  `https://blog.demo.taler.net/essay/article_title`
 
 The offer URLs trigger the expected interaction with the wallet. In practical terms, the
 offer URL returns a HTML page that can either show a pay-form in case Taler is not installed

@@ -29,13 +29,13 @@ Design
 
 TO REVIEW::
 
-  The `frontend` is the existing shopping portal of the merchant.
+  The 'frontend' is the existing shopping portal of the merchant.
   The architecture tries to minimize the amount of modifications necessary
   to the `frontend` as well as the trust that needs to be placed into the
   `frontend` logic.  Taler requires the frontend to facilitate two
   JSON-based interactions between the wallet and the `backend`, and
   one of those is trivial.
   
-  The `backend` is a standalone C application intended to implement all
+  The 'backend' is a standalone C application intended to implement all
   the cryptographic routines required to interact with the Taler wallet
   and a Taler exchange.
