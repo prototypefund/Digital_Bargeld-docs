@@ -101,7 +101,7 @@ format.
 
 The command line tool `taler-exchange-wire` is used to create such a file.
 For example, the utility may be invoked as follows::
-  
+
   $ taler-exchange-wire -j '{"name": "The Exchange", "account_number": 10, "bank_uri": "https://bank.demo.taler.net", "type": "test"}' -t test -o exchange.json
 
 Note that the value given to option `-t` must match the value in the JSON's field ``"type"``.
@@ -114,7 +114,7 @@ Outgoing
 This exchange's bank account is used to give money to merchants, after successful :ref:`deposits <deposit-par>`
 operations. If `test` is the chosen wireformat, the outcoming bank account is configured by the following
 options under `[exchange-wire-outcoming-test]`:
-  
+
   * `exchange_account_numer`: which bank account number has the exchange
   * `bank_uri`: base URL of the bank hosting the exchange bank account
 
@@ -181,5 +181,5 @@ Other
 Reserve management
 ------------------
 
-Incoming transactions to the exchange's provider result in the creation or update of reserves, identified by their withdrawal key.
+Incoming transactions to the exchange's provider result in the creation or update of reserves, identified by their reserve key.
 The command line tool `taler-exchange-reservemod` allows create and add money to reserves in the exchange's database.
