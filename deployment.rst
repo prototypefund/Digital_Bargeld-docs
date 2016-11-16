@@ -74,7 +74,9 @@ After the update is over, the `/home/demo/sockets` symlink will be pointed to `d
 
 .. code-block:: none
 
-  $ rm -rf $HOME
+  # Remove all existing files
+  $ find $HOME -exec rm -fr {} \;
+
   $ git clone /var/git/deployment.git
   $ ./deployment/bootstrap-bluegreen demo
 
