@@ -31,26 +31,27 @@ Interaction with merchant websites
 The payment process
 +++++++++++++++++++
 
-By design, the Taler payment process ensures the following three properties:
+By design, the Taler payment process ensures the following properties:
 
 1. The user must see and accept a contract in a secure context before the payment happens.
+   That contract accounts for all the items which are supposed to be bought.
+
 2. The payment process must be idempotent, that is at any later time the customer must
-   be able to replay the payment and again retrieve the online resource he paid for.
+   be able to replay the payment and retrieve the resource he paid for.
    In case where a physical item was bought, this online resource is the merchant's
    order status page, which may contain tracking information for the customer.
-   Note that by `replay the payment` we mean reusing the `same coins` used to pay for
+   Note that by `replaying the payment` we mean reusing the `same coins` used to pay for
    the product the first time to get the `same product` the user got the first time.
-   So the replay will NOT subtract further credit from the user's total budget.
+   So the replay does NOT subtract further credit from the user's total budget.
 
-3. The user must be able to *share* the link to both the page with the unpaid offer or
-   the order status page. If the links are shared with another user, they should
-   typically allow the other user to perform the same purchase (assuming the item
-   is still available).
+3. Purchases are shareable: any purchase is given a URL that allows other users to
+   buy the same item(s).
 
 We call an *offer URL* any URL at the merchant's Web site that notifies the
 wallet that the user needs to pay for something. The offer URL must take into
 account that the user has no wallet installed, and manage the situation accordingly
-(for example, by showing a credit card paywall).
+(for example, by showing a credit card paywall).  The notification can happen either
+via JavaScript or via HTTP headers.
 
 The merchant needs to have a *contract URL* which generates the JSON
 contract for Taler.  Alternatively, the contract may be embedded
@@ -61,9 +62,17 @@ The merchant must also provide a *pay URL* to which the wallet can
 transmit the payment. Again, how this URL is made known from the merchant
 to the wallet, it is managed by the HTTP headers- or JavaScript-based protocol.
 
-The merchant must have a *fulfillment URL* which is in charge of doing
-two thigs: give to the user what he paid for, or redirect the user
-to the offer URL in case he did not pay.
+The merchant must also have a *fulfillment URL*, that addresses points 2 and 3 above.
+In particular, fulfillment URL is responsible for:
+
+* Deliver the final product to the user after the payment
+* Instruct the wallet to send the payment to the pay URL
+* Redirect the user to the offer URL in case they hit a shared fulfillment URL.
+
+Again, Taler provides two ways of doing that: JavaScript- and HTTP headers-based.
+
+Taler helps merchants on the JavaScript-based interaction by providing the
+``taler-wallet-lib``.  See https://git.taler.net/web-common.git/tree/taler-wallet-lib.ts
 
 -------
 Example
@@ -115,9 +124,17 @@ Making an offer
 When a user visits a offer URL, the merchant returns a page that can interact
 with the wallet either via JavaScript or by returning a "402 Payment Required".
 This page's main objective is to inform the wallet on where it should get the
-contract. In case of JavaScript interaction, this is done by _FIXME_, whereas
-in case of "402 Payment Required", a `X-Taler-contract-url` HTTP header will
-be set to the contract's location. (_FIXME_: is that right?).
+contract.  In case of JavaScript interaction, the merchant should just return
+a page whose javascript contains an invocation to ``offerContractFrom(<CONTRACT-URL>)``
+from ``taler-wallet-lib``.  This function will download the contract from
+`<CONTRACT-URL>` and hand it to the wallet.
+
+In case of HTTP headers-based protocol, the merchant needs to set the header
+`X-Taler-contract-url` to the contract URL.  Once this information reaches the
+browser, the wallet will takes action by reading that header and downloading
+the contract.
+
+Either way, the contract gets to the wallet which then renders it to the user.
 
 .. _fulfillment:
 
@@ -127,34 +144,64 @@ Fulfillment interaction details
 
 A payment process is triggered whenever the user visits a fulfillment
 URL and he has no rights in the session state to get the items
-accounted in the fulfillment URL. Note that when the user is not
-visiting a fulfillment URL he got from someone else, it is the wallet
-which points the browser to a fulfillment URL after the user accepts
-the contract.
+accounted in the fulfillment URL. Note that after the user accepts a
+contract, the wallet will automatically point the browser to the
+fulfillment URL.
 
-A fulfillment URL must carry all the details necessary to reconstruct
-a contract.  For simple contracts, a Web shop should encode the unique
-contract details (in particular, the transaction identifier) in the
-URL.  This way, the Web shop can generate fulfillment URLs without
-actually having to write the full contract proposal to its database.
-This allows the merchant to delay disk (write) operations until
-customers actually pay.
+Becasue fulfillment URLs implements replayable and shareable payments
+(see points 2,3 above), fulfillment URL parameter must encompass all the
+details necessary to reconstruct a contract.
 
-Once the payment process has been started, the merchant will then
-reconstruct the contract and re-hash it, sending back to the client
-a "402 Payment required" status code and some HTTP headers which will
-help the wallet to manage the payment, they are:
+That saves the merchant from writing contracts to disk upon every contract
+generation, and defer this operation until customers actually pay.
+
+..................
+HTTP headers based
+..................
+
+Once the fulfillment URL gets visited, deliver the final product if the user has
+paid, otherwise: the merchant will reconstruct the contract and re-hash it, sending
+back to the client a "402 Payment required" status code and some HTTP headers which
+will help the wallet to manage the payment.  Namely:
 
 * `X-taler-contract-hash`
 * `X-taler-pay-URL`
 * `X-taler-offer-URL`
 
-By looking at `X-taler-contract-hash`, the wallet can face two situations:
+The wallet then looks at `X-taler-contract-hash`, and can face two situations:
 
-1. This hashcode is already present in the wallet's database, so the wallet can send the payment to `X-taler-pay-URL`.  During this operation, the wallet associates the data it sent to `X-taler-pay-URL` with the received hashcode, so that it can replay payments whenever it gets this hashcode again.
-2. This hashcode is unknown to the wallet, so the wallet can point the browser to `X-taler-offer-URL`, so the user will get the contract and decide to accept it or not.  This happens when the user gets the fulfillment URL from someone else.
+1. This hashcode is already present in the wallet's database (meaning that the user did accept the related contract), so the wallet can send the payment to `X-taler-pay-URL`.  During this operation, the wallet associates the coins it sent to `X-taler-pay-URL` with this hashcode, so that it can replay payments whenever it gets this hashcode again.
 
-FIXME: explain the JavaScript way
+2. This hashcode is unknown to the wallet (meaning that the user visited a shared fulfillment URL). The wallet then points the browser to `X-taler-offer-URL`, which is in charge of generating a contract referring to the same items accounted in the fulfillment URL.  Of course, the user is then able to accept or not the contract.
+
+................
+JavaScript based
+................
+
+Once the fulfillment URL gets visited, deliver the final product if the user has paid, otherwise:
+the merchant will reconstruct the contract and re-hash it. Then it will return a page whose JavaScript
+needs to include a call to ``taler.executeContract(..)``. See the following example:
+
+.. sourcecode:: html
+
+  <html>
+    <head>
+      <script src="path/to/taler-wallet-lib.js"></script>
+      <script type="application/javascript">
+        // Imported from taler-wallet-lib.js
+        taler.executePayment(<CONTRACT-HASHCODE>, <PAY-URL>, <OFFERING-URL>);
+      </script>
+    </head>
+    ..
+    
+  </html>
+
+The logic which will take place is the same as in the HTTP header based protocol.
+Once ``executePayment(..)`` gets executed in the browser, it will hand its three
+parameters to the wallet, which will:
+
+1. Send the payment to `<PAY-URL>` if `<CONTRACT-HASH>` is found in its database (meaning that the user accepted it).
+2. Redirect the browser to `<OFFER-URL>`, if `<CONTRACT-HASH>` is NOT found in its database, meaning that the user visited a shared fulfillment URL.
 
 --------------------
 Example: Essay Store

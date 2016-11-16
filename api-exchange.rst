@@ -324,7 +324,7 @@ exchange.
 
   :status 200 OK:
     The exchange responds with a `ReserveStatus`_ object;  the reserve was known to the exchange,
-  :status 404 Not Found: The withdrawal key does not belong to a reserve known to the exchange.
+  :status 404 Not Found: The reserve key does not belong to a reserve known to the exchange.
 
   **Details:**
 
