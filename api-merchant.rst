@@ -389,6 +389,7 @@ The following API are made available by the merchant's `backend` to the merchant
   :query date: only transactions *jounger* than this parameter will be returned. It's a timestamp, given in seconds.
 
   **Response**
+
   :status 200 OK: The response is a JSON `array` of  `TransactionHistory`_.
 
   .. _tsref-type-TransactionHistory:
