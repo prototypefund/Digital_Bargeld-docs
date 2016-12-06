@@ -466,7 +466,11 @@ The `contract` must have the following structure:
       // Optional identifier chosen by the merchant,
       // which allows the wallet to detect if it is buying
       // a contract where it already has paid for the same
-      // product instance.
+      // product instance. NOTE: this information is mainly
+      // needed when the customer visits a shared fulfillment
+      // URL about a product they already paid for, so that
+      // the wallet can reuse the same coins used in the first
+      // place.
       repurchase_correlation_id?: string;
 
       // URL that the wallet will navigate to after the customer
