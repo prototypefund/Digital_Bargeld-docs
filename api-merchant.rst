@@ -380,6 +380,32 @@ The following API are made available by the merchant's `backend` to the merchant
     }
 
 
+.. http:post:: /map
+
+  Store a pair formed by a plain contract and its hashcode into the database.
+
+  **Request**
+
+  The frontend passes a `MapRequest`_ object.
+
+  **Response**
+
+  :status 200 OK:
+    The data has been successfully stored.
+
+.. _MapRequest:
+.. _tsref-type-MapRequest:
+.. code-block:: tsref
+
+  interface MapRequest {
+
+    // Plain contract to be stored
+    contract: Contract;
+
+    // contract's hashcode
+    h_contract: HashCode;
+  }
+
 .. http:get:: /history
 
   Returns transactions up to some point in the past
