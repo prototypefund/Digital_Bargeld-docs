@@ -77,6 +77,9 @@ handle the error as if an internal error (500) had been returned.
       // The other arguments are specific to the error value reported here.
       error: string;
 
+      // Hint about error nature
+      hint?: string;
+
       // Name of the parameter that was bogus (if applicable)
       parameter?: string;
 
