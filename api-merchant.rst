@@ -380,7 +380,7 @@ The following API are made available by the merchant's `backend` to the merchant
     }
 
 
-.. http:post:: /map
+.. http:post:: /map/in
 
   Store a pair formed by a plain contract and its hashcode into the database.
 
@@ -393,6 +393,9 @@ The following API are made available by the merchant's `backend` to the merchant
   :status 200 OK:
     The data has been successfully stored.
 
+  :status 422 Unprocessable Entity:
+    The hashcode provided by the frontend does not match the contract.
+
 .. _MapRequest:
 .. _tsref-type-MapRequest:
 .. code-block:: tsref
@@ -402,9 +405,27 @@ The following API are made available by the merchant's `backend` to the merchant
     // Plain contract to be stored
     contract: Contract;
 
-    // contract's hashcode
+    // contract's hashcode. We require this value from the frontend
+    // as an additional check on data integrity.
     h_contract: HashCode;
   }
+
+
+.. http:get:: /map/out
+
+  Retrieve a contract, given its hashcode.
+
+  **Request**
+
+  :query h_contract: hashcode of the contract to retrieve.
+
+  **Response**
+
+  :status 200 OK:
+    The body contains a `contract`_ corresponding to `h_contract`.
+
+  :status 404 Not Found:
+    There is no contract corresponding to `h_contract` into the database.
 
 .. http:get:: /history
 
