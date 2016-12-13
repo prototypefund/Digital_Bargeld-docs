@@ -146,6 +146,35 @@ The Frontent HTTP API
   necessary since the request to ``$pay_url`` must be made from the merchant's
   origin domain in order to preserve information (e.g. cookies, origin header).
 
+.. http:get:: /history
+
+  Return a list of fulfilled contracts.  Typically used by backoffice interfaces.
+
+  **Request**
+
+  :query days: a number indicating that we request contracts from now up to `days` days ago.
+
+  **Response**
+  
+  :status 200 OK: The response is a JSON array of  `TransactionHistory`_.
+
+.. http:get:: /map
+
+  Takes a hashcode and return the related contract.  Typically used by backoffice interfaces.
+
+  **Request**
+
+  :query h_contract: hashcode of the contract we want to retrieve.
+
+  **Return**
+
+  :status 200 OK:
+    The body contains a `contract`_ corresponding to `h_contract`.
+
+  :status 404 Not Found:
+    There is no contract corresponding to `h_contract`.
+
+
 ------------------------------
 The Merchant Backend HTTP API
 ------------------------------
