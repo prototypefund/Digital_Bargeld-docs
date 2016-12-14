@@ -75,8 +75,7 @@ The Frontent HTTP API
       // maximum fees merchant agreed to cover as per the contract
       max_fee: Amount;
 
-      // The merchant instance which is going to receive the final wire transfer.
-      // See `instances-lab`_
+      // The `merchant instance <instances-lab>`_ which is going to receive the final wire transfer.
       instance: string;
 
       // Signature of `TALER_ContractPS`_
