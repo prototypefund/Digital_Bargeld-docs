@@ -291,7 +291,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
       // A /deposit response matching `coin_pub` showing that the
       // exchange accepted `coin_pub` for `amount_with_fee`.
-      exchange_deposit_proof: DepositSuccess; // FIXME: define/link-to this object
+      exchange_deposit_proof: DepositSuccess;
 
       // Offset in the `exchange_transfer_proof` where the
       // exchange's response fails to match the `exchange_deposit_proof`.
@@ -595,8 +595,8 @@ The `contract` must have the following structure:
       // Exchanges that the merchant accepts even if it does not accept any auditors that audit them.
       exchanges: Exchange[];
 
-      // Map from label to a location
-      locations: { [label: string]: Location }; // FIXME make 'Location' clickable
+      // Map from labels to locations
+      locations: { [label: string]: [location: Location], ... };
     }
 
   The wallet must select a exchange that either the mechant accepts directly by listing it in the exchanges arry, or for which the merchant accepts an auditor that audits that exchange by listing it in the auditors array.
@@ -649,8 +649,8 @@ The `contract` must have the following structure:
     }
 
 
-  .. _Location:
   .. _tsref-type-Location:
+  .. _Location:
   .. code-block:: ts
 
     interface Location {

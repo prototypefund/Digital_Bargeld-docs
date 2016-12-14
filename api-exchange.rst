@@ -360,7 +360,7 @@ exchange.
       // `base32`_ encoding of `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW. This field appears only if `type` is "WITHDRAW".
       details?: string;
 
-      // Signature over the transaction `details` (FIXME: Which transaction, which details?).
+      // Signature of `TALER_WithdrawRequestPS`_ created with the `reserves's private key <reserve-priv>`_.  Only present if type is "WITHDRAW".
       signature?: EddsaSignature;
     }
 
@@ -386,7 +386,7 @@ exchange.
   :status 404 Not Found:
     The denomination key or the reserve are not known to the exchange.  If the
     denomination key is unknown, this suggests a bug in the wallet as the
-    wallet should have used current denomination keys from /keys.  If the
+    wallet should have used current denomination keys from `/keys`.  If the
     reserve is unknown, the wallet should not report a hard error yet, but
     instead simply wait for up to a day, as the wire transaction might simply
     not yet have completed and might be known to the exchange in the near future.
@@ -542,6 +542,7 @@ denomination.
   has enough residual value that has not already been deposited or melted.
 
 
+  .. _`tsref-type-DepositSuccess`:
   .. _DepositSuccess:
   .. code-block:: tsref
 
@@ -682,7 +683,7 @@ the API during normal operation.
       // Signature over the `coin public key <eddsa-coin-pub>`_ by the denomination.
       denom_sig: RsaSignature;
 
-      // Signature by the `coin <coin-priv>`_ over the session public key (FIXME: put link to some C definition of this key?)
+      // Signature by the `coin <coin-priv>`_ over the session public key.
       confirm_sig: EddsaSignature;
 
       // Amount of the value of the coin that should be melted as part of
