@@ -16,26 +16,22 @@
 Merchant
 ========
 
-------------
-Introduction
-------------
-TBD
-
 .. _merchant-arch:
-
 ------
 Design
 ------
 
-TO REVIEW::
+In order for a merchant to be Taler-compatible, they need to run two distinct Web
+services: a *frontend* and a *backend*.  The former is typically the Web site where
+the merchant exposes their goods, whereas the latter is a C program in charge of
+making all the Taler-related cryptography.
 
-  The 'frontend' is the existing shopping portal of the merchant.
-  The architecture tries to minimize the amount of modifications necessary
-  to the `frontend` as well as the trust that needs to be placed into the
-  `frontend` logic.  Taler requires the frontend to facilitate two
-  JSON-based interactions between the wallet and the `backend`, and
-  one of those is trivial.
-  
-  The 'backend' is a standalone C application intended to implement all
-  the cryptographic routines required to interact with the Taler wallet
-  and a Taler exchange.
+In details, the frontend gathers all the information from customers about sales,
+and forwards it to the backend via its RESTful API.  Typically, the backend will either
+cryptographically process this data or just forward it to the exchange.
+
+That saves the frontend developers from dealing with cryptography in scripting
+languages and from commmunicating at all with any exchange.
+
+Additionally, the backend RESTful API is such that a frontend might be run completely
+database-less.
