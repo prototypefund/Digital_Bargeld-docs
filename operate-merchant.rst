@@ -188,68 +188,17 @@ This information is optional, and if not given, the backend will act as the `def
 Installation
 ++++++++++++
 
-Please install the following packages before proceeding with the backend compilation.
-
-* autoconf >= 2.69
-* automake >= 1.14
-* libtool >= 2.4
-* autopoint >= 0.19
-* libltdl >= 2.4
-* libunistring >= 0.9.3
-* libcurl >= 7.26 (or libgnurl >= 7.26)
-* GNU libmicrohttpd >= 0.9.39
-* GNU libgcrypt >= 1.6
-* libjansson >= 2.7
-* Postgres >= 9.4, including libpq
-* libgnunetutil (from Git)
-* GNU Taler exchange (from Git)
-
-Except for the last two, these are available in most GNU/Linux
-distributions and should just be installed using the respective
-package manager.
-
-The following instructions will show how to install libgnunetutil and
-the GNU Taler exchange.
 
 
-Before you install libgnunetutil, you must download and install the
-dependencies mentioned above, otherwise the build may succeed but fail
-to export some of the tooling required by Taler.
-
-To download and install libgnunetutil, proceed as follows::
-
-  $ git clone https://gnunet.org/git/gnunet/
-  $ cd gnunet/
-  $ ./bootstrap
-  $ ./configure [--prefix=GNUNETPFX]
-  $ # Each dependency can be fetched from non standard locations via
-  $ # the '--with-<LIBNAME>' option. See './configure --help'.
-  $ make
-  # make install
 
 
-If you did not specify a prefix, GNUnet will install to
-``/usr/local``, which requires you to run the last step as
-``root``.
+In order to compile your merchant backend, you firstly need to install the GNU Taler
+exchange.  As of other dependencies, the merchant backend needs exactly the same ones
+as the exchange does.  Follow :ref:`those instructions <exchange-install>` to build
+everything needed.
 
-To download and install the GNU Taler exchange, proceeds as follows::
-
-  $ git clone git://taler.net/exchange
-  $ cd exchange
-  $ ./bootstrap
-  $ ./configure [--prefix=EXCHANGEPFX] \
-                [--with-gnunet=GNUNETPFX]
-  $ # Each dependency can be fetched from non standard locations via
-  $ # the '--with-<LIBNAME>' option. See './configure --help'.
-  $ make
-  # make install
-
-If you did not specify a prefix, the exchange will install to
-``/usr/local``, which requires you to run the last step as
-``root``.  Note that you have to specify ``--with-gnunet=/usr/local``
-if you installed GNUnet to ``/usr/local`` in the previous step.
-
-Finally, we can build the merchant backend using the following commands::
+Assuming all the dependencies have been correctly installed, we can now build the
+merchant backend using the following commands::
 
   $ git clone git://taler.net/merchant
   $ cd merchant
