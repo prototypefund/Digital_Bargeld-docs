@@ -17,6 +17,7 @@ Merchant
 ========
 
 .. _merchant-arch:
+
 ------
 Design
 ------

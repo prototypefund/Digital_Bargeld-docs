@@ -283,7 +283,7 @@ The following API are made available by the merchant's `backend` to the merchant
   .. code-block:: tsref
 
     interface TrackTransferConflictDetails {
-      // Numerical error code
+      // Numerical `error code <error-codes>`_
       code: number;
 
       // Text describing the issue for humans.
