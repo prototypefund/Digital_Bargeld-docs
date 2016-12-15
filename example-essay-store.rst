@@ -222,12 +222,40 @@ is required to create the proposition.
 Both ``make_contract`` and ``sign_contract`` are defined in
 ``talerfrontends/blog/helpers.py``.
 
+At this point, the user can accept the contract, which triggers the wallet
+to visit the fulfillment page.  The main logic for a fulfillment page handler
+is to (1) return the claimed product, if it has been paid, or (2) instruct the
+wallet to send the payment.
+
+..
+  - TODO Document fulfillment URL layout.
+  - Mention handler function's name.
+  - Mention filename where the handler is located.
+  - Say 'somehow' that this handler is the same from
+    the offer URL.
+
+The state accounts for a product being paid or not, so the fulfillment handler
+will firstly check that:
+
+.. sourcecode:: python
+
+
+def article(name, data=None):
+    # Get list of payed articles from the state
+    payed_articles = session.get("payed_articles", [])
+
+    if name in payed_articles:
+        ...
+        return send_file(get_article_file(article))
+
+
+
+
+
 
 ..
   Fundamental steps:
   
-  - How 402 HTTP headers are set in each step.
-  - How OTOH JavaScript accomplishes the same.
   - How the handler detects offer vs fulfillment.
   
   To mention:
