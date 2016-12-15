@@ -72,6 +72,8 @@ the material covered in the *Operator Handbook*.
   integration-general
   integration-bank
   integration-merchant
+..
+  Temporarily excluded (#4169).
   example-essay-store
 
 
