@@ -384,8 +384,8 @@ The following API are made available by the merchant's `backend` to the merchant
   .. code-block:: tsref
 
     interface TransactionConflictProof {
-      // Numerical error code
-      code: number; // FIXME Point to some error codes list
+      // Numerical `error code <error-codes>`_
+      code: number;
 
       // Human-readable error description
       hint: string;
