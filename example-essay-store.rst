@@ -154,7 +154,10 @@ contract URL from the responsible ``meta`` tag, and finally invoke ``taler.offer
     ...
   }
 
+.. note::
 
+  In order to get our code validated by W3C validators, we can't have inline
+  JavaScript in our pages, but we are forced to import any used script.
 
 ++++++++++++++++++
 Without JavaScript
