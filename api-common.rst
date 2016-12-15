@@ -167,10 +167,10 @@ Keys
 
 .. code-block:: tsref
 
-   // EdDSA and ECDHE public keys always point on Curve25519 (FIXME does that hold for private
-   // keys as well?) and represented
-   // using the standard 256 bits Ed25519 compact format, converted to Crockford
-   // `Base32`_.
+   // EdDSA and ECDHE public keys always point on Curve25519
+   // (FIXME does that hold for private keys as well?)
+   // and represented  using the standard 256 bits Ed25519 compact format,
+   // converted to Crockford `Base32`_.
    type EddsaPublicKey = string;
    type EddsaPrivateKey = string;
 
