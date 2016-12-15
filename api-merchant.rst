@@ -186,7 +186,10 @@ The following API are made available by the merchant's `backend` to the merchant
 
   **Request:**
 
-  The `proposition` that is to be sent from the frontend is a `contract` object *without* the fields
+.. _proposition:
+
+  The `proposition` that is to be sent from the frontend is a :ref:`Contract <contract>` object
+  **without** the fields:
 
   * `exchanges`
   * `auditors`

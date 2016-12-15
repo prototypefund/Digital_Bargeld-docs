@@ -48,9 +48,7 @@ either with or with*out* the use of JavaScript, see next two sections.
   mix concepts form different actions under one section, parts of code not
   related to the section being documented have been left out.
 
-+++++++++++++++
-With JavaScript
-+++++++++++++++
+**With JavaScript**
 
 We return a HTML page, whose template is in
 ``talerfrontends/blog/templates/purchase.html``, that imports ``taler-wallet-lib.js``,
@@ -121,10 +119,8 @@ That is done with:
   taler.onPresent(handleWalletPresent);
   taler.onAbsent(handleWalletAbsent);
 
-.. note::
-
-  The ``taler`` object is exported by ``taler-wallet-lib.js``, and contains all is
-  needed to communicate with the wallet.
+Note that the ``taler`` object is exported by ``taler-wallet-lib.js``, and contains all
+is needed to communicate with the wallet.
 
 
 ``handleWalletAbsent`` doesn't need to do much: it has to only hide the "please wait"
@@ -157,11 +153,74 @@ contract URL from the responsible ``meta`` tag, and finally invoke ``taler.offer
 .. note::
 
   In order to get our code validated by W3C validators, we can't have inline
-  JavaScript in our pages, but we are forced to import any used script.
+  JavaScript in our pages, we are forced to import any used script instead.
 
-++++++++++++++++++
-Without JavaScript
-++++++++++++++++++
+**Without JavaScript**
+
+This case is handled by the function ``article`` defined in
+``talerfrontends/blog/blog.py``.  Its objective is to set the "402 Payment
+Required" HTTP status code, and the HTTP header ``X-Taler-Contract-Url``
+to the actual contract's URL for this purchase.
+
+Upon returning such a response, the wallet will automatically fetch the
+contract from the URL indicated by ``X-Taler-Contract-Url``, and show it
+to the user.
+
+Below is shown how the function ``article`` prepares and returns such a
+response.
+
+.. sourcecode:: python
+
+  ...
+  # Create response.
+  response = make_response(render_template('templates/fallback.html'), 402)
+  # Set "X-Taler-Contract-Url" header to the contract's URL.
+  response.headers["X-Taler-Contract-Url"] = contract_url
+  return response
+
+The ``make_response`` function is exported by Flask, so it's beyond the scope
+of this document to explain it;  however, it returns a "response object" having
+the "402 Payment Required" as HTTP status code, and the
+HTML file ``talerfrontends/blog/templates/fallback.html`` as the body.
+``fallback.html`` contains the credit card pay form, so that if the wallet is
+not installed, the browser would keep that page shown.
+
+``contract_url`` is defined in the earlier steps of the same function; however,
+in this example it looks like:
+``https://shop.demo.taler.net/essay/generate-contract?article_name=Appendix_A:_A_Note_on_Software``.
+
+The next task for this frontend is generating and returning the contract.
+That is accomplished by the function ``generate_contract``, defined in
+``talerfrontends/blog/blog.py``.  See below.
+
+.. sourcecode:: python
+
+  def generate_contract():
+      now = int(time.time())
+      tid = random.randint(1, 2**50)
+      article_name = expect_parameter("article_name")
+      contract = make_contract(article_name=article_name, tid=tid, timestamp=now)
+      contract_resp = sign_contract(contract)
+      logger.info("generated contract: %s" % str(contract_resp))
+      return jsonify(**contract_resp)
+
+
+Its task is then to provide the ``make_contract`` subroutine all the
+values it needs to generate a contract.  Those values are: the timestamp
+for the contract, the transaction ID, and the article name; respectively,
+``now``, ``tid``, and ``article_name``.
+
+After ``make_contract`` returns, the variable ``contract`` will hold a
+`dict` type that complies with a contract :ref:`proposition <proposition>`.
+We then call ``sign_contract`` feeding it with the proposition, so that
+it can forward it to the backend and return it signed.  Finally we return
+the signed proposition, complying with the :ref:`Offer <contract>` object.
+
+For simplicity, any article costs the same price, so no database operation
+is required to create the proposition.
+
+Both ``make_contract`` and ``sign_contract`` are defined in
+``talerfrontends/blog/helpers.py``.
 
 
 ..
