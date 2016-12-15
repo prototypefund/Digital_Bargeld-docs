@@ -86,6 +86,7 @@ interfaces between the core components of Taler.
   :maxdepth: 2
 
   api-common
+  api-error
   api-exchange
   api-merchant
   api-bank
