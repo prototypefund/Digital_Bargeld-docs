@@ -257,8 +257,9 @@ Obtaining wire-transfer information
       salt: string;
 
       // Signaure of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_TEST_DETAILS
-      // FIXME: Specify how to compute the hash which then
-      // gets signed over
+      // Note that the `h_sepa_details` field of `TALER_MasterWireDetailsPS`_ is computed
+      // by concatenating all of the above fields (in the same order they appear) and then
+      // by hashing the obtained concatenation.
       sig: EddsaSignature;
     }
 
@@ -280,8 +281,9 @@ Obtaining wire-transfer information
       bic: string;
 
       // Signaure of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_SEPA_DETAILS
-      // FIXME: Specify how to compute the hash which then
-      // gets signed over
+      // Note that the `h_sepa_details` field of `TALER_MasterWireDetailsPS`_ is computed
+      // by concatenating all of the above fields (in the same order they appear) and then
+      // by hashing the obtained concatenation.
       sig: EddsaSignature;
     }
 
