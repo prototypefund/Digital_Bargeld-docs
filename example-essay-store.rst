@@ -39,7 +39,11 @@ This logic is implemented in the offer URL, which shows the article name:
 
 Once the server side logic receives a request for a offer URL, it needs to
 instruct the wallet to retrieve a Taler contract.  This action can be taken
-either with or with*out* the use of JavaScript, see next two sections.
+either with or with*out* the use of JavaScript, see the next section.
+
+-----------------------
+Triggering the contract
+-----------------------
 
 .. note::
 
@@ -227,39 +231,260 @@ to visit the fulfillment page.  The main logic for a fulfillment page handler
 is to (1) return the claimed product, if it has been paid, or (2) instruct the
 wallet to send the payment.
 
-..
-  - TODO Document fulfillment URL layout.
-  - Mention handler function's name.
-  - Mention filename where the handler is located.
-  - Say 'somehow' that this handler is the same from
-    the offer URL.
+-----------------
+Fulfillment logic
+-----------------
 
 The state accounts for a product being paid or not, so the fulfillment handler
 will firstly check that:
 
 .. sourcecode:: python
 
+  def article(name, data=None):
+      # Get list of payed articles from the state
+      payed_articles = session.get("payed_articles", [])
 
-def article(name, data=None):
-    # Get list of payed articles from the state
-    payed_articles = session.get("payed_articles", [])
+      if name in payed_articles:
+          ...
+          # This statement ends the successful case.
+          return send_file(get_article_file(article))
+      ...
 
-    if name in payed_articles:
-        ...
-        return send_file(get_article_file(article))
+In case the article has not been paid yet, the fulfillment handler needs
+to `reconstruct` the contract, in order to get a precise reference about the
+purchase in progress.
+
+All the information needed to reconstruct the contract is contained in the
+fulfillment URL parameters; the URL layout is as follows:
+
+  `https://shop.demo.taler.net/essay/Appendix_A:_A_Note_on_Software?uuid=<CONTRACT-HASHCODE>&timestamp=<TIMESTAMP>tid=<TRANSACTION_ID>`
+
+The way the contract is reconstructed is exactly the same as it was generated
+in the previous steps:  we need to call ``make_contract`` to get the original
+:ref:`proposition <proposition>` and then ``sign_contract``.  Recall that aside
+from allowing the backend to add missing fields to the proposition, ``sign_contract``
+returns the contract hashcode also, that we should compare with the ``uuid``
+parameter given by the wallet as a URL parameter.
+
+In our blog, all the fulfillment logic is implemented in the function ``article``,
+defined in ``talerfrontends/blog/blog.py``.  It is important to note that this
+function is `the same` function that runs the offer URL; in fact, as long as your
+URL design allows it, it is not mandatory to split up things.  In our example, the
+offer URL differs from the fulfillment URL respect to the number (and type) of
+parameters, so the ``article`` function can easily decide whether it has to handle
+a "offer" or a "fulfillment" case.  See below how the function detects the right
+case and reconstruct the contract.
+
+.. sourcecode:: python
+
+  ...
+  hc = request.args.get("uuid")
+  tid_str = request.args.get("tid")
+  timestamp_str = request.args.get("timestamp")
+  if hc is None or tid_str is None or timestamp_str is None:
+      contract_url = make_url("/generate-contract", ("article_name",name))
+      ... # Go on operating the offer URL and return
+
+  # Operate fulfillment URL
+  try:
+      tid = int(tid_str)
+  except ValueError:
+      raise MalformedParameterError("tid")
+  try:
+      timestamp = int(timestamp_str)
+  except ValueError:
+      raise MalformedParameterError("timestamp")
+
+  # 'name' is the article name, and is set to the right value by Flask
+  restored_contract = make_contract(article_name=name, tid=tid, timestamp=timestamp)
+  contract_resp = sign_contract(restored_contract)
+
+  # Return error if uuid mismatch with the hashcode coming from the backend
+  if contract_resp["H_contract"] != hc:
+      e = jsonify(error="contract mismatch", was=hc, expected=contract_resp["H_contract"])
+      return e, 400
+
+   # We save the article's name in the state since after
+   # receiving the payment this value will point to the
+   # article to be delivered to the customer.  Note how the
+   # contract's hashcode is used to index the state.
+   session[hc] = si = session.get(hc, {})
+   si['article_name'] = name
 
 
+After a successful contract reconstruction, the handler needs to instruct
+the wallet to actually send the payment.  There are as usual two ways this
+can be accomplished: with and without JavaScript.
 
-
-
+**With JavaScript**
 
 ..
-  Fundamental steps:
+  Mention that the template is the same we used for a offer URL!
+
+We return a HTML page, whose template is in
+``talerfrontends/blog/templates/purchase.html``, that imports ``taler-wallet-lib.js``,
+so that the function ``taler.executePayment()`` can be invoked into the user's
+browser.
+
+The fulfillment handler needs to render ``purchase.html`` so that the right
+parameters get passed to ``taler.executePayment()``.
+
+See below how the function ``article`` does the rendering.
+
+.. sourcecode:: python
+
+  return render_template('templates/purchase.html',
+                         hc=hc,
+                         pay_url=quote(pay_url),
+                         offering_url=quote(offering_url),
+                         article_name=name,
+                         no_contract=0,
+                         data_attribute="data-taler-executecontract=%s,%s,%s" % (hc, pay_url, offering_url))
+
+After the rendering, (part of) ``purchase.html`` will look like shown below.
+
+.. sourcecode:: html
+
+  ...
+  <script src="/static/web-common/taler-wallet-lib.js" type="application/javascript"></script>
+  <script src="/static/purchase.js" type="application/javascript"></script>
+  ...
+  <meta name="pay_url" value="https://shop.demo.taler.net/pay">
+  <meta name="offering_url" value="https://shop.demo.taler.net/essay/Appendix_A:_A_Note_on_Software">
+  <!-- Fake hashcode -->
+  <meta name="hc" value="D7D5HDJRP36GTBBRGHXP7204VR773HHQBNFFCY5YY4P18026PAJ0">
+
+  ...
+  ...
+
+  <div id="ccfakeform" class="fade">
+    <p>
+    Oops, it looks like you don't have a Taler wallet installed.  Why don't you enter
+    all your credit card details before reading the article? <em>You can also
+    use GNU Taler to complete the purchase at any time.</em>
+    </p>
   
-  - How the handler detects offer vs fulfillment.
+    <form>
+      First name<br> <input type="text"></input><br>
+      Family name<br> <input type="text"></input><br>
+      Age<br> <input type="text"></input><br>
+      Nationality<br> <input type="text"></input><br>
+      Gender<br> <input type="radio" name"gender">Male</input>
+      CC number<br> <input type="text"></input><br>
+      <input type="radio" name="gender">Female</input><br>
+    </form>
+    <form method="get" action="/cc-payment/{{ article_name }}">
+      <input type="submit"></input>
+    </form>
+  </div>
   
-  To mention:
+  <div id="talerwait">
+    <em>Processing payment with GNU Taler, please wait <span id="action-indicator"></span></em>
+  </div>
+  ...
+
+The script ``purchase.js`` is now in charge of calling ``taler.executePayment()``.
+It will try to register two handlers: one called whenever the wallet is detected in the
+browser, the other if the user has no wallet installed.
+
+That is done with:
+
+.. sourcecode:: javascript
+
+  taler.onPresent(handleWalletPresent);
+  taler.onAbsent(handleWalletAbsent);
+
+.. note::
   
-  - difference between fulfillment and offer URL, although
-    that pattern is not mandatory at all.
-  - how few details we need to reconstruct the contract.
+  So far, the template and script code are exactly the same as the offer URL case,
+  since we use them for both cases:  see below how the script distinguishes offer
+  from fulfillment case.
+
+Note that the ``taler`` object is exported by ``taler-wallet-lib.js``, and contains all
+is needed to communicate with the wallet.
+
+
+``handleWalletAbsent`` doesn't need to do much: it has to only hide the "please wait"
+message and uncover the credit card pay form.  See below.
+
+.. sourcecode:: javascript
+
+  function handleWalletAbsent() {
+    document.getElementById("talerwait").style.display = "none";
+    document.body.style.display = "";
+  }
+
+On the other hand, ``handleWalletPresent`` needs to firstly hide the credit card
+pay form and show the "please wait" message.  After that, it needs to fetch the
+needed parameters from the responsible ``meta`` tags, and finally invoke
+``taler.offerContractFrom()`` using those parameters.  See below its whole definition.
+Note, that since we are in the fulfillment case, the credit card pay form is `almost`
+useless, as it is highly unlikely that the wallet is not installed.
+
+.. sourcecode:: javascript
+
+  function handleWalletPresent() {
+    document.getElementById("ccfakeform").style.display = "none";
+    document.getElementById("talerwait").style.display = "";
+
+    // The `no_contract` value is provided by the function `article` via a
+    // 'meta' tag in the template.  When this value equals 1, then we are in the
+    // "offer URL" case, otherwise we are in the "fulfillment URL" case.
+    let no_contract = document.querySelectorAll("[name=no_contract]")[0];
+    if (Number(no_contract.getAttribute("value"))) {
+      let contract_url = document.querySelectorAll("[name=contract_url]")[0];
+      taler.offerContractFrom(decodeURIComponent(contract_url.getAttribute("value")));
+    }
+    else {
+      // Fulfillment case.
+      let hc = document.querySelectorAll("[name=hc]")[0];
+      let pay_url = document.querySelectorAll("[name=pay_url]")[0];
+      let offering_url = document.querySelectorAll("[name=offering_url]")[0];
+      taler.executePayment(hc.getAttribute("value"),
+                           decodeURIComponent(pay_url.getAttribute("value")),
+                           decodeURIComponent(offering_url.getAttribute("value")));
+    }
+  }
+
+Once the browser executes ``taler.executePayment()``, the wallet will send the coins
+to ``pay_url``.  Once the payment succeeds, the wallet will again visits the
+fulfillment URL, this time getting the article thanks to the "payed" status set by
+the ``pay_url`` handler.
+
+**Without JavaScript**
+
+This case is handled by the function ``article`` defined in
+``talerfrontends/blog/blog.py``.  Its objective is to set the "402 Payment
+Required" HTTP status code, along with the HTTP headers ``X-Taler-Contract-Hash``,
+``X-Taler-Pay-Url``, and ``X-Taler-Offer-Url``.
+
+..
+  FIXME:
+  Are those three parameters anywhere, at least 'kindof' introduced?
+
+Upon returning such a response, the wallet will automatically send the
+payment to the URL indicated in ``X-Taler-Pay-Url``.
+
+The excerpt below shows how the function ``article`` prepares and returns such a
+response.
+
+.. sourcecode:: python
+
+  response = make_response(render_template('templates/fallback.html'), 402)
+  response.headers["X-Taler-Contract-Hash"] = hc
+  response.headers["X-Taler-Pay-Url"] = pay_url
+  response.headers["X-Taler-Offer-Url"] = offering_url
+  return response
+
+The template ``fallback.html`` contains the credit card pay form, which will be
+used in the rare case where the wallet would not be detected in a fulfillment
+session.  Once the payment succeeds, the wallet will again visits the
+fulfillment URL, this time getting the article thanks to the "payed" status set by
+the ``pay_url`` handler.
+
+---------
+Pay logic
+---------
+
+..
+  TBD
