@@ -365,16 +365,7 @@ After the rendering, (part of) ``purchase.html`` will look like shown below.
     </p>
   
     <form>
-      First name<br> <input type="text"></input><br>
-      Family name<br> <input type="text"></input><br>
-      Age<br> <input type="text"></input><br>
-      Nationality<br> <input type="text"></input><br>
-      Gender<br> <input type="radio" name"gender">Male</input>
-      CC number<br> <input type="text"></input><br>
-      <input type="radio" name="gender">Female</input><br>
-    </form>
-    <form method="get" action="/cc-payment/{{ article_name }}">
-      <input type="submit"></input>
+      <!-- Credit card pay form. -->
     </form>
   </div>
   
@@ -486,5 +477,69 @@ the ``pay_url`` handler.
 Pay logic
 ---------
 
-..
-  TBD
+The pay handler for the blog is implemented by the function
+``pay`` at ``talerfrontends/blog/blog.py``.  Its main duty is
+to receive the :ref:`deposit permission <DepositPermission>`
+from the wallet, forward it to the backend, and return the outcome
+to the wallet.  See below the main steps of its implementation.
+
+.. sourcecode:: python
+
+  def pay():
+      # Get the uploaded deposit permission
+      deposit_permission = request.get_json()
+
+      if deposit_permission is None:
+          e = jsonify(error="no json in body")
+          return e, 400
+
+      # Pick the contract's hashcode from deposit permission
+      hc = deposit_permission.get("H_contract")
+
+      # Return error if no hashcode was found
+      if hc is None:
+          e = jsonify(error="malformed deposit permission", hint="H_contract missing")
+          return e, 400
+
+      # Get a handle to the state for this contract, using the
+      # hashcode from deposit permission as the index
+      si = session.get(hc)
+
+      # If no session was found for this contract, then either it
+      # expired or one of the hashcodes (the one we got from 
+      # reconstructing the contract in the fulfillment handler,
+      # and the one we just picked from the deposit permission)
+      # is bogus.  Note how using the contract's hashcode as index
+      # makes harder for the wallet to use different hashcodes
+      # in different steps of the protocol.
+      if si is None:
+          e = jsonify(error="no session for contract")
+          return e, 400 
+
+      # Forward the deposit permission to the backend
+      r = requests.post(urljoin(BACKEND_URL, 'pay'), json=deposit_permission)
+
+      # Return error if the backend returned a HTTP status code
+      # other than 200 OK
+      if 200 != r.status_code:
+          raise BackendError(r.status_code, r.text)
+
+      # The payment went through.  Now set the state as "payed"
+      # and return 200 OK.
+      ...
+
+      # Resume the article name
+      article = si["article_name"]
+
+      # We keep a *list* of articles the customer can currently
+      # read
+      payed_articles = session["payed_articles"] = session.get("payed_articles", [])
+
+      # Add the article name among the ones that were already paid
+      if article not in payed_articles:
+          payed_articles.append(article)
+
+      ...
+
+      # Return success
+      return r.text, 200
