@@ -199,6 +199,13 @@ The next step is to generate `signkeys` and `denomkeys`.
   policy of 12-chars limit for currency names; which is likely going to
   be changed.
 
+The exchange needs to get its database explicitly set up, before it can
+actually be launched.
+
+.. code-block:: none
+
+  $ taler-exchange-dbinit -r
+
 If all previous steps succeeded, it is now possible to launch all the
 processes.  That is accomplished by the following command:
 
