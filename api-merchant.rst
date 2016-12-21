@@ -357,6 +357,10 @@ The following API are made available by the merchant's `backend` to the merchant
   .. code-block:: tsref
 
     interface TransactionWireTransfer {
+
+      // Responsible exchange
+      exchange_uri: string;
+
       // 32-byte wire transfer identifier
       wtid: Base32;
 
