@@ -29,17 +29,17 @@ The code we are going to describe is available at
 https://git.taler.net/merchant-frontends.git/tree/talerfrontends/blog
 and is implemented in Python+Flask.
 
-The desired effect is the homepage showing a list of buyable articles, and once the
+The frontend shows a list of buyable articles in its homepage, and once the
 user clicks one of them, they will either get the Taler :ref:`contract <contract>`
-or a credit card paywall if they have no Taler wallet installed.
+or a credit card paywall if they don't have the Taler wallet.
 
-This logic is implemented in the offer URL, which shows the article name:
+Each article thus links to a `offer URL`, whose layout is shown below.
 
   `https://shop.demo.taler.net/essay/Appendix_A:_A_Note_on_Software`
 
 Once the server side logic receives a request for a offer URL, it needs to
-instruct the wallet to retrieve a Taler contract.  This action can be taken
-either with or with*out* the use of JavaScript, see the next section.
+instruct the browser to retrieve a Taler contract.  This action can be taken
+either with or without JavaScript, see the next section.
 
 -----------------------
 Triggering the contract
