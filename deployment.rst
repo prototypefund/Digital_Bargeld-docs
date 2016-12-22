@@ -199,12 +199,24 @@ The next step is to generate `signkeys` and `denomkeys`.
   policy of 12-chars limit for currency names; which is likely going to
   be changed.
 
-The exchange needs to get its database explicitly set up, before it can
-actually be launched.
+It may be necessary to define database tables for the exchange.  The
+following command does that.
 
 .. code-block:: none
 
+  # Erase all the data!
   $ taler-exchange-dbinit -r
+
+As of the merchant backend, it creates tables at launch time, so it is
+not required to define tables before launching it.  `However`, if some
+table's definition changed over the time, and there is a need to force
+a redefinition of tables, then the following command accomplishes that
+for the merchant:
+
+.. code-block:: none
+
+  # Erase all the data!
+  $ taler-merchant-dbinit -r
 
 If all previous steps succeeded, it is now possible to launch all the
 processes.  That is accomplished by the following command:
