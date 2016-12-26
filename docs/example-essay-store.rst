@@ -30,7 +30,8 @@ https://git.taler.net/merchant-frontends.git/tree/talerfrontends/blog
 and is implemented in Python+Flask.
 
 The desired effect is the homepage showing a list of buyable articles, and once the
-user clicks one of them, they will either get the Taler :ref:`contract <contract>`
+user clicks one of them, they will either get the Taler
+`contract <https://api.taler.net/api-merchnat.html#contract>`_
 or a credit card paywall if they have no Taler wallet installed.
 
 Each article links thus to a `offer URL`, having the following
@@ -248,10 +249,12 @@ for the contract, the transaction ID, and the article name; respectively,
 ``now``, ``tid``, and ``article_name``.
 
 After ``make_contract`` returns, the variable ``contract`` will hold a
-`dict` type that complies with a contract :ref:`proposition <proposition>`.
+`dict` type that complies with a contract
+`proposition <https://api.taler.net/api-merchnat.html#proposition>`_
 We then call ``sign_contract`` feeding it with the proposition, so that
 it can forward it to the backend and return it signed.  Finally we return
-the signed proposition, complying with the :ref:`Offer <contract>` object.
+the signed proposition, complying with the
+`Offer <https://api.taler.net/api-merchant.html#contract>`_ object.
 
 For simplicity, any article costs the same price, so the frontend
 doesn't need to map articles to prices.
@@ -300,10 +303,10 @@ fulfillment URL parameters.  See below the URL layout:
 
 The way the contract is reconstructed is exactly the same as it was generated
 in the previous steps:  we need to call ``make_contract`` to get the original
-:ref:`proposition <proposition>` and then ``sign_contract``.  Recall that aside
-from allowing the backend to add missing fields to the proposition, ``sign_contract``
-returns the contract hashcode also, that we should compare with the ``uuid``
-parameter provided by the wallet.
+`proposition <https://api.taler.net/api-merchnat.html#proposition>`_ and then
+``sign_contract``.  Recall that aside from allowing the backend to add missing
+fields to the proposition, ``sign_contract`` returns the contract hashcode also,
+that we should compare with the ``uuid`` parameter provided by the wallet.
 
 In our blog, all the fulfillment logic is implemented in the function ``article``,
 defined in ``talerfrontends/blog/blog.py``.  It is important to note that this
@@ -551,8 +554,8 @@ Pay logic
 ---------
 
 The pay handler for the blog is implemented by the function
-``pay`` at ``talerfrontends/blog/blog.py``.  Its main duty is
-to receive the :ref:`deposit permission <DepositPermission>`
+``pay`` at ``talerfrontends/blog/blog.py``.  Its main duty is to receive the
+`deposit permission <https://api.taler.net/api-merchant.html#DepositPermission>`_
 from the wallet, forward it to the backend, and return the outcome
 to the wallet.  See below the main steps of its implementation.
 

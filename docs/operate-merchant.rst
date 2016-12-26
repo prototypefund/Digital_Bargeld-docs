@@ -88,7 +88,8 @@ pattern::
 
    schema://hostname/
 
-`master_key` is the base32 encoding of the exchange's master key (see :ref:`/keys <keys>`).
+`master_key` is the base32 encoding of the exchange's master key
+(see `/keys <https://api.taler.net/api-exchange.html#keys>`_).
 In our demo, we use the following configuration::
 
    [merchant-exchange-test]
@@ -180,17 +181,14 @@ instance `Tor` as follows::
   [merchant-instance-wireformat-Tor]
   TEST_RESPONSE_FILE = ${TALER_CONFIG_HOME}/merchant/wire/tor.json
 
-Please note that :ref:`Taler messagging<merchant-api>` is designed so that the merchant
-frontend can instruct the backend on which instance has to be used in the various operations.
-This information is optional, and if not given, the backend will act as the `default` instance.
+Please note that `Taler messagging <https://api.taler.net/api-merchant.html#merchant-api>`_
+is designed so that the merchant frontend can instruct the backend on which instance has to
+be used in the various operations. This information is optional, and if not given,
+the backend will act as the `default` instance.
 
 ++++++++++++
 Installation
 ++++++++++++
-
-
-
-
 
 In order to compile your merchant backend, you firstly need to install the GNU Taler
 exchange.  As of other dependencies, the merchant backend needs exactly the same ones
