@@ -25,7 +25,7 @@ Merchant API
 
 Before reading the API reference documentation, see the
 `merchant architecture <https://docs.taler.net/dev-merchant.html#merchant-arch>`_
-and :ref:`payprot`
+and the `payment protocol <https://docs.taler.net/integration-merchant.html#payprot>`_
 
 ---------------------
 The Frontend HTTP API
@@ -141,8 +141,8 @@ This frontend API is non-normative, and only gives an example of what a typical 
   Returns a cooperative merchant page (called the execution page) that will
   send the ``taler-execute-payment`` to the wallet and react to failure or
   success of the actual payment. ``fulfillment_url`` is included in the `contract`_.
-  Furthermore, :ref:`payprot` documents the payment protocol between wallets and
-  merchants.
+  Furthermore, `https://docs.taler.net/integration-merchant.html#payprot`_
+  documents the payment protocol between wallets and merchants.
 
   The wallet will inject an ``XMLHttpRequest`` request to the merchant's
   ``$pay_url`` in the context of the execution page.  This mechanism is
