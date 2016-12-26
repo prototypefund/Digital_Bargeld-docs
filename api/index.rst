@@ -41,35 +41,6 @@ In this document, we describe the REST-based APIs between the various
 components, internal architecture of key components, and how to get them
 installed.
 
--------
-Preface
--------
-
-The *Operator Handbook* is for people who want to run a exchange or a merchant.
-It focuses on how to install, configure and run the required software.
-
-.. toctree::
-  :maxdepth: 2
-
-  global_licensing
-  versioning
-
-------------------------
-Web Integration Handbook
-------------------------
-
-The *Web Integration Handbook* is for those who want to interact with Taler
-wallets on their own website.  Integrators will also have to be familiar with
-the material covered in the *Operator Handbook*.
-
-
-.. toctree::
-  :maxdepth: 2
-
-  integration-general
-  integration-bank
-  integration-merchant
-
 --------------------------------------
 Taler HTTP Core Protocol Specification
 --------------------------------------

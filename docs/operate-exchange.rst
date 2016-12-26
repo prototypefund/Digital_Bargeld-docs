@@ -106,12 +106,15 @@ For example, the utility may be invoked as follows::
 
 Note that the value given to option `-t` must match the value in the JSON's field ``"type"``.
 
-The generated file will be echoed by the exchange when serving :ref:`/wire <wire-req>` requests.
+The generated file will be echoed by the exchange when serving
+`/wire <https://api.taler.net/api-exchange.html#wire-req>`_
+requests.
 
 Outgoing
 ^^^^^^^^
 
-This exchange's bank account is used to give money to merchants, after successful :ref:`deposits <deposit-par>`
+This exchange's bank account is used to give money to merchants, after successful
+`deposits <https://api.taler.net/api-exchange.html#deposit-par>`_
 operations. If `test` is the chosen wireformat, the outcoming bank account is configured by the following
 options under `[exchange-wire-outcoming-test]`:
 
