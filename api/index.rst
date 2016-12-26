@@ -41,9 +41,9 @@ In this document, we describe the REST-based APIs between the various
 components, internal architecture of key components, and how to get them
 installed.
 
------------------
-Operator Handbook
------------------
+-------
+Preface
+-------
 
 The *Operator Handbook* is for people who want to run a exchange or a merchant.
 It focuses on how to install, configure and run the required software.
@@ -52,9 +52,6 @@ It focuses on how to install, configure and run the required software.
   :maxdepth: 2
 
   global_licensing
-  configuration-basics
-  operate-exchange
-  operate-merchant
   versioning
 
 ------------------------
@@ -72,8 +69,6 @@ the material covered in the *Operator Handbook*.
   integration-general
   integration-bank
   integration-merchant
-  example-essay-store
-
 
 --------------------------------------
 Taler HTTP Core Protocol Specification
@@ -92,33 +87,3 @@ interfaces between the core components of Taler.
   api-bank
 
   wireformats
-
-
-------------------
-Developer Handbook
-------------------
-
-The *Developer Handbook* brings developers up to speed who want to hack on the
-core components of the Taler reference implementation.
-
-.. toctree::
-  :maxdepth: 2
-
-  dev-talerdotnet
-  dev-wallet-wx
-  dev-exchange
-  dev-merchant
-  deployment.rst
-  releases.rst
-
-------------------
-Indices and tables
-------------------
-
-.. toctree::
-  :hidden:
-
-  glossary
-
-* :doc:`glossary`
-* :ref:`search`
