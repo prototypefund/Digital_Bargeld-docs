@@ -23,7 +23,9 @@
 Merchant API
 ============
 
-Before reading the API reference documentation, see the :ref:`merchant architecture<merchant-arch>` and :ref:`payprot`
+Before reading the API reference documentation, see the
+`merchant architecture <https://docs.taler.net/dev-merchant.html#merchant-arch>`_
+and :ref:`payprot`
 
 ---------------------
 The Frontend HTTP API
@@ -262,7 +264,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
   :query exchange: base URI of the exchange that made the wire transfer
-  :query instance: (optional) identificative token of the merchant :ref:`instance <instances-lab>` which is being tracked.
+  :query instance: (optional) identificative token of the merchant `instance <https://docs.taler.net/operate-merchant.html#instances-lab>`_ which is being tracked.
 
   **Response:**
 
@@ -330,7 +332,7 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   :query id: ID of the transaction we want to trace (an integer)
-  :query instance: identificative token for the merchant instance which is to be tracked (optional). See :ref:`instances-lab`. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
+  :query instance: identificative token for the merchant instance which is to be tracked (optional). See `https://docs.taler.net/operate-merchant.html#instances-lab`_. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
 
   **Response:**
 

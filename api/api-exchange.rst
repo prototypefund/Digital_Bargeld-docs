@@ -20,7 +20,8 @@ The Exchange RESTful JSON API
 =============================
 
 The API specified here follows the :ref:`general conventions <http-common>`
-for all details not specified in the individual requests. The :ref:`glossary`
+for all details not specified in the individual requests.
+The `glossary <https://docs.taler.net/glossary.html#glossary>`
 defines all specific terms used in this section.
 
 .. _keys:
