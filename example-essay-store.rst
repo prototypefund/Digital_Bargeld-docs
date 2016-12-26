@@ -21,7 +21,7 @@ Example: Essay Store
 ====================
 
 This section shows how to set up a merchant :ref:`frontend <merchant-arch>`, and is
-inspired by our demonstration shop running at `https://blog.demo.taler.net/`.
+inspired by our demonstration shop running at `https://shop.demo.taler.net/`.
 It is recommended that the reader is already familiar with the
 :ref:`payment protocol and terminology <payprot>`.
 
@@ -33,45 +33,62 @@ The desired effect is the homepage showing a list of buyable articles, and once 
 user clicks one of them, they will either get the Taler :ref:`contract <contract>`
 or a credit card paywall if they have no Taler wallet installed.
 
-This logic is implemented in the offer URL, which shows the article name:
+Each article links thus to a `offer URL`, having the following
+layout:
 
   `https://shop.demo.taler.net/essay/Appendix_A:_A_Note_on_Software`
 
 Once the server side logic receives a request for a offer URL, it needs to
 instruct the wallet to retrieve a Taler contract.  This action can be taken
-either with or with*out* the use of JavaScript, see the next section.
+either with or **without** the use of JavaScript, see the next section.
 
 -----------------------
 Triggering the contract
 -----------------------
 
+It is important to note that the contract is not returned simply
+as the offer URL's response, but rather the frontend `instructs`
+the browser on how to retrieve the contract.  That is needed for
+the right handling of the cases where the wallet is not installed.
+
 .. note::
 
-  The code samples shown below are intentionally incomplete, as often
+  The code samples shown below are intentionally "incomplete", as often
   one function contains logic for multiple actions.  Thus in order to not
   mix concepts form different actions under one section, parts of code not
   related to the section being documented have been left out.
 
 **With JavaScript**
 
-We return a HTML page, whose template is in
-``talerfrontends/blog/templates/purchase.html``, that imports ``taler-wallet-lib.js``,
-so that the function ``taler.offerContractFrom()`` can be invoked into the user's
+In this case, the objective is to call the function ``taler.offerContractFrom()`` into the user browser, which will then retrieve the
+contract.  In order to do that, we return a HTML page, whose
+template is in ``talerfrontends/blog/templates/purchase.html``,
+that imports ``taler-wallet-lib.js``, so that the function
+``taler.offerContractFrom()`` can be invoked into the user's
 browser.
 
 The server side handler for a offer URL needs to render ``purchase.html`` by passing
 the right parameters to ``taler.offerContractFrom()``.
 
 The rendering is done by the ``article`` function at ``talerfrontends/blog/blog.py``,
-and looks like the following sample.
+and is done by Flask's ``render_template()``, see below.
 
 .. sourcecode:: python
 
-  return render_template('templates/purchase.html',
-                          article_name=name,
-                          no_contract=1,
-                          contract_url=quote(contract_url),
-                          data_attribute="data-taler-contractoffer=%s" % contract_url)
+  # 'name' is the article name, and is set to the right value
+  # by Flask
+  # The 'data' parameter is used to send images along
+  # the articles, however its use is beyond the scope of
+  # this survey.
+  def article(name, data=None):
+      ...
+      ...
+
+      return render_template('templates/purchase.html',
+                              article_name=name,
+                              no_contract=1,
+                              contract_url=quote(contract_url),
+                              data_attribute="data-taler-contractoffer=%s" % contract_url)
 
 After the rendering, (part of) ``purchase.html`` will look like shown below.
 
@@ -133,7 +150,9 @@ message and uncover the credit card pay form.  See below.
 .. sourcecode:: javascript
 
   function handleWalletAbsent() {
+    // Hide "please wait" message
     document.getElementById("talerwait").style.display = "none";
+    // Uncover credit card pay form
     document.body.style.display = "";
   }
 
@@ -144,12 +163,17 @@ contract URL from the responsible ``meta`` tag, and finally invoke ``taler.offer
 .. sourcecode:: javascript
 
   function handleWalletPresent() {
+    // Hide credit card paywall
     document.getElementById("ccfakeform").style.display = "none";
+    // Show "please wait" message
     document.getElementById("talerwait").style.display = "";
     ...
     ...
       // Fetch contract URL from 'meta' tag.
       let contract_url = document.querySelectorAll("[name=contract_url]")[0];
+      // If this call is successful, it will obtain the contract,
+      // hand it to the wallet, so the wallet can eventually
+      // show it to the user.
       taler.offerContractFrom(decodeURIComponent(contract_url.getAttribute("value")));
     ...
   }
@@ -175,12 +199,20 @@ response.
 
 .. sourcecode:: python
 
-  ...
-  # Create response.
-  response = make_response(render_template('templates/fallback.html'), 402)
-  # Set "X-Taler-Contract-Url" header to the contract's URL.
-  response.headers["X-Taler-Contract-Url"] = contract_url
-  return response
+  # 'name' is the article name, and is set to the right value
+  # by Flask
+  # The 'data' parameter is used to send images along
+  # the articles, however its use is beyond the scope of
+  # this survey.
+  def article(name, data=None):
+      ...
+      ...
+
+      # Create response.
+      response = make_response(render_template('templates/fallback.html'), 402)
+      # Set "X-Taler-Contract-Url" header to the contract's URL.
+      response.headers["X-Taler-Contract-Url"] = contract_url
+      return response
 
 The ``make_response`` function is exported by Flask, so it's beyond the scope
 of this document to explain it;  however, it returns a "response object" having
@@ -191,10 +223,11 @@ not installed, the browser would keep that page shown.
 
 ``contract_url`` is defined in the earlier steps of the same function; however,
 in this example it looks like:
-``https://shop.demo.taler.net/essay/generate-contract?article_name=Appendix_A:_A_Note_on_Software``.
 
-The next task for this frontend is generating and returning the contract.
-That is accomplished by the function ``generate_contract``, defined in
+  `https://shop.demo.taler.net/essay/generate-contract?article_name=Appendix_A:_A_Note_on_Software`.
+
+The frontend will also have to provide the contract.  That is done
+by the handler ``generate_contract``, defined in
 ``talerfrontends/blog/blog.py``.  See below.
 
 .. sourcecode:: python
@@ -209,7 +242,7 @@ That is accomplished by the function ``generate_contract``, defined in
       return jsonify(**contract_resp)
 
 
-Its task is then to provide the ``make_contract`` subroutine all the
+Its task is to feed the ``make_contract`` subroutine with all the
 values it needs to generate a contract.  Those values are: the timestamp
 for the contract, the transaction ID, and the article name; respectively,
 ``now``, ``tid``, and ``article_name``.
@@ -220,8 +253,8 @@ We then call ``sign_contract`` feeding it with the proposition, so that
 it can forward it to the backend and return it signed.  Finally we return
 the signed proposition, complying with the :ref:`Offer <contract>` object.
 
-For simplicity, any article costs the same price, so no database operation
-is required to create the proposition.
+For simplicity, any article costs the same price, so the frontend
+doesn't need to map articles to prices.
 
 Both ``make_contract`` and ``sign_contract`` are defined in
 ``talerfrontends/blog/helpers.py``.
@@ -240,22 +273,28 @@ will firstly check that:
 
 .. sourcecode:: python
 
+  # 'name' is the article name, and is set to the right value
+  # by Flask
+  # The 'data' parameter is used to send images along
+  # the articles, however its use is beyond the scope of
+  # this survey.
   def article(name, data=None):
       # Get list of payed articles from the state
       payed_articles = session.get("payed_articles", [])
 
       if name in payed_articles:
           ...
-          # This statement ends the successful case.
+          # The articles has been paid, so return it to the
+          # customer.
           return send_file(get_article_file(article))
       ...
 
 In case the article has not been paid yet, the fulfillment handler needs
 to `reconstruct` the contract, in order to get a precise reference about the
-purchase in progress.
+purchase in being served.
 
 All the information needed to reconstruct the contract is contained in the
-fulfillment URL parameters; the URL layout is as follows:
+fulfillment URL parameters.  See below the URL layout:
 
   `https://shop.demo.taler.net/essay/Appendix_A:_A_Note_on_Software?uuid=<CONTRACT-HASHCODE>&timestamp=<TIMESTAMP>tid=<TRANSACTION_ID>`
 
@@ -264,7 +303,7 @@ in the previous steps:  we need to call ``make_contract`` to get the original
 :ref:`proposition <proposition>` and then ``sign_contract``.  Recall that aside
 from allowing the backend to add missing fields to the proposition, ``sign_contract``
 returns the contract hashcode also, that we should compare with the ``uuid``
-parameter given by the wallet as a URL parameter.
+parameter provided by the wallet.
 
 In our blog, all the fulfillment logic is implemented in the function ``article``,
 defined in ``talerfrontends/blog/blog.py``.  It is important to note that this
@@ -273,29 +312,36 @@ URL design allows it, it is not mandatory to split up things.  In our example, t
 offer URL differs from the fulfillment URL respect to the number (and type) of
 parameters, so the ``article`` function can easily decide whether it has to handle
 a "offer" or a "fulfillment" case.  See below how the function detects the right
-case and reconstruct the contract.
+case and reconstructs the contract.
 
 .. sourcecode:: python
 
-  ...
-  hc = request.args.get("uuid")
-  tid_str = request.args.get("tid")
-  timestamp_str = request.args.get("timestamp")
-  if hc is None or tid_str is None or timestamp_str is None:
-      contract_url = make_url("/generate-contract", ("article_name",name))
-      ... # Go on operating the offer URL and return
+  # 'name' is the article name, and is set to the right value
+  # by Flask
+  # The 'data' parameter is used to send images along
+  # the articles, however its use is beyond the scope of
+  # this survey.
+  def article(name, data=None):
 
-  # Operate fulfillment URL
-  try:
-      tid = int(tid_str)
-  except ValueError:
-      raise MalformedParameterError("tid")
-  try:
-      timestamp = int(timestamp_str)
-  except ValueError:
-      raise MalformedParameterError("timestamp")
+      ...
+      hc = request.args.get("uuid")
+      tid_str = request.args.get("tid")
+      timestamp_str = request.args.get("timestamp")
+      if hc is None or tid_str is None or timestamp_str is None:
+          # Offer URL case.
+          contract_url = make_url("/generate-contract", ("article_name",name))
+          ... # Go on operating the offer URL and return
+    
+      # Fulfillment URL case from here on.
+      try:
+          tid = int(tid_str)
+      except ValueError:
+          raise MalformedParameterError("tid")
+      try:
+          timestamp = int(timestamp_str)
+      except ValueError:
+          raise MalformedParameterError("timestamp")
 
-  # 'name' is the article name, and is set to the right value by Flask
   restored_contract = make_contract(article_name=name, tid=tid, timestamp=timestamp)
   contract_resp = sign_contract(restored_contract)
 
@@ -333,13 +379,23 @@ See below how the function ``article`` does the rendering.
 
 .. sourcecode:: python
 
-  return render_template('templates/purchase.html',
-                         hc=hc,
-                         pay_url=quote(pay_url),
-                         offering_url=quote(offering_url),
-                         article_name=name,
-                         no_contract=0,
-                         data_attribute="data-taler-executecontract=%s,%s,%s" % (hc, pay_url, offering_url))
+  # 'name' is the article name, and is set to the right value
+  # by Flask
+  # The 'data' parameter is used to send images along
+  # the articles, however its use is beyond the scope of
+  # this survey.
+  def article(name, data=None):
+
+      ...
+      ...
+    
+      return render_template('templates/purchase.html',
+                             hc=hc,
+                             pay_url=quote(pay_url),
+                             offering_url=quote(offering_url),
+                             article_name=name,
+                             no_contract=0,
+                             data_attribute="data-taler-executecontract=%s,%s,%s" % (hc, pay_url, offering_url))
 
 After the rendering, (part of) ``purchase.html`` will look like shown below.
 
@@ -387,9 +443,10 @@ That is done with:
 
 .. note::
   
-  So far, the template and script code are exactly the same as the offer URL case,
-  since we use them for both cases:  see below how the script distinguishes offer
-  from fulfillment case.
+  So far, the template and the imported script (``purchase.js``)
+  are exactly the same as the offer URL case, since we use them
+  for both cases.  See below how the script distinguishes "offer"
+  from "fulfillment" case.
 
 Note that the ``taler`` object is exported by ``taler-wallet-lib.js``, and contains all
 is needed to communicate with the wallet.
@@ -401,7 +458,9 @@ message and uncover the credit card pay form.  See below.
 .. sourcecode:: javascript
 
   function handleWalletAbsent() {
+    // Hide "please wait" message
     document.getElementById("talerwait").style.display = "none";
+    // Uncover credit card pay form
     document.body.style.display = "";
   }
 
@@ -415,19 +474,22 @@ useless, as it is highly unlikely that the wallet is not installed.
 .. sourcecode:: javascript
 
   function handleWalletPresent() {
+    // Hide the credit card pay form
     document.getElementById("ccfakeform").style.display = "none";
+    // Show "please wait" message
     document.getElementById("talerwait").style.display = "";
 
     // The `no_contract` value is provided by the function `article` via a
     // 'meta' tag in the template.  When this value equals 1, then we are in the
-    // "offer URL" case, otherwise we are in the "fulfillment URL" case.
+    // "offer" URL case, otherwise we are in the "fulfillment" URL case.
     let no_contract = document.querySelectorAll("[name=no_contract]")[0];
     if (Number(no_contract.getAttribute("value"))) {
+      // "Offer" case
       let contract_url = document.querySelectorAll("[name=contract_url]")[0];
       taler.offerContractFrom(decodeURIComponent(contract_url.getAttribute("value")));
     }
     else {
-      // Fulfillment case.
+      // "Fulfillment" case.
       let hc = document.querySelectorAll("[name=hc]")[0];
       let pay_url = document.querySelectorAll("[name=pay_url]")[0];
       let offering_url = document.querySelectorAll("[name=offering_url]")[0];
@@ -437,8 +499,8 @@ useless, as it is highly unlikely that the wallet is not installed.
     }
   }
 
-Once the browser executes ``taler.executePayment()``, the wallet will send the coins
-to ``pay_url``.  Once the payment succeeds, the wallet will again visits the
+Once the browser executes ``taler.executePayment(...)``, the wallet will send the coins
+to ``pay_url``.  Once the payment succeeds, the wallet will again visit the
 fulfillment URL, this time getting the article thanks to the "payed" status set by
 the ``pay_url`` handler.
 
@@ -461,11 +523,22 @@ response.
 
 .. sourcecode:: python
 
-  response = make_response(render_template('templates/fallback.html'), 402)
-  response.headers["X-Taler-Contract-Hash"] = hc
-  response.headers["X-Taler-Pay-Url"] = pay_url
-  response.headers["X-Taler-Offer-Url"] = offering_url
-  return response
+  # 'name' is the article name, and is set to the right value
+  # by Flask
+  # The 'data' parameter is used to send images along
+  # the articles, however its use is beyond the scope of
+  # this survey.
+  def article(name, data=None):
+  ...
+
+      # 'make_response' is exported by Flask.  It returns a
+      # "response object" with customizable status code, HTTP
+      # headers and body
+      response = make_response(render_template('templates/fallback.html'), 402)
+      response.headers["X-Taler-Contract-Hash"] = hc
+      response.headers["X-Taler-Pay-Url"] = pay_url
+      response.headers["X-Taler-Offer-Url"] = offering_url
+      return response
 
 The template ``fallback.html`` contains the credit card pay form, which will be
 used in the rare case where the wallet would not be detected in a fulfillment
@@ -524,18 +597,16 @@ to the wallet.  See below the main steps of its implementation.
       if 200 != r.status_code:
           raise BackendError(r.status_code, r.text)
 
-      # The payment went through.  Now set the state as "payed"
-      # and return 200 OK.
+      # The payment went through..
       ...
 
       # Resume the article name
       article = si["article_name"]
 
-      # We keep a *list* of articles the customer can currently
-      # read
+      # Set the article's state as "payed".  This is realized by
+      # appending it to a *list* of articles the customer is currently
+      # allowed to read.
       payed_articles = session["payed_articles"] = session.get("payed_articles", [])
-
-      # Add the article name among the ones that were already paid
       if article not in payed_articles:
           payed_articles.append(article)
 
