@@ -95,40 +95,47 @@ After the rendering, (part of) ``purchase.html`` will look like shown below.
 
 .. sourcecode:: html
 
-  ...
-  <script src="/static/web-common/taler-wallet-lib.js" type="application/javascript"></script>
-  <script src="/static/purchase.js" type="application/javascript"></script>
-  ...
-  <meta name="contract_url" value="https://shop.demo.taler.net/generate-contract?article_name=Appendix_A:_A_Note_on_Software">
+  <html>
+    <head>
+      <!-- ... -->
+      <script src="/static/web-common/taler-wallet-lib.js" type="application/javascript"></script>
+      <script src="/static/purchase.js" type="application/javascript"></script>
+      <!-- ... -->
+      <meta name="contract_url" value="https://shop.demo.taler.net/generate-contract?article_name=Appendix_A:_A_Note_on_Software">
 
-  ...
-  ...
+    </head>
+    <body>
+      <!-- ... -->
+      <!-- ... -->
+  
+      <div id="ccfakeform" class="fade">
+        <p>
+        Oops, it looks like you don't have a Taler wallet installed.  Why don't you enter
+        all your credit card details before reading the article? <em>You can also
+        use GNU Taler to complete the purchase at any time.</em>
+        </p>
+        <form>
+          First name<br> <input type="text"></input><br>
+          Family name<br> <input type="text"></input><br>
+          Age<br> <input type="text"></input><br>
+          Nationality<br> <input type="text"></input><br>
+          Gender<br> <input type="radio" name="gender">Male</input>
+          CC number<br> <input type="text"></input><br>
+          <input type="radio" name="gender">Female</input><br>
+        </form>
 
-  <div id="ccfakeform" class="fade">
-    <p>
-    Oops, it looks like you don't have a Taler wallet installed.  Why don't you enter
-    all your credit card details before reading the article? <em>You can also
-    use GNU Taler to complete the purchase at any time.</em>
-    </p>
-  
-    <form>
-      First name<br> <input type="text"></input><br>
-      Family name<br> <input type="text"></input><br>
-      Age<br> <input type="text"></input><br>
-      Nationality<br> <input type="text"></input><br>
-      Gender<br> <input type="radio" name"gender">Male</input>
-      CC number<br> <input type="text"></input><br>
-      <input type="radio" name="gender">Female</input><br>
-    </form>
-    <form method="get" action="/cc-payment/{{ article_name }}">
-      <input type="submit"></input>
-    </form>
-  </div>
-  
-  <div id="talerwait">
-    <em>Processing payment with GNU Taler, please wait <span id="action-indicator"></span></em>
-  </div>
-  ...
+        <form method="get" action="/cc-payment/{{ article_name }}">
+          <input type="submit"></input>
+        </form>
+      </div>
+    
+      <div id="talerwait">
+        <em>Processing payment with GNU Taler, please wait <span id="action-indicator"></span></em>
+      </div>
+      <!-- ... -->
+    </body>
+  </html>
+
 
 The script ``purchase.js`` is now in charge of implementing the behaviour we seek.
 It needs to register two handlers: one called whenever the wallet is detected in the
