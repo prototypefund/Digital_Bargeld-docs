@@ -455,7 +455,8 @@ Any piece of signed data, complies to the abstract data structure given below.
 
 The following list contains all the data structure that can be signed in
 Taler. Their definition is typically found in `src/include/taler_signatures.h`,
-within the :ref:`exchange's codebase <exchange-repo>`.
+within the
+`exchange's codebase <https://docs.taler.net/global-licensing.html#exchange-repo>`_.
 
 .. _TALER_WithdrawRequestPS:
 .. sourcecode:: c

@@ -79,7 +79,8 @@ This frontend API is non-normative, and only gives an example of what a typical 
       // maximum fees merchant agreed to cover as per the contract
       max_fee: Amount;
 
-      // The `merchant instance <instances-lab>`_ which is going to receive the final wire transfer.
+      // The `merchant instance <https://docs.taler.net/operate-merchant.html#instances-lab>`_
+      // which is going to receive the final wire transfer.
       instance: string;
 
       // Signature of `TALER_ContractPS`_
@@ -141,7 +142,7 @@ This frontend API is non-normative, and only gives an example of what a typical 
   Returns a cooperative merchant page (called the execution page) that will
   send the ``taler-execute-payment`` to the wallet and react to failure or
   success of the actual payment. ``fulfillment_url`` is included in the `contract`_.
-  Furthermore, `https://docs.taler.net/integration-merchant.html#payprot`_
+  Furthermore, `<https://docs.taler.net/integration-merchant.html#payprot>`_
   documents the payment protocol between wallets and merchants.
 
   The wallet will inject an ``XMLHttpRequest`` request to the merchant's
@@ -332,7 +333,7 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   :query id: ID of the transaction we want to trace (an integer)
-  :query instance: identificative token for the merchant instance which is to be tracked (optional). See `https://docs.taler.net/operate-merchant.html#instances-lab`_. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
+  :query instance: identificative token for the merchant instance which is to be tracked (optional). See `<https://docs.taler.net/operate-merchant.html#instances-lab>`_. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
 
   **Response:**
 

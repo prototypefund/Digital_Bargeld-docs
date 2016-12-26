@@ -51,7 +51,7 @@ It focuses on how to install, configure and run the required software.
 .. toctree::
   :maxdepth: 2
 
-  global_licensing
+  global-licensing
   configuration-basics
   operate-exchange
   operate-merchant
