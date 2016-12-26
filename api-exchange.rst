@@ -72,7 +72,7 @@ possibly by using HTTPS.
       // The exchange's signing keys.
       signkeys: SignKey[];
 
-      // compact EdDSA signature_ (binary-only) over the SHA-512 hash of the
+      // compact EdDSA `signature`_ (binary-only) over the SHA-512 hash of the
       // concatenation of all SHA-512 hashes of the RSA denomination public keys
       // in `denoms` in the same order as they were in `denoms`.  Note that for
       // hashing, the binary format of the RSA public keys is used, and not their
