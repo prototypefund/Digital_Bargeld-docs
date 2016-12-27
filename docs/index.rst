@@ -20,8 +20,6 @@
 GNU Taler Documentation
 =======================
 
-Appears?
-
 We are building an anonymous, taxable payment system using modern
 cryptography.  Customers will use traditional money transfers to send
 money to a digital Exchange and in return receive (anonymized) digital
