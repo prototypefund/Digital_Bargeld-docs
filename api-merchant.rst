@@ -26,7 +26,7 @@ Merchant API
 Before reading the API reference documentation, see the :ref:`merchant architecture<merchant-arch>` and :ref:`payprot`
 
 ---------------------
-The Frontent HTTP API
+The Frontend HTTP API
 ---------------------
 
 .. http:get:: contract_url
