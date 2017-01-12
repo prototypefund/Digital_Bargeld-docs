@@ -29,10 +29,11 @@ Before reading the API reference documentation, see the :ref:`merchant architect
 The Frontend HTTP API
 ---------------------
 
+This frontend API is non-normative, and only gives an example of what a typical frontend API would look like.
+
 .. http:get:: contract_url
 
-  Triggers the contract generation. Note that the URL may differ between
-  merchants.
+  Requesting this URL generates a contract, typically with a new (and unique) transaction id.
 
   **Request:**
 
@@ -51,7 +52,8 @@ The Frontend HTTP API
 
 
   Send the deposit permission to the merchant. The client should POST a `DepositPermission`_
-  object.
+  object.  If the payment was processed successfully by the merchant, this URL will set session
+  state that allows the fulfillment URL to show the final product.
 
   .. _DepositPermission:
   .. code-block:: tsref
