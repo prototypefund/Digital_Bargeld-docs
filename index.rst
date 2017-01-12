@@ -104,6 +104,7 @@ core components of the Taler reference implementation.
 .. toctree::
   :maxdepth: 2
 
+  dev-talerdotnet
   dev-wallet-wx
   dev-exchange
   dev-merchant
