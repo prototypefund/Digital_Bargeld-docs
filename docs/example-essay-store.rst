@@ -522,7 +522,7 @@ Required" HTTP status code, along with the HTTP headers ``X-Taler-Contract-Hash`
 
 ..
   FIXME:
-  Are those three parameters anywhere, at least 'kindof' introduced?
+  Are those three parameters previously introduced?
 
 Upon returning such a response, the wallet will automatically send the
 payment to the URL indicated in ``X-Taler-Pay-Url``.
