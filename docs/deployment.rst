@@ -161,7 +161,7 @@ Now we need to compile and install all the downloaded codebases.
 .. code-block:: none
 
   # We first update ``$PATH``, in order to make all the compilation
-    and configuration utilities available.
+  # and configuration utilities available.
   $ source activate
 
   # Double check if the previous step worked: $PATH should
