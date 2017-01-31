@@ -161,7 +161,7 @@ Now we need to compile and install all the downloaded codebases.
 .. code-block:: none
 
   # We first update ``$PATH``, in order to make all the compilation
-    and configuration utilities available.
+  # and configuration utilities available.
   $ source activate
 
   # Double check if the previous step worked: $PATH should
@@ -174,7 +174,7 @@ Now we need to compile and install all the downloaded codebases.
 The following step will generate config files for all the components.
 Please **note** that although a default currency will be picked up by the
 script, it is possible to have a custom currency by setting the environment
-variable ``TALER_CONFIG_CURRENCY`` to the wanted currency, and then runing
+variable ``TALER_CONFIG_CURRENCY`` to the wanted currency, and then running
 the config generator.
 
 .. code-block:: none
