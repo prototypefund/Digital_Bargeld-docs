@@ -31,23 +31,28 @@ and the `payment protocol <https://docs.taler.net/integration-merchant.html#payp
 The Frontend HTTP API
 ---------------------
 
-This frontend API is non-normative, and only gives an example of what a typical frontend API would look like.
+  Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
+  like `sketch`, `proposal`, `contract`, and others.
 
-.. http:get:: contract_url
 
-  Requesting this URL generates a contract, typically with a new (and unique) transaction id.
+.. http:get:: proposal_url
+
+  Requesting this URL generates a proposal, typically with a new (and unique) transaction id.  Note that the wallet will get properly triggered by the merchant in order
+  to issue this GET request.  The merchant will also instruct the wallet whether or
+  not to provide the optional `nonce` parameter.  `Payment protocol <https://docs.taler.net/integration-merchant.html#payprot>`_ explains how the wallet is triggered to
+  fetch the proposal.
 
   **Request:**
 
-  The request depends entirely on the merchant implementation.
+  :query nonce: any value that is invertible by the wallet.  This value will be included in the sketch, so that when the wallet receives the proposal it can easily check whether it was the genuine receiver of the proposal it got.  This value is needed to avoid proposals' replications.
 
   **Response**
 
-  :status 200 OK: The request was successful.  The body contains an :ref:`Offer <contract>`.
+  :status 200 OK: The request was successful.  The body contains a :ref:`proposal <proposal>`.
   :status 400 Bad Request: Request not understood.
   :status 500 Internal Server Error:
     In most cases, some error occurred while the backend was generating the
-    contract. For example, it failed to store it into its database.
+    proposal. For example, it failed to store it into its database.
 
 .. _pay:
 .. http:post:: pay_url
@@ -62,18 +67,21 @@ This frontend API is non-normative, and only gives an example of what a typical 
 
     interface DepositPermission {
       // the hashed `wire details <wireformats>`_ of this merchant.
-      // The wallet takes this value as-is from the contract 
+      // The wallet takes this value as-is from the proposal
       H_wire: HashCode;
 
       // `base32`_ encoded `TALER_ContractPS`_. The wallet can choose whether
-      // to take this value obtained from the field `h_contract`,
-      // or regenerating one starting from the values it gets within the contract
-      H_contract: HashCode;
+      // to take this value obtained from the field `H_proposal` in the Proposal
+      // it got beforehand, or regenerating one starting from the values it gets
+      // within the contract
+      H_proposal: HashCode;
 
-      // a 53-bit number corresponding to the contract being agreed on
-      transaction_id: number;
+      // a free-form identifier indiacting the current transaction.
+      transaction_id: string;
 
-      // total amount being paid as per the contract (the sum of the amounts from the `coins` may be larger to cover deposit fees not covered by the merchant)
+      // total amount being paid as per the contract (the sum of the amounts
+      // from the `coins` may be larger to cover deposit fees not covered by
+      // the merchant)
       total_amount: Amount;
 
       // maximum fees merchant agreed to cover as per the contract
@@ -86,23 +94,24 @@ This frontend API is non-normative, and only gives an example of what a typical 
       // Signature of `TALER_ContractPS`_
       merchant_sig: EddsaSignature;
 
-      // a timestamp of this deposit permission. It equals just the contract's timestamp
+      // a timestamp of this deposit permission. It equals just the proposal's timestamp
       timestamp: Timestamp;
 
       // Deadline for the customer to be refunded for this purchase
       refund_deadline: Timestamp;
 
-      // Deadline for the customer to pay for this purchase. Note that is up to the frontend
-      // to make sure that this value matches the one the backend signed over when the contract
-      // was generated. The frontend should never verify if the payment is still on time,
-      // because when payments are replayed it is expxectable that this deadline is expired,
-      // and only the backend can detect if a payment is a reply or not. 
+      // Deadline for the customer to pay for this purchase. Note that it is up
+      // to the frontend to make sure that this value matches the one the backend
+      // signed over when the proposal was generated. The frontend should never
+      // verify if the payment is still on time, because when payments are replayed
+      // it is expxectable that this deadline is expired, and only the backend
+      // can detect if a payment is a reply or not. 
       pay_deadline: Timestamp;
 
       // the chosen exchange's base URL
       exchange: string;
 
-      // the coins used to sign the contract
+      // the coins used to sign the proposal
       coins: DepositedCoin[];
 
     }
@@ -139,16 +148,18 @@ This frontend API is non-normative, and only gives an example of what a typical 
 
 .. http:post:: fulfillment_url
 
-  Returns a cooperative merchant page (called the execution page) that will
-  send the ``taler-execute-payment`` to the wallet and react to failure or
-  success of the actual payment. ``fulfillment_url`` is included in the `contract`_.
-  Furthermore, `<https://docs.taler.net/integration-merchant.html#payprot>`_
-  documents the payment protocol between wallets and merchants.
+  Every fulfillment URL accounts for one purchase.  If the user buys three movies
+  and one e-book, then the fulfillment URL will be such that for the merchant is
+  possible to understand that the user wants those three movies and that e-book.
 
-  The wallet will inject an ``XMLHttpRequest`` request to the merchant's
-  ``$pay_url`` in the context of the execution page.  This mechanism is
-  necessary since the request to ``$pay_url`` must be made from the merchant's
-  origin domain in order to preserve information (e.g. cookies, origin header).
+  It is also possible for the user to bookmark the fulfillment URL, so that he/she
+  can replay the purchase and get the same items again in the future.
+
+  .. note::
+    By "replaying" a payment, we mean that the user reuses the same coins he
+    used the first time he/she bought those items, thus not spending new coins
+    (and therefore not spending additional money).
+
 
 .. http:get:: /history
 
@@ -162,21 +173,25 @@ This frontend API is non-normative, and only gives an example of what a typical 
   
   :status 200 OK: The response is a JSON array of  `TransactionHistory`_.
 
+..
+  BE AWARE: /map is some old naming from the backend.  Better name here as well?
+
 .. http:get:: /map
 
-  Takes a hashcode and return the related contract.  Typically used by backoffice interfaces.
+  Takes a transaction ID and return the related contract.
+  Typically used by backoffice interfaces.
 
   **Request**
 
-  :query h_contract: hashcode of the contract we want to retrieve.
+  :query transaction_id: transaction ID of the contract we want to retrieve.
 
   **Return**
 
   :status 200 OK:
-    The body contains a `contract`_ corresponding to `h_contract`.
+    The body contains the `contract`_ associated to `transaction_id`.
 
   :status 404 Not Found:
-    There is no contract corresponding to `h_contract`.
+    There is no contract associated to `transaction_id`.
 
 
 ------------------------------
@@ -185,32 +200,32 @@ The Merchant Backend HTTP API
 
 The following API are made available by the merchant's `backend` to the merchant's `frontend`.
 
-.. http:post:: /contract
+.. http:post:: /contract/propose
 
-  Ask the backend to add some missing (mostly related to cryptography) information to the contract.
+  Ask the backend to complete the sketch.
 
   **Request:**
 
-.. _proposition:
+.. _sketch:
 
-  The `proposition` that is to be sent from the frontend is a :ref:`Contract <contract>` object
-  **without** the fields:
+  The backend expects a `sketch` as input.  The sketch is a :ref:`proposal <proposal>`
+  object **missing** the fields:
 
   * `exchanges`
   * `auditors`
   * `H_wire`
   * `merchant_pub`
 
-  The frontend may or may not provide a `instance` field in the proposition, depending on its logic.
+  The frontend may or may not provide a `instance` field in the sketch, depending on its logic.
   The ``default`` instance will be used if no `instance` field is found by the backend.
 
   **Response**
 
   :status 200 OK:
-    The backend has successfully created the contract.  It responds with an :ref:`offer <offer>`. On success, the `frontend` should pass this response verbatim to the wallet.
+    The backend has successfully created the proposal.  It responds with a :ref:`proposal <proposal>`. On success, the `frontend` should pass this response verbatim to the wallet.
 
   :status 403 Forbidden:
-    The frontend used the same transaction ID twice.  This is only allowed if the response from the backend was lost ("instant" replay), but to assure that frontends usually create fresh transaction IDs this is forbidden if the contract was already paid.  So attempting to have the backend sign a contract for a contract that was already paid by a wallet (and thus was generated by the frontend a "long" time ago), is forbidden and results in this error.  Frontends must make sure that they increment the transaction ID properly and persist the largest value used so far.
+    The frontend used the same transaction ID twice.  This is only allowed if the response from the backend was lost ("instant" replay), but to assure that frontends usually create fresh transaction IDs this is forbidden if the contract was already paid.  So attempting to have the backend sign a proposal for a contract that was already paid by a wallet (and thus was generated by the frontend a "long" time ago), is forbidden and results in this error.  Frontends must make sure that they never use the same transaction ID.
 
 .. http:post:: /pay
 
@@ -219,7 +234,7 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request:**
 
   The `frontend` passes the :ref:`deposit permission <DepositPermission>`
-  received from the wallet, and optionally adding a field named `wire_transfer_deadline`,
+  received from the wallet, and optionally adds a field named `wire_transfer_deadline`,
   indicating a deadline by which he would expect to receive the bank transfer
   for this deal.  Note that the `wire_transfer_deadline` must be after the `refund_deadline`.
   The backend calculates the `wire_transfer_deadline` by adding the `wire_transfer_delay`
@@ -420,52 +435,21 @@ The following API are made available by the merchant's `backend` to the merchant
     }
 
 
-.. http:post:: /map/in
+.. http:get:: /contract/lookup
 
-  Store a pair formed by a plain contract and its hashcode into the database.
+  Retrieve a proposal, given its transaction ID.
 
   **Request**
 
-  The frontend passes a `MapRequest`_ object.
+  :query transaction_id: transaction ID of the proposal to retrieve.
 
   **Response**
 
   :status 200 OK:
-    The data has been successfully stored.
-
-  :status 422 Unprocessable Entity:
-    The hashcode provided by the frontend does not match the contract.
-
-.. _MapRequest:
-.. _tsref-type-MapRequest:
-.. code-block:: tsref
-
-  interface MapRequest {
-
-    // Plain contract to be stored
-    contract: Contract;
-
-    // contract's hashcode. We require this value from the frontend
-    // as an additional check on data integrity.
-    h_contract: HashCode;
-  }
-
-
-.. http:get:: /map/out
-
-  Retrieve a contract, given its hashcode.
-
-  **Request**
-
-  :query h_contract: hashcode of the contract to retrieve.
-
-  **Response**
-
-  :status 200 OK:
-    The body contains a `contract`_ corresponding to `h_contract`.
+    The body contains the `proposal`_ pointed to by `transaction_id`.
 
   :status 404 Not Found:
-    There is no contract corresponding to `h_contract` into the database.
+    No proposal corresponds to `transaction_id`.
 
 .. http:get:: /history
 
@@ -500,47 +484,46 @@ The following API are made available by the merchant's `backend` to the merchant
       total_amount: Amount;
     }
 
-.. _contract:
+.. _proposal:
 
-------------------
-Offer and Contract
-------------------
+------------
+The proposal
+------------
 
-An `offer` is a wrapper around a contract with some additional information
-that is legally non-binding:
+The `proposal` is obtained by filling some missing information
+in the `sketch`, and then by signing it.  See below.
 
-  .. _tsref-type-Offer:
+  .. _tsref-type-Proposal:
   .. code-block:: tsref
-    :name: offer
 
-    interface Offer {
-      // The actual contract
-      contract: Contract;
+    interface Proposal {
+      // The actual proposal
+      proposal: Proposal;
 
       // Contract's hash, provided as a convenience.  All components that do
       // not fully trust the merchant must verify this field.
-      H_contract: HashCode ;
+      H_proposal: HashCode ;
 
-      // Signature over the hashcode of `contract` made by the merchant.
+      // Signature over the hashcode of `proposal` made by the merchant.
       merchant_sig: EddsaSignature;
     }
 
 .. note::
-  When the contract is signed by the merchant or the wallet, the
-  signature is made over the hash of the JSON text, as the contract may
+  When the proposal is signed by the merchant or the wallet, the
+  signature is made over the hash of the JSON text, as the proposal may
   be confidential between merchant and customer and should not be
   exposed to the exchange.  The hashcode is generated by hashing the
-  encoding of the contract's JSON obtained by using the flags
+  encoding of the proposal's JSON obtained by using the flags
   ``JSON_COMPACT | JSON_PRESERVE_ORDER``, as described in the `libjansson
   documentation
   <https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
 
-The `contract` must have the following structure:
+The `proposal` must have the following structure:
 
-  .. _tsref-type-Contract:
+  .. _tsref-type-Proposal:
   .. code-block:: tsref
 
-    interface Contract {
+    interface Proposal {
       // Human-readable description of the whole purchase
       // NOTE: still not implemented
       summary: string;
@@ -550,30 +533,29 @@ The `contract` must have the following structure:
       // before transfering it to the merchant.
       amount: Amount;
 
-      // Optional identifier chosen by the merchant,
-      // which allows the wallet to detect if it is buying
-      // a contract where it already has paid for the same
-      // product instance. NOTE: this information is mainly
-      // needed when the customer visits a shared fulfillment
-      // URL about a product they already paid for, so that
-      // the wallet can reuse the same coins used in the first
-      // place.
+      // Needed by the wallet to detect if a payment needs
+      // to be replayed.  It can have the values:
+      // 1. 'BYURL', in this case the wallet will search for contracts
+      //    where the fulfillment URL matches the one associated with the
+      //    current purchase.
+      // 2. <TOKEN>, in this case the wallet will search for contracts
+      //    whose repurchase_correlation_id matches this field.
+      // 3. If not given, no replay occurs.
       repurchase_correlation_id?: string;
 
-      // URL that the wallet will navigate to after the customer
-      // confirmed purchasing the contract.  Responsible for
-      // doing the actual payment and making available the product (if digital)
-      // or displaying a confirmation.
-      // The placeholder ${H_contract} will be replaced
-      // with the contract hash by wallets before navigating
-      // to the fulfillment URL.
+      // The URL where the wallet has to send coins.
+      pay_url: string;
+
+      // The URI for this purchase.  Every time is is visited, the merchant
+      // will send back to the customer the same proposal.  Clearly, this URL
+      // can be bookmarked and shared by users.
       fulfillment_url: string;
 
       // Maximum total deposit fee accepted by the merchant for this contract
       max_fee: Amount;
 
-      // 53-bit number chosen by the merchant to uniquely identify the contract.
-      transaction_id: number;
+      // A free-form identifier for this transaction.
+      transaction_id: string;
 
       // List of products that are part of the purchase (see `below <Product>`_)
       products: Product[];
@@ -587,15 +569,17 @@ The `contract` must have the following structure:
       // After this deadline, the merchant won't accept payments for the contact
       expiry: Timestamp;
 
-      // Merchant's public key used to sign this contract; this information is typically added by the backend
-      // Note that this can be an ephemeral key.
+      // Merchant's public key used to sign this proposal; this information
+      // is typically added by the backend Note that this can be an ephemeral key.
       merchant_pub: EddsaPublicKey;
 
       // More info about the merchant, see below
       merchant: Merchant;
 
-      // Which instance is participating in this contract. See `Merchant Instances <instances-lab>`_.
-      // This field is optional, as the "default" instance is not forced to provide any `instance` identificator.
+      // Which instance is working this proposal.
+      // See `Merchant Instances <https://docs.taler.net/operate-merchant.html#instances-lab>`_.
+      // This field is optional, as the "default" instance is not forced to provide any
+      // `instance` identificator.
       instance: string;
 
       // The hash of the merchant instance's wire details.
@@ -611,7 +595,9 @@ The `contract` must have the following structure:
       locations: { [label: string]: [location: Location], ... };
     }
 
-  The wallet must select a exchange that either the mechant accepts directly by listing it in the exchanges arry, or for which the merchant accepts an auditor that audits that exchange by listing it in the auditors array.
+  The wallet must select a exchange that either the mechant accepts directly by
+  listing it in the exchanges arry, or for which the merchant accepts an auditor
+  that audits that exchange by listing it in the auditors array.
 
   The `product` object describes the product being purchased from the merchant. It has the following structure:
 

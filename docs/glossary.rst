@@ -34,7 +34,7 @@ Taler Glossary
       coins are individual token representing a certain amount of value, also known as the :term:`denomination` of the coin
 
   contract
-      specification of the details of a transaction, specifies the payment obligations for the customer (i.e. the amount), the deliverables of the merchant and other related information, such as deadlines or locations
+      the proposal signed by the wallet.
 
   denomination
       unit of currency, specifies both the currency and the face value of a :term:`coin`
@@ -66,6 +66,9 @@ Taler Glossary
   proof
      message that cryptographically demonstrates that a particular claim is correct
 
+  proposal
+     a sketch that has been completed and signed by the merchant backend.
+
   reserve
      funds set aside for future use; either the balance of a customer at the exchange ready for :term:`withdrawal`, or the funds kept in the exchange's bank account to cover obligations from coins in circulation
 
@@ -77,6 +80,14 @@ Taler Glossary
 
   sharing
      users can share ownership of a :term:`coin` by sharing access to the coin's private key, thereby allowing all co-owners to spend the coin at any time.
+
+  sketch
+     specification of the details of a transaction, specifies the payment obligations
+     for the customer (i.e. the amount), the deliverables of the merchant and other
+     related information, such as deadlines or locations; However, it lacks some
+     information that the backend is supposed to provide.
+     In other words, after the backend adds the missing information to the sketch and
+     signs it, it becomes a proposal.
 
   signing key
      see message signing key.
