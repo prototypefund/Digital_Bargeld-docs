@@ -355,8 +355,8 @@ case and reconstructs the contract.
   contract_resp = sign_contract(restored_contract)
 
   # Return error if uuid mismatch with the hashcode coming from the backend
-  if contract_resp["H_contract"] != hc:
-      e = jsonify(error="contract mismatch", was=hc, expected=contract_resp["H_contract"])
+  if contract_resp["h_proposal_data"] != hc:
+      e = jsonify(error="contract mismatch", was=hc, expected=contract_resp["h_proposal_data"])
       return e, 400
 
    # We save the article's name in the state since after
@@ -576,11 +576,11 @@ to the wallet.  See below the main steps of its implementation.
           return e, 400
 
       # Pick the contract's hashcode from deposit permission
-      hc = deposit_permission.get("H_contract")
+      hc = deposit_permission.get("h_proposal_data")
 
       # Return error if no hashcode was found
       if hc is None:
-          e = jsonify(error="malformed deposit permission", hint="H_contract missing")
+          e = jsonify(error="malformed deposit permission", hint="h_proposal_data missing")
           return e, 400
 
       # Get a handle to the state for this contract, using the

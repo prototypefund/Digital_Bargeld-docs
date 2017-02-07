@@ -269,7 +269,7 @@ The following API are made available by the merchant's `backend` to the merchant
       merchant_sig: EddsaSignature;
 
       // Contract's hash being signed over
-      h_contract: HashCode;
+      h_proposal_data: HashCode;
     }
 
 .. http:get:: /track/transfer
@@ -472,7 +472,7 @@ The following API are made available by the merchant's `backend` to the merchant
       transaction_id: number;
 
       // Hashcode of the relevant contract
-      h_contract: HashCode;
+      h_proposal_data: HashCode;
 
       // Exchange's base URL
       exchange: string;

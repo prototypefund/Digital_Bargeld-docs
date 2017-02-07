@@ -1140,7 +1140,7 @@ The following list shows error codes defined in
   
     /**
      * The backend encountered an error while trying to store the
-     * pair <contract, h_contract> into the database. 
+     * pair <contract, h_proposal_data> into the database. 
      * The response is provided with HTTP status code MHD_HTTP_INTERNAL_SERVER_ERROR.
      */
     TALER_EC_MAP_IN_STORE_DB_ERROR = 2501,

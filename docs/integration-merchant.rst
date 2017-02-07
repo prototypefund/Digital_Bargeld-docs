@@ -245,8 +245,8 @@ parameters to the wallet, which will:
     if 200 == response.status_code:
         # Here we pick the article name from the state defined at
         # fulfillment time.
-        # deposit_permission['H_contract'] is the contract hashcode
-        payed_article = session[deposit_permission['H_contract']]['article_name']
+        # deposit_permission['h_proposal_data'] is the contract hashcode
+        payed_article = session[deposit_permission['h_proposal_data']]['article_name']
         session['payed_articles'].append(payed_article)
         
   

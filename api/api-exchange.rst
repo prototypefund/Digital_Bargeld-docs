@@ -507,7 +507,7 @@ denomination.
 
       // SHA-512 hash of the contact of the merchant with the customer.  Further
       // details are never disclosed to the exchange.
-      H_contract: HashCode;
+      h_proposal_data: HashCode;
 
       // `coin's public key <eddsa-coin-pub>`_, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
@@ -985,7 +985,7 @@ typically also view the balance.)
 
     interface TrackTransferDetail {
       // SHA-512 hash of the contact of the merchant with the customer.
-      H_contract: HashCode;
+      h_proposal_data: HashCode;
 
       // 64-bit transaction id for the transaction between merchant and
       // customer
@@ -1032,7 +1032,7 @@ typically also view the balance.)
       H_wire: HashCode;
 
       // SHA-512 hash of the contact of the merchant with the customer.
-      H_contract: HashCode;
+      h_proposal_data: HashCode;
 
       // coin's public key, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
@@ -1132,7 +1132,7 @@ Refunds
       refund_fee: Amount;
 
       // SHA-512 hash of the contact of the merchant with the customer.
-      H_contract: HashCode;
+      h_proposal_data: HashCode;
 
       // coin's public key, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
