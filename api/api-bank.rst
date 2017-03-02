@@ -9,7 +9,7 @@
   A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
   You should have received a copy of the GNU Lesser General Public License along with
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
-  
+
   @author Marcello Stanisci
 
 =========
@@ -50,7 +50,20 @@ namely exchanges.
     // to the recipient's count
     amount: Amount;
 
-    // The id of this wire transfer
+    // Exchange base URL, used to perform tracking requests against the
+    // wire transfer ID.  Note that in the actual bank wire transfer,
+    // the schema may have to be encoded differently, i.e.
+    // "https://exchange.com/" may become "https exchange.com" due to
+    // character set restrictions.  It is the responsibility of the
+    // wire transfer adapter to properly encode/decode the URL.
+    // Payment service providers must ensure that their URL is short
+    // enough to fit together with the wire transfer identifier into
+    // the wire transfer subject of their respective banking system.
+    exchange_url: string;
+
+    // The id of this wire transfer, a `TALER_WireTransferIdentifierRawP`.
+    // Should be encoded together with a checksum in actual wire transfers.
+    // (See `TALER_WireTransferIdentifierP`_ for an encoding with CRC8.).
     wtid: base32;
 
     // The sender's account identificator
@@ -67,7 +80,7 @@ namely exchanges.
   interface BankIncomingError {
 
     // Human readable explanation of the failure.
-    reason: string
+    reason: string;
 
   }
 
