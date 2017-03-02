@@ -257,6 +257,9 @@ Obtaining wire-transfer information
       // Salt used to sign, `base32`_ encoded
       salt: string;
 
+      // Wire transfer fee structure. Specifies aggregate wire transfer fees.
+      fees: AggregateTransferFee[];
+
       // Signaure of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_TEST_DETAILS
       // Note that the `h_sepa_details` field of `TALER_MasterWireDetailsPS`_ is computed
       // by concatenating all of the above fields (in the same order they appear) and then
@@ -275,16 +278,46 @@ Obtaining wire-transfer information
       // Legal name of the owner of the account
       receiver_name: string;
 
+      // Wire transfer fee structure. Specifies aggregate wire transfer fees.
+      fees: AggregateTransferFee[];
+
       // IBAN account number.
       iban: string;
 
       // BIC of the bank.
       bic: string;
 
-      // Signaure of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_SEPA_DETAILS
+      // Signature of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_SEPA_DETAILS
       // Note that the `h_sepa_details` field of `TALER_MasterWireDetailsPS`_ is computed
       // by concatenating all of the above fields (in the same order they appear) and then
       // by hashing the obtained concatenation.
+      sig: EddsaSignature;
+    }
+
+  Aggregate wire transfer fees representing the fees the exchange
+  charges per wire transfer to a merchant must be specified as an
+  array in all wire transfer response objects under `fees`.  The
+  respective array contains objects with the following members:
+
+  .. _AggregateTransferFee:
+  .. _tsref-type-AggregateTransferFee:
+  .. code-block:: tsref
+
+    interface AggregateTransferFee {
+      // Per transfer wire transfer fee.
+      wire_fee: Amount;
+
+      // What date (inclusive) does this fee go into effect?
+      // The different fees must cover the full time period in which
+      // any of the denomination keys are valid without overlap.
+      start_date: Timestamp;
+
+      // What date (exclusive) does this fee stop going into effect?
+      // The different fees must cover the full time period in which
+      // any of the denomination keys are valid without overlap.
+      end_date: Timestamp;
+
+      // Signature of `TALER_MasterWireFeePS`_ with purpose TALER_SIGNATURE_MASTER_WIRE_FEES
       sig: EddsaSignature;
     }
 
