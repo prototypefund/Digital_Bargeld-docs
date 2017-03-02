@@ -200,7 +200,7 @@ Signatures
 .. _`tsref-type-EddsaSignature`:
 
 .. code-block:: tsref
-  
+
   // EdDSA signatures are transmitted as 64-bytes `base32`_
   // binary-encoded objects with just the R and S values (base32_ binary-only)
   type EddsaSignature = string;
@@ -209,14 +209,14 @@ Signatures
 .. _`tsref-type-RsaSignature`:
 
 .. code-block:: tsref
-  
+
   // `base32`_ encoded RSA signature
   type RsaSignature = string;
 
 .. _`tsref-type-BlindedRsaSignature`:
 
 .. code-block:: tsref
-  
+
   // `base32`_ encoded RSA blinded signature
   type BlindedRsaSignature = string;
 
@@ -262,7 +262,7 @@ Binary Formats
      arithmetic up to 53 bits.
 
   .. note::
-     
+
      Taler uses `libgnunetutil` for interfacing itself with the operating system,
      doing crypto work, and other "low level" actions, therefore it is strongly
      connected with the `GNUnet project <https://gnunet.org>`_.
@@ -536,6 +536,9 @@ within the
     uint16_t noreveal_index;
   };
 
+.. _TALER_ExchangeSigningKeyValidityPS:
+.. sourcecode:: c
+
   struct TALER_ExchangeSigningKeyValidityPS {
     /**
      * purpose.purpose = TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY
@@ -588,6 +591,23 @@ within the
     struct GNUNET_HashCode h_sepa_details;
   };
 
+
+.. _TALER_MasterWireFeePS:
+.. sourcecode:: c
+
+  struct TALER_MasterWireFeePS {
+    /**
+     * purpose.purpose = TALER_SIGNATURE_MASTER_WIRE_FEES
+     */
+    struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+    struct GNUNET_TIME_AbsoluteNBO start_date;
+    struct GNUNET_TIME_AbsoluteNBO end_date;
+    struct TALER_AmountNBO wire_fee;
+  };
+
+.. _TALER_DepositTrackPS:
+.. sourcecode:: c
+
   struct TALER_DepositTrackPS {
     /**
      * purpose.purpose = TALER_SIGNATURE_MASTER_SEPA_DETAILS || TALER_SIGNATURE_MASTER_TEST_DETAILS
@@ -600,10 +620,9 @@ within the
     struct TALER_CoinSpendPublicKeyP coin_pub;
   };
 
-  /**
-   * Format internally used for packing the detailed information
-   * to generate the signature for /track/transfer signatures.
-   */
+.. _TALER_WireDepositDetailP:
+.. sourcecode:: c
+
   struct TALER_WireDepositDetailP {
     struct GNUNET_HashCode h_proposal_data;
     struct GNUNET_TIME_AbsoluteNBO execution_time;
@@ -614,9 +633,12 @@ within the
   };
 
 
+.. _TALER_WireDepositDataPS:
+.. sourcecode:: c
+
   struct TALER_WireDepositDataPS {
     /**
-     * purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT 
+     * purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
     struct TALER_AmountNBO total;
@@ -646,7 +668,6 @@ within the
     struct GNUNET_HashCode denom_hash;
   };
 
-
 .. _TALER_PaymentResponsePS:
 .. sourcecode:: c
 
@@ -657,7 +678,6 @@ within the
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
     struct GNUNET_HashCode h_proposal_data;
   };
-
 
 .. _TALER_ContractPS:
 .. sourcecode:: c
@@ -673,6 +693,9 @@ within the
     struct GNUNET_HashCode h_proposal_data;
     struct TALER_MerchantPublicKeyP merchant_pub;
   };
+
+.. _TALER_ConfirmWirePS:
+.. sourcecode:: c
 
   struct TALER_ConfirmWirePS {
     /**
