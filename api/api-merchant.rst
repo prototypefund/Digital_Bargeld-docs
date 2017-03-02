@@ -32,7 +32,7 @@ The Frontend HTTP API
 ---------------------
 
   Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
-  like `sketch`, `proposal`, `contract`, and others.
+  like `offer`, `proposal`, `contract`, and others.
 
 
 .. http:get:: proposal_url
@@ -44,7 +44,7 @@ The Frontend HTTP API
 
   **Request:**
 
-  :query nonce: any value that is invertible by the wallet.  This value will be included in the sketch, so that when the wallet receives the proposal it can easily check whether it was the genuine receiver of the proposal it got.  This value is needed to avoid proposals' replications.
+  :query nonce: any value that is invertible by the wallet.  This value will be included in the offer, so that when the wallet receives the proposal it can easily check whether it was the genuine receiver of the proposal it got.  This value is needed to avoid proposals' replications.
 
   **Response**
 
@@ -105,7 +105,7 @@ The Frontend HTTP API
       // signed over when the proposal was generated. The frontend should never
       // verify if the payment is still on time, because when payments are replayed
       // it is expxectable that this deadline is expired, and only the backend
-      // can detect if a payment is a reply or not. 
+      // can detect if a payment is a reply or not.
       pay_deadline: Timestamp;
 
       // the chosen exchange's base URL
@@ -170,7 +170,7 @@ The Frontend HTTP API
   :query days: a number indicating that we request contracts from now up to `days` days ago.
 
   **Response**
-  
+
   :status 200 OK: The response is a JSON array of  `TransactionHistory`_.
 
 ..
@@ -188,7 +188,7 @@ The Frontend HTTP API
   **Return**
 
   :status 200 OK:
-    The body contains the `contract`_ associated to `transaction_id`.
+    The body contains the `proposal`_ associated to `transaction_id`.
 
   :status 404 Not Found:
     There is no contract associated to `transaction_id`.
@@ -202,13 +202,13 @@ The following API are made available by the merchant's `backend` to the merchant
 
 .. http:post:: /contract/propose
 
-  Ask the backend to complete the sketch.
+  Ask the backend to complete and sign an offer to create a proposal.
 
   **Request:**
 
-.. _sketch:
+.. _offer:
 
-  The backend expects a `sketch` as input.  The sketch is a :ref:`proposal <proposal>`
+  The backend expects a `sketch` as input.  The sketch is an :ref:`Offer`_
   object **missing** the fields:
 
   * `exchanges`
@@ -491,18 +491,18 @@ The proposal
 ------------
 
 The `proposal` is obtained by filling some missing information
-in the `sketch`, and then by signing it.  See below.
+in the `offer`, and then by signing it.  See below.
 
   .. _tsref-type-Proposal:
   .. code-block:: tsref
 
     interface Proposal {
-      // The actual proposal
-      proposal: Proposal;
+      // The offer
+      offer: Offer;
 
       // Contract's hash, provided as a convenience.  All components that do
       // not fully trust the merchant must verify this field.
-      H_proposal: HashCode ;
+      H_proposal: HashCode;
 
       // Signature over the hashcode of `proposal` made by the merchant.
       merchant_sig: EddsaSignature;
@@ -518,12 +518,12 @@ in the `sketch`, and then by signing it.  See below.
   documentation
   <https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
 
-The `proposal` must have the following structure:
+The `offer` must have the following structure:
 
-  .. _tsref-type-Proposal:
+  .. _tsref-type-Offer:
   .. code-block:: tsref
 
-    interface Proposal {
+    interface Offer {
       // Human-readable description of the whole purchase
       // NOTE: still not implemented
       summary: string;
