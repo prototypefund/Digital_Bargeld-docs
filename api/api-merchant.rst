@@ -533,16 +533,6 @@ The `offer` must have the following structure:
       // before transfering it to the merchant.
       amount: Amount;
 
-      // Needed by the wallet to detect if a payment needs
-      // to be replayed.  It can have the values:
-      // 1. 'BYURL', in this case the wallet will search for contracts
-      //    where the fulfillment URL matches the one associated with the
-      //    current purchase.
-      // 2. <TOKEN>, in this case the wallet will search for contracts
-      //    whose repurchase_correlation_id matches this field.
-      // 3. If not given, no replay occurs.
-      repurchase_correlation_id?: string;
-
       // The URL where the wallet has to send coins.
       pay_url: string;
 
@@ -567,7 +557,7 @@ The `offer` must have the following structure:
       refund_deadline: Timestamp;
 
       // After this deadline, the merchant won't accept payments for the contact
-      expiry: Timestamp;
+      pay_deadline: Timestamp;
 
       // Merchant's public key used to sign this proposal; this information
       // is typically added by the backend Note that this can be an ephemeral key.
@@ -575,12 +565,6 @@ The `offer` must have the following structure:
 
       // More info about the merchant, see below
       merchant: Merchant;
-
-      // Which instance is working this proposal.
-      // See `Merchant Instances <https://docs.taler.net/operate-merchant.html#instances-lab>`_.
-      // This field is optional, as the "default" instance is not forced to provide any
-      // `instance` identificator.
-      instance: string;
 
       // The hash of the merchant instance's wire details.
       H_wire: HashCode;
@@ -593,6 +577,11 @@ The `offer` must have the following structure:
 
       // Map from labels to locations
       locations: { [label: string]: [location: Location], ... };
+
+      // Extra data that is only interpreted by the merchant frontend.
+      // Useful when the merchant needs to store extra information on a 
+      // contract without storing it separately in their database.
+      extra: any;
     }
 
   The wallet must select a exchange that either the mechant accepts directly by
@@ -644,6 +633,12 @@ The `offer` must have the following structure:
       // label for a location that denotes the jurisdiction for disputes.
       // Some of the typical fields for a location (such as a street address) may be absent.
       jurisdiction: string;
+
+      // Which instance is working this proposal.
+      // See `Merchant Instances <https://docs.taler.net/operate-merchant.html#instances-lab>`_.
+      // This field is optional, as the "default" instance is not forced to provide any
+      // `instance` identificator.
+      instance: string;
     }
 
 
