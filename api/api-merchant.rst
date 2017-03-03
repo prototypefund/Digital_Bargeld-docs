@@ -44,7 +44,10 @@ The Frontend HTTP API
 
   **Request:**
 
-  :query nonce: any value that is invertible by the wallet.  This value will be included in the offer, so that when the wallet receives the proposal it can easily check whether it was the genuine receiver of the proposal it got.  This value is needed to avoid proposals' replications.
+  :query nonce: Any string value.  This value will be
+    included in the offer, so that when the wallet receives the proposal it can
+    easily check whether it was the genuine receiver of the proposal it got.
+    This value is needed to avoid proposals' replications.
 
   **Response**
 
@@ -66,54 +69,17 @@ The Frontend HTTP API
   .. code-block:: tsref
 
     interface DepositPermission {
-      // the hashed `wire details <wireformats>`_ of this merchant.
-      // The wallet takes this value as-is from the proposal
-      H_wire: HashCode;
+      // a free-form identifier identifying the order that is being payed for
+      order_id: string;
 
-      // `base32`_ encoded `TALER_ContractPS`_. The wallet can choose whether
-      // to take this value obtained from the field `H_proposal` in the Proposal
-      // it got beforehand, or regenerating one starting from the values it gets
-      // within the contract
-      H_proposal: HashCode;
-
-      // a free-form identifier indiacting the current transaction.
-      transaction_id: string;
-
-      // total amount being paid as per the contract (the sum of the amounts
-      // from the `coins` may be larger to cover deposit fees not covered by
-      // the merchant)
-      total_amount: Amount;
-
-      // maximum fees merchant agreed to cover as per the contract
-      max_fee: Amount;
-
-      // The `merchant instance <https://docs.taler.net/operate-merchant.html#instances-lab>`_
-      // which is going to receive the final wire transfer.
-      instance: string;
-
-      // Signature of `TALER_ContractPS`_
-      merchant_sig: EddsaSignature;
-
-      // a timestamp of this deposit permission. It equals just the proposal's timestamp
-      timestamp: Timestamp;
-
-      // Deadline for the customer to be refunded for this purchase
-      refund_deadline: Timestamp;
-
-      // Deadline for the customer to pay for this purchase. Note that it is up
-      // to the frontend to make sure that this value matches the one the backend
-      // signed over when the proposal was generated. The frontend should never
-      // verify if the payment is still on time, because when payments are replayed
-      // it is expxectable that this deadline is expired, and only the backend
-      // can detect if a payment is a reply or not.
-      pay_deadline: Timestamp;
+      // Public key of the merchant.  Used to identify the merchant instance.
+      merchant_pub: EddsaSignature;
 
       // the chosen exchange's base URL
       exchange: string;
 
       // the coins used to sign the proposal
       coins: DepositedCoin[];
-
     }
 
   .. _`tsref-type-DepositedCoin`:
@@ -159,39 +125,6 @@ The Frontend HTTP API
     By "replaying" a payment, we mean that the user reuses the same coins he
     used the first time he/she bought those items, thus not spending new coins
     (and therefore not spending additional money).
-
-
-.. http:get:: /history
-
-  Return a list of fulfilled contracts.  Typically used by backoffice interfaces.
-
-  **Request**
-
-  :query days: a number indicating that we request contracts from now up to `days` days ago.
-
-  **Response**
-
-  :status 200 OK: The response is a JSON array of  `TransactionHistory`_.
-
-..
-  BE AWARE: /map is some old naming from the backend.  Better name here as well?
-
-.. http:get:: /map
-
-  Takes a transaction ID and return the related contract.
-  Typically used by backoffice interfaces.
-
-  **Request**
-
-  :query transaction_id: transaction ID of the contract we want to retrieve.
-
-  **Return**
-
-  :status 200 OK:
-    The body contains the `proposal`_ associated to `transaction_id`.
-
-  :status 404 Not Found:
-    There is no contract associated to `transaction_id`.
 
 
 ------------------------------
