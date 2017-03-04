@@ -50,7 +50,7 @@ sys.path.append(os.path.abspath('exts'))
 extensions = [
     'tsref',
     'sphinx.ext.todo',
-    'sphinx.ext.pngmath',
+    'sphinx.ext.imgmath',
     'sphinxcontrib.httpdomain'
 ]
 
