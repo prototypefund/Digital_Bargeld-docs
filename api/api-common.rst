@@ -600,6 +600,7 @@ within the
      * purpose.purpose = TALER_SIGNATURE_MASTER_WIRE_FEES
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+    struct GNUNET_HashCode h_wire_method;
     struct GNUNET_TIME_AbsoluteNBO start_date;
     struct GNUNET_TIME_AbsoluteNBO end_date;
     struct TALER_AmountNBO wire_fee;
@@ -642,6 +643,7 @@ within the
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
     struct TALER_AmountNBO total;
+    struct TALER_AmountNBO wire_fee;
     struct TALER_MerchantPublicKeyP merchant_pub;
     struct GNUNET_HashCode h_wire;
     struct GNUNET_HashCode h_details;

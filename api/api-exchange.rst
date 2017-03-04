@@ -260,7 +260,7 @@ Obtaining wire-transfer information
       // Wire transfer fee structure. Specifies aggregate wire transfer fees.
       fees: AggregateTransferFee[];
 
-      // Signaure of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_TEST_DETAILS
+      // Signature of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_TEST_DETAILS
       // Note that the `h_sepa_details` field of `TALER_MasterWireDetailsPS`_ is computed
       // by concatenating all of the above fields (in the same order they appear) and then
       // by hashing the obtained concatenation.
@@ -989,6 +989,9 @@ typically also view the balance.)
     interface TrackTransferResponse {
       // Total amount transferred
       total: Amount;
+
+      // Applicable wire fee that was charged
+      wire_fee: Amount;
 
       // public key of the merchant (identical for all deposits)
       merchant_pub: EddsaPublicKey;
