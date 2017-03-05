@@ -477,6 +477,21 @@ The `offer` must have the following structure:
       // Maximum total deposit fee accepted by the merchant for this contract
       max_fee: Amount;
 
+      // Maximum wire fee accepted by the merchant (customer share to be
+      // divided by the 'wire_fee_amortization' factor, and further reduced
+      // if deposit fees are below 'max_fee').  Default if missing is zero.
+      max_wire_fee: Amount;
+
+      // Over how many customer transactions does the merchant expect to
+      // amortize wire fees on average?  If the exchange's wire fee is
+      // above 'max_wire_fee', the difference is divided by this number
+      // to compute the expected customer's contribution to the wire fee.
+      // The customer's contribution may further be reduced by the difference
+      // between the 'max_fee' and the sum of the actual deposit fees.
+      // Optional, default value if missing is 1.  0 and negative values are
+      // invalid and also interpreted as 1.
+      wire_fee_amortization: Integer;
+
       // A free-form identifier for this transaction.
       transaction_id: string;
 
@@ -512,7 +527,7 @@ The `offer` must have the following structure:
       locations: { [label: string]: [location: Location], ... };
 
       // Extra data that is only interpreted by the merchant frontend.
-      // Useful when the merchant needs to store extra information on a 
+      // Useful when the merchant needs to store extra information on a
       // contract without storing it separately in their database.
       extra: any;
     }
