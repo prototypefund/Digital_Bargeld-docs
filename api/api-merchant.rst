@@ -32,7 +32,7 @@ The Frontend HTTP API
 ---------------------
 
   Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
-  like `offer`, `proposal`, `contract`, and others.
+  like `order`, `proposal`, `contract`, and others.
 
 
 .. http:get:: proposal_url
@@ -45,7 +45,7 @@ The Frontend HTTP API
   **Request:**
 
   :query nonce: Any string value.  This value will be
-    included in the offer, so that when the wallet receives the proposal it can
+    included in the proposal, so that when the wallet receives the proposal it can
     easily check whether it was the genuine receiver of the proposal it got.
     This value is needed to avoid proposals' replications.
 
@@ -155,6 +155,7 @@ The following API are made available by the merchant's `backend` to the merchant
   * `auditors`
   * `H_wire`
   * `merchant_pub`
+  * `timestamp`
 
   The following fields from :ref:`ProposalData`_ are optional and will be filled
   in by the backend if not present:
@@ -439,14 +440,15 @@ The proposal
 ------------
 
 The `proposal` is obtained by filling some missing information
-in the `offer`, and then by signing it.  See below.
+in the `order`, and then by signing it.  See below.
 
   .. _tsref-type-Proposal:
   .. code-block:: tsref
 
     interface Proposal {
-      // The offer
-      offer: Offer;
+      // The proposal data, effectively the frontend's order with some data filled in
+      // by the merchant backend.
+      data: ProposalData;
 
       // Contract's hash, provided as a convenience.  All components that do
       // not fully trust the merchant must verify this field.
@@ -466,12 +468,12 @@ in the `offer`, and then by signing it.  See below.
   documentation
   <https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
 
-The `offer` must have the following structure:
+The `proposal data` must have the following structure:
 
-  .. _tsref-type-Offer:
+  .. _tsref-type-ProposalData:
   .. code-block:: tsref
 
-    interface Offer {
+    interface ProposalData {
       // Human-readable description of the whole purchase
       // NOTE: still not implemented
       summary: string;
