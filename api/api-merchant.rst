@@ -31,13 +31,14 @@ and the `payment protocol <https://docs.taler.net/integration-merchant.html#payp
 The Frontend HTTP API
 ---------------------
 
+
   Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
   like `order`, `proposal`, `contract`, and others.
 
 
 .. http:get:: proposal_url
 
-  Requesting this URL generates a proposal, typically with a new (and unique) transaction id.  Note that the wallet will get properly triggered by the merchant in order
+  Requesting this URL generates a proposal.  Note that the wallet will get properly triggered by the merchant in order
   to issue this GET request.  The merchant will also instruct the wallet whether or
   not to provide the optional `nonce` parameter.  `Payment protocol <https://docs.taler.net/integration-merchant.html#payprot>`_ explains how the wallet is triggered to
   fetch the proposal.
@@ -148,7 +149,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
 .. _proposal:
 
-  The backend expects an `order` as input.  The order is a :ref:`ProposalData`_
+  The backend expects an `order` as input.  The order is a `ProposalData`_
   object **without** the fields:
 
   * `exchanges`
@@ -157,7 +158,7 @@ The following API are made available by the merchant's `backend` to the merchant
   * `merchant_pub`
   * `timestamp`
 
-  The following fields from :ref:`ProposalData`_ are optional and will be filled
+  The following fields from `ProposalData`_ are optional and will be filled
   in by the backend if not present:
 
   * `merchant.instance` (default instance will be used)
