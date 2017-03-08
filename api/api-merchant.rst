@@ -127,7 +127,7 @@ The Frontend HTTP API
   when the user visits the page after they cleared their cookies, the purchase
   can be replayed.
 
-  For purchases that can be repeated, the fulfillment URL map one-to-one to
+  For purchases that can be repeated, the fulfillment URL should map one-to-one to
   a proposal, e.g. by including the order id.
 
   Following these rules allows sharing of links and bookmarking to work correctly,
