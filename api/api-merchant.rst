@@ -32,6 +32,10 @@ The Frontend HTTP API
 ---------------------
 
 
+  The merchant frontend API described here describes the minimal set of HTTP requests that a web shop
+  needs to understand in order to support Taler payments.  The names `proposal_url`, `pay_url` and `fulfillment_url`
+  are placeholders for the actual URLs that the merchant frontend uses.
+
   Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
   like `order`, `proposal`, `contract`, and others.
 
