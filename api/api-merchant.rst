@@ -478,6 +478,14 @@ The `proposal data` must have the following structure:
       // NOTE: still not implemented
       summary: string;
 
+      // Unique, free-form identifier for the proposal.
+      // Must be unique within a merchant instance.
+      // For merchants that do not store proposals in their DB
+      // before the customer paid for them, the order_id can be used
+      // by the frontend to restore a proposal from the information
+      // encoded in it (such as a short product identifier and timestamp).
+      order_id: string;
+
       // Total price for the transaction.
       // The exchange will subtract deposit fees from that amount
       // before transfering it to the merchant.
