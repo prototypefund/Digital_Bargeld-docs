@@ -347,7 +347,7 @@ The following API are made available by the merchant's `backend` to the merchant
     }
 
 
-.. http:get:: /track/transaction
+.. http:get:: /track/order
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 
@@ -368,7 +368,7 @@ The following API are made available by the merchant's `backend` to the merchant
     executed.  Hence the exchange does not yet have a wire transfer identifier.
     The merchant should come back later and ask again.
     The response body is a :ref:`TrackTransactionAcceptedResponse <TrackTransactionAcceptedResponse>`.  Note that
-    the similarity to the response given by the exchange for a /track/transaction
+    the similarity to the response given by the exchange for a /track/order
     is completely intended.
 
   :status 404 Not Found: The transaction is unknown to the backend.
@@ -433,7 +433,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
       // The current claim by the exchange that the given
       // transaction is included in the above WTID.
-      // (A response from `/track/transaction`).
+      // (A response from `/track/order`).
       transaction_tracking_claim: TrackTransactionResponse;
 
       // Public key of the coin for which we got conflicting information.
