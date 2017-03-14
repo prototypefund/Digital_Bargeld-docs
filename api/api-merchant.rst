@@ -243,7 +243,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
-    The body of the response is a :ref:`TrackTransferResponse <TrackTransferResponse>`.  Note that
+    The body of the response is a `MerchantTrackTransferResponse`_.  Note that
     the similarity to the response given by the exchange for a /track/transfer
     is completely intended.
 
@@ -254,6 +254,55 @@ The following API are made available by the merchant's `backend` to the merchant
     there is at least one deposit among the deposits aggregated by `wtid` that accounts for a coin whose
     details don't match the details stored in merchant's database about the same keyed coin.
     The response body contains the `TrackTransferConflictDetails`_.
+
+  .. _MerchantTrackTransferResponse:
+  .. _tsref-type-TrackTransferResponse:
+  .. code-block:: tsref
+
+    interface TrackTransferResponse {
+      // Total amount transferred
+      total: Amount;
+
+      // Applicable wire fee that was charged
+      wire_fee: Amount;
+
+      // public key of the merchant (identical for all deposits)
+      merchant_pub: EddsaPublicKey;
+
+      // hash of the wire details (identical for all deposits)
+      H_wire: HashCode;
+
+      // Time of the execution of the wire transfer by the exchange
+      execution_time: Timestamp;
+
+      // details about the deposits
+      deposits_sums: TrackTransferDetail[];
+
+      // signature from the exchange made with purpose
+      // `TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT`
+      exchange_sig: EddsaSignature;
+
+      // public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  Again given
+      // explicitly as the client might otherwise be confused by clock skew as to
+      // which signing key was used.
+      exchange_pub: EddsaSignature;
+    }
+
+  .. _tsref-type-TrackTransferDetail:
+  .. code-block:: tsref
+
+    interface TrackTransferDetail {
+      // Business activity associated with the wire tranfered amount
+      // `deposit_value`.
+      order_id: string;
+
+      // The total amount the exchange paid back for `order_id`.
+      deposit_value: Amount;
+
+      // applicable fees for the deposit
+      deposit_fee: Amount;
+    }
 
 
   **Details:**
@@ -344,8 +393,9 @@ The following API are made available by the merchant's `backend` to the merchant
       // execution time of the wire transfer
       execution_time: Timestamp;
 
-      // Array of data about coins
-      coins: CoinWireTransfer[];
+      // Total amount that has been wire transfered
+      // to the merchant
+      amount: Amount;
     }
 
   .. _tsref-type-CoinWireTransfer:
