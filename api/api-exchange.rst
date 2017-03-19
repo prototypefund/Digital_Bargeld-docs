@@ -1019,7 +1019,7 @@ in using this API.
     interface PaybackConfirmation {
       // wire subject the exchange promises to use for the
       // wire transfer of the funds;
-      wire_subject: String;
+      wire_subject: Base32;
 
       // How much will the exchange pay back (needed by wallet in
       // case coin was partially spent and wallet got restored from backup)
