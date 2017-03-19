@@ -502,7 +502,7 @@ within the
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
     struct GNUNET_HashCode h_proposal_data;
     struct GNUNET_HashCode h_wire;
-    uint64_t transaction_id GNUNET_PACKED;
+    uint64_t transaction_id;
     struct GNUNET_TIME_AbsoluteNBO timestamp;
     struct GNUNET_TIME_AbsoluteNBO refund_deadline;
     struct TALER_AmountNBO amount_without_fee;
@@ -627,7 +627,7 @@ within the
   struct TALER_WireDepositDetailP {
     struct GNUNET_HashCode h_proposal_data;
     struct GNUNET_TIME_AbsoluteNBO execution_time;
-    uint64_t transaction_id GNUNET_PACKED;
+    uint64_t transaction_id;
     struct TALER_CoinSpendPublicKeyP coin_pub;
     struct TALER_AmountNBO deposit_value;
     struct TALER_AmountNBO deposit_fee;
@@ -718,14 +718,43 @@ within the
 
   struct TALER_RefundRequestPS {
     /**
-      *  purpose.purpose = TALER_SIGNATURE_MERCHANT_REFUND
-      */
+     *  purpose.purpose = TALER_SIGNATURE_MERCHANT_REFUND
+     */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-    struct GNUNET_HashCode h_proposal_data GNUNET_PACKED;
-    uint64_t transaction_id GNUNET_PACKED;
+    struct GNUNET_HashCode h_proposal_data;
+    uint64_t transaction_id;
     struct TALER_CoinSpendPublicKeyP coin_pub;
     struct TALER_MerchantPublicKeyP merchant;
-    uint64_t rtransaction_id GNUNET_PACKED;
+    uint64_t rtransaction_id;
     struct TALER_AmountNBO refund_amount;
     struct TALER_AmountNBO refund_fee;
+  };
+
+
+.. _TALER_PaybackRequestPS:
+.. sourcecode:: c
+
+  struct TALER_PaybackRequestPS {
+    /**
+     *  purpose.purpose = TALER_SIGNATURE_WALLET_COIN_PAYBACK
+     */
+    struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+    struct TALER_CoinSpendPublicKeyP coin_pub;
+    struct GNUNET_HashCode h_denom_pub;
+    struct TALER_DenominationBlindingKeyP coin_blind;
+  };
+
+
+.. _TALER_PaybackConfirmationPS:
+.. sourcecode:: c
+
+  struct TALER_PaybackConfirmationPS {
+    /**
+     *  purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK
+     */
+    struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+    struct GNUNET_TIME_AbsoluteNBO payback_deadline;
+    struct TALER_AmountNBO payback_amount;
+    struct TALER_CoinSpendPublicKeyP coin_pub;
+    struct GNUNET_HashCode h_wire_subject;
   };

@@ -61,8 +61,11 @@ possibly by using HTTPS.
       // EdDSA master public key of the exchange, used to sign entries in `denoms` and `signkeys`
       master_public_key: EddsaPublicKey;
 
-      // Denomination offered by this exchange.
+      // Denominations offered by this exchange.
       denoms: Denom[];
+
+      // Denominations for which the exchange currently offers/requests payback.
+      payback: Payback[];
 
       // The date when the denomination keys were last updated.
       list_issue_date: Timestamp;
@@ -134,6 +137,21 @@ possibly by using HTTPS.
   currency of the `value`.  Theoretically, the `fee_withdraw` could be in a
   different currency, but this is not currently supported by the
   implementation.
+
+  .. _tsref-type-Payback:
+  .. code-block:: tsref
+
+    interface Payback {
+      // hash of the public key of the denomination that is being revoked under
+      // emergency protocol (see /payback).
+      h_denom_pub: HashCode;
+
+      // We do not include any signature here, as the primary use-case for
+      // this emergency involves the exchange having lost its signing keys,
+      // so such a signature here would be pretty worthless.  However, the
+      // exchange will not honor /payback requests unless they are for
+      // denomination keys listed here.
+    }
 
   A signing key in the `signkeys` list is a JSON object with the following fields:
 
@@ -515,7 +533,7 @@ denomination.
     The deposit operation has failed because the coin has insufficient
     residual value; the request should not be repeated again with this coin.
     In this case, the response is a `DepositDoubleSpendError`_.
-  :status 404:
+  :status 404 Not Found:
     Either the denomination key is not recognized (expired or invalid) or
     the wire type is not recognized.
 
@@ -933,6 +951,87 @@ the API during normal operation.
     }
 
 
+-------------------
+Emergency Cash-Back
+-------------------
+
+This API is only used if the exchange is either about to go out of
+business or has had its private signing keys compromised (so in
+either case, the protocol is only used in **abnormal**
+situations).  In the above cases, the exchange signals to the
+wallets that the emergency cash back protocol has been activated
+by putting the affected denomination keys into the cash-back
+part of the /keys response.  If and only if this has happened,
+coins that were signed with those denomination keys can be cashed
+in using this API.
+
+   .. note::
+
+      This is a proposed API, we are implementing it as bug #3887.
+
+.. http:post:: /payback
+
+  Demand that a coin be refunded via wire transfer to the original owner.
+
+  **Request:** The request body must be a `PaybackRequest`_ object.
+
+  **Response:**
+  :status 200 OK:
+    The request was succesful, and the response is a `PaybackConfirmation`.
+    Note that repeating exactly the same request
+    will again yield the same response, so if the network goes down during the
+    transaction or before the client can commit the coin signature to disk, the
+    coin is not lost.
+  :status 401 Unauthorized: The coin's signature is invalid.
+  :status 403 Forbidden: The coin was already used for payment.
+    The response is a `DepositDoubleSpendError`_.
+  :status 404 Not Found:
+    The denomination key is not in the set of denomination
+    keys where emergency pay back is enabled.
+
+  **Details:**
+
+  .. _PaybackRequest:
+  .. code-block:: tsref
+
+    interface PaybackRequest {
+      // Denomination public key (RSA), specifying the type of coin the client
+      // would like the exchange to pay back.
+      denom_pub: RsaPublicKey;
+
+      // coin's public key
+      coin_pub: CoinPublicKey;
+
+      // coin's blinding factor
+      coin_blind_key_secret: RsaBlindingKeySecret;
+
+      // Signature of `TALER_PaybackRequestPS`_ created with the `coin's private key <coin-priv>`_
+      coin_sig: EddsaSignature;
+    }
+
+
+  .. _PaybackConfirmation:
+  .. code-block:: tsref
+
+    interface PaybackConfirmation {
+      // wire subject the exchange promises to use for the
+      // wire transfer of the funds;
+      wire_subject: String;
+
+      // How much will the exchange pay back (needed by wallet in
+      // case coin was partially spent and wallet got restored from backup)
+      amount: Amount;
+
+      // Time by which the exchange promises to wire the funds back.
+      payback_deadline: Timestamp;
+
+      // the EdDSA signature of `TALER_PaybackConfirmationPS`_ using a current
+      // `signing key of the exchange <sign-key-priv>`_ affirming the successful
+      // payback request, and that the exchange promises to transfer the funds
+      // by the date specified (this allows the exchange delaying the transfer
+      // a bit to aggregate additional payback requests into a larger one).
+      sig: EddsaSignature;
+    }
 
 
 -----------------------
