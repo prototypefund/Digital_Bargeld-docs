@@ -999,6 +999,9 @@ in using this API.
       // would like the exchange to pay back.
       denom_pub: RsaPublicKey;
 
+      // Signature over the `coin public key <eddsa-coin-pub>`_ by the denomination.
+      denom_sig: RsaSignature;
+
       // coin's public key
       coin_pub: CoinPublicKey;
 
