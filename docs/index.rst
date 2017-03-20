@@ -53,7 +53,6 @@ It focuses on how to install, configure and run the required software.
 
   global-licensing
   configuration-basics
-  operate-exchange
   operate-merchant
   versioning
 
@@ -86,7 +85,6 @@ core components of the Taler reference implementation.
 
   dev-talerdotnet
   dev-wallet-wx
-  dev-exchange
   dev-merchant
   deployment
   releases

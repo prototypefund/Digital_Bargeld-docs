@@ -64,11 +64,11 @@ source_suffix = '.rst'
 #source_encoding = 'utf-8-sig'
 
 # The master toctree document.
-master_doc = 'index'
+master_doc = 'operate-exchange'
 
 # General information about the project.
 project = u'Taler'
-copyright = u'2014, 2015, 2016 Florian Dold, Benedikt Muller, Sree Harsha Totakura, Christian Grothoff, Marcello Stanisci (GPLv3+ or GFDL 1.3+)'
+copyright = u'2014, 2015, 2016, 2017 Florian Dold, Benedikt Muller, Sree Harsha Totakura, Christian Grothoff, Marcello Stanisci (GPLv3+ or GFDL 1.3+)'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -251,7 +251,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'taler', u'Taler Documentation',
+    ('index', 'taler', u'GNU Taler Exchange Operator Manual',
      [u'F. Dold, B. Muller, S. H. Totakura, C. Grothoff'],
      1)
 ]
@@ -266,7 +266,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'taler', u'GNU Taler Documentation',
+  ('index', 'taler', u'GNU Taler Exchange Operator Manual',
    u'F. Dold, B. Muller, S. H. Totakura, C. Grothoff',
    'Taler', 'One-Click Cash Payments.',
    'Miscellaneous'),
