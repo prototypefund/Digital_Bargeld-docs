@@ -464,31 +464,37 @@ The following API are made available by the merchant's `backend` to the merchant
 
   **Request**
 
-  :query date: only transactions *jounger* than this parameter will be returned. It's a timestamp, given in seconds.
+  :query date: only transactions *older* than this parameter will be returned. It's a timestamp, given in seconds.
+               Being optional, it defaults to the current time if not given.
+  :query start: only transactions having `row_id` less than `start` will be returned. Being optional, it defaults to the
+                highest `row_id` contained in the DB (namely, the youngest entry).
+  :query delta: at most `delta` entries will be returned. Being optional, it defaults to 20.
+  :query instance: on behalf of which merchant instance the query should be accomplished.
 
+  A typical usage is to firstly call this API without `start` and `date` parameter, then fetch the oldest
+  `row_id` from the results, and then keep calling the API by using the oldest row ID as `start` parameter.
+  This way we simply "scroll" results from the youngest to the oldest, `delta` entries at time.
+  
   **Response**
 
-  :status 200 OK: The response is a JSON `array` of  `TransactionHistory`_.
+  :status 200 OK: The response is a JSON `array` of  `TransactionHistory`_.  The array is sorted such that entry `i` is younger than entry `i+1`.
 
   .. _tsref-type-TransactionHistory:
   .. _TransactionHistory:
   .. code-block:: tsref
 
     interface TransactionHistory {
-      // transaction id
-      transaction_id: number;
+      // The serial number this entry has in the merchant's DB.
+      row_id: number;
 
-      // Hashcode of the relevant contract
-      h_proposal_data: HashCode;
-
-      // Exchange's base URL
-      exchange: string;
+      // order ID of the transaction related to this entry.
+      order_id: string;
 
       // Transaction's timestamp
       timestamp: Timestamp;
 
-      // Price payed for this transaction
-      total_amount: Amount;
+      // Total amount associated to this transaction.
+      amount: Amount;
     }
 
 .. _proposal:
