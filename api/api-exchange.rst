@@ -1033,7 +1033,13 @@ in using this API.
       // payback request, and that the exchange promises to transfer the funds
       // by the date specified (this allows the exchange delaying the transfer
       // a bit to aggregate additional payback requests into a larger one).
-      sig: EddsaSignature;
+      eddsa_sig: EddsaSignature;
+
+      // Public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  It is given
+      // explicitly as the client might otherwise be confused by clock skew as to
+      // which signing key was used.
+      eddsa_pub: EddsaPublicKey;
     }
 
 
