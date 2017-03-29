@@ -987,7 +987,8 @@ in using this API.
     The response is a `DepositDoubleSpendError`_.
   :status 404 Not Found:
     The denomination key is not in the set of denomination
-    keys where emergency pay back is enabled.
+    keys where emergency pay back is enabled, or the blinded
+    coin is not known to have been withdrawn.
 
   **Details:**
 
@@ -1033,13 +1034,13 @@ in using this API.
       // payback request, and that the exchange promises to transfer the funds
       // by the date specified (this allows the exchange delaying the transfer
       // a bit to aggregate additional payback requests into a larger one).
-      eddsa_sig: EddsaSignature;
+      exchange_sig: EddsaSignature;
 
       // Public EdDSA key of the exchange that was used to generate the signature.
       // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
-      eddsa_pub: EddsaPublicKey;
+      exchange_pub: EddsaPublicKey;
     }
 
 
