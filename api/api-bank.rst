@@ -100,11 +100,31 @@ the number of results.
 
 .. http:post:: /history
 
-**Request**
+**Request:** The body of this request must have the format of a `HistoryRequest`_.
 TBD
 
 **Response**
 TBD
+
+.. _HistoryRequest:
+.. code-block:: tsref
+
+  interface HistoryRequest {
+  
+    // The username of the user calling this API.
+    username: string;
+
+    // Password of the user calling this API.
+    password: string;
+
+    // Row number identifier in the bank's database
+    // such that only rows with GREATER (meaning younger
+    // records) row number will be returned.
+    start: number;
+
+    // How many rows we want returned, at most.
+    delta: number;
+  }
 
 --------
 Util API
