@@ -25,8 +25,9 @@ needs to give real money to the merchant.
 Administrative API
 ------------------
 
-This is `local` API, meant to make the bank communicate with trusted entities,
-namely exchanges.
+This API allows one user to send money to another user, withing the same "test"
+bank.  The user calling it has to authenticate by including his credentials in the
+request.
 
 .. _bank-deposit:
 .. http:post:: /admin/add/incoming
@@ -45,6 +46,12 @@ namely exchanges.
 .. code-block:: tsref
 
   interface BankDepositRequest {
+
+    // The username of the user calling this API.
+    username: string;
+
+    // Password of the user calling this API.
+    password: string;
 
     // JSON 'amount' object. The amount the caller wants to transfer
     // to the recipient's count
