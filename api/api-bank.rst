@@ -92,6 +92,21 @@ request.
   }
 
 --------
+User API
+--------
+
+This API gets the user a list of his transactions, optionally limiting
+the number of results.
+
+.. http:post:: /history
+
+**Request**
+TBD
+
+**Response**
+TBD
+
+--------
 Util API
 --------
 
