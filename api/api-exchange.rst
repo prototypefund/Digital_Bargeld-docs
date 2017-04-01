@@ -1018,9 +1018,8 @@ in using this API.
   .. code-block:: tsref
 
     interface PaybackConfirmation {
-      // wire subject the exchange promises to use for the
-      // wire transfer of the funds;
-      wire_subject: Base32;
+      // public key of the reserve that will receive the payback.
+      reserve_pub: EddsaPublicKey;
 
       // How much will the exchange pay back (needed by wallet in
       // case coin was partially spent and wallet got restored from backup)
