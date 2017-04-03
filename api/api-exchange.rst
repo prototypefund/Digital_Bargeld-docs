@@ -1025,8 +1025,8 @@ in using this API.
       // case coin was partially spent and wallet got restored from backup)
       amount: Amount;
 
-      // Time by which the exchange promises to wire the funds back.
-      payback_deadline: Timestamp;
+      // Time by which the exchange received the /payback request.
+      timestamp: Timestamp;
 
       // the EdDSA signature of `TALER_PaybackConfirmationPS`_ using a current
       // `signing key of the exchange <sign-key-priv>`_ affirming the successful
