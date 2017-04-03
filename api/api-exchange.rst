@@ -411,10 +411,11 @@ exchange.
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
       transfer_details?: any;
 
-      // `base32`_ encoding of a purpose, not present for "DEPOSIT" or "PAYBACK".
+      // `base32`_ encoding of a purpose, not present for "DEPOSIT"
       // If `type` is "WITHDRAW", this is a `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW.
       // If `type` is "CLOSING", this is a `struct TALER_ReserveCloseConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
-      details?: string;
+      // If `type` is "PAYBACK", this is a `struct TALER_PaybackConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK.
+      details?: SignaturePurpose; // See #4980
 
       // Signature of `TALER_WithdrawRequestPS`_ created with the `reserves's private key <reserve-priv>`_.  Only present if type is "WITHDRAW".
       signature?: EddsaSignature;
@@ -662,7 +663,7 @@ denomination.
       // `base32`_ binary encoding of the transaction data as a
       // `TALER_DepositRequestPS`_, `TALER_RefreshMeltCoinAffirmationPS`_,
       // `TALER_RefundRequestPS`_ or `TALER_PaybackConfirmationPS`_.
-      details: string;
+      details: SignaturePurpose; // See #4980
 
       // `EdDSA Signature <eddsa-sig>`_ of what we got in `details`.
       // Note that in the case of a 'refund', the signature is made with
