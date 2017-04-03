@@ -753,8 +753,23 @@ within the
      *  purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-    struct GNUNET_TIME_AbsoluteNBO payback_deadline;
+    struct GNUNET_TIME_AbsoluteNBO timestamp;
     struct TALER_AmountNBO payback_amount;
     struct TALER_CoinSpendPublicKeyP coin_pub;
-    struct GNUNET_HashCode h_wire_subject;
+    struct TALER_ReservePublicKeyP reserve_pub;
+  };
+
+
+.. _TALER_ReserveCloseConfirmationPS:
+.. sourcecode:: c
+
+  struct TALER_ReserveCloseConfirmationPS {
+    /**
+     * purpose.purpose = TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED
+     */
+    struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+    struct GNUNET_TIME_AbsoluteNBO timestamp;
+    struct TALER_AmountNBO closing_amount;
+    struct TALER_ReservePublicKeyP reserve_pub;
+    struct GNUNET_HashCode h_wire;
   };

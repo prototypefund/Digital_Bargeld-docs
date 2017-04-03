@@ -399,7 +399,7 @@ exchange.
   .. code-block:: tsref
 
     interface TransactionHistoryItem {
-      // Either "WITHDRAW" or "DEPOSIT"
+      // Either "WITHDRAW", "DEPOSIT", "PAYBACK", or "CLOSING"
       type: string;
 
       // The amount that was withdrawn or deposited.
@@ -411,12 +411,25 @@ exchange.
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
       transfer_details?: any;
 
-      // `base32`_ encoding of `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW. This field appears only if `type` is "WITHDRAW".
+      // `base32`_ encoding of a purpose, not present for "DEPOSIT" or "PAYBACK".
+      // If `type` is "WITHDRAW", this is a `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW.
+      // If `type` is "CLOSING", this is a `struct TALER_ReserveCloseConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
       details?: string;
 
       // Signature of `TALER_WithdrawRequestPS`_ created with the `reserves's private key <reserve-priv>`_.  Only present if type is "WITHDRAW".
       signature?: EddsaSignature;
-    }
+
+      // If `type` is "PAYBACK", this is a signature over a `struct TALER_PaybackConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK.
+      // If `type` is "CLOSING", this is a signature over a `struct TALER_ReserveCloseConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
+      // Not present for other values of `type`.
+      exchange_sig?: EddsaSignature;
+
+      // Public key used to create `exchange_sig`, only present if `exchange_sig` is present.
+      exchange_pub?: EddsaPublicKey;
+
+      // Timestamp when the exchange received the /payback. Only present if `type` is "PAYBACK".
+      timestamp?: Timestamp;
+   }
 
 
 .. http:post:: /reserve/withdraw
@@ -635,7 +648,7 @@ denomination.
   .. code-block:: tsref
 
     interface CoinSpendHistoryItem {
-      // Either "deposit" or "melt" or "refund"
+      // Either "DEPOSIT", "MELT", "REFUND" or "PAYBACK"
       type: string;
 
       // The total amount of the coin's value absorbed (or restored in the case of a refund) by this transaction.
@@ -647,14 +660,21 @@ denomination.
       amount: Amount;
 
       // `base32`_ binary encoding of the transaction data as a
-      // `TALER_DepositRequestPS`_ or `TALER_RefreshMeltCoinAffirmationPS`_
-      // or `TALER_RefundRequestPS`_
+      // `TALER_DepositRequestPS`_, `TALER_RefreshMeltCoinAffirmationPS`_,
+      // `TALER_RefundRequestPS`_ or `TALER_PaybackConfirmationPS`_.
       details: string;
 
       // `EdDSA Signature <eddsa-sig>`_ of what we got in `details`.
       // Note that in the case of a 'refund', the signature is made with
-      // the `public key of the merchant <merchant-pub>`_, and not `that of the coin <eddsa-coin-pub>`_
-      signature: EddsaSignature;
+      // the `public key of the merchant <merchant-pub>`_, and not `that of the coin <eddsa-coin-pub>`_,
+      // Not present if `type` is "PAYBACK"
+      signature?: EddsaSignature;
+
+      // Signature by the exchange, only present if `type` is "PAYBACK".
+      exchange_sig?: EddsaSignature;
+
+      // public key used to sign `exchange_sig`, only present if `exchange_sig` present.
+      exchange_pub?: EddsaPublicKey;
     }
 
 ----------
