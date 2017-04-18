@@ -604,6 +604,7 @@ within the
     struct GNUNET_TIME_AbsoluteNBO start_date;
     struct GNUNET_TIME_AbsoluteNBO end_date;
     struct TALER_AmountNBO wire_fee;
+    struct TALER_AmountNBO closing_fee;
   };
 
 .. _TALER_DepositTrackPS:

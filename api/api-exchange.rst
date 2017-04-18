@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014, 2015, 2016 GNUnet e.V. and INRIA
+  Copyright (C) 2014-2017 GNUnet e.V. and INRIA
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -325,6 +325,9 @@ Obtaining wire-transfer information
       // Per transfer wire transfer fee.
       wire_fee: Amount;
 
+      // Per transfer closing fee.
+      closing_fee: Amount;
+
       // What date (inclusive) does this fee go into effect?
       // The different fees must cover the full time period in which
       // any of the denomination keys are valid without overlap.
@@ -402,8 +405,26 @@ exchange.
       // Either "WITHDRAW", "DEPOSIT", "PAYBACK", or "CLOSING"
       type: string;
 
-      // The amount that was withdrawn or deposited.
+      // The amount that was withdrawn or deposited (incl. fee)
+      // or paid back, or the closing amount.
       amount: Amount;
+
+      // Hash of the denomination public key of the coin, if
+      // type is "WITHDRAW".
+      h_denom_pub?: base32;
+
+      // Hash of the blinded coin to be signed, if
+      // type is "WITHDRAW".
+      h_coin_envelope?: base32;
+
+      // Signature of `TALER_WithdrawRequestPS`_ created with the `reserves's private key <reserve-priv>`_.  Only present if type is "WITHDRAW".
+      reserve_sig?: EddsaSignature;
+
+      // The fee that was charged for "WITHDRAW".
+      withdraw_fee?: Amount;
+
+      // The fee that was charged for "CLOSING".
+      closing_fee?: Amount;
 
       // Sender account details, only present if type is "DEPOSIT".
       sender_account_details?: any;
@@ -411,15 +432,10 @@ exchange.
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
       transfer_details?: any;
 
-      // `base32`_ encoding of a purpose, not present for "DEPOSIT"
-      // If `type` is "WITHDRAW", this is a `TALER_WithdrawRequestPS`_ with purpose TALER_SIGNATURE_WALLET_RESERVE_WITHDRAW.
-      // If `type` is "CLOSING", this is a `struct TALER_ReserveCloseConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
-      // If `type` is "PAYBACK", this is a `struct TALER_PaybackConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK.
-      details?: SignaturePurpose; // See #4980
-
-      // Signature of `TALER_WithdrawRequestPS`_ created with the `reserves's private key <reserve-priv>`_.  Only present if type is "WITHDRAW".
-      signature?: EddsaSignature;
-
+      // Hash of the wire account into which the funds were
+      // returned to, present if type is "CLOSING".
+      h_wire?: base32;
+      
       // If `type` is "PAYBACK", this is a signature over a `struct TALER_PaybackConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK.
       // If `type` is "CLOSING", this is a signature over a `struct TALER_ReserveCloseConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
       // Not present for other values of `type`.
@@ -427,6 +443,9 @@ exchange.
 
       // Public key used to create `exchange_sig`, only present if `exchange_sig` is present.
       exchange_pub?: EddsaPublicKey;
+
+      // Public key of the coin that was paid back; only present if type is "PAYBACK".
+      coin_pub?: CoinPublicKey;
 
       // Timestamp when the exchange received the /payback. Only present if `type` is "PAYBACK".
       timestamp?: Timestamp;
@@ -568,6 +587,7 @@ denomination.
 
       // SHA-512 hash of the merchant's payment details from `wire`.  Although
       // strictly speaking redundant, this helps detect inconsistencies.
+      // TODO: change to 'h_wire'.
       H_wire: HashCode;
 
       // SHA-512 hash of the contact of the merchant with the customer.  Further
@@ -578,6 +598,8 @@ denomination.
       coin_pub: CoinPublicKey;
 
       // denomination RSA key with which the coin is signed
+      // TODO: consider changing to h_denom_pub to reduce bandwidth?
+      // (Exchange clearly knows the full denom_pub).
       denom_pub: RsaPublicKey;
 
       // exchange's unblinded RSA signature of the coin
@@ -630,7 +652,7 @@ denomination.
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
       pub: EddsaPublicKey;
-      }
+    }
 
   .. _DepositDoubleSpendError:
   .. code-block:: tsref
@@ -653,23 +675,58 @@ denomination.
       type: string;
 
       // The total amount of the coin's value absorbed (or restored in the case of a refund) by this transaction.
-      // Note that for deposit and melt, this means the amount given includes
+      // Note that for deposit and melt this means the amount given includes
       // the transaction fee, while for refunds the amount given excludes
       // the transaction fee. The current coin value can thus be computed by
       // subtracting deposit and melt amounts and adding refund amounts from
       // the coin's denomination value.
       amount: Amount;
 
-      // `base32`_ binary encoding of the transaction data as a
-      // `TALER_DepositRequestPS`_, `TALER_RefreshMeltCoinAffirmationPS`_,
-      // `TALER_RefundRequestPS`_ or `TALER_PaybackConfirmationPS`_.
-      details: SignaturePurpose; // See #4980
+      // Deposit fee in case of type "DEPOSIT".
+      deposit_fee: Amount;
 
-      // `EdDSA Signature <eddsa-sig>`_ of what we got in `details`.
-      // Note that in the case of a 'refund', the signature is made with
-      // the `public key of the merchant <merchant-pub>`_, and not `that of the coin <eddsa-coin-pub>`_,
-      // Not present if `type` is "PAYBACK"
-      signature?: EddsaSignature;
+      // public key of the merchant, for "DEPOSIT" operations.
+      merchant_pub?: EddsaPublicKey;
+      
+      // date when the operation was made.
+      // Only for "DEPOSIT" operations.
+      timestamp?: Timestamp;
+
+      // date until which the merchant can issue a refund to the customer via the
+      // exchange, possibly zero if refunds are not allowed. Only for "DEPOSIT" operations.
+      refund_deadline?: Timestamp;
+      
+      // Signature by the coin, only present if `type` is "DEPOSIT" or "MELT".
+      coin_sig?: EddsaSignature;
+
+      // Deposit fee in case of type "MELT".
+      melt_fee: Amount;
+
+      // Session hash for the melt operation.
+      session_hash: HashCode;
+
+      // Hash of the bank account from where we received the funds.
+      h_wire: HashCode;
+
+      // Deposit fee in case of type "REFUND".
+      refund_fee: Amount;
+
+      // Hash over the proposal data of the contract that
+      // is being paid (if type is "DEPOSIT") or refunded (if
+      // `type` is "REFUND"); otherwise absent.
+      h_proposal_data?: HashCode;
+
+      // Refund transaction ID.  Only present if `type` is
+      // "REFUND"
+      rtransaction_id?: integer;
+
+      // `EdDSA Signature <eddsa-sig>`_ authorizing the REFUND. Made with
+      // the `public key of the merchant <merchant-pub>`_.
+      // Only present if `type` is "REFUND"
+      merchant_sig?: EddsaSignature;
+
+      // public key of the reserve that will receive the funds, for "PAYBACK" operations.
+      reserve_pub?: EddsaPublicKey;
 
       // Signature by the exchange, only present if `type` is "PAYBACK".
       exchange_sig?: EddsaSignature;
