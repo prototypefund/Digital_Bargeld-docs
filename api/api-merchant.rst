@@ -603,6 +603,12 @@ The `proposal data` must have the following structure:
       // The hash of the merchant instance's wire details.
       H_wire: HashCode;
 
+      // Wire transfer method identifier for the wire method associated with H_wire.
+      // The wallet may only select exchanges via a matching auditor if the
+      // exchange also supports this wire method.
+      // The wire transfer fees must be added based on this wire transfer method.
+      wire_method: string;
+
       // Any exchanges audited by these auditors are accepted by the merchant.
       auditors: Auditor[];
 
