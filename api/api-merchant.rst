@@ -444,19 +444,19 @@ The following API are made available by the merchant's `backend` to the merchant
 
 .. http:get:: /contract/lookup
 
-  Retrieve a proposal, given its transaction ID.
+  Retrieve a proposal, given its order ID.
 
   **Request**
 
-  :query transaction_id: transaction ID of the proposal to retrieve.
+  :query order_id: transaction ID of the proposal to retrieve.
 
   **Response**
 
   :status 200 OK:
-    The body contains the `proposal`_ pointed to by `transaction_id`.
+    The body contains the `proposal`_ pointed to by `order_id`.
 
   :status 404 Not Found:
-    No proposal corresponds to `transaction_id`.
+    No proposal corresponds to `order_id`.
 
 .. http:get:: /history
 
