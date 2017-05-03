@@ -141,8 +141,8 @@ the number of results.
     amount: Amount;
 
     // "-" if the transfer was outgoing, "+" if it was
-    // incoming.  This field is only present if the argument
-    // `direction` was NOT given.
+    // incoming.  This field is only present if the
+    // argument `direction` was NOT given.
     sign: string;
 
     // Bank account number of the other party involved in the
