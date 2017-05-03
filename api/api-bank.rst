@@ -115,16 +115,28 @@ the number of results.
 
 .. http:post:: /history
 
-  **Request**
-  :query direction: Optional parameter that lets the caller specify
-  only incoming, outgoing, or both types of records.  If not given,
-  then the API will return both types; if set to `credit` (`debit`),
-  only incoming (outgoing) records are returned.
+  **Request** JSON of type `HistoryRequest`_.
 
 
   **Response** JSON array of type `BankTransaction`_.
 
 
+.. _HistoryRequest:
+.. code-block:: tsref
+
+  interface HistoryRequest {
+    
+    // Authentication credentials to get right of
+    // issuing this call.
+    auth: BasicAuth;
+
+    // Optional parameter that lets the caller specify
+    // only incoming, outgoing, or both types of records.  If not given,
+    // then the API will return both types; if set to `credit` (`debit`),
+    // only incoming (outgoing) records are returned.
+    direction: string;
+
+    }
 
 .. _BankTransaction:
 .. code-block:: tsref
