@@ -115,10 +115,13 @@ the number of results.
 
 .. http:post:: /history
 
-  **Request** JSON of type `HistoryRequest`_.
+  **Request** JSON object whose field `data` is an array of `HistoryRequest`_ elements.
 
+..
+  NOTE: According to the last research, Django has no way of
+  returning a straight array.
 
-  **Response** JSON array of type `BankTransaction`_.
+  **Response** JSON object of type `BankTransaction`_.
 
 
 .. _HistoryRequest:
