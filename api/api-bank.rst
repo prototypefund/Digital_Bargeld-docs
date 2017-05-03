@@ -47,11 +47,8 @@ request.
 
   interface BankDepositRequest {
 
-    // The username of the user calling this API.
-    username: string;
-
-    // Password of the user calling this API.
-    password: string;
+    // Authentication method used
+    auth: BankAuth;
 
     // JSON 'amount' object. The amount the caller wants to transfer
     // to the recipient's count
@@ -81,6 +78,24 @@ request.
 
   }
 
+
+.. _BankAuth:
+.. code-block:: tsref
+
+  interface BankAuth {
+
+    // authentication type.  Accepted values are:
+    // "basic", "digest", "token".
+    type: string; 
+    
+    // Optional object containing data consistent with the
+    // used authentication type.
+    data: Object;
+
+  }
+
+
+
 .. _BankIncomingError:
 .. code-block:: tsref
 
@@ -95,42 +110,62 @@ request.
 User API
 --------
 
-This API gets the user a list of his transactions, optionally limiting
+This API returns a list of his transactions, optionally limiting
 the number of results.
 
 .. http:post:: /history
 
 **Request:** The body of this request must have the format of a `HistoryRequest`_.
-TBD
 
-**Response**
-TBD
+**Response** JSON array of type `BankTransaction`_.
+
+
+
+.. _BankTransaction:
+.. code-block:: tsref
+
+  interface BankTransaction {
+  
+    // identification number of the record
+    row_id: number;
+
+    // Date of the transaction
+    date: Timestamp;
+
+    // Amount transferred
+    amount: Amount;
+
+    // "-" if the transfer was outcoming, "+" if it was
+    // incoming.
+    sign: string;
+
+    // Bank account number of the other party
+    // involved in the transaction.
+    counterpart: number; 
+  
+  }
+
+..
+  The counterpart currently only points to the same bank as
+  the client using the bank.  A reasonable improvement is to
+  specify a bank URI too, so that Taler can run across multiple
+  banks.
 
 .. _HistoryRequest:
 .. code-block:: tsref
 
   interface HistoryRequest {
   
-    // The username of the user calling this API.
-    username: string;
+    // Authentication method used
+    auth: BankAuth;
 
-    // Password of the user calling this API.
-    password: string;
-
-    // Row number identifier in the bank's database
-    // such that only rows with GREATER (meaning younger
-    // records) row number will be returned.
+    // Only records with row id LESSER than `start' will
+    // be returned.  NOTE, smaller row ids denote older db
+    // records.  If this value equals zero, then the youngest
+    // `delta' rows are returned.
     start: number;
 
-    // How many rows we want returned, at most.
+    // Optional value denoting how many rows we want receive.
+    // If not given, then it defaults to 10.
     delta: number;
   }
-
---------
-Util API
---------
-
-Whenever the user wants to know the bank account number of a public account,
-the following path returns a human readable HTML containing this information
-
-  `/public-accounts/details?account=accountName`
