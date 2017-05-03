@@ -115,9 +115,14 @@ the number of results.
 
 .. http:post:: /history
 
-**Request:** The body of this request must have the format of a `HistoryRequest`_.
+  **Request**
+  :query direction: Optional parameter that lets the caller specify
+  only incoming, outgoing, or both types of records.  If not given,
+  then the API will return both types; if set to `credit` (`debit`),
+  only incoming (outgoing) records are returned.
 
-**Response** JSON array of type `BankTransaction`_.
+
+  **Response** JSON array of type `BankTransaction`_.
 
 
 
@@ -135,12 +140,13 @@ the number of results.
     // Amount transferred
     amount: Amount;
 
-    // "-" if the transfer was outcoming, "+" if it was
-    // incoming.
+    // "-" if the transfer was outgoing, "+" if it was
+    // incoming.  This field is only present if the argument
+    // `direction` was NOT given.
     sign: string;
 
-    // Bank account number of the other party
-    // involved in the transaction.
+    // Bank account number of the other party involved in the
+    // transaction.
     counterpart: number; 
   
   }
