@@ -92,22 +92,6 @@ request.
   }
 
 
-.. _BasicAuth:
-.. _tsref-type-BasicAuth:
-.. code-block:: tsref
-
-  interface BasicAuth {
-    
-    // username identifying the caller at the bank
-    username: string;
-
-    // username's associated password
-    password: string;
-  
-  }
-
-
-
 .. _BankError:
 .. code-block:: tsref
 
