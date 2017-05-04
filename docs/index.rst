@@ -96,7 +96,3 @@ Indices and tables
 .. toctree::
   :hidden:
 
-  glossary
-
-* :doc:`glossary`
-* :ref:`search`
