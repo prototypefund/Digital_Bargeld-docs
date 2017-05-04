@@ -84,14 +84,30 @@ request.
 
   interface BankAuth {
 
-    // authentication type.  Accepted values are:
-    // "basic", "digest", "token".
+    // authentication type.  At this stage of development,
+    // only value "basic" is accepted in this field.  Further
+    // methods as "digest" and "token" are scheduled for future
+    // releases.
     type: string; 
     
     // Optional object containing data consistent with the
     // used authentication type.
-    data: Object;
+    data: BasicAuth;
 
+  }
+
+
+.. _BasicAuth:
+.. code-block:: tsref
+
+  interface BasicAuth {
+    
+    // username identifying the caller at the bank
+    username: string;
+
+    // username's associated password
+    password: string;
+  
   }
 
 
