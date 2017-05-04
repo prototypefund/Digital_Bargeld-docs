@@ -85,15 +85,10 @@ request.
   interface BankAuth {
 
     // authentication type.  At this stage of development,
-    // only value "basic" is accepted in this field.  Further
-    // methods as "digest" and "token" are scheduled for future
-    // releases.
+    // only value "basic" is accepted in this field.
+    // The credentials must be indicated in the following HTTP
+    // headers: "X-Taler-Bank-Username" and "X-Taler-Bank-Password".
     type: string; 
-    
-    // Optional object containing data consistent with the
-    // used authentication type.
-    data: BasicAuth;
-
   }
 
 
@@ -127,14 +122,22 @@ request.
 User API
 --------
 
-This API returns a list of his transactions, optionally limiting
-the number of results.
+.. http:get:: /history
 
-.. http:post:: /history
+  Filters and returns the list of transactions of the customer specified in the request.
 
-  **Request** JSON object of type `HistoryRequest`_.
+  **Request**
 
-  **Response** JSON object whose field `data` is an array of type `BankTransaction`_.
+  :query auth: authentication method used.  At this stage of development, only value `basic` is accepted.  Note that username and password need to be given as request's headers.  The dedicated headers are: `X-Taler-Bank-Username` and `X-Taler-Bank-Password`.
+  :query delta: returns the first `N` records younger (older) than `start` if `+N` (`-N`) is specified.
+  :query start: according to `delta`, only those records with row id strictly greater (lesser) than `start` will be returned.  This argument is optional; if not given, `delta` youngest records will be returned.
+  :query direction: optional argument taking values `debit` or `credit`, according to the caller willing to receive both incoming and outgoing, only outgoing, or only incoming records.
+  :query account_number: optional argument indicating the bank account number whose history is to be returned.  If not given, then the history of the calling user will be returned.
+
+  **Response** 
+
+  :status 200 OK: JSON object whose field `data` is an array of type `BankTransaction`_.
+  :status 204 No content: in case no records exist for the targeted user.
 
 .. _BankTransaction:
 .. code-block:: tsref
@@ -158,6 +161,9 @@ the number of results.
     // Bank account number of the other party involved in the
     // transaction.
     counterpart: number; 
+
+    // Wire transfer subject line.
+    wt_subject: string;
   
   }
 
@@ -166,30 +172,3 @@ the number of results.
   the client using the bank.  A reasonable improvement is to
   specify a bank URI too, so that Taler can run across multiple
   banks.
-
-.. _HistoryRequest:
-.. code-block:: tsref
-
-  interface HistoryRequest {
-  
-    // Authentication method used
-    auth: BankAuth;
-
-    // Only records with row id LESSER than `start' will
-    // be returned.  NOTE, smaller row ids denote older db
-    // records.  If this value equals zero, then the youngest
-    // `delta' rows are returned.
-    start: number;
-
-    // Optional value denoting how many rows we want receive.
-    // If not given, then it defaults to 10.
-    delta: number;
-
-    // Optional parameter that lets the caller specify
-    // only incoming, outgoing, or both types of records.  If not given,
-    // then the API will return both types; if set to `credit` (`debit`),
-    // only incoming (outgoing) records are returned.
-    direction: string;
-
-
-  }
