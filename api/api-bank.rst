@@ -38,7 +38,7 @@ request.
 
 :status 200 OK: The request has been correctly handled, so the funds have been transferred to the recipient's account
 
-:status 400 Bad Request: The bank replies a `BankIncomingError`_ object
+:status 400 Bad Request: The bank replies a `BankError`_ object
 
 **Details:**
 
@@ -96,13 +96,13 @@ request.
 
 
 
-.. _BankIncomingError:
+.. _BankError:
 .. code-block:: tsref
 
-  interface BankIncomingError {
+  interface BankError {
 
     // Human readable explanation of the failure.
-    reason: string;
+    error: string;
 
   }
 
@@ -115,31 +115,9 @@ the number of results.
 
 .. http:post:: /history
 
-  **Request** JSON object whose field `data` is an array of `HistoryRequest`_ elements.
+  **Request** JSON object of type `HistoryRequest`_.
 
-..
-  NOTE: According to the last research, Django has no way of
-  returning a straight array.
-
-  **Response** JSON object of type `BankTransaction`_.
-
-
-.. _HistoryRequest:
-.. code-block:: tsref
-
-  interface HistoryRequest {
-    
-    // Authentication credentials to get right of
-    // issuing this call.
-    auth: BasicAuth;
-
-    // Optional parameter that lets the caller specify
-    // only incoming, outgoing, or both types of records.  If not given,
-    // then the API will return both types; if set to `credit` (`debit`),
-    // only incoming (outgoing) records are returned.
-    direction: string;
-
-    }
+  **Response** JSON object whose field `data` is an array of type `BankTransaction`_.
 
 .. _BankTransaction:
 .. code-block:: tsref
@@ -189,4 +167,12 @@ the number of results.
     // Optional value denoting how many rows we want receive.
     // If not given, then it defaults to 10.
     delta: number;
+
+    // Optional parameter that lets the caller specify
+    // only incoming, outgoing, or both types of records.  If not given,
+    // then the API will return both types; if set to `credit` (`debit`),
+    // only incoming (outgoing) records are returned.
+    direction: string;
+
+
   }
