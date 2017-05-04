@@ -78,8 +78,8 @@ request.
 
   }
 
-
 .. _BankAuth:
+.. _tsref-type-BankAuth:
 .. code-block:: tsref
 
   interface BankAuth {
@@ -98,6 +98,7 @@ request.
 
 
 .. _BasicAuth:
+.. _tsref-type-BasicAuth:
 .. code-block:: tsref
 
   interface BasicAuth {
