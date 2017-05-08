@@ -430,7 +430,7 @@ exchange.
       sender_account_details?: any;
 
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
-      transfer_details?: any;
+      wire_reference?: any;
 
       // Wire transfer subject, only present if type is "CLOSING".
       wtid?: any;
