@@ -432,10 +432,13 @@ exchange.
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
       transfer_details?: any;
 
+      // Wire transfer subject, only present if type is "CLOSING".
+      wtid?: any;
+
       // Hash of the wire account into which the funds were
       // returned to, present if type is "CLOSING".
       h_wire?: base32;
-      
+
       // If `type` is "PAYBACK", this is a signature over a `struct TALER_PaybackConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK.
       // If `type` is "CLOSING", this is a signature over a `struct TALER_ReserveCloseConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
       // Not present for other values of `type`.
@@ -687,7 +690,7 @@ denomination.
 
       // public key of the merchant, for "DEPOSIT" operations.
       merchant_pub?: EddsaPublicKey;
-      
+
       // date when the operation was made.
       // Only for "DEPOSIT" operations.
       timestamp?: Timestamp;
@@ -695,7 +698,7 @@ denomination.
       // date until which the merchant can issue a refund to the customer via the
       // exchange, possibly zero if refunds are not allowed. Only for "DEPOSIT" operations.
       refund_deadline?: Timestamp;
-      
+
       // Signature by the coin, only present if `type` is "DEPOSIT" or "MELT".
       coin_sig?: EddsaSignature;
 
