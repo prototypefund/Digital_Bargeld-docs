@@ -84,7 +84,11 @@ request.
     // (See `TALER_WireTransferIdentifierP`_ for an encoding with CRC8.).
     wtid: base32;
 
-    // The sender's account identificator
+    // The sender's account identificator.  NOTE, in the current stage
+    // of development this field is _ignored_, as it's always the bank account
+    // of the logged user that plays as the "debit account".
+    // In future releases, a logged user may specify multiple bank accounts
+    // of her/his as the debit account.
     debit_account: number;
 
     // The recipient's account identificator
