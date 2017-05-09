@@ -36,11 +36,25 @@ request.
 
 **Response:**
 
-:status 200 OK: The request has been correctly handled, so the funds have been transferred to the recipient's account
+:status 200 OK: The request has been correctly handled, so the funds have been transferred to the recipient's account.  The body is a
+`BankDepositDetails`_.
 
 :status 400 Bad Request: The bank replies a `BankError`_ object
 
 **Details:**
+
+.. _BankDepositDetails:
+.. code-block:: tsref
+
+  interface BankDepositDetails {
+    
+    // Timestamp related to the transaction being made.
+    timestamp: Timestamp;
+
+    // Serial id identifying the transaction into the bank's
+    // database.
+    row_id: number;
+  }
 
 .. _BankDepositRequest:
 .. code-block:: tsref
