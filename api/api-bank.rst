@@ -53,7 +53,7 @@ request.
 
     // Serial id identifying the transaction into the bank's
     // database.
-    row_id: number;
+    serial_id: number;
   }
 
 .. _BankDepositRequest:
