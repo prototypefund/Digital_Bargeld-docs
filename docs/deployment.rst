@@ -48,17 +48,29 @@ Deploying to test
   
   $ deployment/bootstrap-bluegreen test
 
-3. Compile the project
+3. Create configuration file
+.. code-block:: none
+
+  $ taler-deployment-config-generate
+
+4. Compile the project
 .. code-block:: none
   
   $ source activate
   $ taler-deployment-build
 
-4. Create exchange's keys
+5. Create denomination and signing keys
+.. note::
+  This step takes care of creating auditor's signature too.
+.. code-block:: none
 
-5. Sign exchange's /wire response
+  $ taler-deployment-keyup
 
-6. ?
+6. Sign exchange's /wire response file
+.. code-block::
+
+  taler-deployment-config-sign
+
 
 --------------------
 Deploying to stable
