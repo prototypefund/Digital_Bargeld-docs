@@ -29,6 +29,31 @@ FIXME:  include asset links and descriptions we use in the webstore in this docu
 
 FIXME:  include instructions for other app stores
 
+-----------------
+Deploying to test
+-----------------
+
+1. From a clean home directory, first clone the deployment repository
+.. code-block:: none
+  
+  $ git clone /var/git/deployment.git
+
+2. Run the bootstrap script; this will checkout any needed repository
+.. code-block:: none
+  
+  $ deployment/bootstrap-bluegreen test
+
+3. Compile the project
+.. code-block:: none
+  
+  $ source activate
+  $ taler-deployment-build
+
+4. Create exchange's keys
+
+5. Sign exchange's /wire response
+
+6. ?
 
 --------------------
 Deploying to stable
