@@ -34,6 +34,11 @@ Deploying to test
 -----------------
 
 1. From a clean home directory, first clone the deployment repository
+.. note::
+  in case you clean some existing environment, make sure the ``~/.config``
+  and other hidden directories are deleted as well.  Make also sure that
+  a symlink to /test/shared-data exists before going on with the deployment.
+
 .. code-block:: none
   
   $ git clone /var/git/deployment.git
