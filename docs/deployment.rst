@@ -34,6 +34,7 @@ Deploying to test
 -----------------
 
 1. From a clean home directory, first clone the deployment repository
+
 .. note::
   in case you clean some existing environment, make sure the ``~/.config``
   and other hidden directories are deleted as well.  Make also sure that
@@ -44,29 +45,35 @@ Deploying to test
   $ git clone /var/git/deployment.git
 
 2. Run the bootstrap script; this will checkout any needed repository
+
 .. code-block:: none
   
   $ deployment/bootstrap-bluegreen test
 
 3. Create configuration file
+
 .. code-block:: none
 
   $ taler-deployment-config-generate
 
 4. Compile the project
+
 .. code-block:: none
   
   $ source activate
   $ taler-deployment-build
 
 5. Create denomination and signing keys
+
 .. note::
   This step takes care of creating auditor's signature too.
+
 .. code-block:: none
 
   $ taler-deployment-keyup
 
 6. Sign exchange's /wire response file
+
 .. code-block::
 
   taler-deployment-config-sign
