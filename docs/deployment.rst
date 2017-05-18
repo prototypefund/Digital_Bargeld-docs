@@ -50,18 +50,18 @@ Deploying to test
   
   $ deployment/bootstrap-bluegreen test
 
-3. Create configuration file
-
-.. code-block:: none
-
-  $ taler-deployment-config-generate
-
-4. Compile the project
+3. Compile the project
 
 .. code-block:: none
   
   $ source activate
   $ taler-deployment-build
+
+4. Create configuration file
+
+.. code-block:: none
+
+  $ taler-deployment-config-generate
 
 5. Create denomination and signing keys
 
@@ -141,3 +141,34 @@ After the update is over, the `/home/demo/sockets` symlink will be pointed to `d
   # look at the logs, verify that everything is okay
 
 Now the symlink can be updated.
+
+----------------------------------------
+Deploying to developer personal homepage
+----------------------------------------
+
+.. note::
+  Specific to the `tripwire` machine.  Ask for a personal Taler
+  development environment at taler@gnu.org!
+
+1. From your clean homepage, clone the deployment repository
+
+.. code-block:: none
+
+  $ git clone /var/git/deployment.git
+
+Please, *IGNORE* the message saying to start the database in the following way:
+`/usr/lib/postgresql/9.5/bin/pg_ctl -D talerdb -l logfile start`.  This is Postgres
+specific and overridden by our method of starting services.
+
+2. Run the bootstrap script; this will checkout any needed repository
+
+.. code-block:: none
+  
+  $ deployment/bootstrap-standalone
+
+3. Build the project
+
+.. code-block:: none
+
+  $ source activate
+  $ taler-deployment-build
