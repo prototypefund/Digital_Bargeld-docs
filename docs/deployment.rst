@@ -172,3 +172,28 @@ specific and overridden by our method of starting services.
 
   $ source activate
   $ taler-deployment-build
+
+4. Generate configuration
+
+.. code-block:: none
+
+  $ taler-deployment-config-generate
+  # This will sign exchange's /wire response
+  $ taler-deployment-config-sign
+
+5. Generate denomination keys
+
+.. code-block:: none
+
+  # This will also get denomination keys signed by
+  # the auditor.
+  $ taler-deployment-keyup
+
+6. Start all services
+
+.. code-block:: none
+
+  # NOTE: some services might need an explicit reset of the DB.
+  # For example, the exchange might need 'taler-exchange-dbinit -r'
+  # to be run before running the exchange service.
+  $ taler-deployment-start
