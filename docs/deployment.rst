@@ -191,9 +191,13 @@ specific and overridden by our method of starting services.
 
 6. Start all services
 
+.. note::
+  Notify the sysadmin to add the user 'www-data' to your group,
+  otherwise nginx won't be able to open your unix domain sockets.
+
 .. code-block:: none
 
   # NOTE: some services might need an explicit reset of the DB.
   # For example, the exchange might need 'taler-exchange-dbinit -r'
-  # to be run before running the exchange service.
+  # to be run before being launched.
   $ taler-deployment-start
