@@ -146,6 +146,14 @@ To start the worker, log in as `lcovslave` and run:
   # To stop it:
   $ taler-deployment-bbstop
 
++++++++++++++
+Manual switch
++++++++++++++
+
+After the desired blue/green party has been compiled, it is possible to
+log-in as `test` and run the script ``~/.ln-<COLOR>.sh``, in order to make
+``test-<COLOR>`` active.
+
 -------------------
 Site lcov.taler.net
 -------------------
