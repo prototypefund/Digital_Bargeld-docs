@@ -145,3 +145,14 @@ To start the worker, log in as `lcovslave` and run:
 
   # To stop it:
   $ taler-deployment-bbstop
+
+-------------------
+Site lcov.taler.net
+-------------------
+
+The directory ``/var/www/lcov.taler.net`` contains the following two symlinks
+
+* `exchange` --> ``/home/lcovslave/exchange/doc/coverage``
+* `merchant` --> ``/home/lcovslave/merchant/doc/coverage``
+
+The pointed locations are updated by the `lcovslave`.
