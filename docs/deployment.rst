@@ -74,7 +74,7 @@ Deploying to test
 
 6. Sign exchange's /wire response file
 
-.. code-block::
+.. code-block:: none
 
   taler-deployment-config-sign
 

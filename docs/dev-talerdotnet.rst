@@ -65,6 +65,7 @@ Master
 To start the master, log in as `containers`, and run:
 
 .. code-block:: none
+
   $ ~/buildbot/start.sh
 
   # To stop it, run:
@@ -74,6 +75,7 @@ There is also a "restart" script, runnable as follows:
 
 
 .. code-block:: none
+
   $ ~/buildbot/restart.sh
 
 +++++++++++++++
@@ -89,6 +91,7 @@ buildbot worker.
 Start it with:
 
 .. code-block:: none
+
   $ buildbot-worker start ~/buildbot/selenium_worker/
 
   # stop it with:
@@ -108,6 +111,7 @@ on `https://lcov.taler.net`.
 To start the worker, log in as `lcovslave` and run:
 
 .. code-block:: none
+
   $ source ~/activate
   $ taler-deployment-bbstart
 
@@ -140,6 +144,7 @@ under the `sudoers` directory.
 To start the worker, log in as `lcovslave` and run:
 
 .. code-block:: none
+
   $ source ~/activate
   $ taler-deployment-bbstart
 
