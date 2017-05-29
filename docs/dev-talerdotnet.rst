@@ -149,11 +149,14 @@ To start the worker, log in as `testswitcher` and run:
 
 .. code-block:: none
 
-  $ source ~/activate
-  $ taler-deployment-bbstart
+  $ source ~/venv/bin/activate
+  $ buildbot-worker start ~/buildbot/slave
 
   # To stop it:
-  $ taler-deployment-bbstop
+  $ buildbot-worker stop ~/buildbot/slave
+
+  # To exit the virtual env
+  $ deactivate
 
 +++++++++++++
 Manual switch
