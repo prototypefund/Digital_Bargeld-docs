@@ -145,7 +145,7 @@ has some additional "sudo" rights, since it has to act as `test-blue`,
 Note that the "sudo file" is tracked in this (`deployment`) repository,
 under the `sudoers` directory.
 
-To start the worker, log in as `lcovslave` and run:
+To start the worker, log in as `testswitcher` and run:
 
 .. code-block:: none
 
