@@ -92,10 +92,14 @@ Start it with:
 
 .. code-block:: none
 
+  $ source ~/buildbot/venv/bin/activate
   $ buildbot-worker start ~/buildbot/selenium_worker/
 
   # stop it with:
   $ buildbot-worker stop ~/buildbot/selenium_worker/
+
+  # deactivate the virtual env with
+  $ deactivate
 
 +++++++++++
 Lcov worker
