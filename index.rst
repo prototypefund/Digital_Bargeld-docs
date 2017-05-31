@@ -16,6 +16,7 @@
   @author Florian Dold
   @author Benedikt Muller
   @author Sree Harsha Totakura
+  @author Marcello Stanisci
 
 GNU Taler Documentation
 =======================
@@ -56,5 +57,13 @@ interfaces between the core components of Taler.
   api-exchange
   api-merchant
   api-bank
-
   wireformats
+
+---------
+Licensing
+---------
+
+.. toctree::
+  :maxdepth: 2
+
+  global-licensing
