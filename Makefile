@@ -5,8 +5,7 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-APIBUILDDIR   = api/_build
-DOCSBUILDDIR  = docs/_build
+BUILDDIR      = _build
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -16,7 +15,7 @@ endif
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
 PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d $(PWD)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS)
+ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 # the i18n builder cannot share the environment and doctrees with the others
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
@@ -48,189 +47,133 @@ help:
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
 
 clean:
-	rm -rf $(DOCSBUILDDIR)/*
-	rm -rf $(APIBUILDDIR)/*
+	rm -rf $(BUILDDIR)/*
 
 # The html-linked builder does not support caching, so we
 # remove all cached state first.
 html:
-	$(SPHINXBUILD) docs/ -b html-linked $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b html-linked $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b html-linked $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
-	@echo "Build finished. The HTML pages are in $(APIBUILDDIR)/html."
-	@echo "Build finished. The HTML pages are in $(DOCSBUILDDIR)/html."
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 dirhtml:
-	$(SPHINXBUILD) docs/ -b dirhtml $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b dirhtml $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b dirhtml $(ALLSPHINXOPTS) $(BUILDDIR)/dirhtml
 	@echo
-	@echo "Build finished. The HTML pages are in $(APIBUILDDIR)/dirhtml."
-	@echo "Build finished. The HTML pages are in $(DOCSBUILDDIR)/dirhtml."
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/dirhtml."
 
 singlehtml:
-	$(SPHINXBUILD) docs/ -b singlehtml $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b singlehtml $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b singlehtml $(ALLSPHINXOPTS) $(BUILDDIR)/singlehtml
 	@echo
-	@echo "Build finished. The HTML page is in $(DOCSBUILDDIR)/singlehtml."
-	@echo "Build finished. The HTML page is in $(APIBUILDDIR)/singlehtml."
+	@echo "Build finished. The HTML page is in $(BUILDDIR)/singlehtml."
 
 pickle:
-	$(SPHINXBUILD) api/ -b pickle $(ALLSPHINXOPTS)  $(APIBUILDDIR)
-	$(SPHINXBUILD) docs/ -b pickle $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
+	$(SPHINXBUILD) -b pickle $(ALLSPHINXOPTS) $(BUILDDIR)/pickle
 	@echo
 	@echo "Build finished; now you can process the pickle files."
 
 json:
-	$(SPHINXBUILD) docs/ -b json $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b json $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b json $(ALLSPHINXOPTS) $(BUILDDIR)/json
 	@echo
 	@echo "Build finished; now you can process the JSON files."
 
 htmlhelp:
-	$(SPHINXBUILD) docs/ -b htmlhelp $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b htmlhelp $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b htmlhelp $(ALLSPHINXOPTS) $(BUILDDIR)/htmlhelp
 	@echo
 	@echo "Build finished; now you can run HTML Help Workshop with the" \
-	      ".hhp project file in $(DOCSBUILDDIR)/htmlhelp."
-	@echo "Build finished; now you can run HTML Help Workshop with the" \
-	      ".hhp project file in $(APIBUILDDIR)/htmlhelp."
+	      ".hhp project file in $(BUILDDIR)/htmlhelp."
 
 qthelp:
-	$(SPHINXBUILD) docs/ -b qthelp $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b qthelp $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b qthelp $(ALLSPHINXOPTS) $(BUILDDIR)/qthelp
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
-	      ".qhcp project file in $(DOCSBUILDDIR)/qthelp, like this:"
-	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
-	      ".qhcp project file in $(APIBUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(APIBUILDDIR)/qthelp/neuro.qhcp"
+	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/neuro.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(APIBUILDDIR)/qthelp/neuro.qhc"
-	@echo "# qcollectiongenerator $(DOCSBUILDDIR)/qthelp/neuro.qhcp"
-	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(DOCSBUILDDIR)/qthelp/neuro.qhc"
-
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/neuro.qhc"
 
 devhelp:
-	$(SPHINXBUILD) api/ -b devhelp $(ALLSPHINXOPTS)  $(APIBUILDDIR)
-	$(SPHINXBUILD) docs/ -b devhelp $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
+	$(SPHINXBUILD) -b devhelp $(ALLSPHINXOPTS) $(BUILDDIR)/devhelp
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
 	@echo "# mkdir -p $$HOME/.local/share/devhelp/neuro"
-	@echo "# ln -s $(APIBUILDDIR)/devhelp $$HOME/.local/share/devhelp/neuro"
-	@echo "# ln -s $(DOCSBUILDDIR)/devhelp $$HOME/.local/share/devhelp/neuro"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/neuro"
 	@echo "# devhelp"
 
 epub:
-	$(SPHINXBUILD) api/ -b epub $(ALLSPHINXOPTS)  $(APIBUILDDIR)
-	$(SPHINXBUILD) docs/ -b epub $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
+	$(SPHINXBUILD) -b epub $(ALLSPHINXOPTS) $(BUILDDIR)/epub
 	@echo
-	@echo "Build finished. The epub file is in $(APIBUILDDIR)/epub."
-	@echo "Build finished. The epub file is in $(DOCSBUILDDIR)/epub."
+	@echo "Build finished. The epub file is in $(BUILDDIR)/epub."
 
 latex:
-	$(SPHINXBUILD) api/ -b latex $(ALLSPHINXOPTS)  $(APIBUILDDIR)
-	$(SPHINXBUILD) docs/ -b latex $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo
-	@echo "Build finished; the LaTeX files are in $(APIBUILDDIR)/latex."
-	@echo "Build finished; the LaTeX files are in $(DOCSBUILDDIR)/latex."
+	@echo "Build finished; the LaTeX files are in $(BUILDDIR)/latex."
 	@echo "Run \`make' in that directory to run these through (pdf)latex" \
 	      "(use \`make latexpdf' here to do that automatically)."
 
 latexpdf:
-	$(SPHINXBUILD) api/ -b latex $(ALLSPHINXOPTS)  $(APIBUILDDIR)
-	$(SPHINXBUILD) docs/ -b latex $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through pdflatex..."
-	$(MAKE) -C $(DOCSBUILDDIR)/latex all-pdf
-	$(MAKE) -C $(APIBUILDDIR)/latex all-pdf
-	@echo "pdflatex finished; the PDF files are in $(APIBUILDDIR)/latex."
-	@echo "pdflatex finished; the PDF files are in $(DOCSBUILDDIR)/latex."
+	$(MAKE) -C $(BUILDDIR)/latex all-pdf
+	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
 
 latexpdfja:
-	$(SPHINXBUILD) docs/ -b latex $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b latex $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
 	@echo "Running LaTeX files through platex and dvipdfmx..."
-	$(MAKE) -C $(APIBUILDDIR)/latex all-pdf-ja
-	$(MAKE) -C $(DOCSBUILDDIR)/latex all-pdf-ja
-	@echo "pdflatex finished; the PDF files are in $(DOCSBUILDDIR)/latex."
-	@echo "pdflatex finished; the PDF files are in $(APIBUILDDIR)/latex."
+	$(MAKE) -C $(BUILDDIR)/latex all-pdf-ja
+	@echo "pdflatex finished; the PDF files are in $(BUILDDIR)/latex."
 
 text:
-	$(SPHINXBUILD) docs/ -b text $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b text $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b text $(ALLSPHINXOPTS) $(BUILDDIR)/text
 	@echo
-	@echo "Build finished. The text files are in $(DOCSBUILDDIR)/text."
-	@echo "Build finished. The text files are in $(APIBUILDDIR)/text."
+	@echo "Build finished. The text files are in $(BUILDDIR)/text."
 
 man:
-	$(SPHINXBUILD) docs/ -b man $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b man $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b man $(ALLSPHINXOPTS) $(BUILDDIR)/man
 	@echo
-	@echo "Build finished. The manual pages are in $(DOCSBUILDDIR)/man."
-	@echo "Build finished. The manual pages are in $(APIBUILDDIR)/man."
+	@echo "Build finished. The manual pages are in $(BUILDDIR)/man."
 
 texinfo:
-	$(SPHINXBUILD) docs/ -b texinfo $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b texinfo $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo
 	@echo
-	@echo "Build finished. The Texinfo files are in $(DOCSBUILDDIR)/texinfo."
-	@echo "Build finished. The Texinfo files are in $(APIBUILDDIR)/texinfo."
+	@echo "Build finished. The Texinfo files are in $(BUILDDIR)/texinfo."
 	@echo "Run \`make' in that directory to run these through makeinfo" \
 	      "(use \`make info' here to do that automatically)."
 
 info:
-	$(SPHINXBUILD) docs/ -b texinfo $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b texinfo $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo
 	@echo "Running Texinfo files through makeinfo..."
-	make -C $(DOCSBUILDDIR)/texinfo info
-	make -C $(APIBUILDDIR)/texinfo info
-	@echo "makeinfo finished; the Info files are in $(DOCSBUILDDIR)/texinfo."
-	@echo "makeinfo finished; the Info files are in $(APIBUILDDIR)/texinfo."
+	make -C $(BUILDDIR)/texinfo info
+	@echo "makeinfo finished; the Info files are in $(BUILDDIR)/texinfo."
 
 gettext:
-	$(SPHINXBUILD) docs/ -b gettext $(I18NSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b gettext $(I18NSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b gettext $(I18NSPHINXOPTS) $(BUILDDIR)/locale
 	@echo
-	@echo "Build finished. The message catalogs are in $(DOCSBUILDDIR)/locale."
-	@echo "Build finished. The message catalogs are in $(APIBUILDDIR)/locale."
+	@echo "Build finished. The message catalogs are in $(BUILDDIR)/locale."
 
 changes:
-	$(SPHINXBUILD) docs/ -b changes $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b changes $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b changes $(ALLSPHINXOPTS) $(BUILDDIR)/changes
 	@echo
-	@echo "The overview file is in $(DOCSBUILDDIR)/changes."
-	@echo "The overview file is in $(APIBUILDDIR)/changes."
+	@echo "The overview file is in $(BUILDDIR)/changes."
 
 linkcheck:
-	$(SPHINXBUILD) docs/ -b linkcheck $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b linkcheck $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b linkcheck $(ALLSPHINXOPTS) $(BUILDDIR)/linkcheck
 	@echo
 	@echo "Link check complete; look for any errors in the above output " \
-	      "or in $(APIBUILDDIR)/linkcheck/output.txt."
-	@echo "Link check complete; look for any errors in the above output " \
-	      "or in $(DOCSBUILDDIR)/linkcheck/output.txt."
-
+	      "or in $(BUILDDIR)/linkcheck/output.txt."
 
 doctest:
-	$(SPHINXBUILD) docs/ -b doctest $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b doctest $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
-	      "results in $(APIBUILDDIR)/doctest/output.txt."
-	@echo "Testing of doctests in the sources finished, look at the " \
-	      "results in $(DOCSBUILDDIR)/doctest/output.txt."
-
+	      "results in $(BUILDDIR)/doctest/output.txt."
 
 xml:
-	$(SPHINXBUILD) docs/ -b xml $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
-	$(SPHINXBUILD) api/ -b xml $(ALLSPHINXOPTS)  $(APIBUILDDIR)
+	$(SPHINXBUILD) -b xml $(ALLSPHINXOPTS) $(BUILDDIR)/xml
 	@echo
-	@echo "Build finished. The XML files are in $(DOCSBUILDDIR)/xml."
-	@echo "Build finished. The XML files are in $(APIBUILDDIR)/xml."
+	@echo "Build finished. The XML files are in $(BUILDDIR)/xml."
 
 pseudoxml:
-	$(SPHINXBUILD) api/ -b pseudoxml $(ALLSPHINXOPTS)  $(APIBUILDDIR)
-	$(SPHINXBUILD) docs/ -b pseudoxml $(ALLSPHINXOPTS)  $(DOCSBUILDDIR)
+	$(SPHINXBUILD) -b pseudoxml $(ALLSPHINXOPTS) $(BUILDDIR)/pseudoxml
 	@echo
-	@echo "Build finished. The pseudo-XML files are in $(DOCSBUILDDIR)/pseudoxml."
-	@echo "Build finished. The pseudo-XML files are in $(APIBUILDDIR)/pseudoxml."
+	@echo "Build finished. The pseudo-XML files are in $(BUILDDIR)/pseudoxml."
