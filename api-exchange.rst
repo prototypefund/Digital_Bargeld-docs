@@ -58,6 +58,11 @@ possibly by using HTTPS.
   .. code-block:: tsref
 
     interface ExchangeKeysResponse {
+      // libtool-style representation of the Taler protocol version, see
+      // https://www.gnu.org/software/libtool/manual/html_node/Versioning.html#Versioning
+      // The format is "current:revision:age".
+      version: String;
+
       // EdDSA master public key of the exchange, used to sign entries in `denoms` and `signkeys`
       master_public_key: EddsaPublicKey;
 
