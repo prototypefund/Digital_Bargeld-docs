@@ -151,8 +151,6 @@ The following API are made available by the merchant's `backend` to the merchant
 
   **Request:**
 
-.. _proposal:
-
   The backend expects an `order` as input.  The order is a `ProposalData`_
   object **without** the fields:
 
@@ -534,6 +532,7 @@ in the `order`, and then by signing it.  See below.
 
 The `proposal data` must have the following structure:
 
+  .. _ProposalData:
   .. _tsref-type-ProposalData:
   .. code-block:: tsref
 

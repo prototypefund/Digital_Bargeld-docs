@@ -1058,18 +1058,18 @@ in using this API.
 
   **Response:**
   :status 200 OK:
-    The request was succesful, and the response is a `PaybackConfirmation`.
-    Note that repeating exactly the same request
-    will again yield the same response, so if the network goes down during the
-    transaction or before the client can commit the coin signature to disk, the
-    coin is not lost.
+  The request was succesful, and the response is a `PaybackConfirmation`.
+  Note that repeating exactly the same request
+  will again yield the same response, so if the network goes down during the
+  transaction or before the client can commit the coin signature to disk, the
+  coin is not lost.
   :status 401 Unauthorized: The coin's signature is invalid.
   :status 403 Forbidden: The coin was already used for payment.
-    The response is a `DepositDoubleSpendError`_.
+  The response is a `DepositDoubleSpendError`_.
   :status 404 Not Found:
-    The denomination key is not in the set of denomination
-    keys where emergency pay back is enabled, or the blinded
-    coin is not known to have been withdrawn.
+  The denomination key is not in the set of denomination
+  keys where emergency pay back is enabled, or the blinded
+  coin is not known to have been withdrawn.
 
   **Details:**
 
