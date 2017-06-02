@@ -434,6 +434,12 @@ exchange.
       // Sender account details, only present if type is "DEPOSIT".
       sender_account_details?: any;
 
+      // Receiver account details, only present if type is "PAYBACK".
+      receiver_account_details?: any;
+
+      // Wire transfer identifier, only present if type is "PAYBACK".
+      wire_transfer?: any;
+
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
       wire_reference?: any;
 
@@ -455,7 +461,7 @@ exchange.
       // Public key of the coin that was paid back; only present if type is "PAYBACK".
       coin_pub?: CoinPublicKey;
 
-      // Timestamp when the exchange received the /payback. Only present if `type` is "PAYBACK".
+      // Timestamp when the exchange received the /payback or executed the wire transfer. Only present if `type` is "PAYBACK" or "CLOSING".
       timestamp?: Timestamp;
    }
 
