@@ -1368,7 +1368,7 @@ Refunds
       refund_fee: Amount;
 
       // SHA-512 hash of the contact of the merchant with the customer.
-      h_proposal_data: HashCode;
+      h_contract_terms: HashCode;
 
       // coin's public key, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
