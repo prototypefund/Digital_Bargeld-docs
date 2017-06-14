@@ -1373,9 +1373,6 @@ Refunds
       // coin's public key, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
 
-      // 64-bit transaction id of the original transaction between merchant and customer
-      transaction_id: number;
-
       // 64-bit transaction id of the refund transaction between merchant and customer
       rtransaction_id: number;
 
