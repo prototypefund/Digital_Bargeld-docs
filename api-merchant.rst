@@ -268,6 +268,43 @@ The following API are made available by the merchant's `backend` to the merchant
       sig: EddsaSignature  
     }
   
+.. http:get:: /refund
+
+  Shows the refund situation about a transaction
+
+  **Request**
+
+  :query instance: the merchant instance issuing the request
+  :query order_id: the order id whose refund situation is being queried
+
+  **Response**
+
+  If case of success, an *array of* `RefundLookup`_ objects is returned.
+
+  .. _RefundLookup:
+  .. code-block:: tsref
+    
+    interface RefundLookup {
+
+      // Coin from which the refund is going to be taken
+      coin_pub: EddsaPublicKey;     
+
+      // Refund amount taken from coin_pub
+      refund_amount: Amount;
+
+      // Refund fee
+      refund_fee: Amount;
+
+      // Identificator of the refund
+      rtransaction_id: number;
+
+      // Merchant public key
+      merchant_pub: EddsaPublicKey
+
+      // Merchant signature of a TALER_RefundRequestPS object
+      merchant_sig: EddsaSignature;
+    }
+
 .. http:get:: /track/transfer
 
   Provides deposits associated with a given wire transfer.
