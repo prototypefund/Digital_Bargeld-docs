@@ -227,11 +227,52 @@ The following API are made available by the merchant's `backend` to the merchant
       proposal: Proposal;
     }
 
+.. http:post:: /refund
+
+  Increase the refund amount associated with a given order.
+
+  **Request**
+
+  The request body is a `RefundRequest`_ object.
+
+  **Response**
+
+  If the operation was successful, the backend responds with a signed confirmation,
+  see `RefundConfirmation`_
+
+  .. _RefundRequest:
+  .. code-block:: tsref
+
+    interface RefundRequest {
+      // Order id of the transaction to be refunded
+      order_id: string;
+
+      // Amount to be refunded
+      refund: Amount;
+
+      // Human-readable refund justification
+      reason: string;
+
+      // Merchant instance issuing the request
+      instance: string;
+    }
+
+  .. _RefundConfirmation:
+  .. code-block:: tsref
+
+    interface RefundConfirmation {
+      // Merchant signature over the hashed order id. Note
+      // that the purpose is set to zero.  However, this value
+      // is not meant to be soon verified by the frontend, but
+      // could be showed in court.
+      sig: EddsaSignature  
+    }
+  
 .. http:get:: /track/transfer
 
   Provides deposits associated with a given wire transfer.
 
-  **Request:**
+  **Request**
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
   :query exchange: base URI of the exchange that made the wire transfer
