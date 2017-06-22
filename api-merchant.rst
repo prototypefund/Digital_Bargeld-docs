@@ -236,9 +236,11 @@ The following API are made available by the merchant's `backend` to the merchant
   The request body is a `RefundRequest`_ object.
 
   **Response**
-
-  If the operation was successful, the backend responds with a signed confirmation,
-  see `RefundConfirmation`_
+  
+  :status 200 OK:
+    The refund amount has been increased, the backend responds with a `RefundConfirmation`_
+  :status 400 Bad request:
+    The refund amount is not consistent: it is not bigger than the previous one.
 
   .. _RefundRequest:
   .. code-block:: tsref
