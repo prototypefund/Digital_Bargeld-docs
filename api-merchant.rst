@@ -139,6 +139,12 @@ The Frontend HTTP API
     (and therefore not spending additional money).
 
 
+.. http:post:: refund_url
+
+  Although this POST is issued by the merchant UI, wallets are supposed to catch
+  its response.  In the successful case, this response will have a `402 Payment Required`
+  status code, and a `X-Taler-Refund-Url` header containing the refund data URL.
+
 ------------------------------
 The Merchant Backend HTTP API
 ------------------------------
