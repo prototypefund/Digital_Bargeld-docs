@@ -46,6 +46,10 @@ possibly by using HTTPS.
   Get a list of all denomination keys offered by the bank,
   as well as the bank's current online signing key.
 
+  **Request:**
+
+  :query last_issue_date: optional argument specifying the last value of the "list_issue_date" of a "/keys" response that is already known to the client. Allows the exchange to only return keys that have changed since that timestamp.  The given value must be an unsigned 64-bit integer.
+
   **Response:**
 
   :status 200 OK:
