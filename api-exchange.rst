@@ -624,7 +624,9 @@ denomination.
       ub_sig: RsaSignature;
 
       // timestamp when the contract was finalized, must match approximately the
-      // current time of the exchange
+      // current time of the exchange; if the timestamp is too far off, the
+      // exchange returns "400 Bad Request" with an error code of
+      // "TALER_EC_DEPOSIT_INVALID_TIMESTAMP".
       timestamp: Timestamp;
 
       // indicative time by which the exchange undertakes to transfer the funds to
