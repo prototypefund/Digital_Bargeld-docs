@@ -610,7 +610,7 @@ denomination.
 
       // SHA-512 hash of the contact of the merchant with the customer.  Further
       // details are never disclosed to the exchange.
-      h_proposal_data: HashCode;
+      h_contract_terms: HashCode;
 
       // `coin's public key <eddsa-coin-pub>`_, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
@@ -630,9 +630,6 @@ denomination.
       // indicative time by which the exchange undertakes to transfer the funds to
       // the merchant, in case of successful payment.
       pay_deadline: Timestamp;
-
-      // 64-bit transaction id for the transaction between merchant and customer
-      transaction_id: number;
 
       // EdDSA `public key of the merchant <merchant-pub>`_, so that the client can identify the
       // merchant for refund requests.
@@ -732,7 +729,7 @@ denomination.
       // Hash over the proposal data of the contract that
       // is being paid (if type is "DEPOSIT") or refunded (if
       // `type` is "REFUND"); otherwise absent.
-      h_proposal_data?: HashCode;
+      h_contract_terms?: HashCode;
 
       // Refund transaction ID.  Only present if `type` is
       // "REFUND"
@@ -1225,11 +1222,7 @@ typically also view the balance.)
 
     interface TrackTransferDetail {
       // SHA-512 hash of the contact of the merchant with the customer.
-      h_proposal_data: HashCode;
-
-      // 64-bit transaction id for the transaction between merchant and
-      // customer
-      transaction_id: number;
+      h_contract_terms: HashCode;
 
       // coin's public key, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
@@ -1272,13 +1265,10 @@ typically also view the balance.)
       H_wire: HashCode;
 
       // SHA-512 hash of the contact of the merchant with the customer.
-      h_proposal_data: HashCode;
+      h_contract_terms: HashCode;
 
       // coin's public key, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
-
-      // 64-bit transaction id for the transaction between merchant and customer
-      transaction_id: number;
 
       // the EdDSA public key of the merchant, so that the client can identify
       // the merchant for refund requests.

@@ -117,7 +117,7 @@ The Frontend HTTP API
   The error codes and data sent to the wallet are a mere copy of those gotten from the exchange when attempting to pay. The section about :ref:`deposit <deposit>` explains them in detail.
 
 
-.. http:post:: fulfillment_url
+.. http:get:: fulfillment_url
 
   URL that shows the product after it has been purchased.  Going to the a fulfillment URL
   before the payment was completed must trigger the payment process.
@@ -139,11 +139,16 @@ The Frontend HTTP API
     (and therefore not spending additional money).
 
 
-.. http:post:: refund_url
+.. http:get:: refund_url
 
   Although this POST is issued by the merchant UI, wallets are supposed to catch
   its response.  In the successful case, this response will have a `402 Payment Required`
   status code, and a `X-Taler-Refund-Url` header containing the refund data URL.
+
+.. http:POST:: user_tipping_url
+
+  URL that the customer's wallet can post coin planchets to, and will receive withdraw
+  permissions in return.
 
 ------------------------------
 The Merchant Backend HTTP API
@@ -311,6 +316,44 @@ The following API are made available by the merchant's `backend` to the merchant
 
       // Merchant signature of a TALER_RefundRequestPS object
       merchant_sig: EddsaSignature;
+    }
+
+
+.. http:post:: /tip
+
+  Authorize a tip that can be picked up by the customer's wallet by POSTing to `/tip`. 
+
+  **Request**
+
+  The request body is a `TipCreateRequest`_ object.
+
+  **Response**
+  
+  :status 200 OK:
+    The refund amount has been increased, the backend responds with a `TipCreateConfirmation`_
+  :status 400 Bad request:
+    The refund amount is not consistent: it is not bigger than the previous one.
+
+  .. _RefundRequest:
+  .. code-block:: tsref
+
+    interface RefundRequest {
+      // Amount that the customer should be tipped
+      refund: Amount;
+
+      // Human-readable refund justification
+      reason: string;
+
+      // Merchant instance issuing the request
+      instance: string;
+    }
+
+  .. _TipCreateConfirmation:
+  .. code-block:: tsref
+
+    interface TipCreateConfirmation {
+      // Identifier for the tip authorization
+      tip_id: string;
     }
 
 .. http:get:: /track/transfer

@@ -481,11 +481,10 @@ within the
      * purpose.purpose = TALER_SIGNATURE_WALLET_COIN_DEPOSIT
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-    struct GNUNET_HashCode h_proposal_data;
+    struct GNUNET_HashCode h_contract_terms;
     struct GNUNET_HashCode h_wire;
     struct GNUNET_TIME_AbsoluteNBO timestamp;
     struct GNUNET_TIME_AbsoluteNBO refund_deadline;
-    uint64_t transaction_id;
     struct TALER_AmountNBO amount_with_fee;
     struct TALER_AmountNBO deposit_fee;
     struct TALER_MerchantPublicKeyP merchant;
@@ -500,9 +499,8 @@ within the
      * purpose.purpose = TALER_SIGNATURE_WALLET_CONFIRM_DEPOSIT
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-    struct GNUNET_HashCode h_proposal_data;
+    struct GNUNET_HashCode h_contract_terms;
     struct GNUNET_HashCode h_wire;
-    uint64_t transaction_id;
     struct GNUNET_TIME_AbsoluteNBO timestamp;
     struct GNUNET_TIME_AbsoluteNBO refund_deadline;
     struct TALER_AmountNBO amount_without_fee;
@@ -615,9 +613,8 @@ within the
      * purpose.purpose = TALER_SIGNATURE_MASTER_SEPA_DETAILS || TALER_SIGNATURE_MASTER_TEST_DETAILS
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-    struct GNUNET_HashCode h_proposal_data;
+    struct GNUNET_HashCode h_contract_terms;
     struct GNUNET_HashCode h_wire;
-    uint64_t transaction_id;
     struct TALER_MerchantPublicKeyP merchant;
     struct TALER_CoinSpendPublicKeyP coin_pub;
   };
@@ -626,9 +623,8 @@ within the
 .. sourcecode:: c
 
   struct TALER_WireDepositDetailP {
-    struct GNUNET_HashCode h_proposal_data;
+    struct GNUNET_HashCode h_contract_terms;
     struct GNUNET_TIME_AbsoluteNBO execution_time;
-    uint64_t transaction_id;
     struct TALER_CoinSpendPublicKeyP coin_pub;
     struct TALER_AmountNBO deposit_value;
     struct TALER_AmountNBO deposit_fee;
@@ -679,7 +675,7 @@ within the
      * purpose.purpose = TALER_SIGNATURE_MERCHANT_PAYMENT_OK
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-    struct GNUNET_HashCode h_proposal_data;
+    struct GNUNET_HashCode h_contract_terms;
   };
 
 .. _TALER_ContractPS:
@@ -690,10 +686,9 @@ within the
      * purpose.purpose = TALER_SIGNATURE_MERCHANT_CONTRACT
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-    uint64_t transaction_id;
     struct TALER_AmountNBO total_amount;
     struct TALER_AmountNBO max_fee;
-    struct GNUNET_HashCode h_proposal_data;
+    struct GNUNET_HashCode h_contract_terms;
     struct TALER_MerchantPublicKeyP merchant_pub;
   };
 
@@ -706,10 +701,9 @@ within the
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
     struct GNUNET_HashCode h_wire;
-    struct GNUNET_HashCode h_proposal_data;
+    struct GNUNET_HashCode h_contract_terms;
     struct TALER_WireTransferIdentifierRawP wtid;
     struct TALER_CoinSpendPublicKeyP coin_pub;
-    uint64_t transaction_id;
     struct GNUNET_TIME_AbsoluteNBO execution_time;
     struct TALER_AmountNBO coin_contribution;
   };
@@ -722,8 +716,7 @@ within the
      *  purpose.purpose = TALER_SIGNATURE_MERCHANT_REFUND
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-    struct GNUNET_HashCode h_proposal_data;
-    uint64_t transaction_id;
+    struct GNUNET_HashCode h_contract_terms;
     struct TALER_CoinSpendPublicKeyP coin_pub;
     struct TALER_MerchantPublicKeyP merchant;
     uint64_t rtransaction_id;
