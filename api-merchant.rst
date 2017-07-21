@@ -474,7 +474,7 @@ The following API are made available by the merchant's `backend` to the merchant
     }
 
 
-.. http:get:: /track/order
+.. http:get:: /track/transaction
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 
