@@ -363,8 +363,9 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request**
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
+  :query wire_method: name of the wire transfer method used for the wire transfer	       
   :query exchange: base URI of the exchange that made the wire transfer
-  :query instance: (optional) identificative token of the merchant `instance <https://docs.taler.net/operate-merchant.html#instances-lab>`_ which is being tracked.
+  :query instance: (optional) identificative token of the merchant `instance <https://docs.taler.net/operate-merchant.html#instances-lab>`_ which is being tracked.		   
 
   **Response:**
 
