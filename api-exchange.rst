@@ -94,15 +94,13 @@ possibly by using HTTPS.
       // is sabotaging end-user anonymity by giving disjoint denomination keys to
       // different users.  If a exchange were to do this, this signature allows the
       // clients to demonstrate to the public that the exchange is dishonest.
-      // Only returned if "last_issue_date" was not specified (or not used for some
-      // reason and thus the full set of current keys was returned).
-      eddsa_sig?: EddsaSignature;
+      eddsa_sig: EddsaSignature;
 
       // Public EdDSA key of the exchange that was used to generate the signature.
       // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
-      eddsa_pub?: EddsaPublicKey;
+      eddsa_pub: EddsaPublicKey;
     }
 
   .. _tsref-type-Denom:
