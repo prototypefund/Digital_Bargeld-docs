@@ -48,7 +48,7 @@ possibly by using HTTPS.
 
   **Request:**
 
-  :query last_issue_date: optional argument specifying the last value of the "list_issue_date" of a "/keys" response that is already known to the client. Allows the exchange to only return keys that have changed since that timestamp.  The given value must be an unsigned 64-bit integer.
+  :query last_issue_date: optional argument specifying the maximum value of any of the "stamp_start" members of the denomination keys of a "/keys" response that is already known to the client. Allows the exchange to only return keys that have changed since that timestamp.  The given value must be an unsigned 64-bit integer representing seconds after 1970.
 
   **Response:**
 
@@ -94,13 +94,15 @@ possibly by using HTTPS.
       // is sabotaging end-user anonymity by giving disjoint denomination keys to
       // different users.  If a exchange were to do this, this signature allows the
       // clients to demonstrate to the public that the exchange is dishonest.
-      eddsa_sig: EddsaSignature;
+      // Only returned if "last_issue_date" was not specified (or not used for some
+      // reason and thus the full set of current keys was returned).
+      eddsa_sig?: EddsaSignature;
 
       // Public EdDSA key of the exchange that was used to generate the signature.
       // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
-      eddsa_pub: EddsaPublicKey;
+      eddsa_pub?: EddsaPublicKey;
     }
 
   .. _tsref-type-Denom:
