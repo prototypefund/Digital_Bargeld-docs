@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014, 2015, 2016 INRIA
+  Copyright (C) 2014, 2015, 2016, 2017 Taler Systems SA
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -23,9 +23,6 @@
 Merchant API
 ============
 
-Before reading the API reference documentation, see the
-`merchant architecture <https://docs.taler.net/dev-merchant.html#merchant-arch>`_
-and the `payment protocol <https://docs.taler.net/integration-merchant.html#payprot>`_
 
 ---------------------
 The Frontend HTTP API
