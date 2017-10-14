@@ -23,6 +23,8 @@
 Merchant API
 ============
 
+  Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
+  like `order`, `proposal`, `contract`, and others.
 
 ---------------------
 The Frontend HTTP API
@@ -33,45 +35,48 @@ The Frontend HTTP API
   needs to understand in order to support Taler payments.  The names `proposal_url`, `pay_url` and `fulfillment_url`
   are placeholders for the actual URLs that the merchant frontend uses.
 
-  Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
-  like `order`, `proposal`, `contract`, and others.
-
 
 .. http:get:: proposal_url
 
-  Requesting this URL generates a proposal.  Note that the wallet will get properly triggered by the merchant in order
-  to issue this GET request.  The merchant will also instruct the wallet whether or
-  not to provide the optional `nonce` parameter.  `Payment protocol <https://docs.taler.net/integration-merchant.html#payprot>`_ explains how the wallet is triggered to
-  fetch the proposal.
+  A request to this URL should generate a proposal.  When the Taler wallet is
+  triggered by a "402 Payment Required" response, it will issue a GET request to
+  the proposal URL and show the proposal to the user.
+  The "402 Payment Required" trigger instructs the wallet whether or
+  not to provide the optional `nonce` parameter.  
 
   **Request:**
 
   :query nonce: Any string value.  This value will be
     included in the proposal, so that when the wallet receives the proposal it can
     easily check whether it was the genuine receiver of the proposal it got.
-    This value is needed to avoid proposals' replications.
+    This value is needed to avoid having multiple customers pay for 
+    the same proposal, which might be bad if the number of goods that can
+    be shipped is limited.
 
   **Response**
 
   :status 200 OK: The request was successful.  The body contains a :ref:`proposal <proposal>`.
   :status 400 Bad Request: Request not understood.
   :status 500 Internal Server Error:
-    In most cases, some error occurred while the backend was generating the
-    proposal. For example, it failed to store it into its database.
+    Some error occurred while the backend was generating the
+    proposal. For example, it failed to store it in its database.
 
 .. _pay:
 .. http:post:: pay_url
 
 
-  Send the deposit permission to the merchant. The client should POST a `DepositPermission`_
-  object.  If the payment was processed successfully by the merchant, this URL will set session
-  state that allows the fulfillment URL to show the final product.
+  Used to transmit the deposit permission to the merchant. The Taler wallet will
+  use this URL to POST a `DepositPermission`_ object.  The merchant will then
+  forward the deposit permission to its backend to process the payment.
+  If the payment was successfully processed by the merchant, the frontend will
+  update the session state, executing the business logic and ensuring that
+  the fulfillment URL will show the final purchase status (or deliver the product).
 
   .. _DepositPermission:
   .. code-block:: tsref
 
     interface DepositPermission {
-      // a free-form identifier identifying the order that is being payed for
+      // a free-form identifier identifying the order that is being paid for
       order_id: string;
 
       // Public key of the merchant.  Used to identify the merchant instance.
@@ -107,17 +112,18 @@ The Frontend HTTP API
 
   **Success Response:**
 
-  :status 301 Redirection: the merchant should redirect the client to his fullfillment page, where the good outcome of the purchase must be shown to the user.
+  :status 301 Redirection: the merchant should redirect the client to the fulfillment page, where the good outcome of the purchase must be shown to the user.  FIXME: This seems wrong, wasn't the fulfillment URL part of the order, and we now just return a 200 status code?
 
   **Failure Responses:**
 
-  The error codes and data sent to the wallet are a mere copy of those gotten from the exchange when attempting to pay. The section about :ref:`deposit <deposit>` explains them in detail.
+  The error codes and data sent to the wallet are a mere copy of those gotten from the exchange when attempting to deposit.
+  The section about :ref:`deposit <deposit>` explains them in detail.
 
 
 .. http:get:: fulfillment_url
 
   URL that shows the product after it has been purchased.  Going to the a fulfillment URL
-  before the payment was completed must trigger the payment process.
+  before the payment was completed must trigger the payment process.  FIXME: explain how.
 
   For products that are intended to be purchased only once (such as online news
   articles), the fulfillment URL should map one-to-one to an article, so that
@@ -316,9 +322,11 @@ The following API are made available by the merchant's `backend` to the merchant
     }
 
 
-.. http:post:: /tip
+.. http:post:: /tip-authorize
 
-  Authorize a tip that can be picked up by the customer's wallet by POSTing to `/tip`. 
+  Authorize a tip that can be picked up by the customer's wallet by POSTing to `/tip-pickup`.  Note that this is simply the authorization step the back office has to trigger first.  The frontend must return the tip's identifier (and exchange URL) via a "402 Payment Required" response to the wallet.
+
+  Note that tipping is not yet implemented!
 
   **Request**
 
@@ -327,22 +335,22 @@ The following API are made available by the merchant's `backend` to the merchant
   **Response**
   
   :status 200 OK:
-    The refund amount has been increased, the backend responds with a `TipCreateConfirmation`_
-  :status 400 Bad request:
-    The refund amount is not consistent: it is not bigger than the previous one.
+    A tip has been created. The backend responds with a `TipCreateConfirmation`_
+  :status 412 Precondition Failed:
+    The tip amount requested exceeds the available reserve balance for tipping.
 
-  .. _RefundRequest:
+  .. _TipCreateRequest:
   .. code-block:: tsref
 
-    interface RefundRequest {
+    interface TipCreateRequest {
       // Amount that the customer should be tipped
       refund: Amount;
 
-      // Human-readable refund justification
-      reason: string;
-
       // Merchant instance issuing the request
       instance: string;
+
+      // Justification for giving the tip
+      justification: string;
     }
 
   .. _TipCreateConfirmation:
@@ -350,9 +358,74 @@ The following API are made available by the merchant's `backend` to the merchant
 
     interface TipCreateConfirmation {
       // Identifier for the tip authorization
-      tip_id: string;
+      tip_id: HashCode;
+
+      // Expiration time for obtaining the tip
+      tip_expiration: Timestamp;
+
+      // URI of the exchange from where the tip can be withdrawn
+      exchange_uri: String;
     }
 
+
+.. http:post:: /tip-pickup
+
+  Handle request from wallet to pick up a tip.
+
+  Note that tipping is not yet implemented!
+
+  **Request**
+
+  The request body is a `TipPickupRequest`_ object.
+
+  **Response**
+  
+  :status 200 OK:
+    A tip is being returned. The backend responds with a `TipResponse`_
+  :status 401 Unauthorized:
+    The tip amount requested exceeds the tip.
+  :status 404 Not Found:
+    The tip identifier is unknown.
+  :status 409 Conflict:
+    Some of the denomination key hashes of the request do not match those currently available from the exchange (hence there is a conflict between what the wallet requests and what the merchant believes the exchange can provide).
+
+  .. _TipPickupRequest:
+  .. code-block:: tsref
+
+    interface TipPickupRequest {
+
+      // Merchant instance issuing the request
+      instance: string;
+
+      // Identifier of the tip.
+      tip_id: HashCode;
+
+      // List of planches the wallet wants to use for the tip
+      planchets: PlanchetDetail[];
+    }
+
+    interface PlanchetDetail {
+      // Hash of the denomination's public key (hashed to reduce
+      // bandwidth consumption)
+      denom_pub_hash: HashCode;
+
+      // coin's blinded public key
+      coin_ev: CoinEnvelope;
+    
+    }
+
+  .. _TipResponse:
+  .. code-block:: tsref
+
+    interface TipResponse {
+      // Public key of the reserve
+      reserve_pub: EddsaPublicKey;
+
+      // The order of the signatures matches the planchets list.
+      reserve_sigs: EddsaSignature[];
+    }
+
+    
 .. http:get:: /track/transfer
 
   Provides deposits associated with a given wire transfer.
