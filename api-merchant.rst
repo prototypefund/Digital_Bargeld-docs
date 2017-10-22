@@ -42,14 +42,14 @@ The Frontend HTTP API
   triggered by a "402 Payment Required" response, it will issue a GET request to
   the proposal URL and show the proposal to the user.
   The "402 Payment Required" trigger instructs the wallet whether or
-  not to provide the optional `nonce` parameter.  
+  not to provide the optional `nonce` parameter.
 
   **Request:**
 
   :query nonce: Any string value.  This value will be
     included in the proposal, so that when the wallet receives the proposal it can
     easily check whether it was the genuine receiver of the proposal it got.
-    This value is needed to avoid having multiple customers pay for 
+    This value is needed to avoid having multiple customers pay for
     the same proposal, which might be bad if the number of goods that can
     be shipped is limited.
 
@@ -250,7 +250,7 @@ The following API are made available by the merchant's `backend` to the merchant
   The request body is a `RefundRequest`_ object.
 
   **Response**
-  
+
   :status 200 OK:
     The refund amount has been increased, the backend responds with a `RefundConfirmation`_
   :status 400 Bad request:
@@ -281,9 +281,9 @@ The following API are made available by the merchant's `backend` to the merchant
       // that the purpose is set to zero.  However, this value
       // is not meant to be soon verified by the frontend, but
       // could be showed in court.
-      sig: EddsaSignature  
+      sig: EddsaSignature
     }
-  
+
 .. http:get:: /refund
 
   Shows the refund situation about a transaction
@@ -299,11 +299,11 @@ The following API are made available by the merchant's `backend` to the merchant
 
   .. _RefundLookup:
   .. code-block:: tsref
-    
+
     interface RefundLookup {
 
       // Coin from which the refund is going to be taken
-      coin_pub: EddsaPublicKey;     
+      coin_pub: EddsaPublicKey;
 
       // Refund amount taken from coin_pub
       refund_amount: Amount;
@@ -333,7 +333,7 @@ The following API are made available by the merchant's `backend` to the merchant
   The request body is a `TipCreateRequest`_ object.
 
   **Response**
-  
+
   :status 200 OK:
     A tip has been created. The backend responds with a `TipCreateConfirmation`_
   :status 412 Precondition Failed:
@@ -344,7 +344,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
     interface TipCreateRequest {
       // Amount that the customer should be tipped
-      refund: Amount;
+      amount: Amount;
 
       // Merchant instance issuing the request
       instance: string;
@@ -379,7 +379,7 @@ The following API are made available by the merchant's `backend` to the merchant
   The request body is a `TipPickupRequest`_ object.
 
   **Response**
-  
+
   :status 200 OK:
     A tip is being returned. The backend responds with a `TipResponse`_
   :status 401 Unauthorized:
@@ -411,7 +411,7 @@ The following API are made available by the merchant's `backend` to the merchant
 
       // coin's blinded public key
       coin_ev: CoinEnvelope;
-    
+
     }
 
   .. _TipResponse:
@@ -425,7 +425,7 @@ The following API are made available by the merchant's `backend` to the merchant
       reserve_sigs: EddsaSignature[];
     }
 
-    
+
 .. http:get:: /track/transfer
 
   Provides deposits associated with a given wire transfer.
@@ -433,9 +433,9 @@ The following API are made available by the merchant's `backend` to the merchant
   **Request**
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
-  :query wire_method: name of the wire transfer method used for the wire transfer	       
+  :query wire_method: name of the wire transfer method used for the wire transfer
   :query exchange: base URI of the exchange that made the wire transfer
-  :query instance: (optional) identificative token of the merchant `instance <https://docs.taler.net/operate-merchant.html#instances-lab>`_ which is being tracked.		   
+  :query instance: (optional) identificative token of the merchant `instance <https://docs.taler.net/operate-merchant.html#instances-lab>`_ which is being tracked.
 
   **Response:**
 
@@ -672,7 +672,7 @@ The following API are made available by the merchant's `backend` to the merchant
   A typical usage is to firstly call this API without `start` and `date` parameter, then fetch the oldest
   `row_id` from the results, and then keep calling the API by using the oldest row ID as `start` parameter.
   This way we simply "scroll" results from the youngest to the oldest, `delta` entries at time.
-  
+
   **Response**
 
   :status 200 OK: The response is a JSON `array` of  `TransactionHistory`_.  The array is sorted such that entry `i` is younger than entry `i+1`.
