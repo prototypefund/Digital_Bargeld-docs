@@ -322,6 +322,38 @@ The following API are made available by the merchant's `backend` to the merchant
     }
 
 
+.. http:post:: /tip-enable
+
+  Enable tipping by telling the backend that a reserve was created with funds for tipping.
+
+  **Request**
+
+  The request body is a `TipEnable`_ object.  Note that if an existing,
+  non-expired reserve is credited, the credits are added and the
+  expiration time is updated to the max of the expiration times.
+
+  **Response**
+
+  :status 200 OK:
+    A reserve with credit for tipping has been created. The response is empty.
+
+  .. _TipEnable:
+  .. code-block:: tsref
+
+    interface TipEnable {
+      // Amount that was credited to the reserve
+      credit: Amount;
+
+      // Expiration time for the reserve
+      expiration: Timestamp;
+
+      // Private key of the reserve
+      reserve_priv: ReservePrivateKeyP;
+
+      // Unique ID for the wire transfer, used to detect duplicate credits
+      credit_uuid: HashCode;
+    }
+
 .. http:post:: /tip-authorize
 
   Authorize a tip that can be picked up by the customer's wallet by POSTing to `/tip-pickup`.  Note that this is simply the authorization step the back office has to trigger first.  The frontend must return the tip's identifier (and exchange URL) via a "402 Payment Required" response to the wallet.
@@ -393,9 +425,6 @@ The following API are made available by the merchant's `backend` to the merchant
   .. code-block:: tsref
 
     interface TipPickupRequest {
-
-      // Merchant instance issuing the request
-      instance: string;
 
       // Identifier of the tip.
       tip_id: HashCode;
