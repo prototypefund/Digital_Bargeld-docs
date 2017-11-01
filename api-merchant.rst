@@ -368,6 +368,8 @@ The following API are made available by the merchant's `backend` to the merchant
 
   :status 200 OK:
     A tip has been created. The backend responds with a `TipCreateConfirmation`_
+  :status 404 Not Found:
+    The instance is unknown to the backend.    
   :status 412 Precondition Failed:
     The tip amount requested exceeds the available reserve balance for tipping.
 
@@ -393,7 +395,7 @@ The following API are made available by the merchant's `backend` to the merchant
       tip_id: HashCode;
 
       // Expiration time for obtaining the tip
-      tip_expiration: Timestamp;
+      expiration: Timestamp;
 
       // URI of the exchange from where the tip can be withdrawn
       exchange_uri: String;
