@@ -369,7 +369,7 @@ The following API are made available by the merchant's `backend` to the merchant
   :status 200 OK:
     A tip has been created. The backend responds with a `TipCreateConfirmation`_
   :status 404 Not Found:
-    The instance is unknown to the backend.    
+    The instance is unknown to the backend, expired or was never enabled.    
   :status 412 Precondition Failed:
     The tip amount requested exceeds the available reserve balance for tipping.
 
