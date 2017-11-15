@@ -358,8 +358,6 @@ The following API are made available by the merchant's `backend` to the merchant
 
   Authorize a tip that can be picked up by the customer's wallet by POSTing to `/tip-pickup`.  Note that this is simply the authorization step the back office has to trigger first.  The frontend must return the tip's identifier (and exchange URL) via a "402 Payment Required" response to the wallet.
 
-  Note that tipping is not yet implemented!
-
   **Request**
 
   The request body is a `TipCreateRequest`_ object.
@@ -405,8 +403,6 @@ The following API are made available by the merchant's `backend` to the merchant
 .. http:post:: /tip-pickup
 
   Handle request from wallet to pick up a tip.
-
-  Note that tipping is not yet implemented!
 
   **Request**
 
