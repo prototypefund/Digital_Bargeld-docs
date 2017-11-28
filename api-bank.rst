@@ -131,9 +131,10 @@ User API
   :query auth: authentication method used.  At this stage of development, only value `basic` is accepted.  Note that username and password need to be given as request's headers.  The dedicated headers are: `X-Taler-Bank-Username` and `X-Taler-Bank-Password`.
   :query delta: returns the first `N` records younger (older) than `start` if `+N` (`-N`) is specified.
   :query start: according to `delta`, only those records with row id strictly greater (lesser) than `start` will be returned.  This argument is optional; if not given, `delta` youngest records will be returned.
-  :query direction: optional argument taking values `debit` or `credit`, according to the caller willing to receive both incoming and outgoing, only outgoing, or only incoming records.  Takes `credit` by default.
-  :query account_number: optional argument indicating the bank account number whose history is to be returned.  If not given, then the history of the calling user will be returned.
-
+  :query direction: optional argument taking values `debit` or `credit`, according to the caller willing to receive both incoming and outgoing, only outgoing, or only incoming records.  If not given, both directions are returned.
+  :query account_number: bank account whose history is to be returned.  *Currently ignored*, as the multiple bank accounts per user is not implemented yet.
+  
+  
   **Response** 
 
   :status 200 OK: JSON object whose field `data` is an array of type `BankTransaction`_.
