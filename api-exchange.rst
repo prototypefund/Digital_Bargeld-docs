@@ -719,8 +719,8 @@ denomination.
       // Deposit fee in case of type "MELT".
       melt_fee: Amount;
 
-      // Session hash for the melt operation.
-      session_hash: HashCode;
+      // Commitment from the melt operation.
+      rc: TALER_RefreshCommitmentP;
 
       // Hash of the bank account from where we received the funds.
       h_wire: HashCode;
@@ -795,35 +795,8 @@ the API during normal operation.
   .. code-block:: tsref
 
     interface MeltRequest {
-      // Array of `n` new denominations to order.
-      new_denoms: RsaPublicKey[];
 
-      // Information about coin being melted.
-      melt_coin: MeltCoin;
-
-      // The outer dimension of the 2d array has `kappa` entries
-      // for the cut-and-choose protocol.
-      // The inner array contains `n` entries with blinded coins,
-      // matching the respective entries in `new_denoms`.
-      coin_evs: CoinEnvelope[][];
-
-      // `kappa` transfer public keys (ephemeral ECDHE keys)
-      transfer_pubs: EddsaPublicKey[];
-
-    }
-
-  For details about the HKDF used to derive the new coin private keys and
-  the blinding factors from ECDHE between the transfer public keys and
-  the private key of the melted coin, please refer to the
-  implementation in `libtalerutil`. The `melt_coin` field is a list of JSON
-  objects with the following fields:
-
-
-  .. _tsref-type-MeltCoin:
-  .. code-block:: tsref
-
-    interface MeltCoin {
-      // `Coin public key <eddsa-coin-pub>`_, uniquely identifies the coin
+      // `Coin public key <eddsa-coin-pub>`_, uniquely identifies the coin to be melted
       coin_pub: string;
 
       // The denomination public key allows the exchange to determine total coin value.
@@ -832,22 +805,23 @@ the API during normal operation.
       // Signature over the `coin public key <eddsa-coin-pub>`_ by the denomination.
       denom_sig: RsaSignature;
 
-      // Signature by the `coin <coin-priv>`_ over the session public key.
+      // Signature by the `coin <coin-priv>`_ over the melt commitment.
       confirm_sig: EddsaSignature;
 
       // Amount of the value of the coin that should be melted as part of
       // this refresh operation, including melting fee.
       value_with_fee: Amount;
+
+      // Melt commitment.  Hash over the various coins to be withdrawn.
+      // See also `TALER_refresh_get_commitment()`
+      rc: TALER_RefreshCommitmentP;
+
     }
 
-  Errors such as failing to do proper arithmetic when it comes to calculating
-  the total of the coin values and fees are simply reported as bad requests.
-  This includes issues such as melting the same coin twice in the same session,
-  which is simply not allowed.  However, theoretically it is possible to melt a
-  coin twice, as long as the `value_with_fee` of the two melting operations is
-  not larger than the total remaining value of the coin before the melting
-  operations. Nevertheless, this is not really useful.
-
+  For details about the HKDF used to derive the new coin private keys and
+  the blinding factors from ECDHE between the transfer public keys and
+  the private key of the melted coin, please refer to the
+  implementation in `libtalerutil`.
 
   .. _tsref-type-MeltResponse:
   .. _MeltResponse:
@@ -900,8 +874,14 @@ the API during normal operation.
 
   Reveal previously commited values to the exchange, except for the values
   corresponding to the `noreveal_index` returned by the /exchange/melt step.
-  Request body contains a JSON object with the following fields:
 
+  Errors such as failing to do proper arithmetic when it comes to calculating
+  the total of the coin values and fees are simply reported as bad requests.
+  This includes issues such as melting the same coin twice in the same session,
+  which is simply not allowed.  However, theoretically it is possible to melt a
+  coin twice, as long as the `value_with_fee` of the two melting operations is
+  not larger than the total remaining value of the coin before the melting
+  operations. Nevertheless, this is not really useful.
 
   :status 200 OK:
     The transfer private keys matched the commitment and the original request was well-formed.
@@ -913,22 +893,31 @@ the API during normal operation.
     but of course expected to be primarily used for diagnostics.
     The response body is a `RevealConflictResponse`_.
 
+  **Details:**
 
+  Request body contains a JSON object with the following fields:
 
   .. code-block:: tsref
 
     interface RevealRequest {
-      // Hash over most of the arguments to the /exchange/melt step.  Used to
-      // identify the corresponding melt operation.  For details on which elements
-      // must be hashed in which order, please consult the source code of the exchange
-      // reference implementation.
-      session_hash: HashCode;
 
-      // Array of `kappa - 1` ECDHE transfer private keys.
-      // The exchange will use those to decrypt the transfer secrets,
-      // and then decrypt the private keys and blinding factors
-      // of the coins to be generated and check all this against the commitments.
+      // Array of `n` new hash codes of denomination public keys to order.
+      new_denoms_h: HashCode[];
+
+      // Array of `n` entries with blinded coins,
+      // matching the respective entries in `new_denoms`.
+      coin_evs: CoinEnvelope[];
+
+      // `kappa - 1` transfer private keys (ephemeral ECDHE keys)
       transfer_privs: EddsaPrivateKey[];
+
+      // transfer public keys at the `noreveal_index`.
+      transfer_pub: EddsaPublicKey[];
+
+      // The original commitment, used to match the /refresh/reveal
+      // to the corresponding /refresh/melt operation.
+      rc: TALER_RefreshCommitmentP;
+
     }
 
 
@@ -950,48 +939,11 @@ the API during normal operation.
       // Constant "commitment violation"
       error: string;
 
-      // Signature of the coin over the melting operation.
-      coin_sig: EddsaSignature;
+      // Detailed error code
+      code: integer;
 
-      // Coin that we failed to successfully melt.
-      coin_pub: EddsaPublicKey;
-
-      // Amount of the value of the coin to be melted in the refresh session.
-      melt_amount_with_fee: Amount;
-
-      // Fee that was due for the melting for the coin.
-      melt_fee: Amount;
-
-      // Denomination keys to be used for the coins to be withdrawn.
-      newcoin_infos: RsaPublicKey[];
-
-      // Array of blinded coins to be withdrawn.  Same length as
-      // `newcoin_infos`.
-      commit_infos: CoinEnvelope[];
-
-      // Transfer public key at index `gamma`.
-      gamma_tp: EddsaPublicKey;
-
-      // Specific `gamma` value chosen by the exchange.
-      gamma: number;
-
-    }
-
-
-  .. _tsref-type-LinkInfo:
-  .. code-block:: tsref
-
-    interface LinkInfo {
-      // the transfer ECDHE public key
-      transfer_pub: EddsaPublicKey;
-
-    }
-
-  .. _tsref-type-CommitInfo:
-  .. code-block:: tsref
-
-    interface CommitInfo {
-      coin_ev: BlindedRsaSignature;
+      // Commitment as calculated by the exchange from the revealed data.
+      rc_expected: TALER_RefreshCommitmentP;
 
     }
 
@@ -1021,13 +973,8 @@ the API during normal operation.
 
     interface LinkResponse {
       // transfer ECDHE public key corresponding to the `coin_pub`, used to
-      // decrypt the `secret_enc` in combination with the private key of
-      // `coin_pub`.
+      // compute the blinding factor and private key of the fresh coins.
       transfer_pub: EcdhePublicKey;
-
-      // ECDHE-encrypted link secret that, once decrypted, can be used to
-      // decrypt/unblind the `new_coins`.
-      secret_enc: Base32;
 
       // array with (encrypted/blinded) information for each of the coins
       // exchangeed in the refresh operation.
