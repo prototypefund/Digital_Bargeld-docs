@@ -199,14 +199,15 @@ URI: ``git://taler.net/web-common/taler-fallback.css``.
 Withdrawing coins.
 ^^^^^^^^^^^^^^^^^
 
-After the user confirms the withdrawal, the bank must send back the following
-information via HTTP headers:
+After the user confirms the withdrawal, the bank must return a `202 Accepted` response,
+along with the following HTTP headers:
 
 * ``X-Taler-Operation: create-reserve``
-* ``X-Taler-Callback-Url: http://callback.example.com/``; this URL will be automatically visited by the wallet after the user confirms the exchange.
-* ``X-Taler-Wt-Types: '["test"]'``
+* ``X-Taler-Callback-Url: <callback_url>``; this URL will be automatically visited by the wallet after the user confirms the exchange.
+* ``X-Taler-Wt-Types: '["test"]'``; stringified JSON list of supported wire transfer types (only 'test' supported so far).
 * ``X-Taler-Amount: <amount_string>``; stringified Taler-style JSON :ref:`amount <amount>`.
 * ``X-Taler-Sender-Wire: <wire_details>``; stringified WireDetails_.
+* ``X-Taler-Suggested-Exchange: <URL>``; this header is optional, and ``<URL>`` is the suggested exchange URL as given in the `SUGGESTED_EXCHANGE` configuration option.
 
 .. _WireDetails:
 .. code-block:: tsref
@@ -216,3 +217,34 @@ information via HTTP headers:
     bank_uri: URI of the bank.
     account_number: bank account number of the user attempting to withdraw.
   }
+
+After the user confirms the exchange to withdraw coins from, the wallet will
+visit the callback URL, in order to let the user answer some security questions
+and provide all relevant data to create a reserve.
+
+.. note::
+  Currently, the bank is in charge of creating the reserve at the chosen
+  exchange.  In future, the exchange will "poll" its bank account and automatically
+  creating a reserve whenever it receives any funds, without any bank's
+  intervention.
+
+The callback URL implements the following API.
+
+.. http:get:: <callback_url>
+
+  **Request**
+
+  :query amount_value: integer part of the amount to be withdrawn.
+  :query amount_fraction: fractional part of the amount to be withdrawn.
+  :query amount_currency: currency of the amount to be withdrawn.
+  :query exchange: base URL of the exchange where the reserve is to be created.
+  :query reserve_pub: public key of the reserve to create.
+  :query wire_details: stringification of WireDetails_.
+
+  **Response**
+
+  Because the wallet is not supposed to take action according to this response,
+  the bank implementers are not required to return any particular status code here.
+
+  For example, our demonstrator bank always redirects the browser to the user's
+  profile page and let them know the outcome via a informational bar.
