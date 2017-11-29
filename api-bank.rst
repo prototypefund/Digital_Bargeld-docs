@@ -16,11 +16,6 @@
 Bank API
 =========
 
-The following APIs are served from banks, in order to allow exchanges to
-deposit funds to money recipients.  A typical scenario for calling this
-APIs is after a merchant has deposited coins to the exchange, and the exchange
-needs to give real money to the merchant.
-
 ------------------
 Administrative API
 ------------------
@@ -173,3 +168,37 @@ User API
   the client using the bank.  A reasonable improvement is to
   specify a bank URI too, so that Taler can run across multiple
   banks.
+
+------------------------
+Interactions with wallet
+------------------------
+
+The interaction between the bank and the wallet does *not* use JavaScript.
+
+The interaction is needed to (1) make some elements visible only if a wallet
+is installed, and (2) to give the wallet information about a new withdraw
+operation.
+
+Make elements visible.
+^^^^^^^^^^^^^^^^^^^^^^
+
+This feature works via CSS injection from the wallet.  To enable it, the
+page must contain the ``<html data-taler-nojs="true">`` element, so that
+the wallet will do the injection.
+
+Whenever a element ``<x>`` needs to be visualized (hidden) if the wallet is
+installed, the special class ``taler-installed-show`` (``taler-installed-hide``)
+must be added to ``x``, as follows:
+
+* ``<x class="taler-installed-show">y</x>`` will make ``y`` visible.
+* ``<x class="taler-installed-hide">y</x>`` will make ``y`` visible.
+
+Clearly, a fallback page must be provided, which will be useful if the
+wallet is *not* installed.  This special page will hide any element of
+the class ``taler-install-show``; it can be downloaded at the following
+URI: ``git://taler.net/web-common/taler-fallback.css``.
+
+New withdrawal information.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+TBD.
