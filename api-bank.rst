@@ -173,11 +173,9 @@ User API
 Interactions with wallet
 ------------------------
 
-The interaction between the bank and the wallet does *not* use JavaScript.
-
-The interaction is needed to (1) make some elements visible only if a wallet
-is installed, and (2) to give the wallet information about a new withdraw
-operation.
+A bank and a wallet need to communicate for (1) make some elements visible
+only if the wallet is installed, (2) exchange information when the user withdraws
+coins.
 
 Make elements visible.
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -198,7 +196,23 @@ wallet is *not* installed.  This special page will hide any element of
 the class ``taler-install-show``; it can be downloaded at the following
 URI: ``git://taler.net/web-common/taler-fallback.css``.
 
-New withdrawal information.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Withdrawing coins.
+^^^^^^^^^^^^^^^^^
 
-TBD.
+After the user confirms the withdrawal, the bank must send back the following
+information via HTTP headers:
+
+* ``X-Taler-Operation: create-reserve``
+* ``X-Taler-Callback-Url: http://callback.example.com/``; this URL will be automatically visited by the wallet after the user confirms the exchange.
+* ``X-Taler-Wt-Types: '["test"]'``
+* ``X-Taler-Amount: <amount_string>``; stringified Taler-style JSON :ref:`amount <amount>`.
+* ``X-Taler-Sender-Wire: <wire_details>``; stringified WireDetails_.
+
+.. _WireDetails:
+.. code-block:: tsref
+
+  interface WireDetails {
+    type: string; // Only 'test' value admitted so far.
+    bank_uri: URI of the bank.
+    account_number: bank account number of the user attempting to withdraw.
+  }
