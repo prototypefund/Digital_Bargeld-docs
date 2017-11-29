@@ -25,7 +25,7 @@ needs to give real money to the merchant.
 Administrative API
 ------------------
 
-This API allows one user to send money to another user, withing the same "test"
+This API allows one user to send money to another user, within the same "test"
 bank.  The user calling it has to authenticate by including his credentials in the
 request.
 
