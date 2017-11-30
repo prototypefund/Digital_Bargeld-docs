@@ -277,10 +277,8 @@ The following API are made available by the merchant's `backend` to the merchant
   .. code-block:: tsref
 
     interface RefundConfirmation {
-      // Merchant signature over the hashed order id. Note
-      // that the purpose is set to zero.  However, this value
-      // is not meant to be soon verified by the frontend, but
-      // could be showed in court.
+      // Merchant signature over the hashed order id.
+      // The purpose is `TALER_SIGNATURE_MERCHANT_REFUND_OK`.
       sig: EddsaSignature
     }
 
@@ -367,7 +365,7 @@ The following API are made available by the merchant's `backend` to the merchant
   :status 200 OK:
     A tip has been created. The backend responds with a `TipCreateConfirmation`_
   :status 404 Not Found:
-    The instance is unknown to the backend, expired or was never enabled.    
+    The instance is unknown to the backend, expired or was never enabled.
   :status 412 Precondition Failed:
     The tip amount requested exceeds the available reserve balance for tipping.
 
