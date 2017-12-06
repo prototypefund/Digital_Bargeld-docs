@@ -1,24 +1,25 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014, 2015, 2016 INRIA
+
+  Copyright (C) 2014, 2015, 2016, 2017 Taler Systems SA
+
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
   Foundation; either version 2.1, or (at your option) any later version.
+
   TALER is distributed in the hope that it will be useful, but WITHOUT ANY
   WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-  A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more details.
-  You should have received a copy of the GNU Lesser General Public License along with
+  A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along with
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
 
   @author Marcello Stanisci
+  @author Christian Grothoff
 
 =========
 Bank API
 =========
-
-------------------
-Administrative API
-------------------
 
 This API allows one user to send money to another user, within the same "test"
 bank.  The user calling it has to authenticate by including his credentials in the
@@ -40,11 +41,11 @@ request.
 .. code-block:: tsref
 
   interface BankDepositDetails {
-    
+
     // Timestamp related to the transaction being made.
     timestamp: Timestamp;
 
-    // Serial id identifying the transaction into the bank's
+    // Serial id identifying the transaction in the bank's
     // database.
     serial_id: number;
   }
@@ -72,10 +73,8 @@ request.
     // the wire transfer subject of their respective banking system.
     exchange_url: string;
 
-    // The id of this wire transfer, a `TALER_WireTransferIdentifierRawP`.
-    // Should be encoded together with a checksum in actual wire transfers.
-    // (See `TALER_WireTransferIdentifierP`_ for an encoding with CRC8.).
-    wtid: base32;
+    // The subject of this wire transfer.
+    subject: string;
 
     // The sender's account identificator.  NOTE, in the current stage
     // of development this field is _ignored_, as it's always the bank account
@@ -99,7 +98,7 @@ request.
     // only value "basic" is accepted in this field.
     // The credentials must be indicated in the following HTTP
     // headers: "X-Taler-Bank-Username" and "X-Taler-Bank-Password".
-    type: string; 
+    type: string;
   }
 
 
@@ -111,11 +110,46 @@ request.
     // Human readable explanation of the failure.
     error: string;
 
+    // Numeric Taler error code (`enum TALER_ErrorCode`)
+    ec: number;
+
   }
 
---------
-User API
---------
+
+.. http:put:: /reject
+
+  Rejects an inbound transaction.  This can be used by the receiver of an account to
+  cancel a transaction, nullifying its effect.  This basically creates a correcting
+  entry that voids the original transaction.  Henceforth, the /history must show
+  the original transaction as "cancelled+" or "cancelled-" for creditor and debitor respectively.
+  This API is used when the exchange receives a wire transfer with an invalid wire
+  transfer subject that fails to decode to a public key.
+
+  **Request** The body of this request must have the format of a `BankCancelRequest`_.
+
+  :query auth: authentication method used.  At this stage of development, only value `basic` is accepted.  Note that username and password need to be given as request's headers.  The dedicated headers are: `X-Taler-Bank-Username` and `X-Taler-Bank-Password`.
+  :query row_id: row identifier of the transaction that should be cancelled.
+  :query account_number: bank account for which the incoming transfer was made and for which `auth` provides the authentication data.  *Currently ignored*, as multiple bank accounts per user are not implemented yet.
+
+  interface BankCancelRequest {
+
+    // Authentication method used
+    auth: BankAuth;
+
+    // The row id of the wire transfer to cancel
+    row_id: number;
+
+    // The recipient's account identificator
+    credit_account: number;
+
+  }
+
+  **Response**  In case of an error, the body is a `BankError`_ object.
+
+  :status 204 No Content: The request has been correctly handled, so the original transaction was voided.  The body is empty.
+  :status 400 Bad Request: The bank replies a `BankError`_ object.
+  :status 404 Not Found: The bank does not know this rowid for this account.
+
 
 .. http:get:: /history
 
@@ -126,11 +160,12 @@ User API
   :query auth: authentication method used.  At this stage of development, only value `basic` is accepted.  Note that username and password need to be given as request's headers.  The dedicated headers are: `X-Taler-Bank-Username` and `X-Taler-Bank-Password`.
   :query delta: returns the first `N` records younger (older) than `start` if `+N` (`-N`) is specified.
   :query start: according to `delta`, only those records with row id strictly greater (lesser) than `start` will be returned.  This argument is optional; if not given, `delta` youngest records will be returned.
-  :query direction: optional argument taking values `debit` or `credit`, according to the caller willing to receive both incoming and outgoing, only outgoing, or only incoming records.  If not given, both directions are returned.
-  :query account_number: bank account whose history is to be returned.  *Currently ignored*, as the multiple bank accounts per user is not implemented yet.
-  
-  
-  **Response** 
+  :query direction: argument taking values `debit` or `credit`, according to the caller willing to receive both incoming and outgoing, only outgoing, or only incoming records.  Use `both` to return both directions.
+  :query cancelled: argument taking values `omit` or `show` to filter out rejected transactions
+  :query account_number: bank account whose history is to be returned.  *Currently ignored*, as multiple bank accounts per user are not implemented yet.
+
+
+  **Response**
 
   :status 200 OK: JSON object whose field `data` is an array of type `BankTransaction`_.
   :status 204 No content: in case no records exist for the targeted user.
@@ -139,7 +174,7 @@ User API
 .. code-block:: tsref
 
   interface BankTransaction {
-  
+
     // identification number of the record
     row_id: number;
 
@@ -150,17 +185,17 @@ User API
     amount: Amount;
 
     // "-" if the transfer was outgoing, "+" if it was
-    // incoming.  This field is only present if the
-    // argument `direction` was NOT given.
+    // incoming; "cancel+" or "cancel-" if the transfer
+    // was /reject-ed by the receiver.
     sign: string;
 
     // Bank account number of the other party involved in the
     // transaction.
-    counterpart: number; 
+    counterpart: number;
 
     // Wire transfer subject line.
     wt_subject: string;
-  
+
   }
 
 ..
@@ -197,7 +232,7 @@ the class ``taler-install-show``; it can be downloaded at the following
 URI: ``git://taler.net/web-common/taler-fallback.css``.
 
 Withdrawing coins.
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 After the user confirms the withdrawal, the bank must return a `202 Accepted` response,
 along with the following HTTP headers:
