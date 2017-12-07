@@ -118,8 +118,8 @@ request.
 
 .. http:put:: /reject
 
-  Rejects an inbound transaction.  This can be used by the receiver of an account to
-  cancel a transaction, nullifying its effect.  This basically creates a correcting
+  Rejects an inbound transaction.  This can be used by the receiver of a wire transfer to
+  cancel that transaction, nullifying its effect.  This basically creates a correcting
   entry that voids the original transaction.  Henceforth, the /history must show
   the original transaction as "cancelled+" or "cancelled-" for creditor and debitor respectively.
   This API is used when the exchange receives a wire transfer with an invalid wire
