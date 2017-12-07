@@ -131,18 +131,21 @@ request.
   :query row_id: row identifier of the transaction that should be cancelled.
   :query account_number: bank account for which the incoming transfer was made and for which `auth` provides the authentication data.  *Currently ignored*, as multiple bank accounts per user are not implemented yet.
 
-  interface BankCancelRequest {
+  .. _BankCancelRequest:
+  .. code-block:: tsref
 
-    // Authentication method used
-    auth: BankAuth;
+    interface BankCancelRequest {
 
-    // The row id of the wire transfer to cancel
-    row_id: number;
+      // Authentication method used
+      auth: BankAuth;
 
-    // The recipient's account identificator
-    credit_account: number;
+      // The row id of the wire transfer to cancel
+      row_id: number;
 
-  }
+      // The recipient's account identificator
+      credit_account: number;
+
+    }
 
   **Response**  In case of an error, the body is a `BankError`_ object.
 
