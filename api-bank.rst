@@ -45,9 +45,9 @@ request.
     // Timestamp related to the transaction being made.
     timestamp: Timestamp;
 
-    // Serial id identifying the transaction in the bank's
+    // Row id number identifying the transaction in the bank's
     // database.
-    serial_id: number;
+    row_id: number;
   }
 
 .. _BankDepositRequest:
