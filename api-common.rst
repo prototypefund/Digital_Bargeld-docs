@@ -724,6 +724,17 @@ within the
     struct TALER_AmountNBO refund_fee;
   };
 
+  struct TALER_MerchantRefundConfirmationPS {
+    /**
+     *  purpose.purpose = TALER_SIGNATURE_MERCHANT_REFUND_OK
+     */
+    struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+    /**
+     * Hash of the order ID (a string), hashed without the 0-termination.
+     */
+    struct GNUNET_HashCode h_order_id;
+  };
+
 
 .. _TALER_PaybackRequestPS:
 .. sourcecode:: c
