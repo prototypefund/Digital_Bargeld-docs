@@ -911,8 +911,8 @@ the API during normal operation.
       // `kappa - 1` transfer private keys (ephemeral ECDHE keys)
       transfer_privs: EddsaPrivateKey[];
 
-      // transfer public key at the `noreveal_index`.
-      transfer_pub: EddsaPublicKey;
+      // transfer public keys at the `noreveal_index`.
+      transfer_pub: EddsaPublicKey[];
 
       // The original commitment, used to match the /refresh/reveal
       // to the corresponding /refresh/melt operation.

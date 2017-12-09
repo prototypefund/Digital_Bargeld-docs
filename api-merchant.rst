@@ -239,11 +239,6 @@ The following API are made available by the merchant's `backend` to the merchant
       // can do order processing without a second lookup on
       // a successful payment
       proposal: Proposal;
-
-      // Refund permissions for the order.  This array will only
-      // be non-empty when this payment is a replay and a refund happened
-      // between the first successful payment request and a refund.
-      refund_permissions: RefundPermission[];
     }
 
 .. http:post:: /refund
@@ -298,25 +293,12 @@ The following API are made available by the merchant's `backend` to the merchant
 
   **Response**
 
-  :status 200 OK:
-    Refund loopup was successful. The backend responds with a `RefundLookupResponse`_ object.
-    If there were no refunds for a contract, the array of refund permissions is empty.
-  :status 404 Not Found:
-    The transaction was not found.  Note that this is *not* the same as
-    there being no refunds for the transaction.
+  If case of success, an *array of* `RefundLookup`_ objects is returned.
 
   .. _RefundLookup:
   .. code-block:: tsref
 
-<<<<<<< HEAD
-    interface RefundLookupResponse {
-      refund_permissions: RefundPermission[];
-    }
-    
-    interface RefundPermission {
-=======
     interface RefundLookup {
->>>>>>> fd0e5260107f6c418659808b2620484332afd774
 
       // Coin from which the refund is going to be taken
       coin_pub: EddsaPublicKey;
