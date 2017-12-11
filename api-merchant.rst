@@ -381,12 +381,25 @@ The following API are made available by the merchant's `backend` to the merchant
 
       // Justification for giving the tip
       justification: string;
+
+      // URL that the wallet should pick up the tip from,
+      // will be included in the tip_token.
+      pickup_url: string;
+
+      // URL that the user should be directed to after tipping,
+      // will be included in the tip_token.
+      next_url: string;
     }
 
   .. _TipCreateConfirmation:
   .. code-block:: tsref
 
     interface TipCreateConfirmation {
+      // Token that will be handed to the wallet,
+      // contains all relevant information to accept
+      // a tip.
+      tip_token: string;
+
       // Identifier for the tip authorization
       tip_id: HashCode;
 
