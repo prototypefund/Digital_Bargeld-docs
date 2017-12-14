@@ -277,7 +277,7 @@ The callback URL implements the following API.
   :query amount_currency: currency of the amount to be withdrawn.
   :query exchange: base URL of the exchange where the reserve is to be created.
   :query reserve_pub: public key of the reserve to create.
-  :query wire_details: stringification of the chosen exchange's WireDetails_.
+  :query exchange_wire_details: stringification of the chosen exchange's WireDetails_.
 
   **Response**
 
