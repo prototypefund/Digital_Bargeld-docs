@@ -34,6 +34,7 @@ request.
 
 :status 200 OK: The request has been correctly handled, so the funds have been transferred to the recipient's account.  The body is a `BankDepositDetails`_.
 :status 400 Bad Request: The bank replies a `BankError`_ object.
+:status 406 Not Acceptable: The request had wrong currency; the bank replies a `BankError`_ object.
 
 **Details:**
 
