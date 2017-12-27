@@ -82,11 +82,17 @@ The Frontend HTTP API
       // Public key of the merchant.  Used to identify the merchant instance.
       merchant_pub: EddsaSignature;
 
-      // the chosen exchange's base URL
-      exchange: string;
-
       // the coins used to sign the proposal
       coins: DepositedCoin[];
+
+      // Operation mode, either "pay" or "abort-refund".  "pay"
+      // is there to process the payment as usual, while
+      // "abort-refund" has the goal of aborting a previous,
+      // partial (and thus so far unsuccessful) payment request,
+      // asking for the wallet to generate refunds.  In this
+      // latter case, the response will be an array of
+      // refund signatures matching 'coins'.
+      mode: string;
     }
 
   .. _`tsref-type-DepositedCoin`:
@@ -95,13 +101,16 @@ The Frontend HTTP API
 
     interface DepositedCoin {
       // the amount this coin is paying for
-      amount: Amount;
+      constribution: Amount;
 
       // coin's public key
       coin_pub: RsaPublicKey;
 
       // denomination key
       denom_pub: RsaPublicKey;
+
+      // base URL of the exchange that issued the coin
+      exchange_url: string;
 
       // exchange's signature over this `coin's public key <eddsa-coin-pub>`_
       ub_sig: RsaSignature;
@@ -206,7 +215,7 @@ The following API are made available by the merchant's `backend` to the merchant
   **Response:**
 
   :status 200 OK:
-    The exchange accepted all of the coins. The body is a `PaymentResponse`_.
+    The exchange accepted all of the coins. The body is a `PaymentResponse`_ if the request used the mode "pay", or a `PaymentRefundResponse`_ if the request used was the mode "abort-refund".
     The `frontend` should now fullfill the contract.
   :status 412 Precondition Failed:
     The given exchange is not acceptable for this merchant, as it is not in the
@@ -241,6 +250,15 @@ The following API are made available by the merchant's `backend` to the merchant
       proposal: Proposal;
     }
 
+  .. _PaymentRefundResponse:
+  .. code-block:: tsref
+
+    interface PaymentRefundResponse {
+      // array of refunds, in the order of the coins that
+      // were given originally.
+      refunds: RefundConfirmation[];
+    }
+    
 .. http:post:: /refund
 
   Increase the refund amount associated with a given order.
