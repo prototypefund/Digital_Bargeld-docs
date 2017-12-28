@@ -101,7 +101,7 @@ The Frontend HTTP API
 
     interface DepositedCoin {
       // the amount this coin is paying for
-      constribution: Amount;
+      contribution: Amount;
 
       // coin's public key
       coin_pub: RsaPublicKey;
