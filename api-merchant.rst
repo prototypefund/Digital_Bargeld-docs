@@ -256,8 +256,23 @@ The following API are made available by the merchant's `backend` to the merchant
     interface PaymentRefundResponse {
       // array of refunds, in the order of the coins that
       // were given originally.
-      refunds: RefundConfirmation[];
+      refunds: RefundDetail[];
+
+      // public key of the merchant used to sign the refund
+      // details.
+      merchant_pub: MerchantPublicKeyP;
     }
+
+    
+    interface RefundDetail {
+      // Merchant signature over the hashed order id.
+      // The purpose is `TALER_SIGNATURE_MERCHANT_REFUND_OK`.
+      sig: EddsaSignature;
+
+      // refund transaction ID chosen by the merchant.
+      rtransaction_id: uint64_t;
+    }
+
     
 .. http:post:: /refund
 
