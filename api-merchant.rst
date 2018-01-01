@@ -220,6 +220,8 @@ The following API are made available by the merchant's `backend` to the merchant
   :status 412 Precondition Failed:
     The given exchange is not acceptable for this merchant, as it is not in the
     list of accepted exchanges and not audited by an approved auditor.
+  :status 401 Unauthorized:
+    One of the coin signatures was not valid.
   :status 403 Forbidden:
     The exchange rejected the payment because a coin was already spent before.
     The response will include the `coin_pub` for which the payment failed,
@@ -267,7 +269,7 @@ The following API are made available by the merchant's `backend` to the merchant
     interface RefundDetail {
       // Merchant signature over the hashed order id.
       // The purpose is `TALER_SIGNATURE_MERCHANT_REFUND_OK`.
-      sig: EddsaSignature;
+      merchant_sig: EddsaSignature;
 
       // refund transaction ID chosen by the merchant.
       rtransaction_id: uint64_t;
