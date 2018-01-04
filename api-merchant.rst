@@ -271,6 +271,9 @@ The following API are made available by the merchant's `backend` to the merchant
       // The purpose is `TALER_SIGNATURE_MERCHANT_REFUND_OK`.
       merchant_sig: EddsaSignature;
 
+      // Public key of the coin which is being refunded.
+      coin_pub: EddsaPublicKey;
+      
       // refund transaction ID chosen by the merchant.
       rtransaction_id: uint64_t;
     }
