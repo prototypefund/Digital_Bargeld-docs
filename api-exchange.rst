@@ -465,7 +465,7 @@ exchange.
       // Public key of the coin that was paid back; only present if type is "PAYBACK".
       coin_pub?: CoinPublicKey;
 
-      // Timestamp when the exchange received the /payback or executed the wire transfer. Only present if `type` is "PAYBACK" or "CLOSING".
+      // Timestamp when the exchange received the /payback or executed the wire transfer. Only present if `type` is "DEPOSIT", "PAYBACK" or "CLOSING".
       timestamp?: Timestamp;
    }
 
