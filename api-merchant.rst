@@ -265,7 +265,7 @@ The following API are made available by the merchant's `backend` to the merchant
       merchant_pub: MerchantPublicKeyP;
     }
 
-    
+
     interface RefundDetail {
       // Merchant signature over the hashed order id.
       // The purpose is `TALER_SIGNATURE_MERCHANT_REFUND_OK`.
@@ -273,12 +273,12 @@ The following API are made available by the merchant's `backend` to the merchant
 
       // Public key of the coin which is being refunded.
       coin_pub: EddsaPublicKey;
-      
+
       // refund transaction ID chosen by the merchant.
       rtransaction_id: uint64_t;
     }
 
-    
+
 .. http:post:: /refund
 
   Increase the refund amount associated with a given order.
@@ -357,38 +357,6 @@ The following API are made available by the merchant's `backend` to the merchant
       merchant_sig: EddsaSignature;
     }
 
-
-.. http:post:: /tip-enable
-
-  Enable tipping by telling the backend that a reserve was created with funds for tipping.
-
-  **Request**
-
-  The request body is a `TipEnable`_ object.  Note that if an existing,
-  non-expired reserve is credited, the credits are added and the
-  expiration time is updated to the max of the expiration times.
-
-  **Response**
-
-  :status 200 OK:
-    A reserve with credit for tipping has been created. The response is empty.
-
-  .. _TipEnable:
-  .. code-block:: tsref
-
-    interface TipEnable {
-      // Amount that was credited to the reserve
-      credit: Amount;
-
-      // Expiration time for the reserve
-      expiration: Timestamp;
-
-      // Private key of the reserve
-      reserve_priv: ReservePrivateKeyP;
-
-      // Unique ID for the wire transfer, used to detect duplicate credits
-      credit_uuid: HashCode;
-    }
 
 .. http:post:: /tip-authorize
 

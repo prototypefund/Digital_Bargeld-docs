@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014-2017 GNUnet e.V. and INRIA
+  Copyright (C) 2014-2018 GNUnet e.V. and INRIA
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -69,6 +69,10 @@ possibly by using HTTPS.
 
       // EdDSA master public key of the exchange, used to sign entries in `denoms` and `signkeys`
       master_public_key: EddsaPublicKey;
+
+      // Relative duration until inactive reserves are closed; not signed, expressed as
+      // a string in relative time in microseconds, i.e. "/Delay(1000)/" for 1 second.
+      reserve_closing_delay: RelativeTime;
 
       // Denominations offered by this exchange.
       denoms: Denom[];
