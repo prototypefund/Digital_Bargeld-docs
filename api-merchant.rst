@@ -45,7 +45,9 @@ Receiving payments
   **Response**
 
   :status 200 OK:
-    The backend has successfully created the proposal.  It responds with a :ref:`proposal <proposal>`. On success, the `frontend` should pass this response verbatim to the wallet.
+    The backend has successfully created the proposal.  The response is a
+    `OrderResponse`_.  Use `/check-pay` to get a URL that allows the customer
+    to confirm the payment in their browser/wallet.
   :status 403 Forbidden:
     The frontend used the same order ID with different content in the order.
 
@@ -74,6 +76,14 @@ Receiving payments
       instance?: string;
     }
 
+  .. _OrderResponse:
+  .. code-block:: tsref
+
+    interface OrderResponse {
+      // Order ID of the response that was just created
+      order_id: string;
+    }
+
 
 .. http:get:: /check-payment
 
@@ -82,10 +92,11 @@ Receiving payments
   **Request:**
 
   :query order_id: order id that should be used for the payment
-  :query instance: instance used for the payment
-  :query resource_url: resource URL that allows the wallet to identify whether it has already paid for this resource.
-  :query session_id: Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
-  :query session_sig: Signature from the wallet to prove that it paid with the given session_id.  Not specified
+  :query instance: *Optional*. Instance used for the payment. Defaults to the instance named "default".
+  :query resource_url: *Optional*. A resource URL that allows the wallet to identify whether it has already paid for this resource.
+    Typically corresponds to the fulfillment URL.
+  :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
+  :query session_sig: *Optional*. Signature from the wallet to prove that it paid with the given session_id.  Not specified
     if the wallet has not paid yet or still has to replay payment to bound the payment to the session id.
 
   **Response:**
