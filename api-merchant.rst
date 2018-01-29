@@ -19,264 +19,116 @@
 
 .. _merchant-api:
 
-============
-Merchant API
-============
+====================
+Merchant Backend API
+====================
 
-  Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
-  like `order`, `proposal`, `contract`, and others.
-
----------------------
-The Frontend HTTP API
----------------------
+Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
+like `order`, `proposal`, `contract`, and others.
 
 
-  The merchant frontend API described here describes the minimal set of HTTP requests that a web shop
-  needs to understand in order to support Taler payments.  The names `proposal_url`, `pay_url` and `fulfillment_url`
-  are placeholders for the actual URLs that the merchant frontend uses.
+------------------
+Receiving payments
+------------------
 
+.. http:post:: /order
 
-.. http:get:: proposal_url
-
-  A request to this URL should generate a proposal.  When the Taler wallet is
-  triggered by a "402 Payment Required" response, it will issue a GET request to
-  the proposal URL and show the proposal to the user.
-  The "402 Payment Required" trigger instructs the wallet whether or
-  not to provide the optional `nonce` parameter.
+  Create a new order that a customer can pay for.
+  
+  This request is not idempotent unless an `order_id` is explicitly specified.
 
   **Request:**
 
-  :query nonce: Any string value.  This value will be
-    included in the proposal, so that when the wallet receives the proposal it can
-    easily check whether it was the genuine receiver of the proposal it got.
-    This value is needed to avoid having multiple customers pay for
-    the same proposal, which might be bad if the number of goods that can
-    be shipped is limited.
+  The request must be an `OrderRequest`_.  Note that it can overwrite all fields of the `ContractTerms`_.
 
-  **Response**
-
-  :status 200 OK: The request was successful.  The body contains a :ref:`proposal <proposal>`.
-  :status 400 Bad Request: Request not understood.
-  :status 500 Internal Server Error:
-    Some error occurred while the backend was generating the
-    proposal. For example, it failed to store it in its database.
-
-.. _pay:
-.. http:post:: pay_url
-
-
-  Used to transmit the deposit permission to the merchant. The Taler wallet will
-  use this URL to POST a `DepositPermission`_ object.  The merchant will then
-  forward the deposit permission to its backend to process the payment.
-  If the payment was successfully processed by the merchant, the frontend will
-  update the session state, executing the business logic and ensuring that
-  the fulfillment URL will show the final purchase status (or deliver the product).
-
-  .. _DepositPermission:
-  .. code-block:: tsref
-
-    interface DepositPermission {
-      // a free-form identifier identifying the order that is being paid for
-      order_id: string;
-
-      // Public key of the merchant.  Used to identify the merchant instance.
-      merchant_pub: EddsaSignature;
-
-      // the coins used to sign the proposal
-      coins: DepositedCoin[];
-
-      // Operation mode, either "pay" or "abort-refund".  "pay"
-      // is there to process the payment as usual, while
-      // "abort-refund" has the goal of aborting a previous,
-      // partial (and thus so far unsuccessful) payment request,
-      // asking for the wallet to generate refunds.  In this
-      // latter case, the response will be an array of
-      // refund signatures matching 'coins'.
-      mode: string;
-    }
-
-  .. _`tsref-type-DepositedCoin`:
-
-  .. code-block:: tsref
-
-    interface DepositedCoin {
-      // the amount this coin is paying for
-      contribution: Amount;
-
-      // coin's public key
-      coin_pub: RsaPublicKey;
-
-      // denomination key
-      denom_pub: RsaPublicKey;
-
-      // base URL of the exchange that issued the coin
-      exchange_url: string;
-
-      // exchange's signature over this `coin's public key <eddsa-coin-pub>`_
-      ub_sig: RsaSignature;
-
-      // Signature of `TALER_DepositRequestPS`_
-      coin_sig: EddsaSignature;
-    }
-
-  **Success Response:**
-
-  :status 301 Redirection: the merchant should redirect the client to the fulfillment page, where the good outcome of the purchase must be shown to the user.  FIXME: This seems wrong, wasn't the fulfillment URL part of the order, and we now just return a 200 status code?
-
-  **Failure Responses:**
-
-  The error codes and data sent to the wallet are a mere copy of those gotten from the exchange when attempting to deposit.
-  The section about :ref:`deposit <deposit>` explains them in detail.
-
-
-.. http:get:: fulfillment_url
-
-  URL that shows the product after it has been purchased.  Going to the a fulfillment URL
-  before the payment was completed must trigger the payment process.  FIXME: explain how.
-
-  For products that are intended to be purchased only once (such as online news
-  articles), the fulfillment URL should map one-to-one to an article, so that
-  when the user visits the page after they cleared their cookies, the purchase
-  can be replayed.
-
-  For purchases that can be repeated, the fulfillment URL should map one-to-one to
-  a proposal, e.g. by including the order id.
-
-  Following these rules allows sharing of links and bookmarking to work correctly,
-  and produces nicely looking semantic URLs.
-
-  .. note::
-    By "replaying" a payment, we mean that the user reuses the same coins he
-    used the first time he/she bought those items, thus not spending new coins
-    (and therefore not spending additional money).
-
-
-.. http:get:: refund_url
-
-  Although this POST is issued by the merchant UI, wallets are supposed to catch
-  its response.  In the successful case, this response will have a `402 Payment Required`
-  status code, and a `X-Taler-Refund-Url` header containing the refund data URL.
-
-.. http:POST:: user_tipping_url
-
-  URL that the customer's wallet can post coin planchets to, and will receive withdraw
-  permissions in return.
-
-------------------------------
-The Merchant Backend HTTP API
-------------------------------
-
-The following API are made available by the merchant's `backend` to the merchant's `frontend`.
-
-.. http:post:: /proposal
-
-  Generate a new proposal, based on the `order` given in the request.  This request is idempotent.
-
-  **Request:**
-
-  The backend expects an `order` as input.  The order is a `ProposalData`_
-  object **without** the fields:
-
-  * `exchanges`
-  * `auditors`
-  * `H_wire`
-  * `merchant_pub`
-  * `timestamp`
-
-  The following fields from `ProposalData`_ are optional and will be filled
-  in by the backend if not present:
-
-  * `merchant.instance` (default instance will be used)
-  * `order_id` (random alphanumeric identifier will be used)
-  * `refund_deadline` (instance's default will be used)
-  * `pay_deadline` (instance's default will be used)
 
   **Response**
 
   :status 200 OK:
     The backend has successfully created the proposal.  It responds with a :ref:`proposal <proposal>`. On success, the `frontend` should pass this response verbatim to the wallet.
-
   :status 403 Forbidden:
     The frontend used the same order ID with different content in the order.
 
-.. http:post:: /pay
+  .. _OrderRequest:
+  .. code-block:: tsref
 
-  Asks the `backend` to execute the transaction with the exchange and deposit the coins.
+    // Union of both structures
+    type OrderRequest = ContractTerms | MinimalOrderRequest;
+
+  .. _MinimalOrderRequest:
+  .. code-block:: tsref
+
+    interface MinimalOrderRequest {
+      // Amount to be paid by the customer
+      amount: Amount
+
+      // Short summary of the order
+      summary: string;
+
+      // URL that will show that the order was successful after
+      // it has been paid for.  The wallet will automatically append
+      // the order_id (always) and the session_sig (if applicable).
+      fulfillment_url: string;
+
+      // Merchant instance to use (leave empty to use instance "default")
+      instance?: string;
+    }
+
+
+.. http:get:: /check-payment
+
+  Check the status of a payment.
 
   **Request:**
 
-  The `frontend` passes the :ref:`deposit permission <DepositPermission>`
-  received from the wallet, and optionally adds a field named `wire_transfer_deadline`,
-  indicating a deadline by which he would expect to receive the bank transfer
-  for this deal.  Note that the `wire_transfer_deadline` must be after the `refund_deadline`.
-  The backend calculates the `wire_transfer_deadline` by adding the `wire_transfer_delay`
-  value found in the configuration to the current time.
+  :query order_id: order id that should be used for the payment
+  :query instance: instance used for the payment
+  :query resource_url: resource URL that allows the wallet to identify whether it has already paid for this resource.
+  :query session_id: Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
+  :query session_sig: Signature from the wallet to prove that it paid with the given session_id.  Not specified
+    if the wallet has not paid yet or still has to replay payment to bound the payment to the session id.
 
   **Response:**
 
-  :status 200 OK:
-    The exchange accepted all of the coins. The body is a `PaymentResponse`_ if the request used the mode "pay", or a `PaymentRefundResponse`_ if the request used was the mode "abort-refund".
-    The `frontend` should now fullfill the contract.
-  :status 412 Precondition Failed:
-    The given exchange is not acceptable for this merchant, as it is not in the
-    list of accepted exchanges and not audited by an approved auditor.
-  :status 401 Unauthorized:
-    One of the coin signatures was not valid.
-  :status 403 Forbidden:
-    The exchange rejected the payment because a coin was already spent before.
-    The response will include the `coin_pub` for which the payment failed,
-    in addition to the response from the exchange to the `/deposit` request.
+  Returns a `CheckPaymentResponse`_, whose format can differ based on the status of the payment.
 
-  The `backend` will return verbatim the error codes received from the exchange's
-  :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
-  double-spending for example, the `frontend` should pass the reply verbatim to
-  the browser/wallet. This should be the expected case, as the `frontend`
-  cannot really make mistakes; the only reasonable exception is if the
-  `backend` is unavailable, in which case the customer might appreciate some
-  reassurance that the merchant is working on getting his systems back online.
-
-  .. _PaymentResponse:
+  .. _CheckPaymentResponse:
   .. code-block:: tsref
 
-    interface PaymentResponse {
-      // Signature on `TALER_PaymentResponsePS`_ with the public
-      // key of the instance in the proposal.
-      sig: EddsaSignature;
+    type CheckPaymentResponse = CheckPaymentPaidResponse | CheckPaymentUnpaidResponse
 
-      // Proposal data hash being signed over
-      h_proposal_data: HashCode;
-
-      // Proposal, send for convenience so the frontend
-      // can do order processing without a second lookup on
-      // a successful payment
-      proposal: Proposal;
-    }
-
-  .. _PaymentRefundResponse:
+  .. _CheckPaymentPaidResponse:
   .. code-block:: tsref
 
-    interface PaymentRefundResponse {
-      // array of refunds, in the order of the coins that
-      // were given originally.
-      refunds: RefundDetail[];
+    interface CheckPaymentPaidResponse {
+      paid: true;
 
-      // public key of the merchant used to sign the refund
-      // details.
-      merchant_pub: MerchantPublicKeyP;
+      // Was the payment refunded (even partially)
+      refunded: boolean;
+
+      // Amount that was refunded
+      refund_amount: Amount;
+
+      // Contract terms
+      contract_terms: ContractTerms;
+    }
+
+  .. _CheckPaymentUnpaidResponse:
+  .. code-block:: tsref
+
+    interface CheckPaymentUnpaidResponse {
+      paid: false;
+
+      // URL to redirect the customer to pay,
+      // replay payment or confirm that the payment
+      // is bound to a session.
+      payment_redirect_url: string;
     }
 
 
-    interface RefundDetail {
-      // Merchant signature over the hashed order id.
-      // The purpose is `TALER_SIGNATURE_MERCHANT_REFUND_OK`.
-      merchant_sig: EddsaSignature;
-
-      // Public key of the coin which is being refunded.
-      coin_pub: EddsaPublicKey;
-
-      // refund transaction ID chosen by the merchant.
-      rtransaction_id: uint64_t;
-    }
+--------------
+Giving refunds
+--------------
 
 
 .. http:post:: /refund
@@ -290,7 +142,7 @@ The following API are made available by the merchant's `backend` to the merchant
   **Response**
 
   :status 200 OK:
-    The refund amount has been increased, the backend responds with a `RefundConfirmation`_
+    The refund amount has been increased, the backend responds with a `MerchantRefundResponse`_
   :status 400 Bad request:
     The refund amount is not consistent: it is not bigger than the previous one.
 
@@ -311,51 +163,46 @@ The following API are made available by the merchant's `backend` to the merchant
       instance: string;
     }
 
-  .. _RefundConfirmation:
+  .. _MerchantRefundResponse:
   .. code-block:: tsref
 
-    interface RefundConfirmation {
-      // Merchant signature over the hashed order id.
-      // The purpose is `TALER_SIGNATURE_MERCHANT_REFUND_OK`.
-      sig: EddsaSignature
+    interface MerchantRefundResponse {
+      // Public key of the merchant
+      merchant_pub: string;
+
+      
+      // Contract terms hash of the contract that
+      // is being refunded.
+      h_contract_terms: string;
+
+      //The signed refund permissions, to be sent to the exchange.
+      refund_permissions: MerchantRefundPermission[];
     }
 
-.. http:get:: /refund
-
-  Shows the refund situation about a transaction
-
-  **Request**
-
-  :query instance: the merchant instance issuing the request
-  :query order_id: the order id whose refund situation is being queried
-
-  **Response**
-
-  If case of success, an *array of* `RefundLookup`_ objects is returned.
-
-  .. _RefundLookup:
+  .. _MerchantRefundPermission:
   .. code-block:: tsref
 
-    interface RefundLookup {
+    interface MerchantRefundPermission {
+      // Amount to be refunded.
+      refund_amount: AmountJson;
 
-      // Coin from which the refund is going to be taken
-      coin_pub: EddsaPublicKey;
-
-      // Refund amount taken from coin_pub
-      refund_amount: Amount;
-
-      // Refund fee
-      refund_fee: Amount;
-
-      // Identificator of the refund
+      // Fee for the refund.
+      refund_fee: AmountJson;
+      
+      // Public key of the coin being refunded.
+      coin_pub: string;
+      
+      // Refund transaction ID between merchant and exchange.
       rtransaction_id: number;
 
-      // Merchant public key
-      merchant_pub: EddsaPublicKey
-
-      // Merchant signature of a TALER_RefundRequestPS object
-      merchant_sig: EddsaSignature;
+      // Signature made by the merchant over the refund permission.
+      merchant_sig: string;
     }
+
+
+------------------------
+Giving tips to customers
+------------------------
 
 
 .. http:post:: /tip-authorize
@@ -417,58 +264,9 @@ The following API are made available by the merchant's `backend` to the merchant
     }
 
 
-.. http:post:: /tip-pickup
-
-  Handle request from wallet to pick up a tip.
-
-  **Request**
-
-  The request body is a `TipPickupRequest`_ object.
-
-  **Response**
-
-  :status 200 OK:
-    A tip is being returned. The backend responds with a `TipResponse`_
-  :status 401 Unauthorized:
-    The tip amount requested exceeds the tip.
-  :status 404 Not Found:
-    The tip identifier is unknown.
-  :status 409 Conflict:
-    Some of the denomination key hashes of the request do not match those currently available from the exchange (hence there is a conflict between what the wallet requests and what the merchant believes the exchange can provide).
-
-  .. _TipPickupRequest:
-  .. code-block:: tsref
-
-    interface TipPickupRequest {
-
-      // Identifier of the tip.
-      tip_id: HashCode;
-
-      // List of planches the wallet wants to use for the tip
-      planchets: PlanchetDetail[];
-    }
-
-    interface PlanchetDetail {
-      // Hash of the denomination's public key (hashed to reduce
-      // bandwidth consumption)
-      denom_pub_hash: HashCode;
-
-      // coin's blinded public key
-      coin_ev: CoinEnvelope;
-
-    }
-
-  .. _TipResponse:
-  .. code-block:: tsref
-
-    interface TipResponse {
-      // Public key of the reserve
-      reserve_pub: EddsaPublicKey;
-
-      // The order of the signatures matches the planchets list.
-      reserve_sigs: EddsaSignature[];
-    }
-
+------------------------
+Tracking wire transfers
+------------------------
 
 .. http:get:: /track/transfer
 
@@ -684,21 +482,9 @@ The following API are made available by the merchant's `backend` to the merchant
     }
 
 
-.. http:get:: /contract/lookup
-
-  Retrieve a proposal, given its order ID.
-
-  **Request**
-
-  :query order_id: transaction ID of the proposal to retrieve.
-
-  **Response**
-
-  :status 200 OK:
-    The body contains the `proposal`_ pointed to by `order_id`.
-
-  :status 404 Not Found:
-    No proposal corresponds to `order_id`.
+-------------------
+Transaction history
+-------------------
 
 .. http:get:: /history
 
@@ -741,48 +527,18 @@ The following API are made available by the merchant's `backend` to the merchant
 
 .. _proposal:
 
-------------
-The proposal
-------------
+------------------
+The contract terms
+------------------
 
-The `proposal` is obtained by filling some missing information
-in the `order`, and then by signing it.  See below.
+The `contract terms` must have the following structure:
 
-  .. _tsref-type-Proposal:
+  .. _ContractTerms:
+  .. _tsref-type-ContractTerms:
   .. code-block:: tsref
 
-    interface Proposal {
-      // The proposal data, effectively the frontend's order with some data filled in
-      // by the merchant backend.
-      data: ProposalData;
-
-      // Contract's hash, provided as a convenience.  All components that do
-      // not fully trust the merchant must verify this field.
-      H_proposal: HashCode;
-
-      // Signature over the hashcode of `proposal` made by the merchant.
-      merchant_sig: EddsaSignature;
-    }
-
-.. note::
-  When the proposal is signed by the merchant or the wallet, the
-  signature is made over the hash of the JSON text, as the proposal may
-  be confidential between merchant and customer and should not be
-  exposed to the exchange.  The hashcode is generated by hashing the
-  encoding of the proposal's JSON obtained by using the flags
-  ``JSON_COMPACT | JSON_PRESERVE_ORDER``, as described in the `libjansson
-  documentation
-  <https://jansson.readthedocs.org/en/2.7/apiref.html?highlight=json_dumps#c.json_dumps>`_.
-
-The `proposal data` must have the following structure:
-
-  .. _ProposalData:
-  .. _tsref-type-ProposalData:
-  .. code-block:: tsref
-
-    interface ProposalData {
+    interface ContractTerms {
       // Human-readable description of the whole purchase
-      // NOTE: still not implemented
       summary: string;
 
       // Unique, free-form identifier for the proposal.
@@ -968,3 +724,228 @@ The `proposal data` must have the following structure:
       // master public key of the exchange
       master_pub: EddsaPublicKey;
     }
+
+
+-------------------
+Customer-facing API
+-------------------
+
+The `/public/*` endpoints are publicly exposed on the internet and accessed
+both by the user's browser and their wallet.
+
+
+.. http:post:: /public/pay
+
+  Pay for a proposal by giving a deposit permission for coins.  Typically used by
+  the customer's wallet.  Can also be used in `abort-refund` mode to refund coins
+  that were already deposited as part of a failed payment.
+
+  **Request:**
+
+  The request must be a :ref:`pay request <PayRequest>`.
+
+  **Response:**
+
+  :status 200 OK:
+    The exchange accepted all of the coins. The body is a `PaymentResponse`_ if the request used the mode "pay", or a `MerchantRefundResponse`_ if the request used was the mode "abort-refund".
+    The `frontend` should now fullfill the contract.
+  :status 412 Precondition Failed:
+    The given exchange is not acceptable for this merchant, as it is not in the
+    list of accepted exchanges and not audited by an approved auditor.
+  :status 401 Unauthorized:
+    One of the coin signatures was not valid.
+  :status 403 Forbidden:
+    The exchange rejected the payment because a coin was already spent before.
+    The response will include the `coin_pub` for which the payment failed,
+    in addition to the response from the exchange to the `/deposit` request.
+
+  The `backend` will return verbatim the error codes received from the exchange's
+  :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
+  double-spending for example, the `frontend` should pass the reply verbatim to
+  the browser/wallet. This should be the expected case, as the `frontend`
+  cannot really make mistakes; the only reasonable exception is if the
+  `backend` is unavailable, in which case the customer might appreciate some
+  reassurance that the merchant is working on getting his systems back online.
+
+  .. _PaymentResponse:
+  .. code-block:: tsref
+
+    interface PaymentResponse {
+      // Signature on `TALER_PaymentResponsePS`_ with the public
+      // key of the instance in the proposal.
+      sig: EddsaSignature;
+
+      // Proposal data hash being signed over
+      h_proposal_data: HashCode;
+
+      // Proposal, send for convenience so the frontend
+      // can do order processing without a second lookup on
+      // a successful payment
+      proposal: Proposal;
+    }
+
+
+  .. _tsref-type-Proposal:
+  .. code-block:: tsref
+
+    interface Proposal {
+      // The proposal data, effectively the frontend's order with some data filled in
+      // by the merchant backend.
+      data: ProposalData;
+
+      // Contract's hash, provided as a convenience.  All components that do
+      // not fully trust the merchant must verify this field.
+      H_proposal: HashCode;
+
+      // Signature over the hashcode of `proposal` made by the merchant.
+      merchant_sig: EddsaSignature;
+    }
+
+
+  .. _PayRequest:
+  .. code-block:: tsref
+
+    interface PayRequest {
+      // Signature on `TALER_PaymentResponsePS`_ with the public
+      // key of the instance in the proposal.
+      sig: EddsaSignature;
+
+      // Proposal data hash being signed over
+      h_proposal_data: HashCode;
+
+      // Proposal, send for convenience so the frontend
+      // can do order processing without a second lookup on
+      // a successful payment
+      proposal: Proposal;
+
+      // Coins with signature.
+      coins: CoinPaySig[];
+
+      // The merchant public key, used to uniquely
+      // identify the merchant instance.
+      merchant_pub: string;
+
+      // Order ID that's being payed for.
+      order_id: string;
+
+      // Mode for /pay ("pay" or "abort-refund")
+      mode: "pay" | "abort-refund";
+    }
+
+
+.. http:post:: /public/proposal
+
+  Retrieve and take ownership (via nonce) over a proposal.
+
+  **Request**
+
+  :query instance: the merchant instance issuing the request
+  :query order_id: the order id whose refund situation is being queried
+  :query nonce: the nonce for the proposal
+
+  **Response**
+
+  :status 200 OK:
+    The backend has successfully retrieved the proposal.  It responds with a :ref:`proposal <proposal>`.
+
+  :status 403 Forbidden:
+    The frontend used the same order ID with different content in the order.
+
+
+.. http:post:: /public/tip-pickup
+
+  Handle request from wallet to pick up a tip.
+
+  **Request**
+
+  The request body is a `TipPickupRequest`_ object.
+
+  **Response**
+
+  :status 200 OK:
+    A tip is being returned. The backend responds with a `TipResponse`_
+  :status 401 Unauthorized:
+    The tip amount requested exceeds the tip.
+  :status 404 Not Found:
+    The tip identifier is unknown.
+  :status 409 Conflict:
+    Some of the denomination key hashes of the request do not match those currently available from the exchange (hence there is a conflict between what the wallet requests and what the merchant believes the exchange can provide).
+
+  .. _TipPickupRequest:
+  .. code-block:: tsref
+
+    interface TipPickupRequest {
+
+      // Identifier of the tip.
+      tip_id: HashCode;
+
+      // List of planches the wallet wants to use for the tip
+      planchets: PlanchetDetail[];
+    }
+
+    interface PlanchetDetail {
+      // Hash of the denomination's public key (hashed to reduce
+      // bandwidth consumption)
+      denom_pub_hash: HashCode;
+
+      // coin's blinded public key
+      coin_ev: CoinEnvelope;
+
+    }
+
+  .. _TipResponse:
+  .. code-block:: tsref
+
+    interface TipResponse {
+      // Public key of the reserve
+      reserve_pub: EddsaPublicKey;
+
+      // The order of the signatures matches the planchets list.
+      reserve_sigs: EddsaSignature[];
+    }
+
+
+.. http:get:: /public/refund
+
+  Pick up refunds for an order.
+
+  **Request**
+
+  :query instance: the merchant instance issuing the request
+  :query order_id: the order id whose refund situation is being queried
+
+  **Response**
+
+  If case of success, an *array of* `RefundLookup`_ objects is returned.
+
+  .. _RefundLookup:
+  .. code-block:: tsref
+
+    interface RefundLookup {
+
+      // Coin from which the refund is going to be taken
+      coin_pub: EddsaPublicKey;
+
+      // Refund amount taken from coin_pub
+      refund_amount: Amount;
+
+      // Refund fee
+      refund_fee: Amount;
+
+      // Identificator of the refund
+      rtransaction_id: number;
+
+      // Merchant public key
+      merchant_pub: EddsaPublicKey
+
+      // Merchant signature of a TALER_RefundRequestPS object
+      merchant_sig: EddsaSignature;
+    }
+
+
+.. http:get:: /public/trigger-pay
+
+  Used to trigger processing of payments, refunds and tips in the browser.  The exact behavior
+  can be dependent on the user's browser.
+
+
