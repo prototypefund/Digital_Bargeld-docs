@@ -144,7 +144,8 @@ Giving refunds
 
 .. http:post:: /refund
 
-  Increase the refund amount associated with a given order.
+  Increase the refund amount associated with a given order.  The user should be
+  redirected to the `refund_redirect_url` to trigger refund processing in the wallet.
 
   **Request**
 
@@ -186,8 +187,12 @@ Giving refunds
       // is being refunded.
       h_contract_terms: string;
 
-      //The signed refund permissions, to be sent to the exchange.
+      // The signed refund permissions, to be sent to the exchange.
       refund_permissions: MerchantRefundPermission[];
+
+      // URL (handled by the backend) that will
+      // trigger refund processing in the browser/wallet
+      refund_redirect_url: string;
     }
 
   .. _MerchantRefundPermission:
@@ -218,7 +223,10 @@ Giving tips to customers
 
 .. http:post:: /tip-authorize
 
-  Authorize a tip that can be picked up by the customer's wallet by POSTing to `/tip-pickup`.  Note that this is simply the authorization step the back office has to trigger first.  The frontend must return the tip's identifier (and exchange URL) via a "402 Payment Required" response to the wallet.
+  Authorize a tip that can be picked up by the customer's wallet by POSTing to
+  `/tip-pickup`.  Note that this is simply the authorization step the back
+  office has to trigger first.  The user should be navigated to the `tip_redirect_url`
+  to trigger tip processing in the wallet.
 
   **Request**
 
@@ -272,6 +280,10 @@ Giving tips to customers
 
       // URL of the exchange from where the tip can be withdrawn
       exchange_uri: String;
+
+      // URL that will directly trigger procesing
+      // the tip when the browser is redirected to it
+      tip_redirect_url: string;
     }
 
 
