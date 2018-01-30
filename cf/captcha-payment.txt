@@ -62,7 +62,7 @@ Required changes to Taler:
      thus no choice to be made). This change is also rather trivial.
   3) Change Wallet to check for HTTP headers requesting payment for the
      DOM, and then inject an HTTP header in all subsequent requests generated
-     by that page with the payment (i.e. signing the request's URI with
+     by that page with the payment (i.e. signing the request's URL with
      the coin/token).  This change is non-trivial, and may require
      browser-specific solutions.
 

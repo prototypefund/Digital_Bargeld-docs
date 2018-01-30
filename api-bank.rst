@@ -205,7 +205,7 @@ request.
 ..
   The counterpart currently only points to the same bank as
   the client using the bank.  A reasonable improvement is to
-  specify a bank URI too, so that Taler can run across multiple
+  specify a bank URL too, so that Taler can run across multiple
   banks.
 
 ------------------------
@@ -233,7 +233,7 @@ must be added to ``x``, as follows:
 Clearly, a fallback page must be provided, which will be useful if the
 wallet is *not* installed.  This special page will hide any element of
 the class ``taler-install-show``; it can be downloaded at the following
-URI: ``git://taler.net/web-common/taler-fallback.css``.
+URL: ``git://taler.net/web-common/taler-fallback.css``.
 
 Withdrawing coins.
 ^^^^^^^^^^^^^^^^^^
@@ -253,7 +253,7 @@ along with the following HTTP headers:
 
   interface WireDetails {
     type: string; // Only 'test' value admitted so far.
-    bank_uri: URI of the bank.
+    bank_uri: URL of the bank.
     account_number: bank account number of the user attempting to withdraw.
   }
 

@@ -270,7 +270,7 @@ Giving tips to customers
       // Expiration time for obtaining the tip
       expiration: Timestamp;
 
-      // URI of the exchange from where the tip can be withdrawn
+      // URL of the exchange from where the tip can be withdrawn
       exchange_uri: String;
     }
 
@@ -287,7 +287,7 @@ Tracking wire transfers
 
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
   :query wire_method: name of the wire transfer method used for the wire transfer
-  :query exchange: base URI of the exchange that made the wire transfer
+  :query exchange: base URL of the exchange that made the wire transfer
   :query instance: (optional) identificative token of the merchant `instance <https://docs.taler.net/operate-merchant.html#instances-lab>`_ which is being tracked.
 
   **Response:**
@@ -568,7 +568,7 @@ The `contract terms` must have the following structure:
       // The URL where the wallet has to send coins.
       pay_url: string;
 
-      // The URI for this purchase.  Every time is is visited, the merchant
+      // The URL for this purchase.  Every time is is visited, the merchant
       // will send back to the customer the same proposal.  Clearly, this URL
       // can be bookmarked and shared by users.
       fulfillment_url: string;
@@ -667,7 +667,7 @@ The `contract terms` must have the following structure:
       // time indicating when this product should be delivered
       delivery_date: Timestamp;
 
-      // where to deliver this product. This may be an URI for online delivery
+      // where to deliver this product. This may be an URL for online delivery
       // (i.e. `http://example.com/download` or `mailto:customer@example.com`),
       // or a location label defined inside the proposition's `locations`.
       // The presence of a colon (`:`) indicates the use of an URL.

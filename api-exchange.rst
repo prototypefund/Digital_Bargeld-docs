@@ -279,8 +279,8 @@ Obtaining wire-transfer information
       // Account number at the bank
       account_number: number;
 
-      // URI of the bank
-      bank_uri: string;
+      // URL of the bank
+      bank_url: string;
 
       // Name of the account's owner
       name: string;

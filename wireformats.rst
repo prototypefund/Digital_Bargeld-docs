@@ -21,10 +21,10 @@ for a local / regional currency or accounting system.  Using the TEST
 wire format in combination with the Taler's bank, it is thus possible to
 fully test the Taler system without using "real" currencies.  The wire
 format for "TEST" is very simple, in that it only specifies an account
-number in a field "account_number" and the URI of the bank:
+number in a field "account_number" and the URL of the bank:
 
   * `type`: the string constant `"test"`
-  * `bank_uri`: the URI of the bank (starting with `http://` or `https://`)
+  * `bank_uri`: the URL of the bank (starting with `http://` or `https://`)
   * `account_number`: the number of the account at the bank
 
 The account number given must be a positive 53-bit integer.
