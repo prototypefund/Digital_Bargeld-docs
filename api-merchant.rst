@@ -287,6 +287,44 @@ Giving tips to customers
     }
 
 
+.. http:post:: /tip-query
+
+  Query the status of an instance's tipping reserve.
+
+  **Request**
+
+  :query instance: instance to query
+
+  **Response**
+
+  :status 200 OK:
+    A tip has been created. The backend responds with a `TipQueryResponse`_
+  :status 404 Not Found:
+    The instance is unknown to the backend.
+  :status 412 Precondition Failed:
+    The instance does not have a tipping reserve configured.
+
+  .. _TipQueryResponse:
+  .. code-block:: tsref
+
+    interface TipQueryResponse {
+      // Amount still available
+      amount_available: Amount;
+
+      // Amount that we authorized for tips
+      amount_authorized: Amount;
+
+      // Amount that was picked up by users already
+      amount_used: Amount;
+
+      // Timestamp indicating when the tipping reserve will expire
+      expiration: Timestamp;
+
+      // Reserve public key of the tipping reserve
+      reserve_pub: string;
+    }
+
+
 ------------------------
 Tracking wire transfers
 ------------------------
