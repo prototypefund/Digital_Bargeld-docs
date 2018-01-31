@@ -315,7 +315,7 @@ Giving tips to customers
       amount_authorized: Amount;
 
       // Amount that was picked up by users already
-      amount_used: Amount;
+      amount_picked_up: Amount;
 
       // Timestamp indicating when the tipping reserve will expire
       expiration: Timestamp;
