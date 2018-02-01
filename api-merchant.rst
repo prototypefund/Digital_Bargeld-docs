@@ -23,13 +23,11 @@
 Merchant Backend API
 ====================
 
-Please refer to the `glossary <https://docs.taler.net/glossary.html>`_ for terms
-like `order`, `proposal`, `contract`, and others.
-
-
 ------------------
-Receiving payments
+Receiving Payments
 ------------------
+
+.. _post-order:
 
 .. http:post:: /order
 
@@ -37,27 +35,36 @@ Receiving payments
   
   This request is not idempotent unless an `order_id` is explicitly specified.
 
+  .. note::
+
+    This endpoint does not return a URL to redirect your user to confirm the payment.
+    In order to get this URL use :http:get:`/check-payment`.  The API is structured this way
+    since the payment redirect URL is not unique for every order, there might be varying parameters
+    such as the session id.
+
   **Request:**
-
-  The request must be an `OrderRequest`_.  Note that it can overwrite all fields of the `ContractTerms`_.
-
+  
+  The request must be a `PostOrderRequest`_.
 
   **Response**
-
+  
   :status 200 OK:
     The backend has successfully created the proposal.  The response is a
-    `OrderResponse`_.  Use `/check-pay` to get a URL that allows the customer
-    to confirm the payment in their browser/wallet.
-  :status 403 Forbidden:
-    The frontend used the same order ID with different content in the order.
+    `PostOrderResponse`_.
 
-  .. _OrderRequest:
+  .. _PostOrderRequest:
   .. code-block:: tsref
 
-    // Union of both structures
-    type OrderRequest = ContractTerms | MinimalOrderRequest;
+    interface PostOrderRequest {
+      // The order must at least contain the minimal
+      // order detail, but can override all
+      order: MinimalOrderDetail | ContractTerms;
+    }
 
-  .. _MinimalOrderRequest:
+  The following fields of the `ContractTerms`_ 
+
+  .. _MinimalOrderDetail:
+  .. _tsref-type-MinimalOrderDetail:
   .. code-block:: tsref
 
     interface MinimalOrderRequest {
@@ -76,10 +83,10 @@ Receiving payments
       instance?: string;
     }
 
-  .. _OrderResponse:
+  .. _PostOrderResponse:
   .. code-block:: tsref
 
-    interface OrderResponse {
+    interface PostOrderResponse {
       // Order ID of the response that was just created
       order_id: string;
     }
@@ -87,7 +94,8 @@ Receiving payments
 
 .. http:get:: /check-payment
 
-  Check the status of a payment.
+  Check the payment status of an order.  If the order exists but is not payed yet,
+  a redirect URL.  When the user goes to this URL, they will be prompted for payment.
 
   **Request:**
 
@@ -109,6 +117,7 @@ Receiving payments
     type CheckPaymentResponse = CheckPaymentPaidResponse | CheckPaymentUnpaidResponse
 
   .. _CheckPaymentPaidResponse:
+  .. _tsref-type-CheckPaymentPaidResponse:
   .. code-block:: tsref
 
     interface CheckPaymentPaidResponse {
@@ -125,6 +134,7 @@ Receiving payments
     }
 
   .. _CheckPaymentUnpaidResponse:
+  .. _tsref-type-CheckPaymentUnpaidResponse:
   .. code-block:: tsref
 
     interface CheckPaymentUnpaidResponse {
@@ -138,7 +148,7 @@ Receiving payments
 
 
 --------------
-Giving refunds
+Giving Refunds
 --------------
 
 
@@ -172,7 +182,7 @@ Giving refunds
       reason: string;
 
       // Merchant instance issuing the request
-      instance: string;
+      instance?: string;
     }
 
   .. _MerchantRefundResponse:
@@ -196,6 +206,7 @@ Giving refunds
     }
 
   .. _MerchantRefundPermission:
+  .. _tsref-type-MerchantRefundPermissoin:
   .. code-block:: tsref
 
     interface MerchantRefundPermission {
@@ -216,9 +227,9 @@ Giving refunds
     }
 
 
-------------------------
-Giving tips to customers
-------------------------
+--------------------
+Giving Customer Tips
+--------------------
 
 
 .. http:post:: /tip-authorize
@@ -249,14 +260,10 @@ Giving tips to customers
       amount: Amount;
 
       // Merchant instance issuing the request
-      instance: string;
+      instance?: string;
 
       // Justification for giving the tip
       justification: string;
-
-      // URL that the wallet should pick up the tip from,
-      // will be included in the tip_token.
-      pickup_url: string;
 
       // URL that the user should be directed to after tipping,
       // will be included in the tip_token.
@@ -271,15 +278,6 @@ Giving tips to customers
       // contains all relevant information to accept
       // a tip.
       tip_token: string;
-
-      // Identifier for the tip authorization
-      tip_id: HashCode;
-
-      // Expiration time for obtaining the tip
-      expiration: Timestamp;
-
-      // URL of the exchange from where the tip can be withdrawn
-      exchange_uri: String;
 
       // URL that will directly trigger procesing
       // the tip when the browser is redirected to it
@@ -326,7 +324,7 @@ Giving tips to customers
 
 
 ------------------------
-Tracking wire transfers
+Tracking Wire Transfers
 ------------------------
 
 .. http:get:: /track/transfer
@@ -455,15 +453,13 @@ Tracking wire transfers
   **Request:**
 
   :query id: ID of the transaction we want to trace (an integer)
-  :query instance: identificative token for the merchant instance which is to be tracked (optional). See `<https://docs.taler.net/operate-merchant.html#instances-lab>`_. This information is needed because the request has to be signed by the merchant, thus we need to pick the instance's private key.
+  :query instance:  merchant instance
 
   **Response:**
 
   :status 200 OK:
     The deposit has been executed by the exchange and we have a wire transfer identifier.
-     The response body is a JSON array of `TransactionWireTransfer`_ objects.
-
-
+    The response body is a JSON array of `TransactionWireTransfer`_ objects.
   :status 202 Accepted:
     The deposit request has been accepted for processing, but was not yet
     executed.  Hence the exchange does not yet have a wire transfer identifier.
@@ -471,11 +467,12 @@ Tracking wire transfers
     The response body is a :ref:`TrackTransactionAcceptedResponse <TrackTransactionAcceptedResponse>`.  Note that
     the similarity to the response given by the exchange for a /track/order
     is completely intended.
-
   :status 404 Not Found: The transaction is unknown to the backend.
-
   :status 424 Failed Dependency:
-    The exchange previously claimed that a deposit was not included in a wire transfer, and now claims that it is.  This means that the exchange is dishonest.  The response contains the cryptographic proof that the exchange is misbehaving in the form of a `TransactionConflictProof`_.
+    The exchange previously claimed that a deposit was not included in a wire
+    transfer, and now claims that it is.  This means that the exchange is
+    dishonest.  The response contains the cryptographic proof that the exchange
+    is misbehaving in the form of a `TransactionConflictProof`_.
 
   **Details:**
 
@@ -589,7 +586,7 @@ Transaction history
 .. _proposal:
 
 ------------------
-The contract terms
+The Contract Terms
 ------------------
 
 The `contract terms` must have the following structure:
@@ -703,13 +700,13 @@ The `contract terms` must have the following structure:
       description: string;
 
       // The quantity of the product to deliver to the customer (optional, if applicable)
-      quantity?: number;
+      quantity?: string;
 
       // The price of the product; this is the total price for the amount specified by `quantity`
       price: Amount;
 
-      // merchant's 53-bit internal identification number for the product (optional)
-      product_id?: number;
+      // merchant-internal identifier for the product
+      product_id?: string;
 
       // a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
       taxes?: any[];

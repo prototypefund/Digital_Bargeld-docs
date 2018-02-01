@@ -225,13 +225,27 @@ Signatures
 Amounts
 ^^^^^^^
 
-Amounts of currency are expressed as a JSON object with the following fields:
-
 .. _`tsref-type-Amount`:
+
+Amounts of currency are serialized as a string of the format `<Currency>:<DecimalAmount>`.
+Taler treats monetary amounts as fixed-precision numbers.  Unlike floating point numbers,
+this allows accurate representation of monetary amounts.
+
+The following constrains apply for a valid amount:
+
+1. The `<Currency>` part must be at most 12 characters long and may not contain a colon (`:`).
+2. The integer part of `<DecimalAmount>` may be at most 2^52
+3. the fractional part of `<DecimalAmount>` may contain at most 8 decimal digits.
+
+Internally, amounts are parsed into the following object:
+
+.. note::
+
+  "EUR:1.50" and "EUR:10" are is a valid amounts.  These are all invalid amounts: "A:B:1.5", "EUR:4503599627370501.0", "EUR:1.", "EUR:.1"
 
 .. code-block:: tsref
 
-  interface Amount {
+  interface ParsedAmount {
     // name of the currency using either a three-character ISO 4217 currency
     // code, or a regional currency identifier starting with a "*" followed by
     // at most 10 characters.  ISO 4217 exponents in the name are not supported,
@@ -438,6 +452,10 @@ Any piece of signed data, complies to the abstract data structure given below.
   /*From gnunet_crypto_lib.h*/
   struct GNUNET_CRYPTO_EccSignaturePurpose {
     /**
+
+    The following constrains apply for a valid amount:
+    
+    * asd
      * This field is used to express the context in
      * which the signature is made, ensuring that a
      * signature cannot be lifted from one part of the protocol

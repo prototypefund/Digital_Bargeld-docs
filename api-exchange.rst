@@ -1276,10 +1276,6 @@ typically also view the balance.)
 Refunds
 -------
 
-  .. note::
-
-     Refunds are currently not implemented (#3641), this documentation is thus a bit preliminary and may still change.
-
 .. _refund:
 .. http:POST:: /refund
 

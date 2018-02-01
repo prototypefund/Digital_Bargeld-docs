@@ -223,10 +223,10 @@ def remember_targets(app, doctree):
 
 def setup(app): 
     from sphinx.highlighting import lexers
-    from pygments.lexers import TypeScriptLexer
     from pygments.token import Name
     from pygments.filters import NameHighlightFilter
-    lexer = TypeScriptLexer()
+    from tslex import BetterTypeScriptLexer
+    lexer = BetterTypeScriptLexer()
     lexer.add_filter(LinkFilter(app))
     app.add_lexer('tsref', lexer)
     app.add_builder(MyHtmlBuilder)
