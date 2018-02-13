@@ -58,7 +58,7 @@ itself cannot not enforce these rules.
      easily available and will likey increase the code of
      the wallet less, AES plus a SHA-512 HMAC should suffice
      for now.
-   * The wallet must enable merging databases in a way that is
+  *  The wallet must enable merging databases in a way that is
      associative and commutative.  For most activities, this implies
      merging lists, applying expirations, dropping duplicates and
      sorting the result.  For deletions (operations by which the user
@@ -75,18 +75,17 @@ itself cannot not enforce these rules.
      expiration of the longest lasting record that they explicitly
      deleted.
      Purchases do not have an expiration time, thus they create
-     a challenge if an indivdiual purchase is deleted, as such
-     deletions cannot be summarized as above.  On the other hand,
-     remembering the deletion of the purchase is itself evidence
-     that the user might have wanted to erase.  Thus, we first
-     of all only store the hash of the primary key of the deleted
-     transaction.  Second, we keep such deletion records only
-     for a limited time, like one month.  Finally, when merging
-     wallets, transactions older than one month must occur in
-     both wallets to be preserved, while otherwise they must
-     occur in either wallet to be integrated into the merged
-     result.     
-   * The database should contain a "last modified" timestamp to ensure
+     a challenge if an indivdiual purchase is deleted. Thus, when
+     an individual purchase is deleted, the wallet is to keep track
+     of the deletion with a deletion record. The deletion record
+     still includes the purchase amount and purchase date.  Thus,
+     when purchases are deleted "in bulk" in a way that would have
+     covered the individual deletion, such deletion records may
+     still be subsumed by a more general deletion clause.  In addition
+     to the date and amount, the deletion record should only contain
+     a salted hash of the original purchase record's primary key,
+     so as to minimize information leakage.
+  *  The database should contain a "last modified" timestamp to ensure
      we do not go backwards in time if the synchronization service is
      malicious.  Merging two databases means taking the max of the
      "last modified" timestamps, not setting it to the current time.
@@ -301,5 +300,87 @@ stern warning and require user confirmation (as otherwise
 cross-browser synchronization may weaken the security of Tor browser
 users).
     
+
+------------------------------------------------
+Discovery of backup and synchronization services
+------------------------------------------------
+
+The wallet should keep a list of "default" synchronization services
+per currency (by the currency the synchronization service accepts
+for payment).  If a synchronization service is entirely free, it
+should be kept in a special list that is always available.
+
+Extending (or shortening) the list of synchronization services should
+be possible using the same mechanism that is used to add/remove
+auditors or exchanges.
+
+The wallet should urge the user to make use of a synchronization
+service upon first withdrawal, suggesting one that is free or
+accepts payment in the respective currency. If none is available,
+the wallet should warn the user about the lack of availalable
+backups and synchronization and suggest to the user to find a
+reasonable service.  Once a synchronization service was selected,
+the wallet should urge the user to print the respective key
+material.
+
+When the wallet starts the first time on a new device, it should
+ask the user if he wants to synchronize with an existing wallet,
+and if so, ask the user to enter the respective key and the
+(base) URL of the synchronization service.
+
+
+-------------------------
+Synchronization frequency
+-------------------------
+
+Generally, the wallet should attempt to synchronize at a randomized
+time interval between 30 and 300 seconds of being started, unless it
+already synchronized less than two hours ago already.  Afterwards,
+the wallet should synchronize every two hours, or after purchases
+exceed 5 percent of the last bulk amount that the user withdrew.
+In all cases the exact time of synchronization should be randomized
+between 30 and 300 seconds of the specified event, both to minimize
+obvious correlations and to spread the load.
+
+If the two hour frequency would exceed half of the rate budget offered
+by the synchronization provider, it should be reduced to remain below
+that threshold.
+
+
+-------------------------------
+Synchronization user experience
+-------------------------------
+
+The menu should include three entries for synchronization:
+
+  *  "synchronize" to manually trigger synchronization,
+     insensitive if no synchronization provider is available
+  *  "export backup configuration" to re-display (and possibly
+     print) the synchronization and backup parameters (URL and
+     private key), insensitive if no synchronization
+     provider is available, and
+  *  "import backup configuration" to:
+     *  import another devices' synchronization options
+	(by specifying URL and private key, or possibly
+	scanning a QR code), or
+     *	select a synchronization provider from the list,
+	including manual specification of a URL; here
+	confirmation should only be possible if the provider
+	is free or can be paid for; in this case, the
+	wallet should trigger the payment interaction when
+	the user presses the "select" button.
+     *  a special button to "disable synchronization and backup"
+
+One usability issue here is that we are asking users to deal with a
+private key.  It is likely better to map private keys to trustwords
+(PEP-style).  Also, when putting private keys into a QR code, there is
+the danger of the QR code being scanned and interpreted as a "public"
+URL.  Thus, the QR code should use the schema
+"taler-sync://$SYNC-DOMAIN/$SYNC-PATH#private-key" where
+"$SYNC-DOMAIN" is the domainname of the synchronization service and
+$SYNC-PATH the (usually empty) path.  By putting the private key after
+"#", we may succeed in disclosing the value even to eager Web-ish
+interpreters of URLs.  Note that the actual synchronization service
+must use the HTTPS protocol, which means we can leave out this prefix.
 
 
