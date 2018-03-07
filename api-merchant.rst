@@ -891,7 +891,7 @@ both by the user's browser and their wallet.
     }
 
 
-.. http:post:: /public/proposal
+.. http:get:: /public/proposal
 
   Retrieve and take ownership (via nonce) over a proposal.
 
