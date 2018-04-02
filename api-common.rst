@@ -454,7 +454,7 @@ Any piece of signed data, complies to the abstract data structure given below.
     /**
 
     The following constrains apply for a valid amount:
-    
+
     * asd
      * This field is used to express the context in
      * which the signature is made, ensuring that a
@@ -601,10 +601,10 @@ within the
 
   struct TALER_MasterWireDetailsPS {
     /**
-     * purpose.purpose = TALER_SIGNATURE_MASTER_SEPA_DETAILS || TALER_SIGNATURE_MASTER_TEST_DETAILS
+     * purpose.purpose = TALER_SIGNATURE_MASTER_WIRE_DETAILS
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
-    struct GNUNET_HashCode h_sepa_details;
+    struct GNUNET_HashCode h_wire_details;
   };
 
 

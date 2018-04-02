@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014-2018 GNUnet e.V. and INRIA
+  Copyright (C) 2014-2018 Taler Systems SA
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -256,73 +256,32 @@ Obtaining wire-transfer information
   .. code-block:: tsref
 
     interface WireResponse {
-      // The key is a supported method (i.e. "sepa" or "test").
-      // The value is a method-specific JSON object with account details
-      // (i.e. IBAN number, owner name, bank address, etc.).
-      // The value objects may also contain signatures (if applicable).
-      //
-      // A single /wire response can contain an arbitrary number of these
-      // string-object pairs.  However, the keys must be unique.
-      string: Object;
-     }
 
-  Possible encodings for the objects are right now the following:
+      // Array of wire accounts operated by the exchange for
+      // incoming wire transfers.
+      accounts: WireAccount[];
 
-  .. _WireTestResponse:
-  .. _tsref-type-WireTestResponse:
-  .. code-block:: tsref
-
-    interface WireTestResponse {
-      // Mandatory indicator that this is a TEST wire response.
-      type: "test";
-
-      // Account number at the bank
-      account_number: number;
-
-      // URL of the bank
-      bank_url: string;
-
-      // Name of the account's owner
-      name: string;
-
-      // Salt used to sign, `base32`_ encoded
-      salt: string;
-
-      // Wire transfer fee structure. Specifies aggregate wire transfer fees.
-      fees: AggregateTransferFee[];
-
-      // Signature of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_TEST_DETAILS
-      // Note that the `h_sepa_details` field of `TALER_MasterWireDetailsPS`_ is computed
-      // by concatenating all of the above fields (in the same order they appear) and then
-      // by hashing the obtained concatenation.
-      sig: EddsaSignature;
+      // Object mapping names of wire methods (i.e. "sepa" or "x-taler-bank")
+      // to wire fees.
+      fees: { method : AggregateTransferFee };
     }
 
-  .. _WireSepaResponse:
-  .. _tsref-type-WireSepaResponse:
+  The specification for the account object is:
+
+  .. _WireAccouunt:
+  .. _tsref-type-WireAccount:
   .. code-block:: tsref
 
-    interface WireSepaResponse {
-      // Mandatory indicator that this is a SEPA wire response.
-      type: "sepa";
+    interface WireAccount {
+      // payto:// URL identifying the account and wire method
+      url: string;
 
-      // Legal name of the owner of the account
-      receiver_name: string;
+      // Salt value (used when hashing 'url' to verify signature)
+      salt: string;
 
-      // Wire transfer fee structure. Specifies aggregate wire transfer fees.
-      fees: AggregateTransferFee[];
-
-      // IBAN account number.
-      iban: string;
-
-      // BIC of the bank.
-      bic: string;
-
-      // Signature of `TALER_MasterWireDetailsPS`_ with purpose TALER_SIGNATURE_MASTER_SEPA_DETAILS
-      // Note that the `h_sepa_details` field of `TALER_MasterWireDetailsPS`_ is computed
-      // by concatenating all of the above fields (in the same order they appear) and then
-      // by hashing the obtained concatenation.
-      sig: EddsaSignature;
+      // Signature using the exchange's offline key
+      // with purpose TALER_SIGNATURE_MASTER_WIRE_DETAILS.
+      master_sig: EddsaSignature;
     }
 
   Aggregate wire transfer fees representing the fees the exchange
@@ -439,8 +398,8 @@ exchange.
       // The fee that was charged for "CLOSING".
       closing_fee?: Amount;
 
-      // Sender account details, only present if type is "DEPOSIT".
-      sender_account_details?: any;
+      // Sender account payto://-URL, only present if type is "DEPOSIT".
+      sender_account_url?: String;
 
       // Receiver account details, only present if type is "PAYBACK".
       receiver_account_details?: any;

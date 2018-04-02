@@ -1,6 +1,6 @@
 .. _wireformats:
 
-Wire Transfer Formats
+Wire Transfer Methods
 =====================
 
 A wire transfer is essential for the exchange to transfer funds into a merchant's
@@ -8,33 +8,39 @@ account upon a successful deposit (see :ref:`deposit request <deposit>`).  The
 merchant has to include the necessary information for the exchange to initiate the
 wire transfer.
 
-The information required for wire transfer depends on the type of wire transfer
+The information required for wire transfer depends on the method of wire transfer
 used.  Since the wire transfers differ for each region, we document here the
 ones currently supported by the exchange.
 
-TEST
-----
+X-TALER-BANK
+------------
 
-The TEST wire format is used for testing and for integration with Taler's
+The "x-taler-bank" wire format is used for testing and for integration with Taler's
 simple "bank" system which in the future might be useful to setup a bank
-for a local / regional currency or accounting system.  Using the TEST
-wire format in combination with the Taler's bank, it is thus possible to
-fully test the Taler system without using "real" currencies.  The wire
-format for "TEST" is very simple, in that it only specifies an account
-number in a field "account_number" and the URL of the bank:
+for a local / regional currency or accounting system.  Using the @code{x-taler-bank}
+wire method in combination with the Taler's bank, it is thus possible to
+fully test the Taler system without using "real" currencies.  The URL
+format for "x-taler-bank" is simple, in that it only specifies an account
+number and the URL of the bank:
 
-  * `type`: the string constant `"test"`
-  * `bank_uri`: the URL of the bank (starting with `http://` or `https://`)
-  * `account_number`: the number of the account at the bank
+  *  payto://x-taler-bank/BANK_URI/ACCOUNT_NUMBER
 
-The account number given must be a positive 53-bit integer.
-Additional fields may be present, but are not required.
+The account number given must be a positive 53-bit integer.  As with
+any payto://-URI, additional fields may be present (after a ?), but
+are not required.  The BANK_URI may include a port number. If none is
+given, @code{https} over port 443 is assumed.  If a port number is
+given, @code{http} over the given port is to be used.  Note that this
+means that you cannot run an x-taler-bank over @code{https} on a
+non-canonical port.
 
 Note that a particular exchange is usually only supporting one
-particular bank with the "TEST" wire format, so it is not possible for
-a merchant with an account at a different bank to use "TEST" to
-transfer funds across banks. After all, this is for testing and not
-for real banking.
+particular bank with the "x-taler-bank" wire format, so it is not
+possible for a merchant with an account at a different bank to use
+"x-taler-bank" to transfer funds across banks. After all, this is for
+testing and not for real banking.
+
+The "x-taler-bank" method is implemented by the @code{taler_bank} plugin.
+
 
 SEPA
 ----
@@ -42,27 +48,22 @@ SEPA
 The Single Euro Payments Area (SEPA) [#sepa]_ is a regulation for electronic
 payments.  Since its adoption in 2012, all of the banks in the Eurozone and some
 banks in other countries adhere to this standard for sending and receiving
-payments.  Note that the currency of the transfer will (currently) always be *EURO*.  In
+payments.  Note that the currency of the transfer will (currently) always be *EUR*.  In
 case the receiving account is in a currency other than EURO, the receiving bank
 may covert the amount into that currency; currency exchange charges may be
 levied by the receiving bank.
 
 For the merchant to receive deposits through SEPA, the deposit request must
-contain a JSON object with the following fields:
+follow the payto:// specification for SEPA:
 
-  .. The following are taken from Page 33, SEPA_SCT.pdf .
+  *  payto://sepa/IBAN
 
-  * `type`: the string constant `"sepa"`
-  * `iban`: the International Bank Account Number (IBAN) of the account of the beneficiary
-  * `name`: the name of the beneficiary
-  * `bic`: the Bank Identification Code (BIC) code of the beneficiary's bank
-  * `salt`: random salt (used to make brute-forcing the hash harder)
 
-The JSON object may optionally contain:
-  * `address`: the address of the Beneficiary
+The implementation of the @code{ebics} plugin which is envisioned to
+support the @code{sepa} method is currently incomplete.  Specifically,
+we need a working implementation of `libebics` which is a sub-project
+trying to implement the EBICS [#ebics]_ standard.
 
-The implementation of the SEPA plugin is currently incomplete.  Specifically, we need a working implementation of `libebics` which is a sub-project trying to implement the EBICS [#ebics]_ standard.
-    
 .. [#sepa] SEPA - Single Euro Payments Area:
            http://www.ecb.europa.eu/paym/sepa/html/index.en.html
 .. [#ebics] EBCIS - European Banking Computer Interface Standard
