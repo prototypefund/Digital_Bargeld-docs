@@ -594,7 +594,7 @@ denomination.
 
       // indicative time by which the exchange undertakes to transfer the funds to
       // the merchant, in case of successful payment.
-      pay_deadline: Timestamp;
+      wire_deadline: Timestamp;
 
       // EdDSA `public key of the merchant <merchant-pub>`_, so that the client can identify the
       // merchant for refund requests.
