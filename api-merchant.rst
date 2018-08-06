@@ -585,6 +585,197 @@ Transaction history
 
 .. _proposal:
 
+
+-------------------------
+Dynamic Merchant Instance
+-------------------------
+
+.. note::
+
+    The endpoints to dynamically manage merchant instances has not been
+    implemented yet.
+
+.. http:get:: /instances
+
+  This is used to return the list of all the merchant instances
+
+  **Response**
+  
+  :status 200 OK:
+    The backend has successfully returned the list of instances stored. Returns
+    a `InstancesResponse`_.
+
+  .. InstancesResponse:
+  .. code-block:: tsref
+
+    interface InstancesResponse {
+      // List of instances that are present in the backend(see `below <Instance>`_)
+      instances: Instance[];
+    }
+
+    The `instance` object describes the instance registered with the backend. It has the following structure:
+
+  .. Instance:
+  .. _tsref-type-Instance:
+  .. code-block:: tsref
+
+    interface Instance {
+      // Merchant name corresponding to this instance.
+      name: string;
+
+      // The URL where the wallet will send coins.
+      payto: string;
+
+      // Merchant instance of the response to create
+      instance: string;
+
+      //unique key for each merchant
+      merchant_id: string;
+    }
+
+
+.. http:put:: /instances/
+  
+  This request will be used to create a new merchant instance in the backend.
+
+  **Request**
+
+  The request must be a `CreateInstanceRequest`_.
+
+  **Response**
+  
+  :status 200 OK:
+    The backend has successfully created the instance.  The response is a
+    `CreateInstanceResponse`_.
+
+  .. CreateInstanceRequest:
+  .. code-block:: tsref
+
+    interface CreateInstanceRequest {
+      // The URL where the wallet has to send coins.
+      // payto://-URL of the merchant's bank account. Required.
+      payto: string;
+
+      // Merchant instance of the response to create
+      // This field is optional. If it is not specified 
+      // then it will automatically be created.
+      instance?: string;
+
+      // Merchant name corresponding to this instance.
+      name: string;
+
+    }
+
+  .. CreateInstanceResponse:
+  .. code-block:: tsref
+
+    interface CreateInstanceResponse {
+      // Merchant instance of the response that was created
+      instance: string;
+
+      //unique key for each merchant
+      merchant_id: string;
+    }
+
+
+.. http:get:: /instances/<instance-id>
+
+  This is used to query a specific merchant instance.
+
+  **Request:**
+
+  :query instance_id: instance id that should be used for the instance
+
+  **Response**
+  
+  :status 200 OK:
+    The backend has successfully returned the list of instances stored. Returns
+    a `QueryInstancesResponse`_.
+
+  .. QueryInstancesResponse:
+  .. code-block:: tsref
+
+    interface QueryInstancesResponse {
+      // The URL where the wallet has to send coins.
+      // payto://-URL of the merchant's bank account. Required.
+      payto: string;
+
+      // Merchant instance of the response to create
+      // This field is optional. If it is not specified 
+      // then it will automatically be created.
+      instance?: string;
+
+      // Merchant name corresponding to this instance.
+      name: string;
+
+    }
+
+
+.. http:post:: /instances/<instance-id>
+  
+  This request will be used to update merchant instance in the backend.
+
+
+  **Request**
+
+  The request must be a `PostInstanceUpdateRequest`_.
+
+  **Response**
+  
+  :status 200 OK:
+    The backend has successfully updated the instance.  The response is a
+    `PostInstanceUpdateResponse`_.
+
+  .. PostInstanceUpdateRequest:
+  .. code-block:: tsref
+
+    interface PostInstanceUpdateRequest {
+      // Merchant instance that is to be updaated. Required.
+      instance: string;
+
+      // New URL where the wallet has to send coins.
+      // payto://-URL of the merchant's bank account. Required.
+      payto: string;
+
+      // Merchant name coreesponding to this instance.
+      name: string;
+
+    }
+
+  .. PostInstanceUpdateResponse:
+  .. code-block:: tsref
+
+    interface PostInstanceUpdateResponse {
+      // Merchant instance of the response that was updated
+      instance: string;
+
+      //unique key for each merchant
+      merchant_id: string;
+    }
+
+
+.. http:delete:: /instances/<instance-id>
+
+  This request will be used to delete merchant instance in the backend.
+
+  **Request:**
+
+  :query instance_id: instance id that should be used for the instance
+
+  **Response**
+  
+  :status 200 OK:
+    The backend has successfully removed the instance.  The response is a
+    `PostInstanceRemoveResponse`_.
+
+  .. PostInstanceRemoveResponse:
+  .. code-block:: tsref
+
+    interface PostInstanceRemoveResponse {
+      deleted: true;
+    }
+
+
 ------------------
 The Contract Terms
 ------------------
