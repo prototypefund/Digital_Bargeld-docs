@@ -613,7 +613,7 @@ Dynamic Merchant Instance
       instances: Instance[];
     }
 
-    The `instance` object describes the instance registered with the backend. It has the following structure:
+  The `instance` object describes the instance registered with the backend. It has the following structure:
 
   .. Instance:
   .. _tsref-type-Instance:
