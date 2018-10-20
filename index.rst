@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014, 2015, 2016, 2017 GNUnet e.V.
+  Copyright (C) 2014-2018 GNUnet e.V.
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -17,6 +17,7 @@
   @author Benedikt Muller
   @author Sree Harsha Totakura
   @author Marcello Stanisci
+  @author Christian Grothoff
 
 GNU Taler Documentation
 =======================
@@ -56,6 +57,7 @@ interfaces between the core components of Taler.
   api-error
   api-exchange
   api-merchant
+  api-auditor
   api-bank
   wireformats
 
