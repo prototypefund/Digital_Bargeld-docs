@@ -48,7 +48,7 @@ possibly by using HTTPS.
 
   **Request:**
 
-  :query last_issue_date: optional argument specifying the maximum value of any of the "stamp_start" members of the denomination keys of a "/keys" response that is already known to the client. Allows the exchange to only return keys that have changed since that timestamp.  The given value must be an unsigned 64-bit integer representing seconds after 1970.
+  :query last_issue_date: optional argument specifying the maximum value of any of the "stamp_start" members of the denomination keys of a "/keys" response that is already known to the client. Allows the exchange to only return keys that have changed since that timestamp.  The given value must be an unsigned 64-bit integer representing seconds after 1970.  If the timestamp does not exactly match the "stamp_start" of one of the denomination keys, all keys are returned.
 
   **Response:**
 
