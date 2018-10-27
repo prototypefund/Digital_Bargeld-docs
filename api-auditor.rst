@@ -63,6 +63,12 @@ know-your-customer (KYC) registration before issuing contracts.
       auditor_public_key: EddsaPublicKey;
     }
 
+  .. note::
+
+    This API is still experimental (and is not yet implemented at the
+    time of this writing).
+
+
 .. _exchange-list:
 
 -----------------------
@@ -186,12 +192,21 @@ paid out first.
       // Public signing key from the exchange matching @e exchange_sig.
       exchange_pub: EddsaPublicKey;
 
-      // Exchange master signature over @e exchange_sig.
-      master_sig: EddsaSignature;
-
       // Master public key of the exchange corresponding to @e master_sig.
       // Identifies the exchange this is about.
-      master_public_key: EddsaPublicKey;
+      master_pub: EddsaPublicKey;
+
+      // When does the validity of the exchange_pub end?
+      ep_start: Timestamp;
+
+      // When will the exchange stop using the signing key?
+      ep_expire: Timestamp;
+
+      // When does the validity of the exchange_pub end?
+      ep_end: Timestamp;
+
+      // Exchange master signature over @e exchange_sig.
+      master_sig: EddsaSignature;
     }
 
   .. note::
