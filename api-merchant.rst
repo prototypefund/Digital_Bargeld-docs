@@ -392,7 +392,7 @@ Tracking Wire Transfers
   .. code-block:: tsref
 
     interface TrackTransferDetail {
-      // Business activity associated with the wire tranfered amount
+      // Business activity associated with the wire transferred amount
       // `deposit_value`.
       order_id: string;
 
