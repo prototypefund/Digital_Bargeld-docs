@@ -550,16 +550,11 @@ Transaction history
 
   **Request**
 
-  :query date: only transactions *older* than this parameter will be returned. It's a timestamp, given in seconds.
-               Being optional, it defaults to the current time if not given.
-  :query start: only transactions having `row_id` less than `start` will be returned. Being optional, it defaults to the
-                highest `row_id` contained in the DB (namely, the youngest entry).
-  :query delta: at most `delta` entries will be returned. Being optional, it defaults to 20.
+  :query date: time threshold, see `delta` for its interpretation.
+  :query start: row number threshold, see `delta` for its interpretation.  Defaults to `UINT64_MAX`, namely the biggest row id possible in the database.
+  :query delta: takes value of the form `N (-N)`, so that at most `N` values strictly younger (older) than `start` and `date` are returned.  Defaults to `-20`.
   :query instance: on behalf of which merchant instance the query should be accomplished.
-
-  A typical usage is to firstly call this API without `start` and `date` parameter, then fetch the oldest
-  `row_id` from the results, and then keep calling the API by using the oldest row ID as `start` parameter.
-  This way we simply "scroll" results from the youngest to the oldest, `delta` entries at time.
+  :query ordering: takes value `descending` or `ascending` according to the results wanted from younger to older or vice versa.  Defaults to `descending`.
 
   **Response**
 

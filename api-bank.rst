@@ -167,6 +167,7 @@ request.
   :query direction: argument taking values `debit` or `credit`, according to the caller willing to receive both incoming and outgoing, only outgoing, or only incoming records.  Use `both` to return both directions.
   :query cancelled: argument taking values `omit` or `show` to filter out rejected transactions
   :query account_number: bank account whose history is to be returned.  *Currently ignored*, as multiple bank accounts per user are not implemented yet.
+  :query ordering: can be `descending` or `ascending` and regulates whether the row are returned youger-to-older or vice versa.  Defaults to `descending`.
 
 
   **Response**
