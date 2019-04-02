@@ -155,6 +155,27 @@ request.
   :status 404 Not Found: The bank does not know this rowid for this account.
 
 
+.. http:get:: /history-range
+
+  Filters and returns the list of transactions in the time range specified by `start` and `end`
+
+  **Request**
+
+  :query auth: authentication method used.  At this stage of development, only value `basic` is accepted.  Note that username and password need to be given as request's headers.  The dedicated headers are: `X-Taler-Bank-Username` and `X-Taler-Bank-Password`.
+  :query start: unix timestamp indicating the oldest transaction accepted in the result.
+  :query end: unix timestamp indicating the youngest transaction accepted in the result.
+  :query direction: argument taking values `debit` or `credit`, according to the caller willing to receive both incoming and outgoing, only outgoing, or only incoming records.  Use `both` to return both directions.
+  :query cancelled: argument taking values `omit` or `show` to filter out rejected transactions
+  :query account_number: bank account whose history is to be returned.  *Currently ignored*, as multiple bank accounts per user are not implemented yet.
+  :query ordering: can be `descending` or `ascending` and regulates whether the row are returned youger-to-older or vice versa.  Defaults to `descending`.
+
+
+  **Response**
+
+  :status 200 OK: JSON object whose field `data` is an array of type `BankTransaction`_.
+  :status 204 No content: in case no records exist for the targeted user.
+
+
 .. http:get:: /history
 
   Filters and returns the list of transactions of the customer specified in the request.
