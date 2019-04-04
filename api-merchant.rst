@@ -32,7 +32,7 @@ Receiving Payments
 .. http:post:: /order
 
   Create a new order that a customer can pay for.
-  
+
   This request is not idempotent unless an `order_id` is explicitly specified.
 
   .. note::
@@ -43,11 +43,11 @@ Receiving Payments
     such as the session id.
 
   **Request:**
-  
+
   The request must be a `PostOrderRequest`_.
 
   **Response**
-  
+
   :status 200 OK:
     The backend has successfully created the proposal.  The response is a
     `PostOrderResponse`_.
@@ -61,7 +61,7 @@ Receiving Payments
       order: MinimalOrderDetail | ContractTerms;
     }
 
-  The following fields of the `ContractTerms`_ 
+  The following fields of the `ContractTerms`_
 
   .. _MinimalOrderDetail:
   .. _tsref-type-MinimalOrderDetail:
@@ -192,7 +192,7 @@ Giving Refunds
       // Public key of the merchant
       merchant_pub: string;
 
-      
+
       // Contract terms hash of the contract that
       // is being refunded.
       h_contract_terms: string;
@@ -215,10 +215,10 @@ Giving Refunds
 
       // Fee for the refund.
       refund_fee: AmountJson;
-      
+
       // Public key of the coin being refunded.
       coin_pub: string;
-      
+
       // Refund transaction ID between merchant and exchange.
       rtransaction_id: number;
 
@@ -248,7 +248,12 @@ Giving Customer Tips
   :status 200 OK:
     A tip has been created. The backend responds with a `TipCreateConfirmation`_
   :status 404 Not Found:
-    The instance is unknown to the backend, expired or was never enabled.
+    The instance is unknown to the backend, expired or was never enabled or
+    the reserve is unknown to the exchange or expired (see detailed status
+    either being TALER_EC_RESERVE_STATUS_UNKNOWN or
+    TALER_EC_TIP_AUTHORIZE_INSTANCE_UNKNOWN or
+    TALER_EC_TIP_AUTHORIZE_INSTANCE_DOES_NOT_TIP or
+    TALER_EC_TIP_AUTHORIZE_RESERVE_EXPIRED.
   :status 412 Precondition Failed:
     The tip amount requested exceeds the available reserve balance for tipping.
 
@@ -595,7 +600,7 @@ Dynamic Merchant Instance
   This is used to return the list of all the merchant instances
 
   **Response**
-  
+
   :status 200 OK:
     The backend has successfully returned the list of instances stored. Returns
     a `InstancesResponse`_.
@@ -630,7 +635,7 @@ The `instance` object describes the instance registered with the backend. It has
 
 
 .. http:put:: /instances/
-  
+
   This request will be used to create a new merchant instance in the backend.
 
   **Request**
@@ -638,7 +643,7 @@ The `instance` object describes the instance registered with the backend. It has
   The request must be a `CreateInstanceRequest`_.
 
   **Response**
-  
+
   :status 200 OK:
     The backend has successfully created the instance.  The response is a
     `CreateInstanceResponse`_.
@@ -652,7 +657,7 @@ The `instance` object describes the instance registered with the backend. It has
       payto: string;
 
       // Merchant instance of the response to create
-      // This field is optional. If it is not specified 
+      // This field is optional. If it is not specified
       // then it will automatically be created.
       instance?: string;
 
@@ -682,7 +687,7 @@ The `instance` object describes the instance registered with the backend. It has
   :query instance_id: instance id that should be used for the instance
 
   **Response**
-  
+
   :status 200 OK:
     The backend has successfully returned the list of instances stored. Returns
     a `QueryInstancesResponse`_.
@@ -696,7 +701,7 @@ The `instance` object describes the instance registered with the backend. It has
       payto: string;
 
       // Merchant instance of the response to create
-      // This field is optional. If it is not specified 
+      // This field is optional. If it is not specified
       // then it will automatically be created.
       instance?: string;
 
@@ -707,7 +712,7 @@ The `instance` object describes the instance registered with the backend. It has
 
 
 .. http:post:: /instances/<instance-id>
-  
+
   This request will be used to update merchant instance in the backend.
 
 
@@ -716,7 +721,7 @@ The `instance` object describes the instance registered with the backend. It has
   The request must be a `PostInstanceUpdateRequest`_.
 
   **Response**
-  
+
   :status 200 OK:
     The backend has successfully updated the instance.  The response is a
     `PostInstanceUpdateResponse`_.
@@ -758,7 +763,7 @@ The `instance` object describes the instance registered with the backend. It has
   :query instance_id: instance id that should be used for the instance
 
   **Response**
-  
+
   :status 200 OK:
     The backend has successfully removed the instance.  The response is a
     `PostInstanceRemoveResponse`_.
@@ -1191,5 +1196,3 @@ both by the user's browser and their wallet.
 
   Used to trigger processing of payments, refunds and tips in the browser.  The exact behavior
   can be dependent on the user's browser.
-
-

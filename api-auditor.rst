@@ -104,8 +104,8 @@ know-your-customer (KYC) registration before issuing contracts.
 
     interface ExchangeEntry {
 
-      // Public key of the exchange
-      exchange_pub: EddsaPublicKey;
+      // Master public key of the exchange
+      master_pub: EddsaPublicKey;
 
       // Base URL of the exchange
       exchange_url: string;
