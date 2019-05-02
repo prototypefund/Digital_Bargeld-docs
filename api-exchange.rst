@@ -471,9 +471,9 @@ exchange.
   .. code-block:: tsref
 
     interface WithdrawRequest {
-      // Denomination public key (RSA), specifying the type of coin the client
+      // Hash of a denomination public key (RSA), specifying the type of coin the client
       // would like the exchange to create.
-      denom_pub: RsaPublicKey;
+      denom_pub_hash: HashCode;
 
       // coin's blinded public key, should be (blindly) signed by the exchange's
       // denomination private key
@@ -578,10 +578,8 @@ denomination.
       // `coin's public key <eddsa-coin-pub>`_, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
 
-      // denomination RSA key with which the coin is signed
-      // TODO: consider changing to h_denom_pub to reduce bandwidth?
-      // (Exchange clearly knows the full denom_pub).
-      denom_pub: RsaPublicKey;
+      // Hash of denomination RSA key with which the coin is signed
+      denom_pub_hash: HashCode;
 
       // exchange's unblinded RSA signature of the coin
       ub_sig: RsaSignature;
@@ -762,8 +760,8 @@ the API during normal operation.
       // `Coin public key <eddsa-coin-pub>`_, uniquely identifies the coin to be melted
       coin_pub: string;
 
-      // The denomination public key allows the exchange to determine total coin value.
-      denom_pub: RsaPublicKey;
+      // Hash of the denomination public key, to determine total coin value.
+      denom_pub_hash: HashCode;
 
       // Signature over the `coin public key <eddsa-coin-pub>`_ by the denomination.
       denom_sig: RsaSignature;
@@ -1001,9 +999,9 @@ in using this API.
   .. code-block:: tsref
 
     interface PaybackRequest {
-      // Denomination public key (RSA), specifying the type of coin the client
+      // Hash of denomination public key (RSA), specifying the type of coin the client
       // would like the exchange to pay back.
-      denom_pub: RsaPublicKey;
+      denom_pub_hash: HashCode;
 
       // Signature over the `coin public key <eddsa-coin-pub>`_ by the denomination.
       denom_sig: RsaSignature;
