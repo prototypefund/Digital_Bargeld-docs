@@ -95,7 +95,8 @@ Receiving Payments
 .. http:get:: /check-payment
 
   Check the payment status of an order.  If the order exists but is not payed yet,
-  a redirect URL.  When the user goes to this URL, they will be prompted for payment.
+  the response provides a redirect URL.
+  When the user goes to this URL, they will be prompted for payment.
 
   **Request:**
 
