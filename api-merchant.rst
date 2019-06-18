@@ -101,6 +101,7 @@ Receiving Payments
   **Request:**
 
   :query order_id: order id that should be used for the payment
+  :query contract_url: FIXME-FLORIAN
   :query instance: *Optional*. Instance used for the payment. Defaults to the instance named "default".
   :query resource_url: *Optional*. A resource URL that allows the wallet to identify whether it has already paid for this resource.
     Typically corresponds to the fulfillment URL.

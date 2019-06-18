@@ -25,8 +25,7 @@ The wallet backup and synchronization service uses an EdDSA wallet key
 to identify the "account" of the user.  The wallet key is Crockford
 Base32-encoded in the URI to access the data and used to sign requests
 as well as to encrypt the contents (see below).  These signatures are
-provided in detached from as HTTP headers.  The wallet key also
-identifies the account for the purpose of payment.
+provided in detached from as HTTP headers.
 
 Once the user activates backup or synchronization, the wallet should
 display the wallet key as a QR code as well as in text format together
@@ -48,7 +47,7 @@ itself cannot not enforce these rules.
      an HDKF.
   *  The encryption should use an ephemeral Curve25519 point that
      is prefixed to the actual database, and combined with
-     the wallet key via ECDH to create a symmetric secret.
+     the private wallet key via ECDH to create a symmetric secret.
      With every revision of the wallet (but only real
      revisions or merge operations), a fresh ephemeral must be
      used to ensure that the symmetric secret differs every
@@ -100,15 +99,14 @@ over TLS, and that the synchronization service is trusted to not build
 user's location profiles by linking client IP addresses and wallet
 keys.
 
-     
--------------------------- 
+
+--------------------------
 Receiving Terms of Service
 --------------------------
 
 .. http:get:: /terms
 
   Obtain the terms of service provided by the storage service.
-
 
   **Response:**
 
@@ -120,7 +118,7 @@ Receiving Terms of Service
 
     interface SyncTermsOfServiceResponse {
       // maximum wallet database backup size supported
-      storage_limit_in_megabytes: number; 
+      storage_limit_in_megabytes: number;
 
       // maximum number of sync requests per day (per account)
       daily_sync_limit: number;
@@ -135,12 +133,36 @@ Receiving Terms of Service
     }
 
 
+.. http:get:: /salt
+
+  Obtain the salt used by the storage service.
+
+
+  **Response:**
+
+  Returns a `SaltResponse`_.
+
+  .. _SaltResponse:
+  .. _tsref-type-SaltResponse:
+  .. code-block:: tsref
+
+    interface SaltResponse {
+      // salt value, at least 128 bits of entropy
+      salt: string;
+    }
+
+
 .. _sync:
 
 .. http:get:: /$WALLET-KEY
 
   Download latest version of the wallet database.
-  
+  The returned headers must include "Etags" based on
+  the hash of the (encrypted) database. The server must
+  check the client's caching headers and only return the
+  full database if it has changed since the last request
+  of the client.
+
   This method is generally only performed once per device
   when the private key and URL of a synchronization service are
   first given to the wallet on the respective device.  Once a
@@ -152,9 +174,9 @@ Receiving Terms of Service
   information returned is encrypted to the private key anyway
   and thus virtually useless even to an attacker who somehow
   managed to obtain the public key.
-  
+
   **Response**
-  
+
   :status 200 OK:
     The body contains the current version of the wallet's
     database as known to the server.
@@ -169,11 +191,11 @@ Receiving Terms of Service
     should be the /$WALLET-KEY URL, but can be safely ignored
     by the wallet.  The contract should be shown to the user
     in the canonical dialog, possibly in a fresh tab.
-    
+
   :status 410 Gone:
     The backup service has closed operations.  The body will
     contain the latest version still available at the server.
-    The body may be empty if no version is available. 
+    The body may be empty if no version is available.
     The user should be urged to find another provider.
 
   :status 429 Too many requests:
@@ -190,9 +212,9 @@ Receiving Terms of Service
     being updated (unless this is the first revision).
     "X-Taler-Sync-Previous" is only given to enable
     signature validation.
-    
-    
-.. http:post:: /$WALLET-KEY	       
+
+
+.. http:post:: /$WALLET-KEY
 
   Upload a new version of the wallet's database, or download the
   latest version.  The request must include the "Expect: 100 Continue"
@@ -223,7 +245,7 @@ Receiving Terms of Service
 
   The uploaded body must have at least 32 bytes of payload (see
   suggested upload format beginning with an ephemeral key).
-  
+
 
   **Response**
 
@@ -234,10 +256,10 @@ Receiving Terms of Service
   :status 304 Not modified:
     The server is already aware of this version of the wallet.
     Returned before 100 continue to avoid upload.
-    
+
   :status 400 Bad request:
     Most likely, the uploaded body is too short (less than 32 bytes).
-    
+
   :status 401 Unauthorized:
     The signature is invalid or missing (or body does not match).
 
@@ -247,7 +269,7 @@ Receiving Terms of Service
     should be the /$WALLET-KEY URL, but can be safely ignored
     by the wallet.  The contract should be shown to the user
     in the canonical dialog, possibly in a fresh tab.
-    
+
   :status 409 Conflict:
     The server has a more recent version than what is given
     in "If-Match".  The more recent version is returned. The
@@ -257,7 +279,7 @@ Receiving Terms of Service
   :status 410 Gone:
     The backup service has closed operations.  The body will
     contain the latest version still available at the server.
-    The body may be empty if no version is available. 
+    The body may be empty if no version is available.
     The user should be urged to find another provider.
 
   :status 411 Length required:
@@ -265,13 +287,13 @@ Receiving Terms of Service
     attempting upload.  While technically optional by the
     HTTP specification, the synchronization service may require
     the client to provide the length upfront.
-    
+
   :status 413 Payload too large:
     The requested upload exceeds the quota for the type of
     account.  The wallet should suggest to the user to
     migrate to another backup and synchronization service
     (like with "410 Gone").
-    
+
   :status 429 Too many requests:
     This account has exceeded daily thresholds for the number of
     requests.  The wallet should try again later, and may want
@@ -299,7 +321,7 @@ synchronizing a "Tor-wallet" with a non-Tor wallet should trigger a
 stern warning and require user confirmation (as otherwise
 cross-browser synchronization may weaken the security of Tor browser
 users).
-    
+
 
 ------------------------------------------------
 Discovery of backup and synchronization services
@@ -382,5 +404,3 @@ $SYNC-PATH the (usually empty) path.  By putting the private key after
 "#", we may succeed in disclosing the value even to eager Web-ish
 interpreters of URLs.  Note that the actual synchronization service
 must use the HTTPS protocol, which means we can leave out this prefix.
-
-
