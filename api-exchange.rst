@@ -877,8 +877,7 @@ the API during normal operation.
 
       // The original commitment, used to match the /refresh/reveal
       // to the corresponding /refresh/melt operation.
-      rc: TALER_RefreshCommitmentP;
-
+      rc: HashCode;
     }
 
 
@@ -904,7 +903,7 @@ the API during normal operation.
       code: integer;
 
       // Commitment as calculated by the exchange from the revealed data.
-      rc_expected: TALER_RefreshCommitmentP;
+      rc_expected: HashCode;
 
     }
 
@@ -951,6 +950,13 @@ the API during normal operation.
 
       // Exchange's blinded signature over the exchangeed coin.
       ev_sig: BlindedRsaSignature;
+
+      // Blinded coin, to be verified by the wallet to protect against
+      // a malicious exchange.
+      coin_ev: CoinEnvelope;
+
+      // Signature made by the old coin over the refresh request.
+      link_sig: EddsaSignature;
     }
 
 
