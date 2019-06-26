@@ -288,7 +288,7 @@ Receiving Terms of Service
     HTTP specification, the synchronization service may require
     the client to provide the length upfront.
 
-  :status 413 Payload too large:
+  :status 413 Request Entity Too Large:
     The requested upload exceeds the quota for the type of
     account.  The wallet should suggest to the user to
     migrate to another backup and synchronization service
@@ -375,23 +375,24 @@ Synchronization user experience
 
 The menu should include three entries for synchronization:
 
-  *  "synchronize" to manually trigger synchronization,
-     insensitive if no synchronization provider is available
-  *  "export backup configuration" to re-display (and possibly
-     print) the synchronization and backup parameters (URL and
-     private key), insensitive if no synchronization
-     provider is available, and
-  *  "import backup configuration" to:
-     *  import another devices' synchronization options
-	(by specifying URL and private key, or possibly
-	scanning a QR code), or
-     *	select a synchronization provider from the list,
-	including manual specification of a URL; here
-	confirmation should only be possible if the provider
-	is free or can be paid for; in this case, the
-	wallet should trigger the payment interaction when
-	the user presses the "select" button.
-     *  a special button to "disable synchronization and backup"
+* "synchronize" to manually trigger synchronization,
+    insensitive if no synchronization provider is available
+* "export backup configuration" to re-display (and possibly
+   print) the synchronization and backup parameters (URL and
+   private key), insensitive if no synchronization
+   provider is available, and
+* "import backup configuration" to:
+
+  * import another devices' synchronization options
+    (by specifying URL and private key, or possibly
+    scanning a QR code), or
+  * select a synchronization provider from the list,
+    including manual specification of a URL; here
+    confirmation should only be possible if the provider
+    is free or can be paid for; in this case, the
+    wallet should trigger the payment interaction when
+    the user presses the "select" button.
+  * a special button to "disable synchronization and backup"
 
 One usability issue here is that we are asking users to deal with a
 private key.  It is likely better to map private keys to trustwords

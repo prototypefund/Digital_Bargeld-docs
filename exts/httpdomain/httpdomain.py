@@ -64,7 +64,7 @@ class IETFRef(DocRef):
     """Represents a reference to the specific IETF RFC."""
 
     def __init__(self, rfc, section):
-        url = 'http://tools.ietf.org/html/rfc{0:d}'.format(rfc)
+        url = 'https://tools.ietf.org/html/rfc{0:d}'.format(rfc)
         super(IETFRef, self).__init__(url, 'section-', section)
 
 
@@ -124,7 +124,7 @@ HEADER_REFS = {
     'Cookie': IETFRef(2109, '4.3.4'), # also RFC6265 section 5.4
     'Date': IETFRef(7231, '7.1.1.2'),
     'Destination': IETFRef(2518, 9.3),
-    'ETag': IETFRef(7231, 2.3),
+    'ETag': IETFRef(7232, 2.3),
     'Expect': IETFRef(7231, '5.1.1'),
     'Expires': IETFRef(7234, 5.3),
     'From': IETFRef(7231, '5.5.2'),
@@ -492,6 +492,8 @@ class HTTPXRefStatusRole(XRefRole):
             url = 'http://tools.ietf.org/html/rfc6585#section-4'
         elif code == 449:
             url = 'http://msdn.microsoft.com/en-us/library/dd891478(v=prot.10).aspx'
+        elif code == 451:
+            url = 'http://www.ietf.org/rfc/rfc7725.txt'
         elif code in WEBDAV_STATUS_CODES:
             url = 'http://tools.ietf.org/html/rfc4918#section-11.%d' % (WEBDAV_STATUS_CODES.index(code) + 1)
         elif code in HTTP_STATUS_CODES:
@@ -646,7 +648,23 @@ class HTTPDomain(Domain):
         try:
             info = self.data[str(typ)][target]
         except KeyError:
-            return None
+            text = contnode.rawsource
+            role = self.roles.get(typ)
+            if role is None:
+                return None
+
+            if fromdocname not in _doctree_cache:
+                _doctree_cache[fromdocname] = env.get_doctree(fromdocname)
+            doctree = _doctree_cache[fromdocname]
+
+            resnode = role.result_nodes(doctree, env, node, None)[0][0]
+            if isinstance(resnode, addnodes.pending_xref):
+                text = node[0][0]
+                reporter = doctree.reporter
+                reporter.warning('Cannot resolve reference to %r' % text,
+                                 line=node.line)
+                return None
+            return resnode
         else:
             anchor = http_resource_anchor(typ, target)
             title = typ.upper() + ' ' + target
@@ -741,6 +759,7 @@ class HTTPLexer(RegexLexer):
 
 def setup(app):
     app.add_domain(HTTPDomain)
+
     try:
         get_lexer_by_name('http')
     except ClassNotFound:
