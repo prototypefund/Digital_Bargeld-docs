@@ -877,6 +877,7 @@ the API during normal operation.
 
       // Signature made by the wallet using the old coin's private key,
       // used later to verify the /refresh/link response from the exchange.
+      // Signs over a `TALER_CoinLinkSignaturePS`_
       link_sig: EddsaSignature;
 
       // The original commitment, used to match the /refresh/reveal
@@ -960,6 +961,7 @@ the API during normal operation.
       coin_ev: CoinEnvelope;
 
       // Signature made by the old coin over the refresh request.
+      // Signs over a `TALER_CoinLinkSignaturePS`_
       link_sig: EddsaSignature;
     }
 
