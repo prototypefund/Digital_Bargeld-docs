@@ -875,10 +875,10 @@ the API during normal operation.
       // transfer public key at the `noreveal_index`.
       transfer_pub: EddsaPublicKey;
 
-      // Signature made by the wallet using the old coin's private key,
+      // Array of `n` signatures made by the wallet using the old coin's private key,
       // used later to verify the /refresh/link response from the exchange.
       // Signs over a `TALER_CoinLinkSignaturePS`_
-      link_sig: EddsaSignature;
+      link_sigs: EddsaSignature[];
 
       // The original commitment, used to match the /refresh/reveal
       // to the corresponding /refresh/melt operation.
