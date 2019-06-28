@@ -21,7 +21,7 @@
 Bank API
 =========
 
-This API provides programmatic user registration in the bank.
+This API provides programmatic user registration at the bank.
 
 .. _bank-register:
 .. http:post:: /user/register
