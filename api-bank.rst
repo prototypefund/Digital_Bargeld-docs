@@ -32,7 +32,7 @@ This API provides programmatic user registration at the bank.
 
 :status 200 OK: The new user has been correctly registered.
 :status 409 Conflict: the username requested by the client is not available anymore
-:status 406 Not Acceptable: unacceptable characters were given as username / password.  See https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.username for the accepted character set.
+:status 406 Not Acceptable: unacceptable characters were given for the username. See https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.username for the accepted character set.
 
 **Details**
 
@@ -41,10 +41,12 @@ This API provides programmatic user registration at the bank.
 
   interface BankRegistrationRequest {
   
-    // Username to use for registration.
+    // Username to use for registration; max length is 150 chars.
     username: string;
 
-    // Password to associate with the username.
+    // Password to associate with the username.  Any characters and
+    // any length are valid; next releases will enforce a minimum length
+    // and a safer characters choice.
     password: string;
   }
 
