@@ -49,8 +49,9 @@ This API provides programmatic user registration in the bank.
   }
 
 
-This API provides programmatic withdrawing of cash via Taler.  It will
-trigger a wire transfer from the client's bank account to the exchange's.
+This API provides programmatic withdrawal of cash via Taler to all the
+users registered at the bank.  It triggers a wire transfer from the client
+bank account to the exchange's.
 
 .. _bank-register:
 .. http:post:: /taler/withdraw
@@ -73,7 +74,7 @@ trigger a wire transfer from the client's bank account to the exchange's.
     // Authentication method used
     auth: BankAuth;
   
-    // How much money will be withdrawn
+    // Amount to withdraw.
     amount: Amount;
 
     // Reserve public key.
