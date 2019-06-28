@@ -49,7 +49,8 @@ This API provides programmatic user registration in the bank.
   }
 
 
-This API provides programmatic withdrawing of cash via Taler.
+This API provides programmatic withdrawing of cash via Taler.  It will
+trigger a wire transfer from the client's bank account to the exchange's.
 
 .. _bank-register:
 .. http:post:: /taler/withdraw
@@ -58,9 +59,9 @@ This API provides programmatic withdrawing of cash via Taler.
 
 **Response**
 
-:status 200 OK: The withdrawal was correctly initiated, and a `BankTalerWithdrawResponse`_ object is returned.
+:status 200 OK: The withdrawal was correctly initiated, therefore the exchange received the payment.  A `BankTalerWithdrawResponse`_ object is returned.
 :status 406 Not Acceptable: the user does not have sufficient credit to fulfill their request.
-:status 404 Not Found: The (exchange's) bank account was not found.
+:status 404 Not Found: The exchange wire details did not point to any valid bank account.
 
 **Details**
 
