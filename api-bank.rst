@@ -24,7 +24,7 @@ Bank API
 This API provides programmatic user registration at the bank.
 
 .. _bank-register:
-.. http:post:: /user/register
+.. http:post:: /register
 
 **Request** The body of this request must have the format of a `BankRegistrationRequest`_.
 
