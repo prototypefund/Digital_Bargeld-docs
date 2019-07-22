@@ -796,3 +796,17 @@ within the
     struct TALER_ReservePublicKeyP reserve_pub;
     struct GNUNET_HashCode h_wire;
   };
+
+.. _TALER_CoinLinkSignaturePS:
+.. sourcecode:: c
+
+  struct TALER_CoinLinkSignaturePS {
+    /**
+     * purpose.purpose = TALER_SIGNATURE_WALLET_COIN_LINK
+     */
+    struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
+    struct GNUNET_HashCode h_denom_pub;
+    struct TALER_CoinSpendPublicKeyP old_coin_pub;
+    struct TALER_TransferPublicKeyP transfer_pub;
+    struct GNUNET_HashCode coin_envelope_hash;
+  };

@@ -46,7 +46,7 @@ know-your-customer (KYC) registration before issuing contracts.
 
   **Details:**
 
-  .. _ExchangeList:
+  .. _AuditorVersion:
   .. code-block:: tsref
 
     interface AuditorVersion {

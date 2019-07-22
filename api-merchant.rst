@@ -607,7 +607,7 @@ Dynamic Merchant Instance
     The backend has successfully returned the list of instances stored. Returns
     a `InstancesResponse`_.
 
-  .. InstancesResponse:
+  .. _InstancesResponse:
   .. code-block:: tsref
 
     interface InstancesResponse {
@@ -650,7 +650,7 @@ The `instance` object describes the instance registered with the backend. It has
     The backend has successfully created the instance.  The response is a
     `CreateInstanceResponse`_.
 
-  .. CreateInstanceRequest:
+  .. _CreateInstanceRequest:
   .. code-block:: tsref
 
     interface CreateInstanceRequest {
@@ -668,7 +668,7 @@ The `instance` object describes the instance registered with the backend. It has
 
     }
 
-  .. CreateInstanceResponse:
+  .. _CreateInstanceResponse:
   .. code-block:: tsref
 
     interface CreateInstanceResponse {
@@ -694,7 +694,7 @@ The `instance` object describes the instance registered with the backend. It has
     The backend has successfully returned the list of instances stored. Returns
     a `QueryInstancesResponse`_.
 
-  .. QueryInstancesResponse:
+  .. _QueryInstancesResponse:
   .. code-block:: tsref
 
     interface QueryInstancesResponse {
@@ -728,7 +728,7 @@ The `instance` object describes the instance registered with the backend. It has
     The backend has successfully updated the instance.  The response is a
     `PostInstanceUpdateResponse`_.
 
-  .. PostInstanceUpdateRequest:
+  .. _PostInstanceUpdateRequest:
   .. code-block:: tsref
 
     interface PostInstanceUpdateRequest {
@@ -744,7 +744,7 @@ The `instance` object describes the instance registered with the backend. It has
 
     }
 
-  .. PostInstanceUpdateResponse:
+  .. _PostInstanceUpdateResponse:
   .. code-block:: tsref
 
     interface PostInstanceUpdateResponse {
@@ -770,7 +770,7 @@ The `instance` object describes the instance registered with the backend. It has
     The backend has successfully removed the instance.  The response is a
     `PostInstanceRemoveResponse`_.
 
-  .. PostInstanceRemoveResponse:
+  .. _PostInstanceRemoveResponse:
   .. code-block:: tsref
 
     interface PostInstanceRemoveResponse {

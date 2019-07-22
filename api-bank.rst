@@ -21,6 +21,87 @@
 Bank API
 =========
 
+This API provides programmatic user registration at the bank.
+
+.. _bank-register:
+.. http:post:: /register
+
+**Request** The body of this request must have the format of a `BankRegistrationRequest`_.
+
+**Response**
+
+:status 200 OK: The new user has been correctly registered.
+:status 409 Conflict: the username requested by the client is not available anymore
+:status 406 Not Acceptable: unacceptable characters were given for the username. See https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.username for the accepted character set.
+
+**Details**
+
+.. _BankRegistrationRequest:
+.. code-block:: tsref
+
+  interface BankRegistrationRequest {
+  
+    // Username to use for registration; max length is 150 chars.
+    username: string;
+
+    // Password to associate with the username.  Any characters and
+    // any length are valid; next releases will enforce a minimum length
+    // and a safer characters choice.
+    password: string;
+  }
+
+
+This API provides programmatic withdrawal of cash via Taler to all the
+users registered at the bank.  It triggers a wire transfer from the client
+bank account to the exchange's.
+
+.. _bank-register:
+.. http:post:: /taler/withdraw
+
+**Request** The body of this request must have the format of a `BankTalerWithdrawRequest`_.
+
+**Response**
+
+:status 200 OK: The withdrawal was correctly initiated, therefore the exchange received the payment.  A `BankTalerWithdrawResponse`_ object is returned.
+:status 406 Not Acceptable: the user does not have sufficient credit to fulfill their request.
+:status 404 Not Found: The exchange wire details did not point to any valid bank account.
+
+**Details**
+
+.. _BankTalerWithdrawRequest:
+.. code-block:: tsref
+
+  interface BankTalerWithdrawRequest {
+
+    // Authentication method used
+    auth: BankAuth;
+  
+    // Amount to withdraw.
+    amount: Amount;
+
+    // Reserve public key.
+    reserve_pub: string;
+
+    // Exchange bank details specified in the 'payto'
+    // format.  NOTE: this field is optional, therefore
+    // the bank will initiate the withdrawal with the
+    // default exchange, if not given.
+    exchange_wire_details: string;
+  }
+
+.. _BankTalerWithdrawResponse:
+.. code-block:: tsref
+
+  interface BankTalerWithdrawResponse {
+
+    // Sender account details in 'payto' format.
+    sender_wire_details: string;
+
+    // Exchange base URL.  Optional: only returned
+    // if the user used the default exchange.
+    exchange_url: string;
+  }
+
 This API allows one user to send money to another user, within the same "test"
 bank.  The user calling it has to authenticate by including his credentials in the
 request.

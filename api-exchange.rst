@@ -717,6 +717,14 @@ denomination.
 
       // public key used to sign `exchange_sig`, only present if `exchange_sig` present.
       exchange_pub?: EddsaPublicKey;
+
+      // Blinding factor of the revoked new coin,
+      // only present if `type` is "REFRESH_PAYBACK".
+      new_coin_blinding_secret: RsaBlindingKeySecret;
+
+      // Blinded public key of the revoked new coin,
+      // only present if `type` is "REFRESH_PAYBACK".
+      new_coin_ev: RsaBlindingKeySecret;
     }
 
 ----------
@@ -881,10 +889,14 @@ the API during normal operation.
       // transfer public key at the `noreveal_index`.
       transfer_pub: EddsaPublicKey;
 
+      // Array of `n` signatures made by the wallet using the old coin's private key,
+      // used later to verify the /refresh/link response from the exchange.
+      // Signs over a `TALER_CoinLinkSignaturePS`_
+      link_sigs: EddsaSignature[];
+
       // The original commitment, used to match the /refresh/reveal
       // to the corresponding /refresh/melt operation.
-      rc: TALER_RefreshCommitmentP;
-
+      rc: HashCode;
     }
 
 
@@ -910,8 +922,47 @@ the API during normal operation.
       code: integer;
 
       // Commitment as calculated by the exchange from the revealed data.
-      rc_expected: TALER_RefreshCommitmentP;
+      rc_expected: HashCode;
 
+    }
+
+
+.. http:post:: /refresh/payback
+
+  When a fresh coin that was obtained via refresh is revoked, the refresh payback can be used
+  to revert the refresh and credit the old coin with the refreshed coin's value.
+
+  :status 200 OK:
+    The old coin was successfully credited with the value of the revoked new coin.
+  :status 404 Not Found:
+    Either the refresh commitment has not been seen by the exchange before,
+    the old coin was not found among the refreshed coins,
+    or the blinded new coin's public key has not been seen and signed before
+    by the exchange.
+  :status 401 Unauthorized:
+    The blinding secret does not match the signature stored by the exchange
+    the new_coin_ev.
+
+  **Details:**
+
+  Request body contains a JSON object with the following fields:
+
+  .. code-block:: tsref
+
+    interface RefreshPaybackRequest {
+      // Public key of the old coin that should receive the
+      // refund for the refreshed coin.
+      old_coin_pub: RsaPublicKey;
+
+      // Blinded public key of the coin of the revoked denomination.
+      new_coin_ev: CoinEnvelope;
+
+      // Secret blinding factor of the new coin
+      new_coin_blinding_secret: RsaBlindingKeySecret;
+
+      // Commitment that identifies the refresh operation.
+      // Redundant, but speeds up the exchange's database lookup.
+      rc: HashCode;
     }
 
 
@@ -957,6 +1008,14 @@ the API during normal operation.
 
       // Exchange's blinded signature over the exchangeed coin.
       ev_sig: BlindedRsaSignature;
+
+      // Blinded coin, to be verified by the wallet to protect against
+      // a malicious exchange.
+      coin_ev: CoinEnvelope;
+
+      // Signature made by the old coin over the refresh request.
+      // Signs over a `TALER_CoinLinkSignaturePS`_
+      link_sig: EddsaSignature;
     }
 
 
