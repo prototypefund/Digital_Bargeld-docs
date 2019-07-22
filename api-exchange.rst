@@ -649,7 +649,8 @@ denomination.
   .. code-block:: tsref
 
     interface CoinSpendHistoryItem {
-      // Either "DEPOSIT", "MELT", "REFUND" or "PAYBACK"
+      // Either "DEPOSIT", "MELT", "REFUND", "PAYBACK",
+      // "OLD-COIN-PAYBACK" or "PAYBACK-REFRESH"
       type: string;
 
       // The total amount of the coin's value absorbed (or restored in the case of a refund) by this transaction.
@@ -667,27 +668,29 @@ denomination.
       merchant_pub?: EddsaPublicKey;
 
       // date when the operation was made.
-      // Only for "DEPOSIT" operations.
+      // Only for "DEPOSIT", "PAYBACK", "OLD-COIN-PAYBACK" and
+      // "PAYBACK-REFRESH" operations.
       timestamp?: Timestamp;
 
       // date until which the merchant can issue a refund to the customer via the
       // exchange, possibly zero if refunds are not allowed. Only for "DEPOSIT" operations.
       refund_deadline?: Timestamp;
 
-      // Signature by the coin, only present if `type` is "DEPOSIT" or "MELT".
+      // Signature by the coin, only present if `type` is "DEPOSIT" or "MELT"
       coin_sig?: EddsaSignature;
 
       // Deposit fee in case of type "MELT".
       melt_fee: Amount;
 
-      // Commitment from the melt operation.
-      rc: TALER_RefreshCommitmentP;
+      // Commitment from the melt operation, only for "MELT".
+      rc?: TALER_RefreshCommitmentP;
 
-      // Hash of the bank account from where we received the funds.
-      h_wire: HashCode;
+      // Hash of the bank account from where we received the funds,
+      // only present if `type` is "DEPOSIT"
+      h_wire?: HashCode;
 
       // Deposit fee in case of type "REFUND".
-      refund_fee: Amount;
+      refund_fee?: Amount;
 
       // Hash over the proposal data of the contract that
       // is being paid (if type is "DEPOSIT") or refunded (if
@@ -706,7 +709,10 @@ denomination.
       // public key of the reserve that will receive the funds, for "PAYBACK" operations.
       reserve_pub?: EddsaPublicKey;
 
-      // Signature by the exchange, only present if `type` is "PAYBACK".
+      // Signature by the exchange, only present if `type` is "PAYBACK",
+      // "OLD-COIN-PAYBACK" or "PAYBACK-REFRESH".  Signature is
+      // of type TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK for "PAYBACK",
+      // and of type TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK_REFRESH otherwise.
       exchange_sig?: EddsaSignature;
 
       // public key used to sign `exchange_sig`, only present if `exchange_sig` present.
