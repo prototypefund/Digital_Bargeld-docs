@@ -927,45 +927,6 @@ the API during normal operation.
     }
 
 
-.. http:post:: /refresh/payback
-
-  When a fresh coin that was obtained via refresh is revoked, the refresh payback can be used
-  to revert the refresh and credit the old coin with the refreshed coin's value.
-
-  :status 200 OK:
-    The old coin was successfully credited with the value of the revoked new coin.
-  :status 404 Not Found:
-    Either the refresh commitment has not been seen by the exchange before,
-    the old coin was not found among the refreshed coins,
-    or the blinded new coin's public key has not been seen and signed before
-    by the exchange.
-  :status 401 Unauthorized:
-    The blinding secret does not match the signature stored by the exchange
-    the new_coin_ev.
-
-  **Details:**
-
-  Request body contains a JSON object with the following fields:
-
-  .. code-block:: tsref
-
-    interface RefreshPaybackRequest {
-      // Public key of the old coin that should receive the
-      // refund for the refreshed coin.
-      old_coin_pub: RsaPublicKey;
-
-      // Blinded public key of the coin of the revoked denomination.
-      new_coin_ev: CoinEnvelope;
-
-      // Secret blinding factor of the new coin
-      new_coin_blinding_secret: RsaBlindingKeySecret;
-
-      // Commitment that identifies the refresh operation.
-      // Redundant, but speeds up the exchange's database lookup.
-      rc: HashCode;
-    }
-
-
 .. http:get:: /refresh/link
 
   Link the old public key of a melted coin to the coin(s) that were exchangeed during the refresh operation.
@@ -1079,6 +1040,10 @@ in using this API.
 
       // Signature of `TALER_PaybackRequestPS`_ created with the `coin's private key <coin-priv>`_
       coin_sig: EddsaSignature;
+
+      // Was the coin refreshed (and thus the payback should go to the old coin)?
+      // Optional (for backwards compatibility); if absent, "false" is assumed
+      refreshed?: boolean;
     }
 
 
@@ -1086,8 +1051,13 @@ in using this API.
   .. code-block:: tsref
 
     interface PaybackConfirmation {
-      // public key of the reserve that will receive the payback.
-      reserve_pub: EddsaPublicKey;
+      // public key of the reserve that will receive the payback,
+      // provided if refreshed was false.
+      reserve_pub?: EddsaPublicKey;
+
+      // public key of the old coin that will receive the payback,
+      // provided if refreshed was true.
+      old_coin_pub?: EddsaPublicKey;
 
       // How much will the exchange pay back (needed by wallet in
       // case coin was partially spent and wallet got restored from backup)
@@ -1096,7 +1066,8 @@ in using this API.
       // Time by which the exchange received the /payback request.
       timestamp: Timestamp;
 
-      // the EdDSA signature of `TALER_PaybackConfirmationPS`_ using a current
+      // the EdDSA signature of `TALER_PaybackConfirmationPS`_ (refreshed false)
+      // or `TALER_PaybackRefreshConfirmationPS_` (refreshed true) using a current
       // `signing key of the exchange <sign-key-priv>`_ affirming the successful
       // payback request, and that the exchange promises to transfer the funds
       // by the date specified (this allows the exchange delaying the transfer
