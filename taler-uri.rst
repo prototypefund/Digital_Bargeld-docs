@@ -34,3 +34,19 @@ The following is a minimal example for a payment request from the demo merchant,
 
   taler://pay/backend.demo.taler.net/-/-/2019.08.26-ABCED
 
+
+----------------------------
+Special URLs for fulfillment
+----------------------------
+
+The special `fulfillment-success` action can be used in a fulfillment URI to indicate success
+with a message, without directing the user to a website.  This is useful in applications that are not Web-based:
+
+When wallets encounter this URI in any other circumstance than going to a fulfillment URL, they must raise an error.
+
+Example:
+
+.. code:: none
+
+  taler://fulfillment-success/Thank+you+for+donating+to+GNUnet
+
