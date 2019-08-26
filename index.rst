@@ -60,6 +60,7 @@ interfaces between the core components of Taler.
   api-auditor
   api-bank
   wireformats
+  taler-uri
 
 ---------
 Licensing
