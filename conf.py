@@ -42,7 +42,7 @@ import os
 # If your documentation needs a minimal Sphinx version, state it here.
 needs_sphinx = '1.3'
 
-sys.path.append(os.path.abspath('exts'))
+sys.path.append(os.path.abspath('_exts'))
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -120,8 +120,6 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output ----------------------------------------------
 
-import sys
-sys.path.append(".")
 import taler_sphinx_theme
 extensions.append("taler_sphinx_theme")
 
