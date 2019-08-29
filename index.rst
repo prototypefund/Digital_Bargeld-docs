@@ -46,9 +46,6 @@ installed.
 Documentation Overview
 ----------------------
 
-The *Protocol Specification* defines the HTTP-based, predominantly RESTful
-interfaces between the core components of Taler.
-
 .. toctree::
   :maxdepth: 2
 
