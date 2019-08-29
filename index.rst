@@ -58,3 +58,8 @@ Documentation Overview
   onboarding
   global-licensing
 
+.. toctree::
+  :hidden:
+
+  fdl-1.3
+

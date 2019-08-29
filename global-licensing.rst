@@ -213,3 +213,9 @@ All copyright owned by INRIA (but questionable whether creativity
 threshold for copyright is even met).
 
 Sources are licensed under the GNU LGPL.
+
++++++++++++++
+Documentation
++++++++++++++
+
+The documentation is licensed under the GNU Free Documentation License Version 1.3 or later.

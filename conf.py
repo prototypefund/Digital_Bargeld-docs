@@ -247,7 +247,7 @@ latex_documents = [
 #latex_show_urls = False
 
 # Documents to append as an appendix to all manuals.
-#latex_appendices = []
+latex_appendices = ["fdl-1.3"]
 
 # If false, no module index is generated.
 #latex_domain_indices = True
