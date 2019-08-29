@@ -226,9 +226,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'taler.tex', u'Taler Documentation',
-   u'F. Dold, B. Muller, S. H. Totakura, C. Grothoff',
-  'manual'),
+  ('taler-exchange-manual', 'taler-exchange-manual.tex', 'GNU Taler Exchange Manual', 'GNU Taler team', 'manual'),
+  ('taler-merchant-manual', 'taler-merchant-manual.tex', 'GNU Taler Exchange Manual', 'GNU Taler team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
