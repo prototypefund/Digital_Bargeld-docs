@@ -35,6 +35,38 @@ The following is a minimal example for a payment request from the demo merchant,
   taler://pay/backend.demo.taler.net/-/-/2019.08.26-ABCED
 
 
+-----------
+Withdrawing
+-----------
+
+.. code:: none
+
+  'taler://withdraw/' bank-host '/' bank-query '/' withdraw-uid
+
+When `bank-query` is `-`, the default `withdraw-operation` will be used.
+
+Example:
+
+.. code:: none
+
+  'taler://withdraw/bank.taler.net/-/ABDE123
+
+
+-------------------------
+Low-level Reserve Actions
+-------------------------
+
+The following actions are deprecated.  They might not be supported
+in newer wallets.
+
+.. code:: none
+
+  'taler://reserve-create/' reserve-pub
+
+.. code:: none
+
+  'taler://reserve-confirm/' query
+
 ----------------------------
 Special URLs for fulfillment
 ----------------------------

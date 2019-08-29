@@ -75,8 +75,8 @@ Receiving Payments
       summary: string;
 
       // URL that will show that the order was successful after
-      // it has been paid for.  The wallet will automatically append
-      // the order_id (always) and the session_sig (if applicable).
+      // it has been paid for.  The wallet will always automatically append
+      // the order_id as a query parameter.
       fulfillment_url: string;
 
       // Merchant instance to use (leave empty to use instance "default")
@@ -101,13 +101,8 @@ Receiving Payments
   **Request:**
 
   :query order_id: order id that should be used for the payment
-  :query contract_url: FIXME-FLORIAN
-  :query instance: *Optional*. Instance used for the payment. Defaults to the instance named "default".
-  :query resource_url: *Optional*. A resource URL that allows the wallet to identify whether it has already paid for this resource.
-    Typically corresponds to the fulfillment URL.
+  :query instance: *Optional*. Instance used for the payment. Defaults to the instance with identifier "default".
   :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
-  :query session_sig: *Optional*. Signature from the wallet to prove that it paid with the given session_id.  Not specified
-    if the wallet has not paid yet or still has to replay payment to bound the payment to the session id.
 
   **Response:**
 
@@ -142,10 +137,9 @@ Receiving Payments
     interface CheckPaymentUnpaidResponse {
       paid: false;
 
-      // URL to redirect the customer to pay,
-      // replay payment or confirm that the payment
-      // is bound to a session.
-      payment_redirect_url: string;
+      // URI that the wallet must process to complete the payment.
+      taler_pay_uri: string;
+
     }
 
 
