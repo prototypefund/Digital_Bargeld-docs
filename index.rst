@@ -57,7 +57,7 @@ interfaces between the core components of Taler.
   taler-merchant-manual
   taler-merchant-api-tutorial
   taler-bank-manual
-  backoffice
+  taler-backoffice-manual
   onboarding
   global-licensing
 
