@@ -20,6 +20,7 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
 
 .PHONY: help clean html dirhtml singlehtml pickle json htmlhelp qthelp devhelp epub latex latexpdf text man changes linkcheck doctest gettext
+.PHONY: texinfo-exchange
 
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
@@ -147,6 +148,12 @@ texinfo:
 	@echo "Build finished. The Texinfo files are in $(BUILDDIR)/texinfo."
 	@echo "Run \`make' in that directory to run these through makeinfo" \
 	      "(use \`make info' here to do that automatically)."
+
+texinfo-exchange:
+	$(SPHINXBUILD) -b texinfo . $(BUILDDIR)/texinfo-exchange ./taler-bank.rst -D master_doc=taler-exchange
+	@echo
+	@echo "Build finished. The Texinfo files are in $(BUILDDIR)/texinfo-exchange."
+	@echo "Run \`make' in that directory to run these through makeinfo"
 
 info:
 	$(SPHINXBUILD) -b texinfo $(ALLSPHINXOPTS) $(BUILDDIR)/texinfo

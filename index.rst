@@ -53,10 +53,10 @@ interfaces between the core components of Taler.
   :maxdepth: 2
 
   core/index
-  taler-exchange
-  merchant-manual
-  merchant-api
-  taler-bank
+  taler-exchange-manual
+  taler-merchant-manual
+  taler-merchant-api-tutorial
+  taler-bank-manual
   backoffice
   onboarding
   global-licensing

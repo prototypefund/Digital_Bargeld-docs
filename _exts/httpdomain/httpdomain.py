@@ -631,7 +631,7 @@ class HTTPDomain(Domain):
         'any': {}
     }
 
-    indices = [HTTPIndex]
+    indices = []
 
     @property
     def routes(self):

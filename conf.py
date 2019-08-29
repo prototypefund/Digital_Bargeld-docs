@@ -272,10 +272,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'taler', u'GNU Taler Documentation',
-   u'F. Dold, B. Muller, S. H. Totakura, C. Grothoff',
-   'neuro', 'One-Click Cash Payments.',
-   'Miscellaneous'),
+    ("taler-exchange-manual", "taler-exchange", "Taler Exchange Manual", "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
+    ("taler-merchant-manual", "taler-merchant", "Taler Merchant Manual", "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
 ]
 
 # Documents to append as an appendix to all manuals.
