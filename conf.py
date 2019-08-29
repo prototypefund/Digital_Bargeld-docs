@@ -67,7 +67,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Taler'
+project = u'GNU Taler'
 copyright = u'2014, 2015, 2016 Florian Dold, Benedikt Muller, Sree Harsha Totakura, Christian Grothoff, Marcello Stanisci (GPLv3+ or GFDL 1.3+)'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -120,14 +120,25 @@ pygments_style = 'sphinx'
 
 # -- Options for HTML output ----------------------------------------------
 
+import sys
+sys.path.append(".")
+import taler_sphinx_theme
+extensions.append("taler_sphinx_theme")
+
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme = 'taler_sphinx_theme'
+html_theme_path = taler_sphinx_theme.html_theme_path()
 
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#html_theme_options = {}
+html_sidebars = {
+    '**': ['logo-text.html', 'globaltoc.html', 'searchbox.html']
+}
+
+
+html_theme_options = {
+    # Set the name of the project to appear in the sidebar
+    "project_nav_name": "GNU Taler",
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
