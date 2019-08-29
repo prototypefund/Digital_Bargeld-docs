@@ -47,6 +47,7 @@ Documentation Overview
 ----------------------
 
 .. toctree::
+  :numbered:
   :maxdepth: 2
 
   core/index
