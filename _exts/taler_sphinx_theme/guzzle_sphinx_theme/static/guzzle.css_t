@@ -964,6 +964,9 @@ span.eqno {
   #left-column {
     display: block !important;
   }
+  div.footer {
+    margin-left: 300px;
+  }
 }
 
 /* Syntax highlighting
