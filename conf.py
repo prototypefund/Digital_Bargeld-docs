@@ -247,6 +247,10 @@ latex_documents = [
         'taler-backoffice-manual', 'taler-backoffice-manual.tex',
         'GNU Taler Back Office Manual', 'GNU Taler team', 'manual'
     ),
+    (
+        'onboarding', 'onboarding.tex',
+        'GNU Taler Developer Onboarding Manual', 'GNU Taler team', 'manual'
+    ),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
