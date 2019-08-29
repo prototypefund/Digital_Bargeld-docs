@@ -1,27 +1,7 @@
-Howtos for taler.net admins and developers (version 0.0.0, 16 Jan 2018),
-Copyright © 2017-2018 Taler Systems SA.
-
-   Permission is granted to copy, distribute and/or modify this document
-   under the terms of the GNU Free Documentation License, Version 1.3 or
-   any later version published by the Free Software Foundation; with no
-   Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
-   Texts. A copy of the license is included in the section entitled “GNU
-   Free Documentation License”.
-
 .. _Top:
 
 Back-office Web service manual
 ###############################
-
-Howtos for taler.net admins and developers (version 0.0.0, 16 Jan 2018),
-Copyright © 2017-2018 Taler Systems SA.
-
-   Permission is granted to copy, distribute and/or modify this document
-   under the terms of the GNU Free Documentation License, Version 1.3 or
-   any later version published by the Free Software Foundation; with no
-   Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
-   Texts. A copy of the license is included in the section entitled “GNU
-   Free Documentation License”.
 
 .. _Introduction:
 
