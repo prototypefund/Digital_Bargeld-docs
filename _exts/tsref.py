@@ -171,8 +171,10 @@ class LinkFilter(Filter):
                 defname = make_id('tsref-type-' + value);
                 t = copy_token(ttype)
                 if defname in id_to_doc:
+                    current_docname = self.app.builder._current_docname
                     docname = id_to_doc[defname]
-                    href = self.app.builder.get_target_uri(docname) + "#" + defname
+                    uri = self.app.builder.get_relative_uri(current_docname, docname)
+                    href = uri + "#" + defname
                     tok_setprop(t, "href", href)
 
                 yield t, value
