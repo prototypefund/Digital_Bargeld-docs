@@ -49,9 +49,16 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
+
+arch-api.png: arch-api.dot
+	dot -Tpng arch-api.dot > arch-api.png
+
+diagrams: arch-api.png
+
+
 # The html-linked builder does not support caching, so we
 # remove all cached state first.
-html:
+html: diagrams
 	$(SPHINXBUILD) -b html-linked $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

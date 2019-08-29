@@ -43,9 +43,8 @@ In this document, we describe the REST-based APIs between the various
 components, internal architecture of key components, and how to get them
 installed.
 
---------------------------------------
-Taler HTTP Core Protocol Specification
---------------------------------------
+Documentation Overview
+----------------------
 
 The *Protocol Specification* defines the HTTP-based, predominantly RESTful
 interfaces between the core components of Taler.
@@ -53,20 +52,12 @@ interfaces between the core components of Taler.
 .. toctree::
   :maxdepth: 2
 
-  api-common
-  api-error
-  api-exchange
-  api-merchant
-  api-auditor
-  api-bank
-  wireformats
-  taler-uri
-
----------
-Licensing
----------
-
-.. toctree::
-  :maxdepth: 2
-
+  core/index
+  taler-exchange
+  merchant-manual
+  merchant-api
+  taler-bank
+  backoffice
+  onboarding
   global-licensing
+

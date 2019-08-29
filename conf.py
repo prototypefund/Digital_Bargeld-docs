@@ -136,6 +136,7 @@ html_sidebars = {
 html_theme_options = {
     # Set the name of the project to appear in the sidebar
     "project_nav_name": "GNU Taler",
+    "globaltoc_depth": 4,
 }
 
 # Add any paths that contain custom themes here, relative to this directory.

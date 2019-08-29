@@ -55,7 +55,7 @@ This API provides programmatic withdrawal of cash via Taler to all the
 users registered at the bank.  It triggers a wire transfer from the client
 bank account to the exchange's.
 
-.. _bank-register:
+.. _bank-withdraw:
 .. http:post:: /taler/withdraw
 
 **Request** The body of this request must have the format of a `BankTalerWithdrawRequest`_.
