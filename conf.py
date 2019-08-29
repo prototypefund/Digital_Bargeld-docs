@@ -275,6 +275,7 @@ man_pages = [
 texinfo_documents = [
     ("taler-exchange-manual", "taler-exchange", "Taler Exchange Manual", "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
     ("taler-merchant-manual", "taler-merchant", "Taler Merchant Manual", "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
+    ("taler-merchant-api-tutorial", "taler-merchant-api-tutorial", "Taler Merchant API Tutorial", "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
     ("taler-bank-manual", "taler-bank", "Taler Bank Manual", "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
     ("onboarding", "onboarding", "Taler Onboarding Manual", "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
 ]
