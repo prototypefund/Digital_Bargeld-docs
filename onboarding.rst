@@ -5,10 +5,12 @@ Developer Onboarding Manual
 Taler installation
 ==================
 
-Users serving Taler.
---------------------
+This section describes the GNU Taler deployment on ``gv.taler.net``.
 
-On Gv.Taler.Net, there are four users that are set up to serve Taler on
+User Acccounts
+--------------
+
+On ``gv.taler.net``, there are four users that are set up to serve Taler on
 the internet:
 
 -  ``taler-test``: serves ``*.test.taler.net`` and gets automatically
@@ -17,14 +19,13 @@ the internet:
 -  ``taler-internal``: serves ``*.int.taler.net``, and does *NOT* get
    automatically built.
 
-The following two users are *NEVER* automatically built, and they both
+The following two users are *never* automatically built, and they both
 serve ``*.demo.taler.net``. At any given time, only one is active and
 serves the HTTP requests from the outside; the other one can so be
 compiled without any downtime. If the compilation succeeds, the inactive
-user can be switched to become active (see next section), and viceversa.
+user can be switched to become active (see next section), and vice versa.
 
 -  ``demo-blue``
-
 -  ``demo-green``
 
 Compile and switch color.
@@ -257,15 +258,10 @@ various Taler components to the official GNU mirrors.
 The following components are published on the GNU mirrors
 
 -  taler-exchange (exchange.git)
-
 -  taler-merchant (merchant.git)
-
 -  talerdonations (donations.git)
-
 -  talerblog (blog.git)
-
 -  taler-bank (bank.git)
-
 -  taler-wallet-webex (wallet-webex.git)
 
 Tagging
