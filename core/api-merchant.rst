@@ -23,6 +23,8 @@
 Merchant Backend API
 ====================
 
+.. contents:: Table of Contents
+
 ------------------
 Receiving Payments
 ------------------
@@ -1187,8 +1189,3 @@ both by the user's browser and their wallet.
       merchant_sig: EddsaSignature;
     }
 
-
-.. http:get:: /public/trigger-pay
-
-  Used to trigger processing of payments, refunds and tips in the browser.  The exact behavior
-  can be dependent on the user's browser.
