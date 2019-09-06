@@ -1087,6 +1087,9 @@ both by the user's browser and their wallet.
   **Request**
 
   :query hc: hash of the order's contract terms
+  :query long_poll_ms: *Optional.*  If specified, the merchant backend will wait up to ``long_poll_ms`` for completion
+    of the payment before sending the HTTP response.  A client must never rely on this behavior, as the merchant backend may
+    return a response immediately.
 
   **Response**
 
