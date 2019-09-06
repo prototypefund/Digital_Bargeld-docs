@@ -35,7 +35,7 @@ Receiving Payments
 
   Create a new order that a customer can pay for.
 
-  This request is not idempotent unless an `order_id` is explicitly specified.
+  This request is **not** idempotent unless an `order_id` is explicitly specified.
 
   .. note::
 
@@ -1080,6 +1080,58 @@ both by the user's browser and their wallet.
     }
 
 
+.. http:get:: /public/pay
+
+  Query the payment status of an order.
+
+  **Request**
+
+  :query hc: hash of the order's contract terms
+
+  **Response**
+
+  :status 200 OK:
+    The response is a `PublicPayStatusResponse`_.
+
+
+  .. _PublicPayStatusResponse:
+  .. code-block:: tsref
+
+    interface PublicPayStatusResponse {
+      // Has the payment for this order been completed?
+      paid: boolean;
+
+      // Refunds for this payment, if any.
+      refunds: RefundInfo[];
+    }
+
+
+  .. _RefundInfo:
+  .. _tsref-type-RefundInfo:
+  .. code-block:: tsref
+
+    interface RefundInfo {
+
+      // Coin from which the refund is going to be taken
+      coin_pub: EddsaPublicKey;
+
+      // Refund amount taken from coin_pub
+      refund_amount: Amount;
+
+      // Refund fee
+      refund_fee: Amount;
+
+      // Identificator of the refund
+      rtransaction_id: number;
+
+      // Merchant public key
+      merchant_pub: EddsaPublicKey
+
+      // Merchant signature of a TALER_RefundRequestPS object
+      merchant_sig: EddsaSignature;
+    }
+
+
 .. http:get:: /public/proposal
 
   Retrieve and take ownership (via nonce) over a proposal.
@@ -1150,42 +1202,3 @@ both by the user's browser and their wallet.
       // The order of the signatures matches the planchets list.
       reserve_sigs: EddsaSignature[];
     }
-
-
-.. http:get:: /public/refund
-
-  Pick up refunds for an order.
-
-  **Request**
-
-  :query instance: the merchant instance issuing the request
-  :query order_id: the order id whose refund situation is being queried
-
-  **Response**
-
-  If case of success, an *array of* `RefundLookup`_ objects is returned.
-
-  .. _RefundLookup:
-  .. code-block:: tsref
-
-    interface RefundLookup {
-
-      // Coin from which the refund is going to be taken
-      coin_pub: EddsaPublicKey;
-
-      // Refund amount taken from coin_pub
-      refund_amount: Amount;
-
-      // Refund fee
-      refund_fee: Amount;
-
-      // Identificator of the refund
-      rtransaction_id: number;
-
-      // Merchant public key
-      merchant_pub: EddsaPublicKey
-
-      // Merchant signature of a TALER_RefundRequestPS object
-      merchant_sig: EddsaSignature;
-    }
-
