@@ -53,6 +53,7 @@ Documentation Overview
   core/index
   taler-exchange-manual
   taler-merchant-manual
+  taler-nfc-guide.rst
   taler-merchant-api-tutorial
   taler-bank-manual
   taler-backoffice-manual
