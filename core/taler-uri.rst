@@ -1,3 +1,5 @@
+.. _taler-uri-scheme:
+
 ====================
 The taler URI scheme
 ====================
