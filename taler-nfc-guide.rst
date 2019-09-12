@@ -26,7 +26,7 @@ using `curl <https://curl.haxx.se/docs/manpage.html>`_ to make HTTP(S) requests.
    that the customer will receive.
    An order is identified by an alphanumeric *order ID*.
    
-   The following :http:post:`/order` request creates a simple order:
+   The following :http:post:`/order` request to the merchant backend creates a simple order:
 
    .. code-block:: sh
  
