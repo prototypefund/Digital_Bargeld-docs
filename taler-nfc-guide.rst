@@ -131,13 +131,30 @@ are used:
   :widths: 5 50
   :header-rows: 1
 
-  * - TID
+  * - TID (reader to wallet)
     - Description
   * - ``0x01``
-    - Dereference ``taler://`` URI (UTF-8 encoded) in the remainder of the command data.
+    - Dereference the UTF-8 ecoded ``taler://`` URI in the remainder of the command data.
   * - ``0x02``
     - Accept the UTF-8 encoded JSON object in the remainder of the command data as a request tunneling response.
 
+
+The ``GET DATA (=0xCA)`` instruction (again with the instruction parameters ``0x0100`` is used to request
+a command from the wallet.  The APDU with this instruction must be sent with a ``0x0000`` trailer to indicate
+that up to 65536 bytes of data are expected in the response from the wallet.  Note that the wallet itself cannot
+initiate communication, and thus the reader must "poll" the wallet for commands.
+
+The response to the ``GET DATA`` instruction has a Taler instruction ID in the first byte.  The rest of the
+body is interpreted depending on the TID.
+
+.. list-table::
+  :widths: 5 50
+  :header-rows: 1
+
+  * - TID (wallet to reader)
+    - Description
+  * - ``0x03``
+    - Accept the UTF-8 encoded JSON object in the remainder of the command data as a request tunneling request.
 
 
 Sending taler:// URIs to the Wallet via NFC
@@ -162,6 +179,5 @@ the ``taler://pay`` URI from the example above:
        50364a
   # success response with no data
   m<-w 9000
-
 
 
