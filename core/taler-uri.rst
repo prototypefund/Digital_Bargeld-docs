@@ -1,8 +1,8 @@
 .. _taler-uri-scheme:
 
-====================
-The taler URI scheme
-====================
+=======================
+The taler:// URI scheme
+=======================
 
 The `taler` URI scheme represents actions that are processed by a Taler wallet.  The basic syntax is as follows:
 

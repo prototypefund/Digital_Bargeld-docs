@@ -140,8 +140,8 @@ are used:
 
 
 
-Sending taler URIs to the Wallet via NFC
-========================================
+Sending taler:// URIs to the Wallet via NFC
+===========================================
 
 To make the wallet process an order via NFC, the merchant PoS terminal sends ``SELECT FILE`` command with the Taler AID,
 and a ``PUT DATA`` command with the Taler instruction ID ``0x01`` and the URI in the rest of the command data.
