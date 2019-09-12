@@ -181,3 +181,48 @@ the ``taler://pay`` URI from the example above:
   m<-w 9000
 
 
+Request tunneling
+=================
+
+Request tunnelling allows tunneling a (very) restricted subset of HTTP through NFC.
+In particular, only JSON request and response bodies are allowed.
+
+It is currently assumed that the requests and responses fit into one APDU frame.
+For devices with more limited maximum APDU sizes, additional TIDs for segmented
+tunnel requests/responsed may be defined in the future.
+
+The request tunneling request/response JSON messages have the following schema:
+
+.. code-block:: tsref
+
+  interface TalerRequestTunnelRequest {
+    // Identifier for the request
+    id: number;
+
+    // Request URL
+    url: string;
+
+    // HTTP method to use
+    method: "post" | "get";
+
+    // Request headers
+    headers?: { [name: string]: string };
+
+    // JSON body for the request, only applicable to GET requests
+    body?: object;
+  }
+
+  interface TalerRequestTunnelResponse {
+    // Identifier for the request
+    id: number;
+
+    // Response HTTP status code,
+    // "0" if there was no response.
+    status: number;
+
+    // JSON body of the response, or undefined
+    // if the response wasn't JSON.
+    // May contain error details if 'status==0'
+    body?: object;
+  }
+
