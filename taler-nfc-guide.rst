@@ -117,9 +117,9 @@ The GNU Taler wallet uses the AID (application identifier) ``F00054414c4552``.
 The ``F`` prefix indicates the proprietary/unregistered namespace of AIDs, and
 the rest of the identifier is the hex-encoded ASCII-string ``TALER`` (with one 0-byte left padding).
 
-During the time that wallet is paired with a reader, the communication channel is stateful.
+During the time that the wallet is paired with a reader, there is state associated with the communication channel.
 Most importantly, the first message sent by the reader to the wallet must be a ``SELECT FILE (=0xA4)`` that selects
-the GNU Taler AID.
+the GNU Taler AID.  Messages that are sent before the correct ``SELECT FILE`` message result in undefined behavior.
 
 The reader sends commands to the wallet with the ``PUT DATA (=0xDA)`` instruction, using the instruction parameters ``0x0100``,
 denoting a proprietary instruction.
