@@ -1,5 +1,5 @@
-The GNU Taler manual for Web shops
-##################################
+GNU Taler Merchant Backend Operator Manual
+##############################################
 
 Introduction
 ============

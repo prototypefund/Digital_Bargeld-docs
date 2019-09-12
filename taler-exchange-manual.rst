@@ -1,5 +1,5 @@
-The GNU Taler Exchange Operator Manual
-######################################
+GNU Taler Exchange Operator Manual
+##################################
 
 Introduction
 ============
