@@ -184,12 +184,15 @@ the ``taler://pay`` URI from the example above:
 Request tunneling
 =================
 
-Request tunnelling allows tunneling a (very) restricted subset of HTTP through NFC.
+Request tunneling allows tunneling a (very) restricted subset of HTTP through NFC.
 In particular, only JSON request and response bodies are allowed.
 
 It is currently assumed that the requests and responses fit into one APDU frame.
 For devices with more limited maximum APDU sizes, additional TIDs for segmented
 tunnel requests/responsed may be defined in the future.
+
+A request for tunneling is initiated with TID 3 and responded to with TID 2 (see tables above).  A tunneling request
+is identified by a numeric ID, which must be unique during one pairing between reader and tag.
 
 The request tunneling request/response JSON messages have the following schema:
 
