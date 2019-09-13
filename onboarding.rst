@@ -57,54 +57,13 @@ do:
    $ cd $HOME 
    $ git clone git://git.taler.net/deployment
 
-Then run the bootstrap script that will download all the repositories.
+Then run the prepare script that will (1) download all the repositories
+(2) build the codebases, (3) configure the system, and (4) generate the
+needed data.
 
 ::
-
-   $ ./deployment/bootstrap-taler <env>
-
-   # <env> will make all the services serve *.<env>.taler.net
-   #
-   # Currently at Gv.Taler.Net, only 'demo' / 'test' / 'int' have
-   # DNS and certs configured.
-
-If successful, then activate the new environment with:
-
-::
-
-   source activate
-
-Compile and install all the components.
-
-::
-
-   $ taler-deployment-build
-
-Create the global configuration file.
-
-::
-
-   $ taler-deployment-config-generate
-
-Create (only) the folders where all the data needed by Taler will be
-copied into (keys / JSONs with wire details / ..)
-
-::
-
-   $ taler-deployment-hier
-
-Create all the keys.
-
-::
-
-   $ taler-deployment-keyup
-
-Sign the ``/wire`` response for the exchange.
-
-::
-
-   $ taler-deployment-sign
-
+   $ ./deployment/bin/taler-deployment-prepare
+    
 ..
 
    **Note**
