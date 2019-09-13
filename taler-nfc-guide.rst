@@ -175,7 +175,7 @@ the ``taler://pay/`` URI from the example above:
   # success response with no data
   m<-w 9000
 
-  # PUT DATA (TID=1)
+  # PUT DATA (TID=0x01)
   m->w 00DA01007c0174616c65723a2f2f7061792f6261636b656e642e64656d6f2e74
        616c65722e6e65742f2d2f2d2f323031392e3235352d30325944484d58434251
        50364a
@@ -196,8 +196,9 @@ It is currently assumed that the requests and responses fit into one APDU frame.
 For devices with more limited maximum APDU sizes, additional TIDs for segmented
 tunnel requests/responsed may be defined in the future.
 
-A request for tunneling is initiated with TID 3 and responded to with TID 2 (see tables above).  A tunneling request
-is identified by a numeric ID, which must be unique during one pairing between reader and tag.
+A request for tunneling is initiated with TID ``0x03`` and responded to with
+TID ``0x02`` (see tables above).  A tunneling request is identified by a
+numeric ID, which must be unique during one pairing between reader and tag.
 
 The request tunneling request/response JSON messages have the following schema:
 
