@@ -152,6 +152,27 @@ starting with a empty home directory.
   $ buildbot-worker start worker/
 
 
+Building the Websites.
+======================
+
+Taler Websites, `www.taler.net` and `stage.taler.net`, are built by the user `taler-websites`
+by the means of a Buildbot worker.  The following commands set the `taler-websites` up,
+starting with a empty home directory.
+
+::
+  # Log-in as the 'taler-websites' user.
+
+  $ cd $HOME
+  $ git clone git://git.taler.net/deployment
+  $ ./deployment/bootstrap-sitesbuilder
+
+  # If the previous step worked, the setup is
+  # complete and the Buildbot worker can be started.
+
+  $ buildbot-worker start worker/
+
+
+
 Testing components
 ==================
 
