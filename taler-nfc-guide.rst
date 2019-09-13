@@ -139,7 +139,7 @@ are used:
     - Accept the UTF-8 encoded JSON object in the remainder of the command data as a request tunneling response.
 
 
-The ``GET DATA (=0xCA)`` instruction (again with the instruction parameters ``0x0100`` is used to request
+The ``GET DATA (=0xCA)`` instruction (again with the instruction parameters ``0x0100``) is used to request
 a command from the wallet.  The APDU with this instruction must be sent with a ``0x0000`` trailer to indicate
 that up to 65536 bytes of data are expected in the response from the wallet.  Note that the wallet itself cannot
 initiate communication, and thus the reader must "poll" the wallet for commands.
