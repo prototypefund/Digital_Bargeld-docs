@@ -160,8 +160,10 @@ body is interpreted depending on the TID.
 Sending taler:// URIs to the Wallet via NFC
 ===========================================
 
-To make the wallet process an order via NFC, the merchant PoS terminal sends ``SELECT FILE`` command with the Taler AID,
-and a ``PUT DATA`` command with the Taler instruction ID ``0x01`` and the URI in the rest of the command data.
+To make the wallet process a ``taler://`` URI via NFC, the merchant PoS
+terminal sends a ``SELECT FILE`` command with the GNU Taler AID, and a ``PUT
+DATA`` command with TID ``0x01`` and the URI in the rest
+of the command data.
 
 Here is an example protocol trace from an interaction which caused the wallet to dereference
 the ``taler://pay`` URI from the example above:
@@ -179,6 +181,9 @@ the ``taler://pay`` URI from the example above:
        50364a
   # success response with no data
   m<-w 9000
+
+(Note that this process works analogously for communication between a bank/ATM
+terminal or "tipping provider".)
 
 
 Request tunneling
