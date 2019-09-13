@@ -347,3 +347,80 @@ Code coverage is done with the Gcov / Lcov
 (http://ltp.sourceforge.net/coverage/lcov.php) combo, and it is run
 \*nightly\* (once a day) by a Buildbot worker. The coverage results are
 then published at ``https://lcov.taler.net/``.
+
+Appendix
+========
+
+Code internals
+++++++++++++++
+
+Testinglib
+----------
+
+This chapter is a VERY ABSTRACT description of how testing is
+implemented in Taler, and in NO WAY wants to substitute the reading of
+the actual source code by the user.
+
+In Taler, a test case is a array of ``struct TALER_TESTING_Command``,
+informally referred to as ``CMD``, that is iteratively executed by the
+testing interpreter. This latter is transparently initiated by the
+testing library.
+
+However, the developer does not have to defined CMDs manually, but
+rather call the proper constructor provided by the library. For example,
+if a CMD is supposed to test feature ``x``, then the library would
+provide the ``TALER_TESTING_cmd_x ()`` constructor for it. Obviously,
+each constructor has its own particular arguments that make sense to
+test ``x``, and all constructor are thoroughly commented within the
+source code.
+
+Internally, each CMD has two methods: ``run ()`` and ``cleanup ()``. The
+former contains the main logic to test feature ``x``, whereas the latter
+cleans the memory up after execution.
+
+In a test life, each CMD needs some internal state, made by values it
+keeps in memory. Often, the test has to *share* those values with other
+CMDs: for example, CMD1 may create some key material and CMD2 needs this
+key material to encrypt data.
+
+The offering of internal values from CMD1 to CMD2 is made by *traits*. A
+trait is a ``struct TALER_TESTING_Trait``, and each CMD contains a array
+of traits, that it offers via the public trait interface to other
+commands. The definition and filling of such array happens transparently
+to the test developer.
+
+For example, the following example shows how CMD2 takes an amount object
+offered by CMD1 via the trait interface.
+
+Note: the main interpreter and the most part of CMDs and traits are
+hosted inside the exchange codebase, but nothing prevents the developer
+from implementing new CMDs and traits within other codebases.
+
+::
+
+   /* Withouth loss of generality, let's consider the
+    * following logic to exist inside the run() method of CMD1 */
+   ..
+
+   struct TALER_Amount *a;
+   /**
+    * the second argument (0) points to the first amount object offered,
+    * in case multiple are available.
+    */
+   if (GNUNET_OK != TALER_TESTING_get_trait_amount_obj (cmd2, 0, &a))
+     return GNUNET_SYSERR;
+   ...
+
+   use(a); /* 'a' points straight into the internal state of CMD2 */
+
+In the Taler realm, there is also the possibility to alter the behaviour
+of supposedly well-behaved components. This is needed when, for example,
+we want the exchange to return some corrupted signature in order to
+check if the merchant backend detects it.
+
+This alteration is accomplished by another service called *twister*. The
+twister acts as a proxy between service A and B, and can be programmed
+to tamper with the data exchanged by A and B.
+
+Please refer to the Twister codebase (under the ``test`` directory) in
+order to see how to configure it.
