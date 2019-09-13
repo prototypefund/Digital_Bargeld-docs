@@ -173,6 +173,26 @@ The following commands do that:
 
 .. _Testing-components:
 
+Building the documentation
+==========================
+
+All the Taler documentation is built by the user `docbuilder` that
+runs a Buildbot worker.  The following commands set the `docbuilder` up,
+starting with a empty home directory.
+
+::
+  # Log-in as the 'docbuilder' user.
+
+  $ cd $HOME
+  $ git clone git://git.taler.net/deployment
+  $ ./deployment/bootstrap-docbuilder
+
+  # If the previous step worked, the setup is
+  # complete and the Buildbot worker can be started.
+
+  $ buildbot-worker start worker/
+
+
 Testing components
 ==================
 
