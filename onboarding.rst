@@ -62,7 +62,7 @@ Then run the prepare script that will (1) download all the repositories
 needed data.
 
 ::
-   $ ./deployment/bin/taler-deployment-prepare
+   $ ./deployment/bin/taler-deployment-prepare [test | int | demo]
     
 ..
 
@@ -155,9 +155,9 @@ starting with a empty home directory.
 Building the Websites.
 ======================
 
-Taler Websites, `www.taler.net` and `stage.taler.net`, are built by the user `taler-websites`
-by the means of a Buildbot worker.  The following commands set the `taler-websites` up,
-starting with a empty home directory.
+Taler Websites, `www.taler.net` and `stage.taler.net`, are built by the
+user `taler-websites` by the means of a Buildbot worker.  The following
+commands set the `taler-websites` up, starting with a empty home directory.
 
 ::
   # Log-in as the 'taler-websites' user.
@@ -172,6 +172,25 @@ starting with a empty home directory.
   $ buildbot-worker start worker/
 
 
+Code coverage.
+==============
+Code coverage tests are run by the `lcovworker` user, and are also driven
+by Buildbot.
+
+::
+
+  # Log-in as the 'lcovworker' user.
+
+  $ cd $HOME
+  $ git clone git://git.taler.net/deployment
+  $ ./deployment/bootstrap-taler lcov
+
+  # If the previous step worked, the setup is
+  # complete and the Buildbot worker can be started.
+
+  $ buildbot-worker start worker/
+
+The results are then published at `https://lcov.taler.net/`.
 
 Testing components
 ==================
