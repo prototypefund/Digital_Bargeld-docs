@@ -166,7 +166,7 @@ DATA`` command with TID ``0x01`` and the URI in the rest
 of the command data.
 
 Here is an example protocol trace from an interaction which caused the wallet to dereference
-the ``taler://pay`` URI from the example above:
+the ``taler://pay/`` URI from the example above:
 
 .. code:: none
 
