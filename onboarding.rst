@@ -211,6 +211,43 @@ Buildbot, and can be bootstrapped as follows.
 
   $ buildbot-worker start worker/
 
+
+Topping the tip reserve up
+==========================
+Both 'test' and 'demo' setups get their tip reserve topped up
+by a Buildbot worker.  The following steps get the reserve topper
+prepared.
+
+::
+  # Log-in as <env>-topper, with <env> being either 'test' or 'demo'
+
+  $ git clone git://git.taler.net/deployment
+  $ ./deployment/prepare-reservetopper <env>
+  
+  # If the previous steps worked, then it should suffice to start
+  # the worker, with:
+
+  $ buildbot-worker start worker/
+
+
+Producing auditor reports
+=========================
+
+Both 'test' and 'demo' setups get their auditor reports compiled
+by a Buildbot worker.  The following steps get the reports compiler
+prepared.
+
+::
+  # Log-in as <env>-auditor, with <env> being either 'test' or 'demo'
+
+  $ git clone git://git.taler.net/deployment
+  $ ./deployment/prepare-auditorreporter <env>
+  
+  # If the previous steps worked, then it should suffice to start
+  # the worker, with:
+
+  $ buildbot-worker start worker/
+
 .. _Releases:
 
 Releases
