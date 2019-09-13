@@ -351,11 +351,8 @@ then published at ``https://lcov.taler.net/``.
 Appendix
 ========
 
-Code internals
-++++++++++++++
-
-Testinglib
-----------
+Testing library
+---------------
 
 This chapter is a VERY ABSTRACT description of how testing is
 implemented in Taler, and in NO WAY wants to substitute the reading of
