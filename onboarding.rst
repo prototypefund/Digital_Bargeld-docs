@@ -192,6 +192,26 @@ by Buildbot.
 
 The results are then published at `https://lcov.taler.net/`.
 
+Online services checker.
+========================
+The user `demo-checker` runs periodic checks to see if all the
+`*.demo.taler.net` services are up and running.  It is driven by
+Buildbot, and can be bootstrapped as follows.
+
+::
+  
+  # Log-in as the 'demo-checker' user
+
+  $ cd $HOME
+  $ git clone git://git.taler.net/deployment
+  $ ./deployment/bootstrap-demochecker
+
+  # If the previous step worked, the setup is
+  # complete and the Buildbot worker can be started.
+
+  $ buildbot-worker start worker/
+
+
 Testing components
 ==================
 
