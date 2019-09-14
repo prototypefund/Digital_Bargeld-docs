@@ -23,9 +23,27 @@ The following steps show a simple payment process with GNU Taler.  Examples are
 written in `Bash <https://www.gnu.org/software/bash/>`_ syntax,
 using `curl <https://curl.haxx.se/docs/manpage.html>`_ to make HTTP(S) requests.
 
+
 1. The merchant creates an *order*, which contains the details of the payment
    and the product/service that the customer will receive.
    An order is identified by an alphanumeric *order ID*.
+
+   The *fulfillment URL* is an URL that the wallet will redirect the customer
+   to once the payment is complete.  For digital products, this is typically an
+   ``https(s)://`` URL that renders the purchased content.  For physical
+   products and in-store purchases, a ``taler://fulfillment-success/<message>``
+   URL should be specified instead.  The wallet will display the URL-encoded
+   UTF-8 text ``<message>`` when the payment has succeeded.
+
+   .. hint::
+
+     When an ``http(s)://`` URL is used as the fulfillment URL in an in-store / NFC payment,
+     the user might not be able to view the page, as request tunneling only works for requests
+     made by the wallet to the merchant backend / exchange.
+
+     In these situations, wallets should display to the user that a page to view the purchase
+     can be opened, and give a warning if it is detected that the devices does not have Internet
+     connectivity.
 
    The following :http:post:`/order` request to the merchant backend creates a
    simple order:
@@ -77,7 +95,7 @@ using `curl <https://curl.haxx.se/docs/manpage.html>`_ to make HTTP(S) requests.
    The details of ``taler://`` URIs are specified :ref:`here <taler-uri-scheme>`.
 
 3. The wallet processes the ``taler://pay/`` URI.  In this example, we use the
-   command line wallet:
+   command-line wallet:
 
    .. code-block:: sh
 
@@ -89,6 +107,12 @@ using `curl <https://curl.haxx.se/docs/manpage.html>`_ to make HTTP(S) requests.
      # Pay for the order from the merchant.
      $ taler-wallet-cli pay-uri 'taler://pay/backend.demo.taler.net/-/-/2019.255-02YDHMXCBQP6J'
      # [... User is asked to confirm the payment ...]
+
+   .. hint::
+
+     The command-line wallet is typically used by developers and not by end-users.
+     See the :ref:`wallet manual <command-line-wallet>` for installation instructions.
+
 
 4. The merchant checks the payment status again:
 
@@ -103,6 +127,16 @@ using `curl <https://curl.haxx.se/docs/manpage.html>`_ to make HTTP(S) requests.
        "paid": true,
        # ... (some fields omitted)
      }
+
+   .. note::
+
+     When paying for digital products displayed on a Web site identified by the
+     fulfillment URL, the merchant only needs to check the payment status
+     before responding with the fulfillment page.
+
+     For in-store payments, the merchant must periodically check the payment status.
+     Instead of polling in a busy loop, the ``long_poll_ms`` parameter of :http:get:`/check-payment`
+     should be used.
 
 
 Taler NFC Basics
@@ -126,7 +160,8 @@ During the time that the wallet is paired with a reader, there is state
 associated with the communication channel. Most importantly, the first message
 sent by the reader to the wallet must be a ``SELECT FILE (=0xA4)`` that selects
 the GNU Taler AID.  Messages that are sent before the correct ``SELECT FILE``
-message result in undefined behavior.
+message results in implementation-defined behavior, such as the tag disconnecting,
+ignoring the message or an app other than the wallet receiving the message.
 
 The reader sends commands to the wallet with the ``PUT DATA (=0xDA)``
 instruction, using the instruction parameters ``0x0100``, denoting a
@@ -159,10 +194,11 @@ first byte.  The rest of the
 body is interpreted depending on the TID.
 
 .. list-table::
-  :widths: 5 50
+  :widths: 15 50
   :header-rows: 1
 
-  * - TID (wallet to reader)
+  * - TID
+      (wallet to reader)
     - Description
   * - ``0x03``
     - Accept the UTF-8 encoded JSON object in the remainder of the command data as a request tunneling request.
@@ -228,7 +264,7 @@ The request tunneling request/response JSON messages have the following schema:
     // Request headers
     headers?: { [name: string]: string };
 
-    // JSON body for the request, only applicable to GET requests
+    // JSON body for the request, only applicable to POST requests
     body?: object;
   }
 

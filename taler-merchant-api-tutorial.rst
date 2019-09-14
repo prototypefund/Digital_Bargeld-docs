@@ -1,4 +1,4 @@
-The GNU Taler Merchant API Tutorial
+GNU Taler Merchant API Tutorial
 ###################################
 
 Introduction
@@ -27,8 +27,6 @@ This version of the tutorial has examples for Python3. It uses the
 requests library for HTTP requests. Versions for other
 languages/environments are available as well.
 
-examples
-git
 If you want to look at some simple, running examples, check out these:
 
 -  The `essay
@@ -346,7 +344,6 @@ Advanced topics
 Detecting the Presence of the Taler Wallet
 ------------------------------------------
 
-wallet
 Taler offers ways to detect whether a user has the wallet installed in
 their browser. This allows Web sites to adapt accordingly. Note that not
 all platforms can do presence detection reliably. Some platforms might
@@ -504,9 +501,6 @@ previous payment.
 The Taler Order Format
 ----------------------
 
-contract
-terms
-order
 A Taler order can specify many details about the payment. This section
 describes each of the fields in depth.
 

@@ -1,5 +1,5 @@
-The GNU Taler bank manual
-#########################
+GNU Taler bank manual
+#####################
 
 Introduction
 ============
