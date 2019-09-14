@@ -1,7 +1,8 @@
 GNU Taler NFC Guide
 ###################
 
-This guide explains how NFC (near-field communication) is used in the GNU Taler payment system.
+This guide explains how NFC (near-field communication) is
+used in the GNU Taler payment system.
 
 Introduction
 ============
@@ -11,8 +12,8 @@ NFC is currently used for two different purposes:
 1. Operations in the wallet (payment, withdrawal, ...) can be triggered by a
    merchant PoS (Point-of-Sale) terminal or Taler-capable ATM.
 2. When either the wallet or the merchant do not have Internet connectivity,
-   the protocol messages to the exchange or merchant backend service can be tunneled via NFC
-   through the party that has Internet connectivity.
+   the protocol messages to the exchange or merchant backend service can be
+   tunneled via NFC through the party that has Internet connectivity.
 
 
 Background: Payment Processing with GNU Taler
@@ -22,14 +23,15 @@ The following steps show a simple payment process with GNU Taler.  Examples are
 written in `Bash <https://www.gnu.org/software/bash/>`_ syntax,
 using `curl <https://curl.haxx.se/docs/manpage.html>`_ to make HTTP(S) requests.
 
-1. The merchant creates an *order*, which contains the details of the payment and the product/service
-   that the customer will receive.
+1. The merchant creates an *order*, which contains the details of the payment
+   and the product/service that the customer will receive.
    An order is identified by an alphanumeric *order ID*.
-   
-   The following :http:post:`/order` request to the merchant backend creates a simple order:
+
+   The following :http:post:`/order` request to the merchant backend creates a
+   simple order:
 
    .. code-block:: sh
- 
+
     $ backend_base_url=https://backend.demo.taler.net/
     $ auth_header='Authorization: ApiKey sandbox'
     $ order_req=$(cat <<EOF
@@ -48,10 +50,11 @@ using `curl <https://curl.haxx.se/docs/manpage.html>`_ to make HTTP(S) requests.
       "order_id": "2019.255-02YDHMXCBQP6J"
     }
 
-2. The merchant checks the payment status of the order using :http:get:`/check-payment`:
+2. The merchant checks the payment status of the order using
+   :http:get:`/check-payment`:
 
    .. code-block:: sh
- 
+
      $ backend_base_url=https://backend.demo.taler.net/
      $ auth_header='Authorization: ApiKey sandbox'
      $ curl -XGET -H"$auth_header" \
@@ -73,7 +76,8 @@ using `curl <https://curl.haxx.se/docs/manpage.html>`_ to make HTTP(S) requests.
 
    The details of ``taler://`` URIs are specified :ref:`here <taler-uri-scheme>`.
 
-3. The wallet processes the ``taler://pay/`` URI.  In this example, we use the command line wallet:
+3. The wallet processes the ``taler://pay/`` URI.  In this example, we use the
+   command line wallet:
 
    .. code-block:: sh
 
@@ -89,7 +93,7 @@ using `curl <https://curl.haxx.se/docs/manpage.html>`_ to make HTTP(S) requests.
 4. The merchant checks the payment status again:
 
    .. code-block:: sh
- 
+
      $ backend_base_url=https://backend.demo.taler.net/
      $ auth_header='Authorization: ApiKey sandbox'
      $ curl -XGET -H"$auth_header" \
@@ -115,17 +119,21 @@ and commands defined in `ISO 7816 <https://cardwerk.com/iso-7816-smart-card-stan
 
 The GNU Taler wallet uses the AID (application identifier) ``F00054414c4552``.
 The ``F`` prefix indicates the proprietary/unregistered namespace of AIDs, and
-the rest of the identifier is the hex-encoded ASCII-string ``TALER`` (with one 0-byte left padding).
+the rest of the identifier is the hex-encoded ASCII-string ``TALER`` (with one
+0-byte left padding).
 
-During the time that the wallet is paired with a reader, there is state associated with the communication channel.
-Most importantly, the first message sent by the reader to the wallet must be a ``SELECT FILE (=0xA4)`` that selects
-the GNU Taler AID.  Messages that are sent before the correct ``SELECT FILE`` message result in undefined behavior.
+During the time that the wallet is paired with a reader, there is state
+associated with the communication channel. Most importantly, the first message
+sent by the reader to the wallet must be a ``SELECT FILE (=0xA4)`` that selects
+the GNU Taler AID.  Messages that are sent before the correct ``SELECT FILE``
+message result in undefined behavior.
 
-The reader sends commands to the wallet with the ``PUT DATA (=0xDA)`` instruction, using the instruction parameters ``0x0100``,
-denoting a proprietary instruction.
+The reader sends commands to the wallet with the ``PUT DATA (=0xDA)``
+instruction, using the instruction parameters ``0x0100``, denoting a
+proprietary instruction.
 
-The command data of the ``PUT DATA`` APDU is prefixed by a one-byte Taler instruction ID (TID).  Currently, the following TIDs
-are used:
+The command data of the ``PUT DATA`` APDU is prefixed by a one-byte Taler
+instruction ID (TID).  Currently, the following TIDs are used:
 
 .. list-table::
   :widths: 5 50
@@ -139,12 +147,15 @@ are used:
     - Accept the UTF-8 encoded JSON object in the remainder of the command data as a request tunneling response.
 
 
-The ``GET DATA (=0xCA)`` instruction (again with the instruction parameters ``0x0100``) is used to request
-a command from the wallet.  The APDU with this instruction must be sent with a ``0x0000`` trailer to indicate
-that up to 65536 bytes of data are expected in the response from the wallet.  Note that the wallet itself cannot
-initiate communication, and thus the reader must "poll" the wallet for commands.
+The ``GET DATA (=0xCA)`` instruction (again with the instruction parameters
+``0x0100`` is used to request a command from the wallet.  The APDU with this
+instruction must be sent with a ``0x0000`` trailer to indicate that up to 65536
+bytes of data are expected in the response from the wallet.  Note that the
+wallet itself cannot initiate communication, and thus the reader must "poll"
+the wallet for commands.
 
-The response to the ``GET DATA`` instruction has a Taler instruction ID in the first byte.  The rest of the
+The response to the ``GET DATA`` instruction has a Taler instruction ID in the
+first byte.  The rest of the
 body is interpreted depending on the TID.
 
 .. list-table::
@@ -165,10 +176,10 @@ terminal sends a ``SELECT FILE`` command with the GNU Taler AID, and a ``PUT
 DATA`` command with TID ``0x01`` and the URI in the rest
 of the command data.
 
-Here is an example protocol trace from an interaction which caused the wallet to dereference
-the ``taler://pay/`` URI from the example above:
+Here is an example protocol trace from an interaction which caused the wallet
+to dereference the ``taler://pay`` URI from the example above:
 
-.. code:: none
+.. code-block:: none
 
   # SELECT FILE
   m->w 00A4040007F00054414c4552
@@ -189,8 +200,8 @@ terminal or "tipping provider".)
 Request tunneling
 =================
 
-Request tunneling allows tunneling a (very) restricted subset of HTTP through NFC.
-In particular, only JSON request and response bodies are allowed.
+Request tunneling allows tunneling a (very) restricted subset of HTTP through
+NFC. In particular, only JSON request and response bodies are allowed.
 
 It is currently assumed that the requests and responses fit into one APDU frame.
 For devices with more limited maximum APDU sizes, additional TIDs for segmented
