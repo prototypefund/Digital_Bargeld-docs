@@ -17,7 +17,8 @@ def setup(app):
     """Setup conntects events to the sitemap builder"""
     app.connect('html-page-context', add_html_link)
     app.connect('build-finished', create_sitemap)
-    app.set_translator('html', HTMLTranslator)
+    app.set_translator('html', MyHTMLTranslator)
+    app.set_translator('html-linked', MyHTMLTranslator)
     app.sitemap_links = []
     app.add_html_theme('taler_sphinx_theme', path.abspath(path.dirname(__file__) + "/guzzle_sphinx_theme"))
 
@@ -53,7 +54,7 @@ def html_theme_path():
     return [os.path.dirname(os.path.abspath(__file__))]
 
 
-class HTMLTranslator(SphinxHTMLTranslator):
+class MyHTMLTranslator(SphinxHTMLTranslator):
     """
     Handle translating to bootstrap structure.
     """
@@ -141,3 +142,25 @@ class HTMLTranslator(SphinxHTMLTranslator):
 
     def visit_container(self, node):
         self.body.append(self.starttag(node, 'div', CLASS='docutils'))
+
+    def add_secnumber(self, node):
+        # type: (nodes.Element) -> None
+        if node.get('secnumber'):
+            numbers = list(map(str, node['secnumber']))
+            if len(numbers) <= 3:
+                self.body.append('.'.join(numbers) + self.secnumber_suffix)
+        elif isinstance(node.parent, nodes.section):
+            if self.builder.name == 'singlehtml':
+                docname = self.docnames[-1]
+                anchorname = "%s/#%s" % (docname, node.parent['ids'][0])
+                if anchorname not in self.builder.secnumbers:
+                    anchorname = "%s/" % docname  # try first heading which has no anchor
+            else:
+                anchorname = '#' + node.parent['ids'][0]
+                if anchorname not in self.builder.secnumbers:
+                    anchorname = ''  # try first heading which has no anchor
+            if self.builder.secnumbers.get(anchorname):
+                numbers = list(self.builder.secnumbers[anchorname])
+                if len(numbers) <= 3:
+                    self.body.append('.'.join(map(str, numbers)) +
+                                     self.secnumber_suffix)
