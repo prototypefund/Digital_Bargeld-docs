@@ -60,6 +60,7 @@ Documentation Overview
   taler-backoffice-manual
   onboarding
   global-licensing
+  manindex
 
 .. toctree::
   :hidden:

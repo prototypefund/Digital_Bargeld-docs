@@ -32,6 +32,10 @@
 import sys
 import os
 
+sys.path.append(os.path.abspath('_exts'))
+
+import taler_sphinx_theme
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -42,13 +46,12 @@ import os
 # If your documentation needs a minimal Sphinx version, state it here.
 needs_sphinx = '1.3'
 
-sys.path.append(os.path.abspath('_exts'))
-
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
     'tsref',
+    'taler_sphinx_theme',
     'sphinx.ext.todo',
     'sphinx.ext.imgmath',
     'httpdomain.httpdomain',
@@ -122,9 +125,6 @@ pygments_style = 'sphinx'
 #keep_warnings = False
 
 # -- Options for HTML output ----------------------------------------------
-
-import taler_sphinx_theme
-extensions.append("taler_sphinx_theme")
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -227,30 +227,18 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (
-        'taler-exchange-manual', 'taler-exchange-manual.tex',
-        'GNU Taler Exchange Manual', 'GNU Taler team', 'manual'
-    ),
-    (
-        'taler-merchant-manual', 'taler-merchant-manual.tex',
-        'GNU Taler Merchant Manual', 'GNU Taler team', 'manual'
-    ),
-    (
-        'taler-merchant-api-tutorial', 'taler-merchant-api-tutorial.tex',
-        'GNU Taler Merchant API Tutorial', 'GNU Taler team', 'manual'
-    ),
-    (
-        'taler-bank-manual', 'taler-bank-manual.tex', 'GNU Taler Bank Manual',
-        'GNU Taler team', 'manual'
-    ),
-    (
-        'taler-backoffice-manual', 'taler-backoffice-manual.tex',
-        'GNU Taler Back Office Manual', 'GNU Taler team', 'manual'
-    ),
-    (
-        'onboarding', 'onboarding.tex',
-        'GNU Taler Developer Onboarding Manual', 'GNU Taler team', 'manual'
-    ),
+    ('taler-exchange-manual', 'taler-exchange-manual.tex',
+     'GNU Taler Exchange Manual', 'GNU Taler team', 'manual'),
+    ('taler-merchant-manual', 'taler-merchant-manual.tex',
+     'GNU Taler Merchant Manual', 'GNU Taler team', 'manual'),
+    ('taler-merchant-api-tutorial', 'taler-merchant-api-tutorial.tex',
+     'GNU Taler Merchant API Tutorial', 'GNU Taler team', 'manual'),
+    ('taler-bank-manual', 'taler-bank-manual.tex', 'GNU Taler Bank Manual',
+     'GNU Taler team', 'manual'),
+    ('taler-backoffice-manual', 'taler-backoffice-manual.tex',
+     'GNU Taler Back Office Manual', 'GNU Taler team', 'manual'),
+    ('onboarding', 'onboarding.tex', 'GNU Taler Developer Onboarding Manual',
+     'GNU Taler team', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -277,10 +265,48 @@ latex_appendices = ["fdl-1.3"]
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(
-    'index', 'taler', u'GNU Taler Documentation',
-    [u'F. Dold, B. Muller, S. H. Totakura, C. Grothoff'], 1
-)]
+man_pages = [
+    ("manpages/taler-auditor-exchange.1", "taler-auditor-exchange",
+     "add or remove exchange from auditor’s list", "GNU Taler contributors",
+     1),
+    ("manpages/taler-auditor-sign.1", "taler-auditor-sign",
+     "sign exchange denomination as auditor", "GNU Taler contributors", 1),
+    ("manpages/taler-auditor.1", "taler-auditor", "audit exchange",
+     "GNU Taler contributors", 1),
+    ("manpages/taler-bank-transfer.1", "taler-bank-transfer",
+     "trigger a transfer at the bank", "GNU Taler contributors", 1),
+    ("manpages/taler-config-generate.1", "taler-config-generate",
+     "tool to simplify Taler configuration generation",
+     "GNU Taler contributors", 1),
+    ("manpages/taler-exchange-aggregator.1", "taler-exchange-aggregator",
+     "aggregate and execute exchange transactions", "GNU Taler contributors",
+     1),
+    ("manpages/taler-exchange-benchmark.1", "taler-exchange-benchmark",
+     "measure exchange performance", "GNU Taler contributors", 1),
+    ("manpages/taler-exchange-dbinit.1", "taler-exchange-dbinit",
+     "initialize Taler exchange database", "GNU Taler contributors", 1),
+    ("manpages/taler-exchange-httpd.1", "taler-exchange-httpd",
+     "run Taler exchange (with RESTful API)", "GNU Taler contributors", 1),
+    ("manpages/taler-exchange-keycheck.1", "taler-exchange-keycheck",
+     "check validity of Taler signing and denomination keys",
+     "GNU Taler contributors", 1),
+    ("manpages/taler-exchange-keyup.1", "taler-exchange-keyup",
+     "set up Taler exchange denomination and signing",
+     "GNU Taler contributors", 1),
+    ("manpages/taler-exchange-wire.1", "taler-exchange-wire",
+     "create the master-key signed responses to /wire",
+     "GNU Taler contributors", 1),
+    ("manpages/taler-exchange-wirewatch.1", "taler-exchange-wirewatch",
+     "watch for incoming wire transfers", "GNU Taler contributors", 1),
+    ("manpages/taler-merchant-benchmark.1", "taler-merchant-benchmark",
+     "generate Taler-style benchmarking payments", "GNU Taler contributors",
+     1),
+    ("manpages/taler-merchant-httpd.1", "taler-merchant-httpd",
+     "run Taler merchant backend (with RESTful API)", "GNU Taler contributors",
+     1),
+    ("manpages/taler.conf.5", "taler.conf", "Taler configuration file",
+     "GNU Taler contributors", 5),
+]
 
 # If true, show URL addresses after external links.
 #man_show_urls = False
@@ -291,27 +317,17 @@ man_pages = [(
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (
-        "taler-exchange-manual", "taler-exchange", "Taler Exchange Manual",
-        "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"
-    ),
-    (
-        "taler-merchant-manual", "taler-merchant", "Taler Merchant Manual",
-        "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"
-    ),
-    (
-        "taler-merchant-api-tutorial", "taler-merchant-api-tutorial",
-        "Taler Merchant API Tutorial", "GNU Taler team", "MENU ENTRY",
-        "DESCRIPTION", "CATEGORY"
-    ),
-    (
-        "taler-bank-manual", "taler-bank", "Taler Bank Manual",
-        "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"
-    ),
-    (
-        "onboarding", "onboarding", "Taler Onboarding Manual", "GNU Taler team",
-        "MENU ENTRY", "DESCRIPTION", "CATEGORY"
-    ),
+    ("taler-exchange-manual", "taler-exchange", "Taler Exchange Manual",
+     "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
+    ("taler-merchant-manual", "taler-merchant", "Taler Merchant Manual",
+     "GNU Taler team", "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
+    ("taler-merchant-api-tutorial", "taler-merchant-api-tutorial",
+     "Taler Merchant API Tutorial", "GNU Taler team", "MENU ENTRY",
+     "DESCRIPTION", "CATEGORY"),
+    ("taler-bank-manual", "taler-bank", "Taler Bank Manual", "GNU Taler team",
+     "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
+    ("onboarding", "onboarding", "Taler Onboarding Manual", "GNU Taler team",
+     "MENU ENTRY", "DESCRIPTION", "CATEGORY"),
 ]
 
 # Documents to append as an appendix to all manuals.
