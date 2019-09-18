@@ -63,7 +63,8 @@ Receiving Payments
       order: MinimalOrderDetail | ContractTerms;
     }
 
-  The following fields of the `ContractTerms`_
+  The following fields must be specified in the ``order`` field of the request.  Other fields from
+  `ContractTerms`_ are optional, and will override the defaults in the merchant configuration.
 
   .. _MinimalOrderDetail:
   .. _tsref-type-MinimalOrderDetail:
@@ -1006,9 +1007,9 @@ both by the user's browser and their wallet.
     The response will include the `coin_pub` for which the payment failed,
     in addition to the response from the exchange to the `/deposit` request.
 
-  The `backend` will return verbatim the error codes received from the exchange's
+  The backend will return verbatim the error codes received from the exchange's
   :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
-  double-spending for example, the `frontend` should pass the reply verbatim to
+  double-spending for example, the frontend should pass the reply verbatim to
   the browser/wallet. This should be the expected case, as the `frontend`
   cannot really make mistakes; the only reasonable exception is if the
   `backend` is unavailable, in which case the customer might appreciate some
@@ -1019,35 +1020,12 @@ both by the user's browser and their wallet.
 
     interface PaymentResponse {
       // Signature on `TALER_PaymentResponsePS`_ with the public
-      // key of the instance in the proposal.
+      // key of the merchant instance.
       sig: EddsaSignature;
 
-      // Proposal data hash being signed over
-      h_proposal_data: HashCode;
-
-      // Proposal, send for convenience so the frontend
-      // can do order processing without a second lookup on
-      // a successful payment
-      proposal: Proposal;
+      // Contract terms hash being signed over.
+      h_contract_terms: HashCode;
     }
-
-
-  .. _tsref-type-Proposal:
-  .. code-block:: tsref
-
-    interface Proposal {
-      // The proposal data, effectively the frontend's order with some data filled in
-      // by the merchant backend.
-      data: ProposalData;
-
-      // Contract's hash, provided as a convenience.  All components that do
-      // not fully trust the merchant must verify this field.
-      H_proposal: HashCode;
-
-      // Signature over the hashcode of `proposal` made by the merchant.
-      merchant_sig: EddsaSignature;
-    }
-
 
   .. _PayRequest:
   .. code-block:: tsref
