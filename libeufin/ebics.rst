@@ -1,6 +1,13 @@
 EBICS
 #####
 
+.. warning::
+
+  This document summarizes and clarifies some aspects of the EBICS protocol
+  that are important to LibEuFin.  Both version 3.0 and 2.5 are discussed here.
+
+  It is not a specification, and it does not replace the official EBICS specification.
+
 EBICS Glossary
 ==============
 
