@@ -59,6 +59,7 @@ Documentation Overview
   taler-bank-manual
   taler-backoffice-manual
   onboarding
+  libeufin/index
   global-licensing
   manindex
 
