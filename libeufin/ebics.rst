@@ -1,5 +1,5 @@
-EBICS
-#####
+EBICS Implementation Notes
+##########################
 
 .. warning::
 
@@ -89,6 +89,25 @@ EBICS Glossary
 Order Types
 ===========
 
+BTD
+  **Only EBICS3.0+**. Business Transaction Format Download.
+  Administrative order type to download a file, described in more detail by the BTF structure
+
+BTU
+  **Only EBICS3.0+**. Business Transaction Format Upload.
+  Administrative order type to upload a file, described in more detail by the BTF structure
+
+C52
+  **Before EBICS 3.0**.  Download bank-to-customer account report.
+
+C53
+  **Before EBICS 3.0**.  Download bank-to-customer statement report.
+
+FUL
+  **Before EBICS 3.0, France**.  File Upload.  Mainly used by France-style EBICS.
+
+FDL
+  **Before EBICS 3.0, France**.  File Download.  Mainly used by France-style EBICS.
 
 HPD
   Host Parameter Data.  Used to query the capabilities of the financial institution.
@@ -100,3 +119,49 @@ HVE:
 HVS:
   Cancel Previous Order (from German "Storno").  Used to submit an electronic signature separately
   from a previously uploaded order.
+
+MT940 vs MT942
+==============
+
+* MT942 contains *pre-advice*, in the sense that transactions in it might still change
+  or be reversed
+* M942 contains the settled transactions by the end of the day
+
+
+Standards and Resources
+=======================
+
+EBICS
+-----
+
+The EBICS standard documents are available at `<http://www.ebics.org>`_.
+
+EBICS 3.0:
+
+* The main EBICS 3.0 specification
+  (``2017-03-29-EBICS_V_3.0-FinalVersion.pdf``).
+* Annex 1 specifies EBICS return codes, as EBICS doesn't use HTTP status codes directly
+  (``2017-03-29-EBICS_V_3.0_Annex1_ReturnCodes-FinalVersion.pdf``) .
+* Annex BTF contains the registry of BTF codes.
+
+DFÜ Agreement
+-------------
+
+The DFÜ Agreement is the set of standards used by the German Banking Industry Committee (Deutsche Kreditwirtschaft).
+
+The following Annexes (also see the `DK Website <https://die-dk.de/zahlungsverkehr/electronic-banking/dfu-verfahren-ebics/>`_) are
+relevant for implementing EBICS:
+
+* Annex 1 is the EBICS specification
+* (Annex 2 is deprecated)
+* Annex 3 describes the data formats used by German banks within EBICS.
+
+EBICS Compendium
+----------------
+
+The `EBICS Compendium <https://www.ppi.de/en/payments/ebics/ebics-compendium/>`_ has some additional info on EBICS.
+It is published by a company that sells a proprietary EBICS server implementation.
+
+
+
+
