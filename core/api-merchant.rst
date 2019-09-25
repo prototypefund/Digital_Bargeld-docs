@@ -81,9 +81,6 @@ Receiving Payments
       // it has been paid for.  The wallet will always automatically append
       // the order_id as a query parameter.
       fulfillment_url: string;
-
-      // Merchant instance to use (leave empty to use instance "default")
-      instance?: string;
     }
 
   .. _PostOrderResponse:
@@ -104,7 +101,6 @@ Receiving Payments
   **Request:**
 
   :query order_id: order id that should be used for the payment
-  :query instance: *Optional*. Instance used for the payment. Defaults to the instance with identifier "default".
   :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
 
   **Response:**
@@ -179,9 +175,6 @@ Giving Refunds
 
       // Human-readable refund justification
       reason: string;
-
-      // Merchant instance issuing the request
-      instance?: string;
     }
 
   .. _MerchantRefundResponse:
@@ -263,9 +256,6 @@ Giving Customer Tips
       // Amount that the customer should be tipped
       amount: Amount;
 
-      // Merchant instance issuing the request
-      instance?: string;
-
       // Justification for giving the tip
       justification: string;
 
@@ -291,20 +281,14 @@ Giving Customer Tips
 
 .. http:post:: /tip-query
 
-  Query the status of an instance's tipping reserve.
-
-  **Request**
-
-  :query instance: instance to query
+  Query the status of a tipping reserve.
 
   **Response**
 
   :status 200 OK:
     A tip has been created. The backend responds with a `TipQueryResponse`_
-  :status 404 Not Found:
-    The instance is unknown to the backend.
   :status 412 Precondition Failed:
-    The instance does not have a tipping reserve configured.
+    The merchant backend instance does not have a tipping reserve configured.
 
   .. _TipQueryResponse:
   .. code-block:: tsref
@@ -340,7 +324,6 @@ Tracking Wire Transfers
   :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
   :query wire_method: name of the wire transfer method used for the wire transfer
   :query exchange: base URL of the exchange that made the wire transfer
-  :query instance: (optional) identificative token of the merchant `instance <https://docs.taler.net/operate-merchant.html#instances-lab>`_ which is being tracked.
 
   **Response:**
 
@@ -457,7 +440,6 @@ Tracking Wire Transfers
   **Request:**
 
   :query id: ID of the transaction we want to trace (an integer)
-  :query instance:  merchant instance
 
   **Response:**
 
@@ -557,7 +539,6 @@ Transaction history
   :query date: time threshold, see `delta` for its interpretation.
   :query start: row number threshold, see `delta` for its interpretation.  Defaults to `UINT64_MAX`, namely the biggest row id possible in the database.
   :query delta: takes value of the form `N (-N)`, so that at most `N` values strictly younger (older) than `start` and `date` are returned.  Defaults to `-20`.
-  :query instance: on behalf of which merchant instance the query should be accomplished.
   :query ordering: takes value `descending` or `ascending` according to the results wanted from younger to older or vice versa.  Defaults to `descending`.
 
   **Response**
@@ -924,12 +905,6 @@ The `contract terms` must have the following structure:
       // label for a location that denotes the jurisdiction for disputes.
       // Some of the typical fields for a location (such as a street address) may be absent.
       jurisdiction: string;
-
-      // Which instance is working this proposal.
-      // See `Merchant Instances <https://docs.taler.net/operate-merchant.html#instances-lab>`_.
-      // This field is optional, as the "default" instance is not forced to provide any
-      // `instance` identificator.
-      instance: string;
     }
 
 
@@ -1120,7 +1095,6 @@ both by the user's browser and their wallet.
 
   **Request**
 
-  :query instance: the merchant instance issuing the request
   :query order_id: the order id whose refund situation is being queried
   :query nonce: the nonce for the proposal
 

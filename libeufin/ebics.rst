@@ -13,6 +13,15 @@ EBICS Glossary
 
 .. glossary::
 
+  A004
+    Electronic signature process, used in H004, deprecated in H005 with EBICS 3.0.
+
+  A005
+    Electronic signature process.  Used in H004 and H005.
+
+  A006
+    Electronic signature process.  Used in H004 and H005.
+
   BTF
     *Business Transaction Formats.*  Before EBICS 3.0, many different order types were
     used for business-related messages.  With EBICS 3.0, the more generic BTU and BTD
@@ -37,6 +46,10 @@ EBICS Glossary
       Transport signature.  Only used to verify authorized submission,
       but not to verify the bank-technical authorization.
 
+    In H004 and H005, the ES of the bank is specified as a "planned feature" that
+    is not actually implemented yet.  Thus banks in practice only use their
+    encryption key pair and authentication/identity key pair.
+
   EDS
     Distributed Electronic Signature.  Allows multiple subscribers to authorize an existing order.
    
@@ -46,6 +59,9 @@ EBICS Glossary
   Human Subscriber
 
    See :term:`Subscriber`. 
+
+  H004
+    Host protocol version 4.  Refers to the XML Schema defined in *EBICS 2.5*.
 
   H005
     Host protocol version 5.  Refers to the XML Schema defined in *EBICS 3.0*.
@@ -79,12 +95,17 @@ EBICS Glossary
     and ``UserId``.  A technical subscriber cannot sign a bank-technical request.
 
   Technical Subscriber
-
    See :term:`Subscriber`. 
 
   TLS
     *Transport Layer Security*.  All messages in EBICS are sent over HTTP with TLS.
     In the current version of the standard, only server certificates are required.
+
+  VEU
+    Distributed Electronic Signature (from German "Verteilte Elektronische Unterschrift").
+
+  X002
+    Identification and authentication signature in H004 and H005.
 
 Order Types
 ===========
@@ -109,16 +130,54 @@ FUL
 FDL
   **Before EBICS 3.0, France**.  File Download.  Mainly used by France-style EBICS.
 
-HPD
+HIA
+  Transmission of the subscriber keys for (1) identification and authentication and (2)
+  encryption within the framework of subscriber initialisation.
+
+HPB
+  Query the three RSA keys of the financial institute.
+
+HP
   Host Parameter Data.  Used to query the capabilities of the financial institution.
 
-HVE:
+INI
+  Transmission of the subscriber keys for bank-technical electronic signatures.
+
+The following order types are, for now, not relevant for LibEuFin:
+
+H3K
+  Send all three RSA key pairs for initialization at once, accompanied
+  by a CA certificate for the keys.  This is (as far as we know) used in France,
+  but not used by any German banks.  When initializing a subscriber with H3K,
+  no INI and HIA letters are required.
+
+HVE
   Host Verification of Electronic Signature.  Used to submit an electronic signature separately
   from a previously uploaded order.
 
-HVS:
+HVD
+  Retrieve VEU state.
+
+HVD
+  Retrieve VEU overview.
+
+HVS
   Cancel Previous Order (from German "Storno").  Used to submit an electronic signature separately
   from a previously uploaded order.
+
+
+Key Management
+==============
+
+RSA key pairs are used for three purposes:
+
+1. Authorization of requests by signing the order data.  Called the *bank-technical key pair*.
+2. Identification/authentication of the subscriber.  Called the *identification and authentication key pair*.
+3. Decryption of the symmetric key used to decrypt the bank's response.  Called the *encryption key pair*.
+
+One subscriber *may* use three different key pairs for these purposes.
+The identification and authentication key pair may be the same as the encryption key pair.
+The bank-technical key pair may not be used for any other purpose..
 
 MT940 vs MT942
 ==============
