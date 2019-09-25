@@ -67,8 +67,28 @@ EBICS Glossary
     Host protocol version 5.  Refers to the XML Schema defined in *EBICS 3.0*.
 
   Host ID
-    Alphanumeric identifier for the EBICS Host, i.e. the financial institution's EBICS server.
-    Given to the EBICS client by the financial institution.
+    Alphanumeric identifier for the EBICS Host.  One EBICS server can
+    host multiple banks, and each bank is identified by the Host ID.
+    This concept is similar to Taler's merchant backend instance identifiers.
+
+  Partner ID
+    In German, this is called "Kunden ID" (= Customer ID).
+    One partner can have multiple "participants", which are identified by user IDs.
+    
+    Practical example:  A company has one Partner ID.  Each person at the company
+    that can access the company's bank accounts gets their own User ID.
+    When the person is indirectly accessing the bank server (for example via
+    a client server application), an additional "System ID" is created for this
+    "technical subscriber".  When there is no technical subscriber, the System ID
+    must be the same as the User ID.  Usually the System ID is optional though.
+
+    The ``(partner, user, system)`` triple uniquely identifies a subscriber.
+
+  User ID
+    ??
+
+  System ID
+    ??
 
   ISO 20022
     *ISO 20022: Financial Services - Universal financial industry message scheme*.  Rather important
@@ -137,11 +157,19 @@ HIA
 HPB
   Query the three RSA keys of the financial institute.
 
-HP
+HPD
   Host Parameter Data.  Used to query the capabilities of the financial institution.
 
 INI
   Transmission of the subscriber keys for bank-technical electronic signatures.
+
+HCS
+  Change keys without having to send a new INI/HIA letter.
+
+SPR
+  Suspend a subscriber.  Used when a key compromise is suspected.
+
+
 
 The following order types are, for now, not relevant for LibEuFin:
 
