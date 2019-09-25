@@ -36,9 +36,12 @@ from sphinx.pygments_styles import SphinxStyle
 from pygments.formatters import HtmlFormatter
 from docutils import nodes
 from docutils.nodes import make_id
+from sphinx.util import logging
 import re
 import sys
 
+
+logger = logging.getLogger(__name__)
 
 _escape_html_table = {
     ord('&'): u'&amp;',
@@ -118,10 +121,6 @@ class MyHtmlBuilder(StandaloneHTMLBuilder):
     def write_doc(self, docname, doctree):
         self._current_docname = docname
         super(MyHtmlBuilder, self).write_doc(docname, doctree)
-
-    def warn(self, msg):
-        print("warning:", msg, file=sys.stderr)
-
 
 def get_annotation(tok, key):
     if not hasattr(tok, "kv"):
@@ -205,7 +204,7 @@ class LinkFilter(Filter):
                         tok_setprop(t, "href", href)
                         tok_setprop(t, "caption", caption)
                     else:
-                        self.app.builder.warn("unresolved link target in comment: " + id)
+                        logger.warning("unresolved link target in comment: " + id)
                     yield t, m.group(1)
                     last = m.end()
                 post = value[last:]
