@@ -37,6 +37,7 @@ from pygments.formatters import HtmlFormatter
 from docutils import nodes
 from docutils.nodes import make_id
 import re
+import sys
 
 
 _escape_html_table = {
@@ -117,6 +118,9 @@ class MyHtmlBuilder(StandaloneHTMLBuilder):
     def write_doc(self, docname, doctree):
         self._current_docname = docname
         super(MyHtmlBuilder, self).write_doc(docname, doctree)
+
+    def warn(self, msg):
+        print("warning:", msg, file=sys.stderr)
 
 
 def get_annotation(tok, key):
