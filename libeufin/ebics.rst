@@ -52,6 +52,9 @@ EBICS Glossary
 
   EDS
     Distributed Electronic Signature.  Allows multiple subscribers to authorize an existing order.
+
+  FTAM
+    Historical predecessor protocol to EBICS (*file transfer, access and management*).
    
   HEV
     The *Host EBICS Version*.  Queried by the client with an HEV request message.
@@ -71,6 +74,26 @@ EBICS Glossary
     host multiple banks, and each bank is identified by the Host ID.
     This concept is similar to Taler's merchant backend instance identifiers.
 
+  Order Number
+    Interchangably called "Order ID".
+
+    Each upload transaction gets a unique order number assigned by the bank server.
+    The Order Number is used to match VEUs in a second upload to the original order.
+    An Order Number matches the format "[A-Z][A-Z0-9]{3}" (and is not really a number!).
+
+    Must be unique per customer ID and per order type
+
+  Transaction ID
+    A transaction ID is a 128-bit cryptographically strong random number.
+    It is assigned by the bank server for every transaction, i.e. upload or download
+    of an order.
+
+    The transaction ID must not be guessable, as it would allow a potential
+    attacker to upload segments of an upload that do not match the whole message's digest.
+
+  Transaction key
+    Symmetric encryption key for the data uploaded/downloaded in a transaction.
+
   Partner ID
     In German, this is called "Kunden ID" (= Customer ID).
     One partner can have multiple "participants", which are identified by user IDs.
@@ -85,10 +108,10 @@ EBICS Glossary
     The ``(partner, user, system)`` triple uniquely identifies a subscriber.
 
   User ID
-    ??
+    See :term:`Partner ID`.
 
   System ID
-    ??
+    See :term:`Partner ID`.
 
   ISO 20022
     *ISO 20022: Financial Services - Universal financial industry message scheme*.  Rather important
@@ -96,6 +119,10 @@ EBICS Glossary
     care of message transmission, segmentation, authentication, key management, etc.
 
     The full catalogue of messages is `available gratis <https://www.iso20022.org/full_catalogue.page>`_.
+
+  UNIFI
+    UNIversal Financial Industry message scheme.  Sometimes used to refer to
+    :tern:`ISO 20022`.
 
   Segmentation
     EBICS implements its own protocol-level segmentation of business-related messages.
@@ -124,11 +151,20 @@ EBICS Glossary
   VEU
     Distributed Electronic Signature (from German "Verteilte Elektronische Unterschrift").
 
+  V001
+    FTAM encryption algorithm ("Verschlüsselung"), superseeded in EBICS by E002.
+
   X002
     Identification and authentication signature in H004 and H005.
 
 Order Types
 ===========
+
+By convention, order types beginning with "H" are administrative order types, and other ones are
+bank-technical order types.  This convention isn't always followed consistently by EBICS.
+
+Relevant Order Types
+--------------------
 
 BTD
   **Only EBICS3.0+**. Business Transaction Format Download.
@@ -163,13 +199,21 @@ HPD
 INI
   Transmission of the subscriber keys for bank-technical electronic signatures.
 
+HAC
+  Customer acknowledgement.  Allows downloading a detailed "log" of the activities
+  done via EBICS, in the pain.002 XML format.
+
 HCS
   Change keys without having to send a new INI/HIA letter.
 
 SPR
   Suspend a subscriber.  Used when a key compromise is suspected.
 
+HCS
+  Change the subscribers keys (``K_SIG``, ``K_IA`` and ``K_ENC``).
 
+Other Order Types
+-----------------
 
 The following order types are, for now, not relevant for LibEuFin:
 
@@ -186,22 +230,59 @@ HVE
 HVD
   Retrieve VEU state.
 
-HVD
+HVU
   Retrieve VEU overview.
 
 HVS
   Cancel Previous Order (from German "Storno").  Used to submit an electronic signature separately
   from a previously uploaded order.
 
+HSA
+  Order to migrate from FTAM to EBICS.  **Removed in EBICS 3.0**.
+
+PUB
+  Change of the bank-technical key (``K_SIG``).
+  Superseeded by HSA.
+
+HCA
+  Change the identification and authentication key as well as the encryption key (``K_IA`` and ``K_ENC``).
+  Superseeded by HCS.
+
+PTK
+  Download a human-readable protocol of operations done via EBICS.
+  Mandatory for German banks.  Superseeded by the machine-readable
+  HAC order type.
+
+
+
+Formats
+=======
+
+ISO 20022
+---------
+
+ISO 20022 is XML-based and defines message format for many finance-related activities.
+The most important message types for LibEuFin are:
+
+camt - Cash Management
+  Particularly camt.053 (BankToCustomerStatement)
+
+pain - Payment Initiation
+  Particularly pain.001 (CustomerCreditTransferInitiation) to initiate a payment and
+  pain.002 (CustomerPaymentStatus) to get the status of a payment.
+  
 
 Key Management
 ==============
 
 RSA key pairs are used for three purposes:
 
-1. Authorization of requests by signing the order data.  Called the *bank-technical key pair*.
-2. Identification/authentication of the subscriber.  Called the *identification and authentication key pair*.
-3. Decryption of the symmetric key used to decrypt the bank's response.  Called the *encryption key pair*.
+1. Authorization of requests by signing the order data.  Called the *bank-technical key pair*,
+   abbreviated here as ``K_SIG``.
+2. Identification/authentication of the subscriber.  Called the *identification and authentication key pair*,
+   abbreviated here as ``K_IA``.
+3. Decryption of the symmetric key used to decrypt the bank's response.  Called the *encryption key pair*,
+   abbreviated here as ``K_ENC``.
 
 One subscriber *may* use three different key pairs for these purposes.
 The identification and authentication key pair may be the same as the encryption key pair.
