@@ -157,6 +157,7 @@ EBICS Glossary
   X002
     Identification and authentication signature in H004 and H005.
 
+
 Order Types
 ===========
 
@@ -186,6 +187,23 @@ Relevant Order Types
     Type: Download.
 
     Fetch payment status report (pain.002)
+
+  CCC
+    Type: Upload.
+
+    Send SEPA Credit Transfer Initiation (pain.001) via XML container.
+    This is the DFÜ variant (Appendix 3 DFÜ-Agreement)
+
+  CCT
+    Type: Upload.
+
+    Send SEPA Credit Transfer Initiation (pain.001) directly.
+    This is the DFÜ variant (Appendix 3 DFÜ-Agreement)
+
+  CIZ
+    Type: Download.
+
+    Payment Status Report for Credit Transfer Instant.
 
   FUL
     **Before EBICS 3.0, France**.  File Upload.  Mainly used by France-style EBICS.
@@ -237,6 +255,11 @@ The following order types are, for now, not relevant for LibEuFin:
     Type: Download.
 
     Download payment status report for direct debit.
+
+  CCU
+    Type: Upload.
+
+    German "Eilüberweisung".
 
   H3K
     Type: Upload.
@@ -348,6 +371,21 @@ The bank-technical key pair may not be used for any other purpose..
 Real-time Transactions
 ======================
 
+Real-time transactions will be supported with EBICS starting November 2019.
+That's the earliest date, some banks may offer it later or not at all.
+
+For us, :ebics:order:`CIZ` is the relevant order type that we need to ask banks
+for.
+
+
+Payment Reversal
+================
+
+It looks like there is no way to "reject" payments, unless you are the bank.
+
+There is a concept of payment reversal (with ``pain.007`` for direct debit and ``camt.055`` for SEPA Credit Transfer),
+but they are a way for the *payer / sender* to reverse a payment before it is finalized.
+
 
 Bank Support
 ============
@@ -364,15 +402,24 @@ According to publicly available `forms
 <https://www.gls-laden.de/media/pdf/f1/c6/f2/nderungsauftrag.pdf>`_, GLS Bank
 supports the following order types:
 
+ * :ebics:order:`AZV`
  * :ebics:order:`PTK`
  * :ebics:order:`CDZ`
+ * :ebics:order:`CRZ`
+ * :ebics:order:`CCC`
+ * :ebics:order:`CCT`
  * ... and mandatory administrative messages
+
+Sparkasse München
+-----------------
+
+See `this document <https://www.sskm.de/content/dam/myif/ssk-muenchen/work/dokumente/pdf/allgemein/ebics-default-geschaeftsvorfaelle.pdf>`__.
 
 
 HypoVereinsbank
 ---------------
 
-See `this document <https://www.hypovereinsbank.de/content/dam/hypovereinsbank/shared/pdf/Auftragsarten_Internet_Nov2018_181118.pdf>`_.
+See `this document <https://www.hypovereinsbank.de/content/dam/hypovereinsbank/shared/pdf/Auftragsarten_Internet_Nov2018_181118.pdf>`__.
 
 Standards and Resources
 =======================
