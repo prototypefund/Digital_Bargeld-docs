@@ -270,18 +270,24 @@ The following order types are, for now, not relevant for LibEuFin:
     no INI and HIA letters are required.
 
   HVE
-    Type: Download.
+    Type: Upload.
 
     Host Verification of Electronic Signature.  Used to submit an electronic signature separately
     from a previously uploaded order.
 
   HVD
+    Type: Download.
+
     Retrieve VEU state.
 
   HVU
+    Type: Download.
+
     Retrieve VEU overview.
 
   HVS
+    Type: Upload.
+
     Cancel Previous Order (from German "Storno").  Used to submit an electronic signature separately
     from a previously uploaded order.
 
@@ -408,6 +414,9 @@ supports the following order types:
  * :ebics:order:`CRZ`
  * :ebics:order:`CCC`
  * :ebics:order:`CCT`
+ * :ebics:order:`CCU`
+ * :ebics:order:`HVE`
+ * :ebics:order:`HVS`
  * ... and mandatory administrative messages
 
 Sparkasse München
