@@ -1,5 +1,9 @@
 """
 EBICS documentation domain.
+
+:copyright: Copyright 2019 by Taler Systems SA
+:license: LGPLv3+
+:author: Florian Dold
 """
 
 import re
@@ -8,22 +12,16 @@ from docutils import nodes
 from typing import List, Optional, Iterable, Dict, Tuple
 from typing import cast
 
-from pygments.lexer import RegexLexer, bygroups
-from pygments.lexers import get_lexer_by_name
-from pygments.token import Literal, Text, Operator, Keyword, Name, Number
-from pygments.util import ClassNotFound
-
 from docutils import nodes
-from docutils.nodes import Element, Node, system_message
+from docutils.nodes import Element, Node
 from docutils.statemachine import StringList
 
 from sphinx import addnodes
 from sphinx.roles import XRefRole
 from sphinx.domains import Domain, ObjType, Index
-from sphinx.directives import ObjectDescription, directives
+from sphinx.directives import directives
 from sphinx.util.docutils import SphinxDirective
 from sphinx.util.nodes import make_refnode
-from sphinx.util.docfields import GroupedField, TypedField
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
