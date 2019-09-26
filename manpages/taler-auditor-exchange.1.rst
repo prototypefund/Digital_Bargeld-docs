@@ -42,7 +42,7 @@ visible via the /exchanges API of the taler-auditor-httpd.
    information. So use with extreme care!
 
 
-   Diagnostics
+Diagnostics
 ===========
 
 **taler-auditor-exchange** will return 0 on success, 1 on usage errors, 3 on problems interacting with the database backend, 4 if exchange entry to be added is already in the database (or already missing when used with **-r**).
