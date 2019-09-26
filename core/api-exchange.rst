@@ -21,7 +21,7 @@ The Exchange RESTful JSON API
 
 The API specified here follows the :ref:`general conventions <http-common>`
 for all details not specified in the individual requests.
-The `glossary <https://docs.taler.net/glossary.html#glossary>`
+The `glossary <https://docs.taler.net/glossary.html#glossary>`_
 defines all specific terms used in this section.
 
 .. _keys:
@@ -53,21 +53,20 @@ possibly by using HTTPS.
   **Response:**
 
   :status 200 OK:
-    The exchange responds with a `ExchangeKeysResponse`_ object. This request should
+    The exchange responds with a `ExchangeKeysResponse` object. This request should
     virtually always be successful.
 
   **Details:**
 
-  .. _ExchangeKeysResponse:
-  .. code-block:: tsref
+  .. ts:def:: ExchangeKeysResponse
 
     interface ExchangeKeysResponse {
       // libtool-style representation of the Taler protocol version, see
       // https://www.gnu.org/software/libtool/manual/html_node/Versioning.html#Versioning
       // The format is "current:revision:age".
-      version: String;
+      version: string;
 
-      // EdDSA master public key of the exchange, used to sign entries in `denoms` and `signkeys`
+      // EdDSA master public key of the exchange, used to sign entries in 'denoms' and 'signkeys'
       master_public_key: EddsaPublicKey;
 
       // Relative duration until inactive reserves are closed; not signed, expressed as
@@ -89,11 +88,11 @@ possibly by using HTTPS.
       // The exchange's signing keys.
       signkeys: SignKey[];
 
-      // compact EdDSA `signature`_ (binary-only) over the SHA-512 hash of the
+      // compact EdDSA `signature` (binary-only) over the SHA-512 hash of the
       // concatenation of all SHA-512 hashes of the RSA denomination public keys
-      // in `denoms` in the same order as they were in `denoms`.  Note that for
+      // in ``denoms`` in the same order as they were in ``denoms``.  Note that for
       // hashing, the binary format of the RSA public keys is used, and not their
-      // `base32 encoding <base32>`_.  Wallets cannot do much with this signature by itself;
+      // `base32 encoding <base32>`.  Wallets cannot do much with this signature by itself;
       // it is only useful when multiple clients need to establish that the exchange
       // is sabotaging end-user anonymity by giving disjoint denomination keys to
       // different users.  If a exchange were to do this, this signature allows the
@@ -107,8 +106,7 @@ possibly by using HTTPS.
       eddsa_pub: EddsaPublicKey;
     }
 
-  .. _tsref-type-Denom:
-  .. code-block:: tsref
+  .. ts:def:: Denom
 
     interface Denom {
       // How much are coins of this denomination worth?
@@ -141,18 +139,17 @@ possibly by using HTTPS.
       // Fee charged by the exchange for refunding a coin of this denomination
       fee_refund: Amount;
 
-      // Signature of `TALER_DenominationKeyValidityPS`_
+      // Signature of `TALER_DenominationKeyValidityPS`
       master_sig: EddsaSignature;
     }
 
   Fees for any of the operations can be zero, but the fields must still be
-  present. The currency of the `fee_deposit`, `fee_refresh` and `fee_refund` must match the
-  currency of the `value`.  Theoretically, the `fee_withdraw` could be in a
+  present. The currency of the ``fee_deposit``, ``fee_refresh`` and ``fee_refund`` must match the
+  currency of the ``value``.  Theoretically, the ``fee_withdraw`` could be in a
   different currency, but this is not currently supported by the
   implementation.
 
-  .. _tsref-type-Payback:
-  .. code-block:: tsref
+  .. ts:def:: Payback
 
     interface Payback {
       // hash of the public key of the denomination that is being revoked under
@@ -166,10 +163,9 @@ possibly by using HTTPS.
       // denomination keys listed here.
     }
 
-  A signing key in the `signkeys` list is a JSON object with the following fields:
+  A signing key in the ``signkeys`` list is a JSON object with the following fields:
 
-  .. _tsref-type-SignKey:
-  .. code-block:: tsref
+  .. ts:def:: SignKey
 
     interface SignKey {
       // The actual exchange's EdDSA signing public key.
@@ -186,15 +182,14 @@ possibly by using HTTPS.
       // henceforth no longer be considered valid in legal disputes.
       stamp_end: Timestamp;
 
-      // Signature over `key` and `stamp_expire` by the exchange master key.
+      // Signature over ``key`` and ``stamp_expire`` by the exchange master key.
       // Must have purpose TALER_SIGNATURE_MASTER_SIGNING_KEY_VALIDITY.
       master_sig: EddsaSignature;
     }
 
-  An entry in the `auditors` list is a JSON object with the following fields:
+  An entry in the ``auditors`` list is a JSON object with the following fields:
 
-  .. _tsref-type-Auditor:
-  .. code-block:: tsref
+  .. ts:def:: Auditor
 
     interface Auditor {
       // The auditor's EdDSA signing public key.
@@ -210,17 +205,16 @@ possibly by using HTTPS.
       denomination_keys: DenominationKey[];
     }
 
-  .. _tsref-type-DenominationKey:
-  .. code-block:: tsref
+  .. ts:def:: DenominationKey
 
     interface DenominationKey {
       // hash of the public RSA key used to sign coins of the respective
       // denomination.  Note that the auditor's signature covers more than just
-      // the hash, but this other information is already provided in `denoms` and
+      // the hash, but this other information is already provided in ``denoms`` and
       // thus not repeated here.
       denom_pub_h: HashCode;
 
-      // Signature of `TALER_ExchangeKeyValidityPS`_
+      // Signature of `TALER_ExchangeKeyValidityPS`
       auditor_sig: EddsaSignature;
     }
 
@@ -247,13 +241,11 @@ Obtaining wire-transfer information
 
   **Response:**
 
-  :status 200: The exchange responds with a `WireResponse`_ object. This request should virtually always be successful.
+  :status 200: The exchange responds with a `WireResponse` object. This request should virtually always be successful.
 
   **Details:**
 
-  .. _WireResponse:
-  .. _tsref-type-WireResponse:
-  .. code-block:: tsref
+  .. ts:def:: WireResponse
 
     interface WireResponse {
 
@@ -268,9 +260,7 @@ Obtaining wire-transfer information
 
   The specification for the account object is:
 
-  .. _WireAccouunt:
-  .. _tsref-type-WireAccount:
-  .. code-block:: tsref
+  .. ts:def:: WireAccount
 
     interface WireAccount {
       // payto:// URL identifying the account and wire method
@@ -286,12 +276,10 @@ Obtaining wire-transfer information
 
   Aggregate wire transfer fees representing the fees the exchange
   charges per wire transfer to a merchant must be specified as an
-  array in all wire transfer response objects under `fees`.  The
+  array in all wire transfer response objects under ``fees``.  The
   respective array contains objects with the following members:
 
-  .. _AggregateTransferFee:
-  .. _tsref-type-AggregateTransferFee:
-  .. code-block:: tsref
+  .. ts:def:: AggregateTransferFee
 
     interface AggregateTransferFee {
       // Per transfer wire transfer fee.
@@ -310,7 +298,7 @@ Obtaining wire-transfer information
       // any of the denomination keys are valid without overlap.
       end_date: Timestamp;
 
-      // Signature of `TALER_MasterWireFeePS`_ with purpose TALER_SIGNATURE_MASTER_WIRE_FEES
+      // Signature of `TALER_MasterWireFeePS` with purpose TALER_SIGNATURE_MASTER_WIRE_FEES
       sig: EddsaSignature;
     }
 
@@ -329,7 +317,7 @@ exchange.
 
   .. note::
 
-     Eventually the exchange will need to advertise a policy for how long it will keep transaction histories for inactive or even fully drained reserves.  We will therefore need some additional handler similar to `/keys` to advertise those terms of service.
+     Eventually the exchange will need to advertise a policy for how long it will keep transaction histories for inactive or even fully drained reserves.  We will therefore need some additional handler similar to ``/keys`` to advertise those terms of service.
 
 
 .. http:get:: /reserve/status
@@ -352,13 +340,12 @@ exchange.
   **Response:**
 
   :status 200 OK:
-    The exchange responds with a `ReserveStatus`_ object;  the reserve was known to the exchange,
+    The exchange responds with a `ReserveStatus` object;  the reserve was known to the exchange,
   :status 404 Not Found: The reserve key does not belong to a reserve known to the exchange.
 
   **Details:**
 
-  .. _ReserveStatus:
-  .. code-block:: tsref
+  .. ts:def:: ReserveStatus
 
     interface ReserveStatus {
       // Balance left in the reserve.
@@ -370,8 +357,7 @@ exchange.
 
   Objects in the transaction history have the following format:
 
-  .. _tsref-type-TransactionHistoryItem:
-  .. code-block:: tsref
+  .. ts:def:: TransactionHistoryItem
 
     interface TransactionHistoryItem {
       // Either "WITHDRAW", "DEPOSIT", "PAYBACK", or "CLOSING"
@@ -383,13 +369,14 @@ exchange.
 
       // Hash of the denomination public key of the coin, if
       // type is "WITHDRAW".
-      h_denom_pub?: base32;
+      h_denom_pub?: Base32;
 
       // Hash of the blinded coin to be signed, if
       // type is "WITHDRAW".
-      h_coin_envelope?: base32;
+      h_coin_envelope?: Base32;
 
-      // Signature of `TALER_WithdrawRequestPS`_ created with the `reserves's private key <reserve-priv>`_.  Only present if type is "WITHDRAW".
+      // Signature of 'TALER_WithdrawRequestPS' created with the `reserves's
+      // private key <reserve-priv>`. Only present if type is "WITHDRAW".
       reserve_sig?: EddsaSignature;
 
       // The fee that was charged for "WITHDRAW".
@@ -399,7 +386,7 @@ exchange.
       closing_fee?: Amount;
 
       // Sender account payto://-URL, only present if type is "DEPOSIT".
-      sender_account_url?: String;
+      sender_account_url?: string;
 
       // Receiver account details, only present if type is "PAYBACK".
       receiver_account_details?: any;
@@ -415,20 +402,27 @@ exchange.
 
       // Hash of the wire account into which the funds were
       // returned to, present if type is "CLOSING".
-      h_wire?: base32;
+      h_wire?: Base32;
 
-      // If `type` is "PAYBACK", this is a signature over a `struct TALER_PaybackConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK.
-      // If `type` is "CLOSING", this is a signature over a `struct TALER_ReserveCloseConfirmationPS` with purpose TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
-      // Not present for other values of `type`.
+      // If ``type`` is "PAYBACK", this is a signature over
+      // a struct `TALER_PaybackConfirmationPS` with purpose
+      // TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK.
+      // If ``type`` is "CLOSING", this is a signature over a
+      // struct `TALER_ReserveCloseConfirmationPS` with purpose
+      // TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
+      // Not present for other values of ``type``.
       exchange_sig?: EddsaSignature;
 
-      // Public key used to create `exchange_sig`, only present if `exchange_sig` is present.
+      // Public key used to create ``exchange_sig``, only present if
+      // ``exchange_sig`` is present.
       exchange_pub?: EddsaPublicKey;
 
       // Public key of the coin that was paid back; only present if type is "PAYBACK".
       coin_pub?: CoinPublicKey;
 
-      // Timestamp when the exchange received the /payback or executed the wire transfer. Only present if `type` is "DEPOSIT", "PAYBACK" or "CLOSING".
+      // Timestamp when the exchange received the /payback or executed the
+      // wire transfer. Only present if ``type`` is "DEPOSIT", "PAYBACK" or
+      // "CLOSING".
       timestamp?: Timestamp;
    }
 
@@ -441,7 +435,7 @@ exchange.
   recover the information if necessary in case of transient failures, like
   power outage, network outage, etc.
 
-  **Request:** The request body must be a `WithdrawRequest`_ object.
+  **Request:** The request body must be a `WithdrawRequest` object.
 
   **Response:**
 
@@ -454,7 +448,7 @@ exchange.
   :status 404 Not Found:
     The denomination key or the reserve are not known to the exchange.  If the
     denomination key is unknown, this suggests a bug in the wallet as the
-    wallet should have used current denomination keys from `/keys`.  If the
+    wallet should have used current denomination keys from ``/keys``.  If the
     reserve is unknown, the wallet should not report a hard error yet, but
     instead simply wait for up to a day, as the wire transaction might simply
     not yet have completed and might be known to the exchange in the near future.
@@ -462,13 +456,12 @@ exchange.
     using exactly the same blinded coin.
   :status 403 Forbidden:
     The balance of the reserve is not sufficient to withdraw a coin of the indicated denomination.
-    The response is `WithdrawError`_ object.
+    The response is `WithdrawError` object.
 
 
   **Details:**
 
-  .. _WithdrawRequest:
-  .. code-block:: tsref
+  .. ts:def:: WithdrawRequest
 
     interface WithdrawRequest {
       // Hash of a denomination public key (RSA), specifying the type of coin the client
@@ -479,27 +472,25 @@ exchange.
       // denomination private key
       coin_ev: CoinEnvelope;
 
-      // `public (EdDSA) key <reserve-pub>`_ of the reserve from which the coin should be
+      // `public (EdDSA) key <reserve-pub>` of the reserve from which the coin should be
       // withdrawn.  The total amount deducted will be the coin's value plus the
       // withdrawal fee as specified with the denomination information.
       reserve_pub: EddsaPublicKey;
 
-      // Signature of `TALER_WithdrawRequestPS`_ created with the `reserves's private key <reserve-priv>`_
+      // Signature of `TALER_WithdrawRequestPS` created with the `reserves's private key <reserve-priv>`
       reserve_sig: EddsaSignature;
     }
 
 
-  .. _WithdrawResponse:
-  .. code-block:: tsref
+  .. ts:def:: WithdrawResponse
 
     interface WithdrawResponse {
-      // The blinded RSA signature over the `coin_ev`, affirms the coin's
+      // The blinded RSA signature over the ``coin_ev``, affirms the coin's
       // validity after unblinding.
       ev_sig: BlindedRsaSignature;
     }
 
-  .. _WithdrawError:
-  .. code-block:: tsref
+  .. ts:def:: WithdrawError
 
     interface WithdrawError {
       // Constant "Insufficient funds"
@@ -535,26 +526,26 @@ denomination.
   the digital coins.  The request should contain a JSON object with the
   following fields:
 
-  **Request:** The request body must be a `DepositRequest`_ object.
+  **Request:** The request body must be a `DepositRequest` object.
 
   **Response:**
 
   :status 200 Ok:
-    The operation succeeded, the exchange confirms that no double-spending took place.  The response will include a `DepositSuccess`_ object.
+    The operation succeeded, the exchange confirms that no double-spending took
+    place.  The response will include a `DepositSuccess` object.
   :status 401 Unauthorized:
     One of the signatures is invalid.
   :status 403 Forbidden:
     The deposit operation has failed because the coin has insufficient
     residual value; the request should not be repeated again with this coin.
-    In this case, the response is a `DepositDoubleSpendError`_.
+    In this case, the response is a `DepositDoubleSpendError`.
   :status 404 Not Found:
     Either the denomination key is not recognized (expired or invalid) or
     the wire type is not recognized.
 
   **Details:**
 
-  .. _DepositRequest:
-  .. code-block:: tsref
+  .. ts:def:: DepositRequest
 
     interface DepositRequest {
       // Amount to be deposited, can be a fraction of the
@@ -563,10 +554,10 @@ denomination.
 
       // The merchant's account details. This must be a JSON object whose format
       // must correspond to one of the supported wire transfer formats of the exchange.
-      // See `wireformats`_.
-      wire: Object;
+      // See `wireformats`.
+      wire: object;
 
-      // SHA-512 hash of the merchant's payment details from `wire`.  Although
+      // SHA-512 hash of the merchant's payment details from ``wire``.  Although
       // strictly speaking redundant, this helps detect inconsistencies.
       // TODO: change to 'h_wire'.
       H_wire: HashCode;
@@ -575,7 +566,7 @@ denomination.
       // details are never disclosed to the exchange.
       h_contract_terms: HashCode;
 
-      // `coin's public key <eddsa-coin-pub>`_, both ECDHE and EdDSA.
+      // `coin's public key <eddsa-coin-pub>`, both ECDHE and EdDSA.
       coin_pub: CoinPublicKey;
 
       // Hash of denomination RSA key with which the coin is signed
@@ -594,7 +585,7 @@ denomination.
       // the merchant, in case of successful payment.
       wire_deadline: Timestamp;
 
-      // EdDSA `public key of the merchant <merchant-pub>`_, so that the client can identify the
+      // EdDSA `public key of the merchant <merchant-pub>`, so that the client can identify the
       // merchant for refund requests.
       merchant_pub: EddsaPublicKey;
 
@@ -602,29 +593,27 @@ denomination.
       // exchange, possibly zero if refunds are not allowed.
       refund_deadline: Timestamp;
 
-      // Signature of `TALER_DepositRequestPS`_, made by the customer with the `coin's private key <coin-priv>`_
+      // Signature of `TALER_DepositRequestPS`, made by the customer with the
+      // `coin's private key <coin-priv>`
       coin_sig: EddsaSignature;
     }
 
   The deposit operation succeeds if the coin is valid for making a deposit and
   has enough residual value that has not already been deposited or melted.
 
-
-  .. _`tsref-type-DepositSuccess`:
-  .. _DepositSuccess:
-  .. code-block:: tsref
+  .. ts:def:: DepositSuccess
 
      interface DepositSuccess {
       // The string constant "DEPOSIT_OK"
       status: string;
 
-      // the EdDSA signature of `TALER_DepositConfirmationPS`_ using a current
-      // `signing key of the exchange <sign-key-priv>`_ affirming the successful
+      // the EdDSA signature of `TALER_DepositConfirmationPS` using a current
+      // `signing key of the exchange <sign-key-priv>` affirming the successful
       // deposit and that the exchange will transfer the funds after the refund
       // deadline, or as soon as possible if the refund deadline is zero.
       sig: EddsaSignature;
 
-      // `public EdDSA key of the exchange <sign-key-pub>`_ that was used to
+      // `public EdDSA key of the exchange <sign-key-pub>` that was used to
       // generate the signature.
       // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
@@ -632,8 +621,7 @@ denomination.
       pub: EddsaPublicKey;
     }
 
-  .. _DepositDoubleSpendError:
-  .. code-block:: tsref
+  .. ts:def:: DepositDoubleSpendError
 
     interface DepositDoubleSpendError {
       // The string constant "insufficient funds"
@@ -644,16 +632,15 @@ denomination.
       history: CoinSpendHistoryItem[];
     }
 
-  .. _`tsref-type-CoinSpendHistoryItem`:
-  .. _CoinSpendHistoryItem:
-  .. code-block:: tsref
+  .. ts:def:: CoinSpendHistoryItem
 
     interface CoinSpendHistoryItem {
       // Either "DEPOSIT", "MELT", "REFUND", "PAYBACK",
       // "OLD-COIN-PAYBACK" or "PAYBACK-REFRESH"
       type: string;
 
-      // The total amount of the coin's value absorbed (or restored in the case of a refund) by this transaction.
+      // The total amount of the coin's value absorbed (or restored in the
+      // case of a refund) by this transaction.
       // Note that for deposit and melt this means the amount given includes
       // the transaction fee, while for refunds the amount given excludes
       // the transaction fee. The current coin value can thus be computed by
@@ -676,7 +663,7 @@ denomination.
       // exchange, possibly zero if refunds are not allowed. Only for "DEPOSIT" operations.
       refund_deadline?: Timestamp;
 
-      // Signature by the coin, only present if `type` is "DEPOSIT" or "MELT"
+      // Signature by the coin, only present if ``type`` is "DEPOSIT" or "MELT"
       coin_sig?: EddsaSignature;
 
       // Deposit fee in case of type "MELT".
@@ -686,7 +673,7 @@ denomination.
       rc?: TALER_RefreshCommitmentP;
 
       // Hash of the bank account from where we received the funds,
-      // only present if `type` is "DEPOSIT"
+      // only present if ``type`` is "DEPOSIT"
       h_wire?: HashCode;
 
       // Deposit fee in case of type "REFUND".
@@ -694,36 +681,37 @@ denomination.
 
       // Hash over the proposal data of the contract that
       // is being paid (if type is "DEPOSIT") or refunded (if
-      // `type` is "REFUND"); otherwise absent.
+      // ``type`` is "REFUND"); otherwise absent.
       h_contract_terms?: HashCode;
 
-      // Refund transaction ID.  Only present if `type` is
+      // Refund transaction ID.  Only present if ``type`` is
       // "REFUND"
-      rtransaction_id?: integer;
+      rtransaction_id?: Integer;
 
-      // `EdDSA Signature <eddsa-sig>`_ authorizing the REFUND. Made with
-      // the `public key of the merchant <merchant-pub>`_.
-      // Only present if `type` is "REFUND"
+      // `EdDSA Signature <eddsa-sig>` authorizing the REFUND. Made with
+      // the `public key of the merchant <merchant-pub>`.
+      // Only present if ``type`` is "REFUND"
       merchant_sig?: EddsaSignature;
 
       // public key of the reserve that will receive the funds, for "PAYBACK" operations.
       reserve_pub?: EddsaPublicKey;
 
-      // Signature by the exchange, only present if `type` is "PAYBACK",
+      // Signature by the exchange, only present if ``type`` is "PAYBACK",
       // "OLD-COIN-PAYBACK" or "PAYBACK-REFRESH".  Signature is
       // of type TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK for "PAYBACK",
       // and of type TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK_REFRESH otherwise.
       exchange_sig?: EddsaSignature;
 
-      // public key used to sign `exchange_sig`, only present if `exchange_sig` present.
+      // public key used to sign ``exchange_sig``,
+      // only present if ``exchange_sig`` present.
       exchange_pub?: EddsaPublicKey;
 
       // Blinding factor of the revoked new coin,
-      // only present if `type` is "REFRESH_PAYBACK".
+      // only present if ``type`` is "REFRESH_PAYBACK".
       new_coin_blinding_secret: RsaBlindingKeySecret;
 
       // Blinded public key of the revoked new coin,
-      // only present if `type` is "REFRESH_PAYBACK".
+      // only present if ``type`` is "REFRESH_PAYBACK".
       new_coin_ev: RsaBlindingKeySecret;
     }
 
@@ -731,7 +719,7 @@ denomination.
 Refreshing
 ----------
 
-Refreshing creates `n` new coins from `m` old coins, where the sum of
+Refreshing creates ``n`` new coins from ``m`` old coins, where the sum of
 denominations of the new coins must be smaller than the sum of the old coins'
 denominations plus melting (refresh) and withdrawal fees charged by the exchange.
 The refreshing API can be used by wallets to melt partially spent coins, making
@@ -747,19 +735,19 @@ the API during normal operation.
 .. http:post:: /refresh/melt
 
   "Melts" coins.  Invalidates the coins and prepares for exchangeing of fresh
-  coins.  Taler uses a global parameter `kappa` for the cut-and-choose
+  coins.  Taler uses a global parameter ``kappa`` for the cut-and-choose
   component of the protocol, for which this request is the commitment.  Thus,
-  various arguments are given `kappa`-times in this step.  At present `kappa`
+  various arguments are given ``kappa``-times in this step.  At present ``kappa``
   is always 3.
 
 
   :status 401 Unauthorized:
     One of the signatures is invalid.
   :status 200 OK:
-    The request was succesful.  The response body is `MeltResponse`_ in this case.
+    The request was succesful.  The response body is `MeltResponse` in this case.
   :status 403 Forbidden:
     The operation is not allowed as at least one of the coins has insufficient funds.  The response
-    is `MeltForbiddenResponse`_ in this case.
+    is `MeltForbiddenResponse` in this case.
   :status 404:
     the exchange does not recognize the denomination key as belonging to the exchange,
     or it has expired
@@ -767,20 +755,20 @@ the API during normal operation.
   **Details:**
 
 
-  .. code-block:: tsref
+  .. ts:def:: MeltRequest
 
     interface MeltRequest {
 
-      // `Coin public key <eddsa-coin-pub>`_, uniquely identifies the coin to be melted
+      // `Coin public key <eddsa-coin-pub>`, uniquely identifies the coin to be melted
       coin_pub: string;
 
       // Hash of the denomination public key, to determine total coin value.
       denom_pub_hash: HashCode;
 
-      // Signature over the `coin public key <eddsa-coin-pub>`_ by the denomination.
+      // Signature over the `coin public key <eddsa-coin-pub>` by the denomination.
       denom_sig: RsaSignature;
 
-      // Signature by the `coin <coin-priv>`_ over the melt commitment.
+      // Signature by the `coin <coin-priv>` over the melt commitment.
       confirm_sig: EddsaSignature;
 
       // Amount of the value of the coin that should be melted as part of
@@ -788,7 +776,7 @@ the API during normal operation.
       value_with_fee: Amount;
 
       // Melt commitment.  Hash over the various coins to be withdrawn.
-      // See also `TALER_refresh_get_commitment()`
+      // See also ``TALER_refresh_get_commitment()``
       rc: TALER_RefreshCommitmentP;
 
     }
@@ -796,21 +784,19 @@ the API during normal operation.
   For details about the HKDF used to derive the new coin private keys and
   the blinding factors from ECDHE between the transfer public keys and
   the private key of the melted coin, please refer to the
-  implementation in `libtalerutil`.
+  implementation in ``libtalerutil``.
 
-  .. _tsref-type-MeltResponse:
-  .. _MeltResponse:
-  .. code-block:: tsref
+  .. ts:def:: MeltResponse
 
     interface MeltResponse {
-      // Which of the `kappa` indices does the client not have to reveal.
+      // Which of the ``kappa`` indices does the client not have to reveal.
       noreveal_index: number;
 
-      // Signature of `TALER_RefreshMeltConfirmationPS`_ whereby the exchange
-      // affirms the successful melt and confirming the `noreveal_index`
+      // Signature of `TALER_RefreshMeltConfirmationPS` whereby the exchange
+      // affirms the successful melt and confirming the ``noreveal_index``
       exchange_sig: EddsaSignature;
 
-      // `public EdDSA key <sign-key-pub>`_ of the exchange that was used to generate the signature.
+      // `public EdDSA key <sign-key-pub>` of the exchange that was used to generate the signature.
       // Should match one of the exchange's signing keys from /keys.  Again given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
@@ -818,9 +804,7 @@ the API during normal operation.
     }
 
 
-  .. _tsref-type-MeltForbiddenResponse:
-  .. _MeltForbiddenResponse:
-  .. code-block:: tsref
+  .. ts:def:: MeltForbiddenResponse
 
     interface MeltForbiddenResponse {
       // Always "insufficient funds"
@@ -848,50 +832,50 @@ the API during normal operation.
 .. http:post:: /refresh/reveal
 
   Reveal previously commited values to the exchange, except for the values
-  corresponding to the `noreveal_index` returned by the /exchange/melt step.
+  corresponding to the ``noreveal_index`` returned by the /exchange/melt step.
 
   Errors such as failing to do proper arithmetic when it comes to calculating
   the total of the coin values and fees are simply reported as bad requests.
   This includes issues such as melting the same coin twice in the same session,
   which is simply not allowed.  However, theoretically it is possible to melt a
-  coin twice, as long as the `value_with_fee` of the two melting operations is
+  coin twice, as long as the ``value_with_fee`` of the two melting operations is
   not larger than the total remaining value of the coin before the melting
   operations. Nevertheless, this is not really useful.
 
   :status 200 OK:
     The transfer private keys matched the commitment and the original request was well-formed.
-    The response body is a `RevealResponse`_
+    The response body is a `RevealResponse`
   :status 409 Conflict:
     There is a problem between the original commitment and the revealed private
     keys.  The returned information is proof of the missmatch, and therefore
     rather verbose, as it includes most of the original /refresh/melt request,
     but of course expected to be primarily used for diagnostics.
-    The response body is a `RevealConflictResponse`_.
+    The response body is a `RevealConflictResponse`.
 
   **Details:**
 
   Request body contains a JSON object with the following fields:
 
-  .. code-block:: tsref
+  .. ts:def:: RevealRequest
 
     interface RevealRequest {
 
-      // Array of `n` new hash codes of denomination public keys to order.
+      // Array of ``n`` new hash codes of denomination public keys to order.
       new_denoms_h: HashCode[];
 
-      // Array of `n` entries with blinded coins,
-      // matching the respective entries in `new_denoms`.
+      // Array of ``n`` entries with blinded coins,
+      // matching the respective entries in ``new_denoms``.
       coin_evs: CoinEnvelope[];
 
-      // `kappa - 1` transfer private keys (ephemeral ECDHE keys)
+      // ``kappa - 1`` transfer private keys (ephemeral ECDHE keys)
       transfer_privs: EddsaPrivateKey[];
 
-      // transfer public key at the `noreveal_index`.
+      // transfer public key at the ``noreveal_index``.
       transfer_pub: EddsaPublicKey;
 
-      // Array of `n` signatures made by the wallet using the old coin's private key,
+      // Array of ``n`` signatures made by the wallet using the old coin's private key,
       // used later to verify the /refresh/link response from the exchange.
-      // Signs over a `TALER_CoinLinkSignaturePS`_
+      // Signs over a `TALER_CoinLinkSignaturePS`
       link_sigs: EddsaSignature[];
 
       // The original commitment, used to match the /refresh/reveal
@@ -900,8 +884,7 @@ the API during normal operation.
     }
 
 
-  .. _RevealResponse:
-  .. code-block:: tsref
+  .. ts:def:: RevealResponse
 
     interface RevealResponse {
       // List of the exchange's blinded RSA signatures on the new coins.  Each
@@ -911,15 +894,14 @@ the API during normal operation.
     }
 
 
-  .. _RevealConflictResponse:
-  .. code-block:: tsref
+  .. ts:def:: RevealConflictResponse
 
     interface RevealConflictResponse {
       // Constant "commitment violation"
       error: string;
 
       // Detailed error code
-      code: integer;
+      code: Integer;
 
       // Commitment as calculated by the exchange from the revealed data.
       rc_expected: HashCode;
@@ -947,11 +929,10 @@ the API during normal operation.
 
   **Details:**
 
-  .. _tsref-type-LinkResponse:
-  .. code-block:: tsref
+  .. ts:def:: LinkResponse
 
     interface LinkResponse {
-      // transfer ECDHE public key corresponding to the `coin_pub`, used to
+      // transfer ECDHE public key corresponding to the ``coin_pub``, used to
       // compute the blinding factor and private key of the fresh coins.
       transfer_pub: EcdhePublicKey;
 
@@ -960,8 +941,7 @@ the API during normal operation.
       new_coins: NewCoinInfo[];
     }
 
-  .. _tsref-type-NewCoinInfo:
-  .. code-block:: tsref
+  .. ts:def:: NewCoinInfo
 
     interface NewCoinInfo {
       // RSA public key of the exchangeed coin.
@@ -975,7 +955,7 @@ the API during normal operation.
       coin_ev: CoinEnvelope;
 
       // Signature made by the old coin over the refresh request.
-      // Signs over a `TALER_CoinLinkSignaturePS`_
+      // Signs over a `TALER_CoinLinkSignaturePS`
       link_sig: EddsaSignature;
     }
 
@@ -994,15 +974,15 @@ part of the /keys response.  If and only if this has happened,
 coins that were signed with those denomination keys can be cashed
 in using this API.
 
-   .. note::
+.. note::
 
-      This is a proposed API, we are implementing it as bug #3887.
+  This is a proposed API, we are implementing it as bug #3887.
 
 .. http:post:: /payback
 
   Demand that a coin be refunded via wire transfer to the original owner.
 
-  **Request:** The request body must be a `PaybackRequest`_ object.
+  **Request:** The request body must be a `PaybackRequest` object.
 
   **Response:**
   :status 200 OK:
@@ -1013,7 +993,7 @@ in using this API.
   coin is not lost.
   :status 401 Unauthorized: The coin's signature is invalid.
   :status 403 Forbidden: The coin was already used for payment.
-  The response is a `DepositDoubleSpendError`_.
+  The response is a `DepositDoubleSpendError`.
   :status 404 Not Found:
   The denomination key is not in the set of denomination
   keys where emergency pay back is enabled, or the blinded
@@ -1021,15 +1001,14 @@ in using this API.
 
   **Details:**
 
-  .. _PaybackRequest:
-  .. code-block:: tsref
+  .. ts:def:: PaybackRequest
 
     interface PaybackRequest {
       // Hash of denomination public key (RSA), specifying the type of coin the client
       // would like the exchange to pay back.
       denom_pub_hash: HashCode;
 
-      // Signature over the `coin public key <eddsa-coin-pub>`_ by the denomination.
+      // Signature over the `coin public key <eddsa-coin-pub>` by the denomination.
       denom_sig: RsaSignature;
 
       // coin's public key
@@ -1038,7 +1017,7 @@ in using this API.
       // coin's blinding factor
       coin_blind_key_secret: RsaBlindingKeySecret;
 
-      // Signature of `TALER_PaybackRequestPS`_ created with the `coin's private key <coin-priv>`_
+      // Signature of `TALER_PaybackRequestPS` created with the `coin's private key <coin-priv>`
       coin_sig: EddsaSignature;
 
       // Was the coin refreshed (and thus the payback should go to the old coin)?
@@ -1047,8 +1026,7 @@ in using this API.
     }
 
 
-  .. _PaybackConfirmation:
-  .. code-block:: tsref
+  .. ts:def:: PaybackConfirmation
 
     interface PaybackConfirmation {
       // public key of the reserve that will receive the payback,
@@ -1066,9 +1044,9 @@ in using this API.
       // Time by which the exchange received the /payback request.
       timestamp: Timestamp;
 
-      // the EdDSA signature of `TALER_PaybackConfirmationPS`_ (refreshed false)
-      // or `TALER_PaybackRefreshConfirmationPS_` (refreshed true) using a current
-      // `signing key of the exchange <sign-key-priv>`_ affirming the successful
+      // the EdDSA signature of `TALER_PaybackConfirmationPS` (refreshed false)
+      // or `TALER_PaybackRefreshConfirmationPS` (refreshed true) using a current
+      // `signing key of the exchange <sign-key-priv>` affirming the successful
       // payback request, and that the exchange promises to transfer the funds
       // by the date specified (this allows the exchange delaying the transfer
       // a bit to aggregate additional payback requests into a larger one).
@@ -1125,13 +1103,11 @@ typically also view the balance.)
 
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
-    The body of the response is a `TrackTransferResponse`_.
+    The body of the response is a `TrackTransferResponse`.
   :status 404 Not Found:
     The wire transfer identifier is unknown to the exchange.
 
-  .. _TrackTransferResponse:
-  .. _tsref-type-TrackTransferResponse:
-  .. code-block:: tsref
+  .. ts:def:: TrackTransferResponse
 
     interface TrackTransferResponse {
       // Total amount transferred
@@ -1163,8 +1139,7 @@ typically also view the balance.)
       exchange_pub: EddsaSignature;
     }
 
-  .. _tsref-type-TrackTransferDetail:
-  .. code-block:: tsref
+  .. ts:def:: TrackTransferDetail
 
     interface TrackTransferDetail {
       // SHA-512 hash of the contact of the merchant with the customer.
@@ -1185,26 +1160,24 @@ typically also view the balance.)
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
 
-  **Request:** The request body must be a `TrackTransactionRequest`_ JSON object.
+  **Request:** The request body must be a `TrackTransactionRequest` JSON object.
 
   **Response:**
 
   :status 200 OK:
     The deposit has been executed by the exchange and we have a wire transfer identifier.
-    The response body is a `TrackTransactionResponse`_ object.
+    The response body is a `TrackTransactionResponse` object.
   :status 202 Accepted:
     The deposit request has been accepted for processing, but was not yet
     executed.  Hence the exchange does not yet have a wire transfer identifier.  The
     merchant should come back later and ask again.
-    The response body is a `TrackTransactionAcceptedResponse`_.
+    The response body is a `TrackTransactionAcceptedResponse`.
   :status 401 Unauthorized: The signature is invalid.
   :status 404 Not Found: The deposit operation is unknown to the exchange
 
   **Details:**
 
-  .. _tsref-type-TrackTransactionRequest:
-  .. _TrackTransactionRequest:
-  .. code-block:: tsref
+  .. ts:def:: TrackTransactionRequest
 
     interface TrackTransactionRequest {
       // SHA-512 hash of the merchant's payment details.
@@ -1227,9 +1200,7 @@ typically also view the balance.)
     }
 
 
-  .. _tsref-type-TrackTransactionResponse:
-  .. _TrackTransactionResponse:
-  .. code-block:: tsref
+  .. ts:def:: TrackTransactionResponse
 
     interface TrackTransactionResponse {
       // raw wire transfer identifier of the deposit.
@@ -1255,9 +1226,7 @@ typically also view the balance.)
       exchange_pub: EddsaPublicKey;
     }
 
-  .. _tsref-type-TrackTransactionAcceptedResponse:
-  .. _TrackTransactionAcceptedResponse:
-  .. code-block:: tsref
+  .. ts:def:: TrackTransactionAcceptedResponse
 
     interface TrackTransactionAcceptedResponse {
       // time by which the exchange currently thinks the deposit will be executed.
@@ -1274,12 +1243,12 @@ Refunds
 
   Undo deposit of the given coin, restoring its value.
 
-  **Request:** The request body must be a `RefundRequest`_ object.
+  **Request:** The request body must be a `RefundRequest` object.
 
   **Response:**
 
   :status 200 Ok:
-    The operation succeeded, the exchange confirms that the coin can now be refreshed.  The response will include a `RefundSuccess`_ object.
+    The operation succeeded, the exchange confirms that the coin can now be refreshed.  The response will include a `RefundSuccess` object.
   :status 401 Unauthorized:
     Merchant signature is invalid.
   :status 404 Not found:
@@ -1289,8 +1258,7 @@ Refunds
 
   **Details:**
 
-  .. _RefundRequest:
-  .. code-block:: tsref
+  .. ts:def:: RefundRequest
 
      interface RefundRequest {
 
@@ -1320,8 +1288,7 @@ Refunds
 
     }
 
-  .. _RefundSuccess:
-  .. code-block:: tsref
+  .. ts:def:: RefundSuccess
 
     interface RefundSuccess {
       // The string constant "REFUND_OK"
@@ -1355,9 +1322,9 @@ binary-compatible with the implementation of the exchange.
 
   **Request:**
 
-  .. code-block:: tsref
+  .. ts:def:: TestBase32Request
 
-    {
+    interface TestBase32Request {
       // some base32-encoded value
       input: Base32;
     }
@@ -1380,10 +1347,10 @@ binary-compatible with the implementation of the exchange.
   .. code-block:: tsref
 
     {
-      // Some `base32`_-encoded value
+      // Some `base32`-encoded value
       input: Base32;
 
-      // some `base32`_-encoded hash that is used to derive the symmetric key and
+      // some `base32`-encoded hash that is used to derive the symmetric key and
       // initialization vector for the encryption using the HKDF with "skey" and
       // "iv" as the salt.
       key_hash: Base32;
@@ -1409,7 +1376,7 @@ binary-compatible with the implementation of the exchange.
   .. code-block:: tsref
 
     {
-      // Some `base32`_-encoded value
+      // Some `base32`-encoded value
       input: Base32;
     }
 
@@ -1513,7 +1480,7 @@ binary-compatible with the implementation of the exchange.
   .. code-block:: tsref
 
     {
-      // Blind RSA signature over the `blind_ev` using the private key
+      // Blind RSA signature over the ``blind_ev`` using the private key
       // corresponding to the RSA public key returned by /test/rsa/get.
       rsa_blind_sig: BlindedRsaSignature;
     }
@@ -1530,7 +1497,7 @@ binary-compatible with the implementation of the exchange.
       // Private transfer key
       trans_priv: string;
 
-      // `Coin public key <eddsa-coin-pub>`_
+      // `Coin public key._
       coin_pub: EddsaPublicKey;
     }
 

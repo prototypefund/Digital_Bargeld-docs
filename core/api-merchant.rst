@@ -35,7 +35,7 @@ Receiving Payments
 
   Create a new order that a customer can pay for.
 
-  This request is **not** idempotent unless an `order_id` is explicitly specified.
+  This request is **not** idempotent unless an ``order_id`` is explicitly specified.
 
   .. note::
 
@@ -46,16 +46,15 @@ Receiving Payments
 
   **Request:**
 
-  The request must be a `PostOrderRequest`_.
+  The request must be a `PostOrderRequest`.
 
   **Response**
 
   :status 200 OK:
     The backend has successfully created the proposal.  The response is a
-    `PostOrderResponse`_.
+    :ts:type:`PostOrderResponse`.
 
-  .. _PostOrderRequest:
-  .. code-block:: tsref
+  .. ts:def:: PostOrderRequest
 
     interface PostOrderRequest {
       // The order must at least contain the minimal
@@ -64,13 +63,11 @@ Receiving Payments
     }
 
   The following fields must be specified in the ``order`` field of the request.  Other fields from
-  `ContractTerms`_ are optional, and will override the defaults in the merchant configuration.
+  `ContractTerms` are optional, and will override the defaults in the merchant configuration.
 
-  .. _MinimalOrderDetail:
-  .. _tsref-type-MinimalOrderDetail:
-  .. code-block:: tsref
+  .. ts:def:: MinimalOrderDetail
 
-    interface MinimalOrderRequest {
+    interface MinimalOrderDetail {
       // Amount to be paid by the customer
       amount: Amount
 
@@ -83,8 +80,7 @@ Receiving Payments
       fulfillment_url: string;
     }
 
-  .. _PostOrderResponse:
-  .. code-block:: tsref
+  .. ts:def:: PostOrderResponse
 
     interface PostOrderResponse {
       // Order ID of the response that was just created
@@ -105,16 +101,13 @@ Receiving Payments
 
   **Response:**
 
-  Returns a `CheckPaymentResponse`_, whose format can differ based on the status of the payment.
+  Returns a `CheckPaymentResponse`, whose format can differ based on the status of the payment.
 
-  .. _CheckPaymentResponse:
-  .. code-block:: tsref
+  .. ts:def:: CheckPaymentResponse
 
     type CheckPaymentResponse = CheckPaymentPaidResponse | CheckPaymentUnpaidResponse
 
-  .. _CheckPaymentPaidResponse:
-  .. _tsref-type-CheckPaymentPaidResponse:
-  .. code-block:: tsref
+  .. ts:def:: CheckPaymentPaidResponse
 
     interface CheckPaymentPaidResponse {
       paid: true;
@@ -129,9 +122,7 @@ Receiving Payments
       contract_terms: ContractTerms;
     }
 
-  .. _CheckPaymentUnpaidResponse:
-  .. _tsref-type-CheckPaymentUnpaidResponse:
-  .. code-block:: tsref
+  .. ts:def:: CheckPaymentUnpaidResponse
 
     interface CheckPaymentUnpaidResponse {
       paid: false;
@@ -150,21 +141,20 @@ Giving Refunds
 .. http:post:: /refund
 
   Increase the refund amount associated with a given order.  The user should be
-  redirected to the `refund_redirect_url` to trigger refund processing in the wallet.
+  redirected to the ``refund_redirect_url`` to trigger refund processing in the wallet.
 
   **Request**
 
-  The request body is a `RefundRequest`_ object.
+  The request body is a `RefundRequest` object.
 
   **Response**
 
   :status 200 OK:
-    The refund amount has been increased, the backend responds with a `MerchantRefundResponse`_
+    The refund amount has been increased, the backend responds with a `MerchantRefundResponse`
   :status 400 Bad request:
     The refund amount is not consistent: it is not bigger than the previous one.
 
-  .. _RefundRequest:
-  .. code-block:: tsref
+  .. ts:def:: RefundRequest
 
     interface RefundRequest {
       // Order id of the transaction to be refunded
@@ -177,8 +167,7 @@ Giving Refunds
       reason: string;
     }
 
-  .. _MerchantRefundResponse:
-  .. code-block:: tsref
+  .. ts:def:: MerchantRefundResponse
 
     interface MerchantRefundResponse {
       // Public key of the merchant
@@ -197,16 +186,14 @@ Giving Refunds
       refund_redirect_url: string;
     }
 
-  .. _MerchantRefundPermission:
-  .. _tsref-type-MerchantRefundPermissoin:
-  .. code-block:: tsref
+  .. ts:def:: MerchantRefundPermission
 
     interface MerchantRefundPermission {
       // Amount to be refunded.
-      refund_amount: AmountJson;
+      refund_amount: Amount;
 
       // Fee for the refund.
-      refund_fee: AmountJson;
+      refund_fee: Amount;
 
       // Public key of the coin being refunded.
       coin_pub: string;
@@ -227,18 +214,18 @@ Giving Customer Tips
 .. http:post:: /tip-authorize
 
   Authorize a tip that can be picked up by the customer's wallet by POSTing to
-  `/tip-pickup`.  Note that this is simply the authorization step the back
-  office has to trigger first.  The user should be navigated to the `tip_redirect_url`
+  ``/tip-pickup``.  Note that this is simply the authorization step the back
+  office has to trigger first.  The user should be navigated to the ``tip_redirect_url``
   to trigger tip processing in the wallet.
 
   **Request**
 
-  The request body is a `TipCreateRequest`_ object.
+  The request body is a `TipCreateRequest` object.
 
   **Response**
 
   :status 200 OK:
-    A tip has been created. The backend responds with a `TipCreateConfirmation`_
+    A tip has been created. The backend responds with a `TipCreateConfirmation`
   :status 404 Not Found:
     The instance is unknown to the backend, expired or was never enabled or
     the reserve is unknown to the exchange or expired (see detailed status
@@ -249,8 +236,7 @@ Giving Customer Tips
   :status 412 Precondition Failed:
     The tip amount requested exceeds the available reserve balance for tipping.
 
-  .. _TipCreateRequest:
-  .. code-block:: tsref
+  .. ts:def:: TipCreateRequest
 
     interface TipCreateRequest {
       // Amount that the customer should be tipped
@@ -264,8 +250,7 @@ Giving Customer Tips
       next_url: string;
     }
 
-  .. _TipCreateConfirmation:
-  .. code-block:: tsref
+  .. ts:def:: TipCreateConfirmation
 
     interface TipCreateConfirmation {
       // Token that will be handed to the wallet,
@@ -286,12 +271,11 @@ Giving Customer Tips
   **Response**
 
   :status 200 OK:
-    A tip has been created. The backend responds with a `TipQueryResponse`_
+    A tip has been created. The backend responds with a `TipQueryResponse`
   :status 412 Precondition Failed:
     The merchant backend instance does not have a tipping reserve configured.
 
-  .. _TipQueryResponse:
-  .. code-block:: tsref
+  .. ts:def:: TipQueryResponse
 
     interface TipQueryResponse {
       // Amount still available
@@ -329,7 +313,7 @@ Tracking Wire Transfers
 
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
-    The body of the response is a `MerchantTrackTransferResponse`_.  Note that
+    The body of the response is a `TrackTransferResponse`.  Note that
     the similarity to the response given by the exchange for a /track/transfer
     is completely intended.
 
@@ -337,13 +321,11 @@ Tracking Wire Transfers
     The wire transfer identifier is unknown to the exchange.
 
   :status 424 Failed Dependency: The exchange provided conflicting information about the transfer. Namely,
-    there is at least one deposit among the deposits aggregated by `wtid` that accounts for a coin whose
+    there is at least one deposit among the deposits aggregated by ``wtid`` that accounts for a coin whose
     details don't match the details stored in merchant's database about the same keyed coin.
-    The response body contains the `TrackTransferConflictDetails`_.
+    The response body contains the `TrackTransferConflictDetails`.
 
-  .. _MerchantTrackTransferResponse:
-  .. _tsref-type-TrackTransferResponse:
-  .. code-block:: tsref
+  .. ts:def:: TrackTransferResponse
 
     interface TrackTransferResponse {
       // Total amount transferred
@@ -365,7 +347,7 @@ Tracking Wire Transfers
       deposits_sums: TrackTransferDetail[];
 
       // signature from the exchange made with purpose
-      // `TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT`
+      // ``TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT``
       exchange_sig: EddsaSignature;
 
       // public EdDSA key of the exchange that was used to generate the signature.
@@ -375,15 +357,14 @@ Tracking Wire Transfers
       exchange_pub: EddsaSignature;
     }
 
-  .. _tsref-type-TrackTransferDetail:
-  .. code-block:: tsref
+  .. ts:def:: TrackTransferDetail
 
     interface TrackTransferDetail {
       // Business activity associated with the wire transferred amount
-      // `deposit_value`.
+      // ``deposit_value``.
       order_id: string;
 
-      // The total amount the exchange paid back for `order_id`.
+      // The total amount the exchange paid back for ``order_id``.
       deposit_value: Amount;
 
       // applicable fees for the deposit
@@ -393,23 +374,21 @@ Tracking Wire Transfers
 
   **Details:**
 
-  .. _tsref-type-TrackTransferConflictDetails:
-  .. _TrackTransferConflictDetails:
-  .. code-block:: tsref
+  .. ts:def:: TrackTransferConflictDetails
 
     interface TrackTransferConflictDetails {
-      // Numerical `error code <error-codes>`_
+      // Numerical `error code <error-codes>`
       code: number;
 
       // Text describing the issue for humans.
-      hint: String;
+      hint: string;
 
-      // A /deposit response matching `coin_pub` showing that the
-      // exchange accepted `coin_pub` for `amount_with_fee`.
+      // A /deposit response matching ``coin_pub`` showing that the
+      // exchange accepted ``coin_pub`` for ``amount_with_fee``.
       exchange_deposit_proof: DepositSuccess;
 
-      // Offset in the `exchange_transfer_proof` where the
-      // exchange's response fails to match the `exchange_deposit_proof`.
+      // Offset in the ``exchange_transfer_proof`` where the
+      // exchange's response fails to match the ``exchange_deposit_proof``.
       conflict_offset: number;
 
       // The response from the exchange which tells us when the
@@ -420,7 +399,7 @@ Tracking Wire Transfers
       // Public key of the coin for which we have conflicting information.
       coin_pub: EddsaPublicKey;
 
-      // Merchant transaction in which `coin_pub` was involved for which
+      // Merchant transaction in which ``coin_pub`` was involved for which
       // we have conflicting information.
       transaction_id: number;
 
@@ -445,12 +424,12 @@ Tracking Wire Transfers
 
   :status 200 OK:
     The deposit has been executed by the exchange and we have a wire transfer identifier.
-    The response body is a JSON array of `TransactionWireTransfer`_ objects.
+    The response body is a JSON array of `TransactionWireTransfer` objects.
   :status 202 Accepted:
     The deposit request has been accepted for processing, but was not yet
     executed.  Hence the exchange does not yet have a wire transfer identifier.
     The merchant should come back later and ask again.
-    The response body is a :ref:`TrackTransactionAcceptedResponse <TrackTransactionAcceptedResponse>`.  Note that
+    The response body is a `TrackTransactionAcceptedResponse <TrackTransactionAcceptedResponse>`.  Note that
     the similarity to the response given by the exchange for a /track/order
     is completely intended.
   :status 404 Not Found: The transaction is unknown to the backend.
@@ -458,13 +437,11 @@ Tracking Wire Transfers
     The exchange previously claimed that a deposit was not included in a wire
     transfer, and now claims that it is.  This means that the exchange is
     dishonest.  The response contains the cryptographic proof that the exchange
-    is misbehaving in the form of a `TransactionConflictProof`_.
+    is misbehaving in the form of a `TransactionConflictProof`.
 
   **Details:**
 
-  .. _tsref-type-TransactionWireTransfer:
-  .. _TransactionWireTransfer:
-  .. code-block:: tsref
+  .. ts:def:: TransactionWireTransfer
 
     interface TransactionWireTransfer {
 
@@ -482,9 +459,7 @@ Tracking Wire Transfers
       amount: Amount;
     }
 
-  .. _tsref-type-CoinWireTransfer:
-  .. _CoinWireTransfer:
-  .. code-block:: tsref
+  .. ts:def:: CoinWireTransfer
 
     interface CoinWireTransfer {
       // public key of the coin that was deposited
@@ -497,12 +472,10 @@ Tracking Wire Transfers
       deposit_fee: Amount;
     }
 
-  .. _TransactionConflictProof:
-  .. _tsref-type-TransactionConflictProof:
-  .. code-block:: tsref
+  .. ts:def:: TransactionConflictProof
 
     interface TransactionConflictProof {
-      // Numerical `error code <error-codes>`_
+      // Numerical `error code <error-codes>`
       code: number;
 
       // Human-readable error description
@@ -510,14 +483,14 @@ Tracking Wire Transfers
 
       // A claim by the exchange about the transactions associated
       // with a given wire transfer; it does not list the
-      // transaction that `transaction_tracking_claim` says is part
+      // transaction that ``transaction_tracking_claim`` says is part
       // of the aggregate.  This is
-      // a `/track/transfer` response from the exchange.
+      // a ``/track/transfer`` response from the exchange.
       wtid_tracking_claim: TrackTransferResponse;
 
       // The current claim by the exchange that the given
       // transaction is included in the above WTID.
-      // (A response from `/track/order`).
+      // (A response from ``/track/order``).
       transaction_tracking_claim: TrackTransactionResponse;
 
       // Public key of the coin for which we got conflicting information.
@@ -536,18 +509,18 @@ Transaction history
 
   **Request**
 
-  :query date: time threshold, see `delta` for its interpretation.
-  :query start: row number threshold, see `delta` for its interpretation.  Defaults to `UINT64_MAX`, namely the biggest row id possible in the database.
-  :query delta: takes value of the form `N (-N)`, so that at most `N` values strictly younger (older) than `start` and `date` are returned.  Defaults to `-20`.
-  :query ordering: takes value `descending` or `ascending` according to the results wanted from younger to older or vice versa.  Defaults to `descending`.
+  :query date: time threshold, see ``delta`` for its interpretation.
+  :query start: row number threshold, see ``delta`` for its interpretation.  Defaults to ``UINT64_MAX``, namely the biggest row id possible in the database.
+  :query delta: takes value of the form ``N (-N)``, so that at most ``N`` values strictly younger (older) than ``start`` and ``date`` are returned.  Defaults to ``-20``.
+  :query ordering: takes value ``"descending"`` or ``"ascending"`` according to the results wanted from younger to older or vice versa.  Defaults to ``"descending"``.
 
   **Response**
 
-  :status 200 OK: The response is a JSON `array` of  `TransactionHistory`_.  The array is sorted such that entry `i` is younger than entry `i+1`.
+  :status 200 OK:
+    The response is a JSON ``array`` of  `TransactionHistory`.  The array is
+    sorted such that entry ``i`` is younger than entry ``i+1``.
 
-  .. _tsref-type-TransactionHistory:
-  .. _TransactionHistory:
-  .. code-block:: tsref
+  .. ts:def:: TransactionHistory
 
     interface TransactionHistory {
       // The serial number this entry has in the merchant's DB.
@@ -583,21 +556,18 @@ Dynamic Merchant Instance
 
   :status 200 OK:
     The backend has successfully returned the list of instances stored. Returns
-    a `InstancesResponse`_.
+    a `InstancesResponse`.
 
-  .. _InstancesResponse:
-  .. code-block:: tsref
+  .. ts:def:: InstancesResponse
 
     interface InstancesResponse {
-      // List of instances that are present in the backend(see `below <Instance>`_)
+      // List of instances that are present in the backend (see `Instance`)
       instances: Instance[];
     }
 
-The `instance` object describes the instance registered with the backend. It has the following structure:
+  The `Instance` object describes the instance registered with the backend. It has the following structure:
 
-  .. Instance:
-  .. _tsref-type-Instance:
-  .. code-block:: tsref
+  .. ts:def:: Instance
 
     interface Instance {
       // Merchant name corresponding to this instance.
@@ -620,16 +590,15 @@ The `instance` object describes the instance registered with the backend. It has
 
   **Request**
 
-  The request must be a `CreateInstanceRequest`_.
+  The request must be a `CreateInstanceRequest`.
 
   **Response**
 
   :status 200 OK:
     The backend has successfully created the instance.  The response is a
-    `CreateInstanceResponse`_.
+    `CreateInstanceResponse`.
 
-  .. _CreateInstanceRequest:
-  .. code-block:: tsref
+  .. ts:def:: CreateInstanceRequest
 
     interface CreateInstanceRequest {
       // The URL where the wallet has to send coins.
@@ -646,8 +615,7 @@ The `instance` object describes the instance registered with the backend. It has
 
     }
 
-  .. _CreateInstanceResponse:
-  .. code-block:: tsref
+  .. ts:def:: CreateInstanceResponse
 
     interface CreateInstanceResponse {
       // Merchant instance of the response that was created
@@ -670,10 +638,9 @@ The `instance` object describes the instance registered with the backend. It has
 
   :status 200 OK:
     The backend has successfully returned the list of instances stored. Returns
-    a `QueryInstancesResponse`_.
+    a `QueryInstancesResponse`.
 
-  .. _QueryInstancesResponse:
-  .. code-block:: tsref
+  .. ts:def:: QueryInstancesResponse
 
     interface QueryInstancesResponse {
       // The URL where the wallet has to send coins.
@@ -698,16 +665,15 @@ The `instance` object describes the instance registered with the backend. It has
 
   **Request**
 
-  The request must be a `PostInstanceUpdateRequest`_.
+  The request must be a `PostInstanceUpdateRequest`.
 
   **Response**
 
   :status 200 OK:
     The backend has successfully updated the instance.  The response is a
-    `PostInstanceUpdateResponse`_.
+    `PostInstanceUpdateResponse`.
 
-  .. _PostInstanceUpdateRequest:
-  .. code-block:: tsref
+  .. ts:def:: PostInstanceUpdateRequest
 
     interface PostInstanceUpdateRequest {
       // Merchant instance that is to be updaated. Required.
@@ -722,8 +688,7 @@ The `instance` object describes the instance registered with the backend. It has
 
     }
 
-  .. _PostInstanceUpdateResponse:
-  .. code-block:: tsref
+  .. ts:def:: PostInstanceUpdateResponse
 
     interface PostInstanceUpdateResponse {
       // Merchant instance of the response that was updated
@@ -746,10 +711,9 @@ The `instance` object describes the instance registered with the backend. It has
 
   :status 200 OK:
     The backend has successfully removed the instance.  The response is a
-    `PostInstanceRemoveResponse`_.
+    `PostInstanceRemoveResponse`.
 
-  .. _PostInstanceRemoveResponse:
-  .. code-block:: tsref
+  .. ts:def:: PostInstanceRemoveResponse
 
     interface PostInstanceRemoveResponse {
       deleted: true;
@@ -760,11 +724,9 @@ The `instance` object describes the instance registered with the backend. It has
 The Contract Terms
 ------------------
 
-The `contract terms` must have the following structure:
+The contract terms must have the following structure:
 
-  .. _ContractTerms:
-  .. _tsref-type-ContractTerms:
-  .. code-block:: tsref
+  .. ts:def:: ContractTerms
 
     interface ContractTerms {
       // Human-readable description of the whole purchase
@@ -807,9 +769,9 @@ The `contract terms` must have the following structure:
       // between the 'max_fee' and the sum of the actual deposit fees.
       // Optional, default value if missing is 1.  0 and negative values are
       // invalid and also interpreted as 1.
-      wire_fee_amortization: Integer;
+      wire_fee_amortization: number;
 
-      // List of products that are part of the purchase (see `below <Product>`_)
+      // List of products that are part of the purchase (see `Product`).
       products: Product[];
 
       // Time when this contract was generated
@@ -860,11 +822,9 @@ The `contract terms` must have the following structure:
   listing it in the exchanges arry, or for which the merchant accepts an auditor
   that audits that exchange by listing it in the auditors array.
 
-  The `product` object describes the product being purchased from the merchant. It has the following structure:
+  The `Product` object describes the product being purchased from the merchant. It has the following structure:
 
-  .. _Product:
-  .. _tsref-type-Product:
-  .. code-block:: tsref
+  .. ts:def:: Product
 
     interface Product {
       // Human-readable product description.
@@ -873,27 +833,26 @@ The `contract terms` must have the following structure:
       // The quantity of the product to deliver to the customer (optional, if applicable)
       quantity?: string;
 
-      // The price of the product; this is the total price for the amount specified by `quantity`
+      // The price of the product; this is the total price for the amount specified by 'quantity'
       price: Amount;
 
       // merchant-internal identifier for the product
       product_id?: string;
 
-      // a list of objects indicating a `taxname` and its amount. Again, italics denotes the object field's name.
+      // a list of objects indicating a 'taxname' and its amount. Again, italics denotes the object field's name.
       taxes?: any[];
 
       // time indicating when this product should be delivered
       delivery_date: Timestamp;
 
       // where to deliver this product. This may be an URL for online delivery
-      // (i.e. `http://example.com/download` or `mailto:customer@example.com`),
-      // or a location label defined inside the proposition's `locations`.
-      // The presence of a colon (`:`) indicates the use of an URL.
+      // (i.e. 'http://example.com/download' or 'mailto:customer@example.com'),
+      // or a location label defined inside the proposition's 'locations'.
+      // The presence of a colon (':') indicates the use of an URL.
       delivery_location: string;
     }
 
-  .. _tsref-type-Merchant:
-  .. code-block:: ts
+  .. ts:def:: Merchant
 
     interface Merchant {
       // label for a location with the business address of the merchant
@@ -908,9 +867,7 @@ The `contract terms` must have the following structure:
     }
 
 
-  .. _tsref-type-Location:
-  .. _Location:
-  .. code-block:: ts
+  .. ts:def:: Location
 
     interface Location {
       country?: string;
@@ -923,8 +880,7 @@ The `contract terms` must have the following structure:
       street_number?: string;
     }
 
-  .. _tsref-type-Auditor:
-  .. code-block:: tsref
+  .. ts:def:: Auditor
 
     interface Auditor {
       // official name
@@ -937,8 +893,7 @@ The `contract terms` must have the following structure:
       url: string;
     }
 
-  .. _tsref-type-Exchange:
-  .. code-block:: tsref
+  .. ts:def:: Exchange
 
     interface Exchange {
       // the exchange's base URL
@@ -953,25 +908,27 @@ The `contract terms` must have the following structure:
 Customer-facing API
 -------------------
 
-The `/public/*` endpoints are publicly exposed on the internet and accessed
+The ``/public/*`` endpoints are publicly exposed on the internet and accessed
 both by the user's browser and their wallet.
 
 
 .. http:post:: /public/pay
 
   Pay for a proposal by giving a deposit permission for coins.  Typically used by
-  the customer's wallet.  Can also be used in `abort-refund` mode to refund coins
+  the customer's wallet.  Can also be used in ``abort-refund`` mode to refund coins
   that were already deposited as part of a failed payment.
 
   **Request:**
 
-  The request must be a :ref:`pay request <PayRequest>`.
+  The request must be a `pay request <PayRequest>`.
 
   **Response:**
 
   :status 200 OK:
-    The exchange accepted all of the coins. The body is a `PaymentResponse`_ if the request used the mode "pay", or a `MerchantRefundResponse`_ if the request used was the mode "abort-refund".
-    The `frontend` should now fullfill the contract.
+    The exchange accepted all of the coins. The body is a `PaymentResponse` if
+    the request used the mode "pay", or a `MerchantRefundResponse` if the
+    request used was the mode "abort-refund".
+    The ``frontend`` should now fullfill the contract.
   :status 412 Precondition Failed:
     The given exchange is not acceptable for this merchant, as it is not in the
     list of accepted exchanges and not audited by an approved auditor.
@@ -979,22 +936,21 @@ both by the user's browser and their wallet.
     One of the coin signatures was not valid.
   :status 403 Forbidden:
     The exchange rejected the payment because a coin was already spent before.
-    The response will include the `coin_pub` for which the payment failed,
-    in addition to the response from the exchange to the `/deposit` request.
+    The response will include the 'coin_pub' for which the payment failed,
+    in addition to the response from the exchange to the ``/deposit`` request.
 
   The backend will return verbatim the error codes received from the exchange's
   :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
   double-spending for example, the frontend should pass the reply verbatim to
-  the browser/wallet. This should be the expected case, as the `frontend`
+  the browser/wallet. This should be the expected case, as the ``frontend``
   cannot really make mistakes; the only reasonable exception is if the
-  `backend` is unavailable, in which case the customer might appreciate some
+  ``backend`` is unavailable, in which case the customer might appreciate some
   reassurance that the merchant is working on getting his systems back online.
 
-  .. _PaymentResponse:
-  .. code-block:: tsref
+  .. ts:def:: PaymentResponse
 
     interface PaymentResponse {
-      // Signature on `TALER_PaymentResponsePS`_ with the public
+      // Signature on `TALER_PaymentResponsePS` with the public
       // key of the merchant instance.
       sig: EddsaSignature;
 
@@ -1002,23 +958,9 @@ both by the user's browser and their wallet.
       h_contract_terms: HashCode;
     }
 
-  .. _PayRequest:
-  .. code-block:: tsref
+  .. ts:def:: PayRequest
 
     interface PayRequest {
-      // Signature on `TALER_PaymentResponsePS`_ with the public
-      // key of the instance in the proposal.
-      sig: EddsaSignature;
-
-      // Proposal data hash being signed over
-      h_proposal_data: HashCode;
-
-      // Proposal, send for convenience so the frontend
-      // can do order processing without a second lookup on
-      // a successful payment
-      proposal: Proposal;
-
-      // Coins with signature.
       coins: CoinPaySig[];
 
       // The merchant public key, used to uniquely
@@ -1030,6 +972,28 @@ both by the user's browser and their wallet.
 
       // Mode for /pay ("pay" or "abort-refund")
       mode: "pay" | "abort-refund";
+    }
+
+  .. ts:def:: CoinPaySig
+
+    export interface CoinPaySig {
+      // Signature by the coin.
+      coin_sig: string;
+
+      // Public key of the coin being spend.
+      coin_pub: string;
+
+      // Signature made by the denomination public key.
+      ub_sig: string;
+
+      // The denomination public key associated with this coin.
+      denom_pub: string;
+
+      // The amount that is subtracted from this coin with this payment.
+      contribution: Amount;
+
+      // URL of the exchange this coin was withdrawn from.
+      exchange_url: string;
     }
 
 
@@ -1048,11 +1012,9 @@ both by the user's browser and their wallet.
   **Response**
 
   :status 200 OK:
-    The response is a `PublicPayStatusResponse`_.
+    The response is a `PublicPayStatusResponse`.
 
-
-  .. _PublicPayStatusResponse:
-  .. code-block:: tsref
+  .. ts:def:: PublicPayStatusResponse
 
     interface PublicPayStatusResponse {
       // Has the payment for this order been completed?
@@ -1063,9 +1025,7 @@ both by the user's browser and their wallet.
     }
 
 
-  .. _RefundInfo:
-  .. _tsref-type-RefundInfo:
-  .. code-block:: tsref
+  .. ts:def:: RefundInfo
 
     interface RefundInfo {
 
@@ -1113,12 +1073,12 @@ both by the user's browser and their wallet.
 
   **Request**
 
-  The request body is a `TipPickupRequest`_ object.
+  The request body is a `TipPickupRequest` object.
 
   **Response**
 
   :status 200 OK:
-    A tip is being returned. The backend responds with a `TipResponse`_
+    A tip is being returned. The backend responds with a `TipResponse`
   :status 401 Unauthorized:
     The tip amount requested exceeds the tip.
   :status 404 Not Found:
@@ -1126,8 +1086,7 @@ both by the user's browser and their wallet.
   :status 409 Conflict:
     Some of the denomination key hashes of the request do not match those currently available from the exchange (hence there is a conflict between what the wallet requests and what the merchant believes the exchange can provide).
 
-  .. _TipPickupRequest:
-  .. code-block:: tsref
+  .. ts:def:: TipPickupRequest
 
     interface TipPickupRequest {
 
@@ -1137,6 +1096,8 @@ both by the user's browser and their wallet.
       // List of planches the wallet wants to use for the tip
       planchets: PlanchetDetail[];
     }
+
+  .. ts:def:: PlanchetDetail
 
     interface PlanchetDetail {
       // Hash of the denomination's public key (hashed to reduce
@@ -1148,8 +1109,7 @@ both by the user's browser and their wallet.
 
     }
 
-  .. _TipResponse:
-  .. code-block:: tsref
+  .. ts:def:: TipResponse
 
     interface TipResponse {
       // Public key of the reserve

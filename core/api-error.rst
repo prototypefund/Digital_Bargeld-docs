@@ -26,6 +26,7 @@ The following list shows error codes defined in
 `<EXCHANGE-REPO>/src/include/taler_error_codes.h <https://git.taler.net/exchange.git/tree/src/include/taler_error_codes.h>`_
 
 .. _error-codes:
+.. _TALER_ErrorCode:
 .. code-block:: c
 
   /**

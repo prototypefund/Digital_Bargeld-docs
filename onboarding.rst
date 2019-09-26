@@ -136,8 +136,8 @@ The following commands do that:
 Building the documentation
 ==========================
 
-All the Taler documentation is built by the user `docbuilder` that
-runs a Buildbot worker.  The following commands set the `docbuilder` up,
+All the Taler documentation is built by the user ``docbuilder`` that
+runs a Buildbot worker.  The following commands set the ``docbuilder`` up,
 starting with a empty home directory.
 
 ::
@@ -156,9 +156,9 @@ starting with a empty home directory.
 Building the Websites.
 ======================
 
-Taler Websites, `www.taler.net` and `stage.taler.net`, are built by the
-user `taler-websites` by the means of a Buildbot worker.  The following
-commands set the `taler-websites` up, starting with a empty home directory.
+Taler Websites, ``www.taler.net`` and ``stage.taler.net``, are built by the
+user ``taler-websites`` by the means of a Buildbot worker.  The following
+commands set the ``taler-websites`` up, starting with a empty home directory.
 
 ::
   # Log-in as the 'taler-websites' user.
@@ -175,7 +175,7 @@ commands set the `taler-websites` up, starting with a empty home directory.
 
 Code coverage.
 ==============
-Code coverage tests are run by the `lcovworker` user, and are also driven
+Code coverage tests are run by the ``lcovworker`` user, and are also driven
 by Buildbot.
 
 ::
@@ -191,12 +191,12 @@ by Buildbot.
 
   $ buildbot-worker start worker/
 
-The results are then published at `https://lcov.taler.net/`.
+The results are then published at ``https://lcov.taler.net/``.
 
 Online services checker.
 ========================
-The user `demo-checker` runs periodic checks to see if all the
-`*.demo.taler.net` services are up and running.  It is driven by
+The user ``demo-checker`` runs periodic checks to see if all the
+``*.demo.taler.net`` services are up and running.  It is driven by
 Buildbot, and can be bootstrapped as follows.
 
 ::

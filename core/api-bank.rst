@@ -26,18 +26,23 @@ This API provides programmatic user registration at the bank.
 .. _bank-register:
 .. http:post:: /register
 
-**Request** The body of this request must have the format of a `BankRegistrationRequest`_.
+  **Request** The body of this request must have the format of a
+  `BankRegistrationRequest`.
 
-**Response**
+  **Response**
 
-:status 200 OK: The new user has been correctly registered.
-:status 409 Conflict: the username requested by the client is not available anymore
-:status 406 Not Acceptable: unacceptable characters were given for the username. See https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.username for the accepted character set.
+  :status 200 OK:
+    The new user has been correctly registered.
+  :status 409 Conflict:
+    The username requested by the client is not available anymore.
+  :status 406 Not Acceptable:
+    Unacceptable characters were given for the username. See
+    https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.username
+    for the accepted character set.
 
 **Details**
 
-.. _BankRegistrationRequest:
-.. code-block:: tsref
+.. ts:def:: BankRegistrationRequest
 
   interface BankRegistrationRequest {
   
@@ -58,18 +63,17 @@ bank account to the exchange's.
 .. _bank-withdraw:
 .. http:post:: /taler/withdraw
 
-**Request** The body of this request must have the format of a `BankTalerWithdrawRequest`_.
+**Request** The body of this request must have the format of a `BankTalerWithdrawRequest`.
 
 **Response**
 
-:status 200 OK: The withdrawal was correctly initiated, therefore the exchange received the payment.  A `BankTalerWithdrawResponse`_ object is returned.
+:status 200 OK: The withdrawal was correctly initiated, therefore the exchange received the payment.  A `BankTalerWithdrawResponse` object is returned.
 :status 406 Not Acceptable: the user does not have sufficient credit to fulfill their request.
 :status 404 Not Found: The exchange wire details did not point to any valid bank account.
 
 **Details**
 
-.. _BankTalerWithdrawRequest:
-.. code-block:: tsref
+.. ts:def:: BankTalerWithdrawRequest
 
   interface BankTalerWithdrawRequest {
 
@@ -89,8 +93,7 @@ bank account to the exchange's.
     exchange_wire_details: string;
   }
 
-.. _BankTalerWithdrawResponse:
-.. code-block:: tsref
+.. ts:def:: BankTalerWithdrawResponse
 
   interface BankTalerWithdrawResponse {
 
@@ -109,93 +112,90 @@ request.
 .. _bank-deposit:
 .. http:post:: /admin/add/incoming
 
-**Request:** The body of this request must have the format of a `BankDepositRequest`_.
+  **Request:** The body of this request must have the format of a `BankDepositRequest`.
 
-**Response:**
+  **Response:**
 
-:status 200 OK: The request has been correctly handled, so the funds have been transferred to the recipient's account.  The body is a `BankDepositDetails`_.
-:status 400 Bad Request: The bank replies a `BankError`_ object.
-:status 406 Not Acceptable: The request had wrong currency; the bank replies a `BankError`_ object.
+  :status 200 OK:
+    The request has been correctly handled, so the funds have been transferred to
+    the recipient's account.  The body is a `BankDepositDetails`
+  :status 400 Bad Request: The bank replies a `BankError` object.
+  :status 406 Not Acceptable: The request had wrong currency; the bank replies a `BankError` object.
 
-**Details:**
+  **Details:**
 
-.. _BankDepositDetails:
-.. code-block:: tsref
+  .. ts:def:: BankDepositDetails
 
-  interface BankDepositDetails {
+    interface BankDepositDetails {
 
-    // Timestamp related to the transaction being made.
-    timestamp: Timestamp;
+      // Timestamp related to the transaction being made.
+      timestamp: Timestamp;
 
-    // Row id number identifying the transaction in the bank's
-    // database.
-    row_id: number;
-  }
+      // Row id number identifying the transaction in the bank's
+      // database.
+      row_id: number;
+    }
 
-.. _BankDepositRequest:
-.. code-block:: tsref
+  .. ts:def:: BankDepositRequest
 
-  interface BankDepositRequest {
+    interface BankDepositRequest {
 
-    // Authentication method used
-    auth: BankAuth;
+      // Authentication method used
+      auth: BankAuth;
 
-    // JSON 'amount' object. The amount the caller wants to transfer
-    // to the recipient's count
-    amount: Amount;
+      // JSON 'amount' object. The amount the caller wants to transfer
+      // to the recipient's count
+      amount: Amount;
 
-    // Exchange base URL, used to perform tracking requests against the
-    // wire transfer ID.  Note that in the actual bank wire transfer,
-    // the schema may have to be encoded differently, i.e.
-    // "https://exchange.com/" may become "https exchange.com" due to
-    // character set restrictions.  It is the responsibility of the
-    // wire transfer adapter to properly encode/decode the URL.
-    // Payment service providers must ensure that their URL is short
-    // enough to fit together with the wire transfer identifier into
-    // the wire transfer subject of their respective banking system.
-    exchange_url: string;
+      // Exchange base URL, used to perform tracking requests against the
+      // wire transfer ID.  Note that in the actual bank wire transfer,
+      // the schema may have to be encoded differently, i.e.
+      // "https://exchange.com/" may become "https exchange.com" due to
+      // character set restrictions.  It is the responsibility of the
+      // wire transfer adapter to properly encode/decode the URL.
+      // Payment service providers must ensure that their URL is short
+      // enough to fit together with the wire transfer identifier into
+      // the wire transfer subject of their respective banking system.
+      exchange_url: string;
 
-    // The subject of this wire transfer.
-    subject: string;
+      // The subject of this wire transfer.
+      subject: string;
 
-    // The sender's account identificator.  NOTE, in the current stage
-    // of development this field is _ignored_, as it's always the bank account
-    // of the logged user that plays as the "debit account".
-    // In future releases, a logged user may specify multiple bank accounts
-    // of her/his as the debit account.
-    debit_account: number;
+      // The sender's account identificator.  NOTE, in the current stage
+      // of development this field is _ignored_, as it's always the bank account
+      // of the logged user that plays as the "debit account".
+      // In future releases, a logged user may specify multiple bank accounts
+      // of her/his as the debit account.
+      debit_account: number;
 
-    // The recipient's account identificator
-    credit_account: number;
+      // The recipient's account identificator
+      credit_account: number;
 
-  }
+    }
 
-.. _BankAuth:
-.. _tsref-type-BankAuth:
-.. code-block:: tsref
+  .. ts:def:: BankAuth
 
-  interface BankAuth {
+    interface BankAuth {
 
-    // authentication type.  At this stage of development,
-    // only value "basic" is accepted in this field.
-    // The credentials must be indicated in the following HTTP
-    // headers: "X-Taler-Bank-Username" and "X-Taler-Bank-Password".
-    type: string;
-  }
+      // authentication type.  At this stage of development,
+      // only value "basic" is accepted in this field.
+      // The credentials must be indicated in the following HTTP
+      // headers: "X-Taler-Bank-Username" and "X-Taler-Bank-Password".
+      type: string;
+    }
 
 
-.. _BankError:
-.. code-block:: tsref
+  .. ts:def:: BankError
 
-  interface BankError {
+    interface BankError {
 
-    // Human readable explanation of the failure.
-    error: string;
+      // Human readable explanation of the failure.
+      error: string;
 
-    // Numeric Taler error code (`enum TALER_ErrorCode`)
-    ec: number;
+      // Numeric Taler error code (`TALER_ErrorCode`)
+      ec: number;
 
-  }
+    }
 
 
 .. http:put:: /reject
@@ -207,14 +207,20 @@ request.
   This API is used when the exchange receives a wire transfer with an invalid wire
   transfer subject that fails to decode to a public key.
 
-  **Request** The body of this request must have the format of a `BankCancelRequest`_.
+  **Request** The body of this request must have the format of a `BankCancelRequest`.
 
-  :query auth: authentication method used.  At this stage of development, only value `basic` is accepted.  Note that username and password need to be given as request's headers.  The dedicated headers are: `X-Taler-Bank-Username` and `X-Taler-Bank-Password`.
+  :query auth:
+    authentication method used.  At this stage of development, only
+    value ``"basic"`` is accepted.  Note that username and password need to be
+    given as request's headers.
+    The dedicated headers are: ``X-Taler-Bank-Username`` and ``X-Taler-Bank-Password``.
   :query row_id: row identifier of the transaction that should be cancelled.
-  :query account_number: bank account for which the incoming transfer was made and for which `auth` provides the authentication data.  *Currently ignored*, as multiple bank accounts per user are not implemented yet.
+  :query account_number:
+    bank account for which the incoming transfer was made and
+    for which ``auth`` provides the authentication data.
+    **Currently ignored**, as multiple bank accounts per user are not implemented yet.
 
-  .. _BankCancelRequest:
-  .. code-block:: tsref
+  .. ts:def:: BankCancelRequest
 
     interface BankCancelRequest {
 
@@ -229,31 +235,50 @@ request.
 
     }
 
-  **Response**  In case of an error, the body is a `BankError`_ object.
+  **Response**  In case of an error, the body is a `BankError` object.
 
   :status 204 No Content: The request has been correctly handled, so the original transaction was voided.  The body is empty.
-  :status 400 Bad Request: The bank replies a `BankError`_ object.
+  :status 400 Bad Request: The bank replies a `BankError` object.
   :status 404 Not Found: The bank does not know this rowid for this account.
 
 
 .. http:get:: /history-range
 
-  Filters and returns the list of transactions in the time range specified by `start` and `end`
+  Filters and returns the list of transactions in the time range specified by
+  ``start`` and ``end``
 
   **Request**
 
-  :query auth: authentication method used.  At this stage of development, only value `basic` is accepted.  Note that username and password need to be given as request's headers.  The dedicated headers are: `X-Taler-Bank-Username` and `X-Taler-Bank-Password`.
-  :query start: unix timestamp indicating the oldest transaction accepted in the result.
-  :query end: unix timestamp indicating the youngest transaction accepted in the result.
-  :query direction: argument taking values `debit` or `credit`, according to the caller willing to receive both incoming and outgoing, only outgoing, or only incoming records.  Use `both` to return both directions.
-  :query cancelled: argument taking values `omit` or `show` to filter out rejected transactions
-  :query account_number: bank account whose history is to be returned.  *Currently ignored*, as multiple bank accounts per user are not implemented yet.
-  :query ordering: can be `descending` or `ascending` and regulates whether the row are returned youger-to-older or vice versa.  Defaults to `descending`.
+  :query auth:
+    authentication method used.  At this stage of development, only
+    value ``"basic"`` is accepted.  Note that username and password need to be
+    given as request's headers.  The dedicated headers are:
+    ``X-Taler-Bank-Username`` and ``X-Taler-Bank-Password``.
+  :query start:
+    unix timestamp indicating the oldest transaction accepted in
+    the result.
+  :query end:
+    unix timestamp indicating the youngest transaction accepted in
+    the result.
+  :query direction:
+    argument taking values ``debit`` or ``credit``, according to
+    the caller willing to receive both incoming and outgoing, only outgoing, or
+    only incoming records.  Use ``both`` to return both directions.
+  :query cancelled:
+    argument taking values ``omit`` or ``show`` to filter out rejected
+    transactions
+  :query account_number:
+    bank account whose history is to be returned.  *Currently ignored*, as
+    multiple bank accounts per user are not implemented yet.
+  :query ordering:
+    can be ``descending`` or ``ascending`` and regulates whether
+    the row are returned youger-to-older or vice versa.  Defaults to
+    ``descending``.
 
 
   **Response**
 
-  :status 200 OK: JSON object whose field `data` is an array of type `BankTransaction`_.
+  :status 200 OK: JSON object whose field ``data`` is an array of type `BankTransaction`.
   :status 204 No content: in case no records exist for the targeted user.
 
 
@@ -263,22 +288,39 @@ request.
 
   **Request**
 
-  :query auth: authentication method used.  At this stage of development, only value `basic` is accepted.  Note that username and password need to be given as request's headers.  The dedicated headers are: `X-Taler-Bank-Username` and `X-Taler-Bank-Password`.
-  :query delta: returns the first `N` records younger (older) than `start` if `+N` (`-N`) is specified.
-  :query start: according to `delta`, only those records with row id strictly greater (lesser) than `start` will be returned.  This argument is optional; if not given, it defaults to "MAX_UINT64".
-  :query direction: argument taking values `debit` or `credit`, according to the caller willing to receive both incoming and outgoing, only outgoing, or only incoming records.  Use `both` to return both directions.
-  :query cancelled: argument taking values `omit` or `show` to filter out rejected transactions
-  :query account_number: bank account whose history is to be returned.  *Currently ignored*, as multiple bank accounts per user are not implemented yet.
-  :query ordering: can be `descending` or `ascending` and regulates whether the row are returned youger-to-older or vice versa.  Defaults to `descending`.
+  :query auth:
+    authentication method used.  At this stage of development, only
+    value ``basic`` is accepted.  Note that username and password need to be given
+    as request's headers.  The dedicated headers are: ``X-Taler-Bank-Username`` and
+    ``X-Taler-Bank-Password``.
+  :query delta:
+    returns the first ``N`` records younger (older) than ``start`` if
+    ``+N`` (``-N``) is specified.
+  :query start:
+    according to ``delta``, only those records with row id strictly
+    greater (lesser) than ``start`` will be returned.  This argument is optional;
+    if not given, it defaults to "MAX_UINT64".
+  :query direction:
+    argument taking values ``debit`` or ``credit``, according
+    to the caller willing to receive both incoming and outgoing, only outgoing,
+    or only incoming records.  Use ``both`` to return both directions.
+  :query cancelled:
+    argument taking values ``omit`` or ``show`` to filter out rejected transactions
+  :query account_number:
+    bank account whose history is to be returned.
+    *Currently ignored*, as multiple bank accounts per user are not implemented
+    yet.
+  :query ordering:
+    can be ``descending`` or ``ascending`` and regulates whether the
+    row are returned youger-to-older or vice versa.  Defaults to ``descending``.
 
 
   **Response**
 
-  :status 200 OK: JSON object whose field `data` is an array of type `BankTransaction`_.
+  :status 200 OK: JSON object whose field ``data`` is an array of type `BankTransaction`.
   :status 204 No content: in case no records exist for the targeted user.
 
-.. _BankTransaction:
-.. code-block:: tsref
+.. ts:def:: BankTransaction
 
   interface BankTransaction {
 
@@ -338,26 +380,30 @@ wallet is *not* installed.  This special page will hide any element of
 the class ``taler-install-show``; it can be downloaded at the following
 URL: ``git://taler.net/web-common/taler-fallback.css``.
 
-Withdrawing coins.
-^^^^^^^^^^^^^^^^^^
+Withdrawing coins
+^^^^^^^^^^^^^^^^^
 
-After the user confirms the withdrawal, the bank must return a `202 Accepted` response,
+After the user confirms the withdrawal, the bank must return a ``202 Accepted`` response,
 along with the following HTTP headers:
 
 * ``X-Taler-Operation: create-reserve``
 * ``X-Taler-Callback-Url: <callback_url>``; this URL will be automatically visited by the wallet after the user confirms the exchange.
 * ``X-Taler-Wt-Types: '["test"]'``; stringified JSON list of supported wire transfer types (only 'test' supported so far).
 * ``X-Taler-Amount: <amount_string>``; stringified Taler-style JSON :ref:`amount <amount>`.
-* ``X-Taler-Sender-Wire: <wire_details>``; stringified WireDetails_.
-* ``X-Taler-Suggested-Exchange: <URL>``; this header is optional, and ``<URL>`` is the suggested exchange URL as given in the `SUGGESTED_EXCHANGE` configuration option.
+* ``X-Taler-Sender-Wire: <wire_details>``; stringified `WireDetails`.
+* ``X-Taler-Suggested-Exchange: <URL>``; this header is optional, and ``<URL>`` is the suggested exchange URL as given in the ``SUGGESTED_EXCHANGE`` configuration option.
 
-.. _WireDetails:
-.. code-block:: tsref
+.. ts:def:: WireDetails
 
   interface WireDetails {
-    type: string; // Only 'test' value admitted so far.
-    bank_uri: URL of the bank.
-    account_number: bank account number of the user attempting to withdraw.
+    // Only 'test' value admitted so far.
+    type: string;
+
+    // URL of the bank.
+    bank_uri: string;
+
+    // bank account number of the user attempting to withdraw.
+    account_number: number;
   }
 
 After the user confirms the exchange to withdraw coins from, the wallet will
@@ -381,7 +427,7 @@ The callback URL implements the following API.
   :query amount_currency: currency of the amount to be withdrawn.
   :query exchange: base URL of the exchange where the reserve is to be created.
   :query reserve_pub: public key of the reserve to create.
-  :query exchange_wire_details: stringification of the chosen exchange's WireDetails_.
+  :query exchange_wire_details: stringification of the chosen exchange's `WireDetails`.
 
   **Response**
 

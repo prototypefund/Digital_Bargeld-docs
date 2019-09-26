@@ -36,7 +36,7 @@ handle the error as if an internal error (500) had been returned.
   **Request:**
 
   Unless specified otherwise, HTTP requests that carry a message body must
-  have the content type `application/json`.
+  have the content type ``application/json``.
 
   :reqheader Content-Type: application/json
 
@@ -60,17 +60,15 @@ handle the error as if an internal error (500) had been returned.
   :status 400 Bad Request: One of the arguments to the request is missing or malformed.
 
   Unless specified otherwise, all error status codes (4xx and 5xx) have a message
-  body with an `ErrorDetail`_ JSON object.
+  body with an `ErrorDetail` JSON object.
 
   **Details:**
 
-  .. _ErrorDetail:
-  .. _tsref-type-ErrorDetail:
-  .. code-block:: tsref
+  .. ts:def:: ErrorDetail
 
     interface ErrorDetail {
 
-      // Numeric `error code <error-codes>`_ unique to the condition.
+      // Numeric `error code <error-codes>` unique to the condition.
       code: number;
 
       // Human-readable description of the error, i.e. "missing parameter", "commitment violation", ...
@@ -115,10 +113,13 @@ Common encodings
 This section describes how certain types of values are represented throughout the API.
 
 .. _base32:
-.. _tsref-type-Base32:
 
 Binary Data
 ^^^^^^^^^^^
+
+.. ts:def:: foobase
+
+  type Base32 = string;
 
 Binary data is generally encoded using Crockford's variant of Base32
 (http://www.crockford.com/wrmg/base32.html), except that "U" is not excluded
@@ -126,12 +127,14 @@ but also decodes to "V" to make OCR easy.  We will still simply use the JSON
 type "base32" and the term "Crockford Base32" in the text to refer to the
 resulting encoding.
 
-.. _tsref-type-HashCode:
-
 Hash codes
 ^^^^^^^^^^
 Hashcodes are strings representing base32 encoding of the respective hashed
 data. See `base32`_.
+
+.. ts:def:: HashCode
+
+  type HashCode = string;
 
 Large numbers
 ^^^^^^^^^^^^^
@@ -139,45 +142,76 @@ Large numbers
 Large numbers such as RSA blinding factors and 256 bit  keys, are transmitted
 as other binary data in Crockford Base32 encoding.
 
-
-.. _tsref-type-Timestamp:
-
 Timestamps
 ^^^^^^^^^^
 
-Timestamps are represented in JSON as a string literal `"\\/Date(x)\\/"`,
-where `x` is the decimal representation of the number of seconds past the
-Unix Epoch (January 1, 1970).  The escaped slash (`\\/`) is interpreted in
+Timestamps are represented in JSON as a string literal ``"\\/Date(x)\\/"``,
+where ``x`` is the decimal representation of the number of seconds past the
+Unix Epoch (January 1, 1970).  The escaped slash (``\\/``) is interpreted in
 JSON simply as a normal slash, but distinguishes the timestamp from a normal
 string literal.  We use the type "date" in the documentation below.
-Additionally, the special strings "\\/never\\/" and "\\/forever\\/" are
+Additionally, the special strings ``"\\/never\\/"`` and ``"\\/forever\\/"`` are
 recognized to represent the end of time.
+
+.. ts:def:: Timestamp
+
+  type Timestamp = string;
+
+
+.. ts:def:: RelativeTime
+
+  type RelativeTime = string;
 
 
 .. _public\ key:
 
+
+Integers
+^^^^^^^^
+
+.. ts:def:: Integer
+
+  // JavaScript numbers restricted to integers
+  type Integer = number;
+
 Keys
 ^^^^
 
-.. _`tsref-type-EddsaPublicKey`:
-.. _`tsref-type-EcdhePublicKey`:
-.. _`tsref-type-EcdhePrivateKey`:
-.. _`tsref-type-EddsaPrivateKey`:
-.. _`tsref-type-CoinPublicKey`:
-
-.. code-block:: tsref
+.. ts:def:: EddsaPublicKey
 
    // EdDSA and ECDHE public keys always point on Curve25519
    // and represented  using the standard 256 bits Ed25519 compact format,
-   // converted to Crockford `Base32`_.
+   // converted to Crockford `Base32`.
    type EddsaPublicKey = string;
+
+.. ts:def:: EddsaPrivateKey
+
+   // EdDSA and ECDHE public keys always point on Curve25519
+   // and represented  using the standard 256 bits Ed25519 compact format,
+   // converted to Crockford `Base32`.
    type EddsaPrivateKey = string;
 
-.. _`tsref-type-RsaPublicKey`:
+.. ts:def:: EcdhePublicKey
 
-.. code-block:: tsref
+   // EdDSA and ECDHE public keys always point on Curve25519
+   // and represented  using the standard 256 bits Ed25519 compact format,
+   // converted to Crockford `Base32`.
+   type EcdhePublicKey = string;
 
-   // RSA public key converted to Crockford `Base32`_.
+.. ts:def:: EcdhePrivateKey
+
+   // EdDSA and ECDHE public keys always point on Curve25519
+   // and represented  using the standard 256 bits Ed25519 compact format,
+   // converted to Crockford `Base32`.
+   type EcdhePrivateKey = string;
+
+.. ts:def:: CoinPublicKey
+
+   type CoinPublicKey = EddsaPublicKey;
+
+.. ts:def:: RsaPublicKey
+
+   // RSA public key converted to Crockford `Base32`.
    type RsaPublicKey = string;
 
 .. _blinded-coin:
@@ -185,11 +219,9 @@ Keys
 Blinded coin
 ^^^^^^^^^^^^
 
-.. _`tsref-type-CoinEnvelope`:
+.. ts:def:: CoinEnvelope
 
-.. code-block:: tsref
-
-  // Blinded coin's `public EdDSA key <eddsa-coin-pub>`_, `base32`_ encoded
+  // Blinded coin's `public EdDSA key <eddsa-coin-pub>`, `base32` encoded
   type CoinEnvelope = string;
 
 .. _signature:
@@ -197,45 +229,46 @@ Blinded coin
 Signatures
 ^^^^^^^^^^
 
-.. _`tsref-type-EddsaSignature`:
 
-.. code-block:: tsref
+.. ts:def:: EddsaSignature
 
-  // EdDSA signatures are transmitted as 64-bytes `base32`_
+  // EdDSA signatures are transmitted as 64-bytes `base32`
   // binary-encoded objects with just the R and S values (base32_ binary-only)
   type EddsaSignature = string;
 
+.. ts:def:: RsaSignature
 
-.. _`tsref-type-RsaSignature`:
-
-.. code-block:: tsref
-
-  // `base32`_ encoded RSA signature
+  // `base32` encoded RSA signature
   type RsaSignature = string;
 
-.. _`tsref-type-BlindedRsaSignature`:
+.. ts:def:: BlindedRsaSignature
 
-.. code-block:: tsref
-
-  // `base32`_ encoded RSA blinded signature
+  // `base32` encoded RSA blinded signature
   type BlindedRsaSignature = string;
+
+.. ts:def:: RsaBlindingKeySecret
+
+  // `base32` encoded RSA blinding secret
+  type RsaBlindingKeySecret = string;
 
 .. _amount:
 
 Amounts
 ^^^^^^^
 
-.. _`tsref-type-Amount`:
+.. ts:def:: Amount
 
-Amounts of currency are serialized as a string of the format `<Currency>:<DecimalAmount>`.
+  type Amount = string;
+
+Amounts of currency are serialized as a string of the format ``<Currency>:<DecimalAmount>``.
 Taler treats monetary amounts as fixed-precision numbers.  Unlike floating point numbers,
 this allows accurate representation of monetary amounts.
 
 The following constrains apply for a valid amount:
 
-1. The `<Currency>` part must be at most 12 characters long and may not contain a colon (`:`).
-2. The integer part of `<DecimalAmount>` may be at most 2^52
-3. the fractional part of `<DecimalAmount>` may contain at most 8 decimal digits.
+1. The ``<Currency>`` part must be at most 12 characters long and may not contain a colon (``:``).
+2. The integer part of ``<DecimalAmount>`` may be at most 2^52
+3. the fractional part of ``<DecimalAmount>`` may contain at most 8 decimal digits.
 
 Internally, amounts are parsed into the following object:
 
@@ -243,7 +276,7 @@ Internally, amounts are parsed into the following object:
 
   "EUR:1.50" and "EUR:10" are is a valid amounts.  These are all invalid amounts: "A:B:1.5", "EUR:4503599627370501.0", "EUR:1.", "EUR:.1"
 
-.. code-block:: tsref
+.. ts:def:: ParsedAmount
 
   interface ParsedAmount {
     // name of the currency using either a three-character ISO 4217 currency
@@ -256,7 +289,7 @@ Internally, amounts are parsed into the following object:
     // correspond to 1 EUR or 1 USD, depending on `currency`, not 1 cent.
     value: number;
 
-    // unsigned 32 bit fractional value to be added to `value` representing
+    // unsigned 32 bit fractional value to be added to ``value`` representing
     // an additional currency fraction, in units of one millionth (1e-6)
     // of the base currency value.  For example, a fraction
     // of 500,000 would correspond to 50 cents.
@@ -270,14 +303,14 @@ Binary Formats
 
   .. note::
 
-     Due to the way of handling `big` numbers by some platforms (such as
-     `JavaScript`, for example), wherever the following specification mentions
+     Due to the way of handling "big" numbers by some platforms (such as
+     JavaScript, for example), wherever the following specification mentions
      a 64-bit value, the actual implementations are strongly advised to rely on
      arithmetic up to 53 bits.
 
   .. note::
 
-     Taler uses `libgnunetutil` for interfacing itself with the operating system,
+     Taler uses ``libgnunetutil`` for interfacing itself with the operating system,
      doing crypto work, and other "low level" actions, therefore it is strongly
      connected with the `GNUnet project <https://gnunet.org>`_.
 
@@ -310,7 +343,7 @@ Time
 ^^^^
 
 In signed messages, time is represented using 64-bit big-endian values,
-denoting microseconds since the UNIX Epoch.  `UINT64_MAX` represents "never".
+denoting microseconds since the UNIX Epoch.  ``UINT64_MAX`` represents "never".
 
 .. sourcecode:: c
 
@@ -472,7 +505,7 @@ Any piece of signed data, complies to the abstract data structure given below.
 
 
 The following list contains all the data structure that can be signed in
-Taler. Their definition is typically found in `src/include/taler_signatures.h`,
+Taler. Their definition is typically found in ``src/include/taler_signatures.h``,
 within the
 `exchange's codebase <https://docs.taler.net/global-licensing.html#exchange-repo>`_.
 
@@ -525,6 +558,11 @@ within the
     union TALER_CoinSpendPublicKeyP coin_pub;
     struct TALER_MerchantPublicKeyP merchant;
   };
+
+.. _TALER_RefreshCommitmentP:
+.. sourcecode:: c
+
+  // FIXME: put definition here
 
 .. _TALER_RefreshMeltCoinAffirmationPS:
 .. sourcecode:: c
@@ -650,6 +688,7 @@ within the
 
 
 .. _TALER_WireDepositDataPS:
+.. _TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT:
 .. sourcecode:: c
 
   struct TALER_WireDepositDataPS {
@@ -711,6 +750,7 @@ within the
   };
 
 .. _TALER_ConfirmWirePS:
+.. _TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE:
 .. sourcecode:: c
 
   struct TALER_ConfirmWirePS {
@@ -725,6 +765,16 @@ within the
     struct GNUNET_TIME_AbsoluteNBO execution_time;
     struct TALER_AmountNBO coin_contribution;
   };
+
+.. _TALER_SIGNATURE_EXCHANGE_CONFIRM_REFUND:
+.. sourcecode:: c
+
+  // FIXME: put definition here
+
+.. _TALER_SIGNATURE_MERCHANT_TRACK_TRANSACTION:
+.. sourcecode:: c
+
+  // FIXME: put definition here
 
 .. _TALER_RefundRequestPS:
 .. sourcecode:: c
@@ -767,6 +817,10 @@ within the
     struct TALER_DenominationBlindingKeyP coin_blind;
   };
 
+.. _TALER_PaybackRefreshConfirmationPS:
+.. sourcecode:: c
+
+  // FIXME: put definition here
 
 .. _TALER_PaybackConfirmationPS:
 .. sourcecode:: c

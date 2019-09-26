@@ -110,11 +110,9 @@ Receiving Terms of Service
 
   **Response:**
 
-  Returns a `SyncTermsOfServiceResponse`_.
+  Returns a `SyncTermsOfServiceResponse`.
 
-  .. _SyncTermsOfServiceResponse:
-  .. _tsref-type-SyncTermsOfServiceResponse:
-  .. code-block:: tsref
+  .. ts:def:: SyncTermsOfServiceResponse
 
     interface SyncTermsOfServiceResponse {
       // maximum wallet database backup size supported
@@ -125,7 +123,7 @@ Receiving Terms of Service
 
       // how long after an account (or device) becomes dormant does the
       // service expire the respective records?
-      inactive_expiration: relative-time;
+      inactive_expiration: RelativeTime;
 
       // Fee for an account, per year.
       annual_fee: Amount;
@@ -140,11 +138,9 @@ Receiving Terms of Service
 
   **Response:**
 
-  Returns a `SaltResponse`_.
+  Returns a `SaltResponse`.
 
-  .. _SaltResponse:
-  .. _tsref-type-SaltResponse:
-  .. code-block:: tsref
+  .. ts:def:: SaltResponse
 
     interface SaltResponse {
       // salt value, at least 128 bits of entropy

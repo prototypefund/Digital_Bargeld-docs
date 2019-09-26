@@ -59,9 +59,9 @@ follow the payto:// specification for SEPA:
   *  payto://sepa/IBAN
 
 
-The implementation of the @code{ebics} plugin which is envisioned to
+The implementation of the ``ebics`` plugin which is envisioned to
 support the @code{sepa} method is currently incomplete.  Specifically,
-we need a working implementation of `libebics` which is a sub-project
+we need a working implementation of ``libebics`` which is a sub-project
 trying to implement the EBICS [#ebics]_ standard.
 
 .. [#sepa] SEPA - Single Euro Payments Area:

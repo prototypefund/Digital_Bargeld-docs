@@ -21,7 +21,7 @@ The Auditor RESTful JSON API
 
 The API specified here follows the :ref:`general conventions <http-common>`
 for all details not specified in the individual requests.
-The `glossary <https://docs.taler.net/glossary.html#glossary>`
+The `glossary <https://docs.taler.net/glossary.html#glossary>`_
 defines all specific terms used in this section.
 
 .. _auditor-version:
@@ -54,10 +54,10 @@ know-your-customer (KYC) registration before issuing contracts.
       // https://www.gnu.org/software/libtool/manual/html_node/Versioning.html#Versioning
       // The format is "current:revision:age".  Note that the auditor
       // protocol is versioned independently of the exchange's protocol.
-      version: String;
+      version: string;
 
       // Return which currency this auditor is auditing for.
-      currency: String;
+      currency: string;
 
       // EdDSA master public key of the auditor
       auditor_public_key: EddsaPublicKey;
@@ -86,21 +86,19 @@ know-your-customer (KYC) registration before issuing contracts.
   **Response:**
 
   :status 200 OK:
-    The auditor responds with a `ExchangeList`_ object. This request should
+    The auditor responds with a :ts:type:`ExchangeList` object. This request should
     virtually always be successful.
 
   **Details:**
 
-  .. _ExchangeList:
-  .. code-block:: tsref
+  .. ts:def:: ExchangeList
 
     interface ExchangeList {
       // Exchanges audited by this auditor
       exchanges: ExchangeEntry[];
     }
 
-  .. _tsref-type-Denom:
-  .. code-block:: tsref
+  .. ts:def:: ExchangeEntry
 
     interface ExchangeEntry {
 
@@ -134,28 +132,24 @@ paid out first.
 
 .. http:put:: /deposit-confirmation
 
-   Submits a `DepositConfirmation`_ to the exchange. Should succeed
+   Submits a `DepositConfirmation` to the exchange. Should succeed
    unless the signature provided is invalid or the exchange is not
    audited by this auditor.
 
   **Response:**
 
-  :status 200: The auditor responds with a `DepositAudited`_ object.
+  :status 200: The auditor responds with a `DepositAudited` object.
                This request should virtually always be successful.
 
   **Details:**
 
-  .. _DepositAudited:
-  .. _tsref-type-DepositAudited:
-  .. code-block:: tsref
+  .. ts:def:: DepositAudited
 
     interface DepositAudited {
-        // TODO: do we care for the auditor to sign this?
+      // TODO: do we care for the auditor to sign this?
     }
 
-  .. _DepositConfirmation:
-  .. _tsref-type-DepositConfirmation:
-  .. code-block:: tsref
+  .. ts:def:: DepositConfirmation
 
     interface DepositConfirmation {
 
