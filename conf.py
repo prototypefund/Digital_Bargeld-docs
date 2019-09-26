@@ -51,7 +51,7 @@ needs_sphinx = '1.3'
 # ones.
 extensions = [
     'ebicsdomain',
-    'tsref',
+    'typescriptdomain',
     'taler_sphinx_theme',
     'sphinx.ext.todo',
     'sphinx.ext.imgmath',
@@ -103,7 +103,7 @@ exclude_patterns = ['_build', '_exts', 'cf', 'prebuilt']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
-#default_role = None
+default_role = "ts:type"
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True
