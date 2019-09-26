@@ -17,13 +17,13 @@ EBICS Glossary
   :sorted:
 
   A004
-    Electronic signature process, used in H004, deprecated in H005 with EBICS 3.0.
+    Electronic signature process, used in :term:`H004`, deprecated in :term:`H005` with EBICS 3.0.
 
   A005
-    Electronic signature process.  Used in H004 and H005.
+    Electronic signature process.  Used in :term:`H004` and :term:`H005`.
 
   A006
-    Electronic signature process.  Used in H004 and H005.
+    Electronic signature process.  Used in :term:`H004` and :term:`H005`.
 
   BTF
     *Business Transaction Formats.*  Before EBICS 3.0, many different order types were
@@ -82,7 +82,7 @@ EBICS Glossary
 
     Each upload transaction gets a unique order number assigned by the bank server.
     The Order Number is used to match VEUs in a second upload to the original order.
-    An Order Number matches the format "[A-Z][A-Z0-9]{3}" (and is not really a number!).
+    An Order Number matches the format ``[A-Z][A-Z0-9]{3}`` (and is not really a number!).
 
     Must be unique per customer ID and per order type
 
@@ -318,6 +318,39 @@ The following order types are, for now, not relevant for LibEuFin:
     Mandatory for German banks.  Superseeded by the machine-readable
     HAC order type.
 
+
+EBICS Transaction
+=================
+
+A transaction in EBICS simply refers to the process of uploading or downloading
+a file.  Whether it is an upload or download transaction depends on the order
+type.  Each transaction is either an upload transaction or a download
+transaction, neither both.
+
+Uploads and downloads must proceed in segments of at most ``1 MB``.  The
+segmentation happens after (1) encryption (2) zipping and (3) base64-encoding
+of the order data.
+
+The number of segments is always fixed starting from the first message sent
+(for uploads) or received (for downloads) by the subscriber.  The digest of the
+whole message is also sent/received with the first message of a transaction.
+The EBICS host generates a 128-bit transaction ID.  This ID is used to
+correlate uploads/downloads of segments for the same transaction.
+
+If an attacker would be able to guess the transaction ID, they could upload a
+bogus segment.  This would only be detected after the whole file has been
+transmitted.
+
+An upload transaction is finished when the subscriber has sent the last
+segment.  A download transaction is only finished when the subscriber has sent
+an additional acknowledgement message to the EBICS host.
+
+When upload/download of a segment fails, the client can always re-try.  There
+are some conditions for that:
+
+* Segment ``n`` can only be downloaded/uploaded when segments ``[0..n-1]`` have
+  been downloaded/uploaded.
+* The (implementation-defined) retry counter may not be exceeded.
 
 
 Formats
