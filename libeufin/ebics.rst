@@ -408,16 +408,16 @@ According to publicly available `forms
 <https://www.gls-laden.de/media/pdf/f1/c6/f2/nderungsauftrag.pdf>`_, GLS Bank
 supports the following order types:
 
- * :ebics:order:`AZV`
- * :ebics:order:`PTK`
- * :ebics:order:`CDZ`
- * :ebics:order:`CRZ`
- * :ebics:order:`CCC`
- * :ebics:order:`CCT`
- * :ebics:order:`CCU`
- * :ebics:order:`HVE`
- * :ebics:order:`HVS`
- * ... and mandatory administrative messages
+* :ebics:order:`AZV`
+* :ebics:order:`PTK`
+* :ebics:order:`CDZ`
+* :ebics:order:`CRZ`
+* :ebics:order:`CCC`
+* :ebics:order:`CCT`
+* :ebics:order:`CCU`
+* :ebics:order:`HVE`
+* :ebics:order:`HVS`
+* ... and mandatory administrative messages
 
 Sparkasse München
 -----------------
