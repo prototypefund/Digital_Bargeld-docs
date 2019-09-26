@@ -51,13 +51,14 @@ HTTP API
 
   Get information about a customer.
 
-  
-  .. code-block:: tsref
+  .. ts:def:: CustomerInfo
 
     interface CustomerInfo {
       ebicsInfo?: CustomerEbicsInfo;
       finTsInfo?: CustomerFinTsInfo;
     }
+
+  .. ts:def:: CustomerEbicsInfo
 
     interface CustomerEbicsInfo {
       ebicsHostId: string;
@@ -67,6 +68,10 @@ HTTP API
       // Info for the customer's "main subscriber"
       subscriberInitializationState: "NEW" | "PARTIALLY_INITIALIZED_INI" | "PARTIALLY_INITIALIZED_HIA" | "READY" | "INITIALIZED";
     }
+
+  .. ts:def:: CustomerFinTsInfo
+    
+    // TODO
 
 .. http:post:: /admin/customers/:id/ebics/keyletter
 

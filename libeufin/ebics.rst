@@ -122,7 +122,7 @@ EBICS Glossary
 
   UNIFI
     UNIversal Financial Industry message scheme.  Sometimes used to refer to
-    :tern:`ISO 20022`.
+    :term:`ISO 20022`.
 
   Segmentation
     EBICS implements its own protocol-level segmentation of business-related messages.
@@ -166,92 +166,123 @@ bank-technical order types.  This convention isn't always followed consistently 
 Relevant Order Types
 --------------------
 
-BTD
-  **Only EBICS3.0+**. Business Transaction Format Download.
-  Administrative order type to download a file, described in more detail by the BTF structure
+.. ebics:orders::
 
-BTU
-  **Only EBICS3.0+**. Business Transaction Format Upload.
-  Administrative order type to upload a file, described in more detail by the BTF structure
+  BTD
+    **Only EBICS3.0+**. Business Transaction Format Download.
+    Administrative order type to download a file, described in more detail by the BTF structure
 
-C52
-  **Before EBICS 3.0**.  Download bank-to-customer account report.
+  BTU
+    **Only EBICS3.0+**. Business Transaction Format Upload.
+    Administrative order type to upload a file, described in more detail by the BTF structure
 
-C53
-  **Before EBICS 3.0**.  Download bank-to-customer statement report.
+  C52
+    **Before EBICS 3.0**.  Download bank-to-customer account report (intra-day information).
 
-FUL
-  **Before EBICS 3.0, France**.  File Upload.  Mainly used by France-style EBICS.
+  C53
+    **Before EBICS 3.0**.  Download bank-to-customer statement report (prior day bank statement).
 
-FDL
-  **Before EBICS 3.0, France**.  File Download.  Mainly used by France-style EBICS.
+  CRZ
+    Type: Download.
 
-HIA
-  Transmission of the subscriber keys for (1) identification and authentication and (2)
-  encryption within the framework of subscriber initialisation.
+    Fetch payment status report (pain.002)
 
-HPB
-  Query the three RSA keys of the financial institute.
+  FUL
+    **Before EBICS 3.0, France**.  File Upload.  Mainly used by France-style EBICS.
 
-HPD
-  Host Parameter Data.  Used to query the capabilities of the financial institution.
+  FDL
+    **Before EBICS 3.0, France**.  File Download.  Mainly used by France-style EBICS.
 
-INI
-  Transmission of the subscriber keys for bank-technical electronic signatures.
+  HIA
+    Transmission of the subscriber keys for (1) identification and authentication and (2)
+    encryption within the framework of subscriber initialisation.
 
-HAC
-  Customer acknowledgement.  Allows downloading a detailed "log" of the activities
-  done via EBICS, in the pain.002 XML format.
+  HPB
+    Query the three RSA keys of the financial institute.
 
-HCS
-  Change keys without having to send a new INI/HIA letter.
+  HPD
+    Host Parameter Data.  Used to query the capabilities of the financial institution.
 
-SPR
-  Suspend a subscriber.  Used when a key compromise is suspected.
+  INI
+    Transmission of the subscriber keys for bank-technical electronic signatures.
 
-HCS
-  Change the subscribers keys (``K_SIG``, ``K_IA`` and ``K_ENC``).
+  HAC
+    Customer acknowledgement.  Allows downloading a detailed "log" of the activities
+    done via EBICS, in the pain.002 XML format.
+
+  HCS
+    Change keys without having to send a new INI/HIA letter.
+
+  SPR
+    Suspend a subscriber.  Used when a key compromise is suspected.
+
+  HCS
+    Change the subscribers keys (``K_SIG``, ``K_IA`` and ``K_ENC``).
 
 Other Order Types
 -----------------
 
 The following order types are, for now, not relevant for LibEuFin:
 
-H3K
-  Send all three RSA key pairs for initialization at once, accompanied
-  by a CA certificate for the keys.  This is (as far as we know) used in France,
-  but not used by any German banks.  When initializing a subscriber with H3K,
-  no INI and HIA letters are required.
 
-HVE
-  Host Verification of Electronic Signature.  Used to submit an electronic signature separately
-  from a previously uploaded order.
+.. ebics:orders::
 
-HVD
-  Retrieve VEU state.
+  AZV
+    Type: Upload.
 
-HVU
-  Retrieve VEU overview.
+    From German "Auslandszahlungsverkehr".  Used to submit
+    cross-border payments in a legacy format.
 
-HVS
-  Cancel Previous Order (from German "Storno").  Used to submit an electronic signature separately
-  from a previously uploaded order.
+  CDZ
+    Type: Download.
 
-HSA
-  Order to migrate from FTAM to EBICS.  **Removed in EBICS 3.0**.
+    Download payment status report for direct debit.
 
-PUB
-  Change of the bank-technical key (``K_SIG``).
-  Superseeded by HSA.
+  H3K
+    Type: Upload.
 
-HCA
-  Change the identification and authentication key as well as the encryption key (``K_IA`` and ``K_ENC``).
-  Superseeded by HCS.
+    Send all three RSA key pairs for initialization at once, accompanied
+    by a CA certificate for the keys.  This is (as far as we know) used in France,
+    but not used by any German banks.  When initializing a subscriber with H3K,
+    no INI and HIA letters are required.
 
-PTK
-  Download a human-readable protocol of operations done via EBICS.
-  Mandatory for German banks.  Superseeded by the machine-readable
-  HAC order type.
+  HVE
+    Type: Download.
+
+    Host Verification of Electronic Signature.  Used to submit an electronic signature separately
+    from a previously uploaded order.
+
+  HVD
+    Retrieve VEU state.
+
+  HVU
+    Retrieve VEU overview.
+
+  HVS
+    Cancel Previous Order (from German "Storno").  Used to submit an electronic signature separately
+    from a previously uploaded order.
+
+  HSA
+    Order to migrate from FTAM to EBICS.  **Removed in EBICS 3.0**.
+
+  PUB
+    Type: Upload.
+
+    Change of the bank-technical key (``K_SIG``).
+    Superseeded by HSA.
+
+  HCA
+    Type: Upload.
+
+    Change the identification and authentication key as well as the encryption key (``K_IA`` and ``K_ENC``).
+    Superseeded by HCS.
+
+  PTK
+    Type: Download.
+
+    Download a human-readable protocol of operations done via EBICS.
+    Mandatory for German banks.  Superseeded by the machine-readable
+    HAC order type.
 
 
 
@@ -262,6 +293,15 @@ ISO 20022
 ---------
 
 ISO 20022 is XML-based and defines message format for many finance-related activities.
+
+ISO 20022 messages are identified by a message identifier in the following format:
+
+  <business area> . <message identifier> . <variant> . <version>
+
+Some financial instututions (such as the Deutsche Kreditwirtschaft) may decided to use
+a subset of elements/attributes in a message, this is what the ``<variant>`` part is for.
+"Standard" ISO20022 have variant ``001``.
+
 The most important message types for LibEuFin are:
 
 camt - Cash Management
@@ -270,6 +310,22 @@ camt - Cash Management
 pain - Payment Initiation
   Particularly pain.001 (CustomerCreditTransferInitiation) to initiate a payment and
   pain.002 (CustomerPaymentStatus) to get the status of a payment.
+
+
+SWIFT Proprietary
+=================
+
+SWIFT Proprietary messages are in a custom textual format.
+The relevant messages are MT940 and MT942
+
+* MT940 contains *pre-advice*, in the sense that transactions in it might still
+  change or be reversed
+* MT942 contains the settled transactions by the end of the day
+
+SWIFT will eventually transition from MT messages to ISO20022,
+but some banks might still only give us account statements in the old
+SWIFT format.
+
   
 
 Key Management
@@ -288,13 +344,35 @@ One subscriber *may* use three different key pairs for these purposes.
 The identification and authentication key pair may be the same as the encryption key pair.
 The bank-technical key pair may not be used for any other purpose..
 
-MT940 vs MT942
-==============
 
-* MT942 contains *pre-advice*, in the sense that transactions in it might still change
-  or be reversed
-* M942 contains the settled transactions by the end of the day
+Real-time Transactions
+======================
 
+
+Bank Support
+============
+
+All German banks that are part of the Deutsche Kreditwirtschaft *must* support EBICS.
+
+The exact subset of EBICS order types must be agreed on contractually by the bank and customer.
+The following subsections list the message types that we know are supported by particular banks.
+
+GLS Bank
+--------
+
+According to publicly available `forms
+<https://www.gls-laden.de/media/pdf/f1/c6/f2/nderungsauftrag.pdf>`_, GLS Bank
+supports the following order types:
+
+ * :ebics:order:`PTK`
+ * :ebics:order:`CDZ`
+ * ... and mandatory administrative messages
+
+
+HypoVereinsbank
+---------------
+
+See `this document <https://www.hypovereinsbank.de/content/dam/hypovereinsbank/shared/pdf/Auftragsarten_Internet_Nov2018_181118.pdf>`_.
 
 Standards and Resources
 =======================
@@ -330,6 +408,10 @@ EBICS Compendium
 The `EBICS Compendium <https://www.ppi.de/en/payments/ebics/ebics-compendium/>`_ has some additional info on EBICS.
 It is published by a company that sells a proprietary EBICS server implementation.
 
+Others
+------
 
+* `<https://wiki.windata.de/index.php?title=EBICS-Auftragsarten>`_
+* `<https://www.gls-laden.de/media/pdf/f1/c6/f2/nderungsauftrag.pdf>`_
 
 
