@@ -7,6 +7,7 @@ EBICS documentation domain.
 """
 
 import re
+import unicodedata
 
 from docutils import nodes
 from typing import List, Optional, Iterable, Dict, Tuple

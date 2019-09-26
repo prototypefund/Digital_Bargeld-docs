@@ -8,10 +8,13 @@ EBICS Implementation Notes
 
   It is not a specification, and it does not replace the official EBICS specification.
 
+.. contents:: Table of Contents
+
 EBICS Glossary
 ==============
 
 .. glossary::
+  :sorted:
 
   A004
     Electronic signature process, used in H004, deprecated in H005 with EBICS 3.0.
@@ -168,6 +171,7 @@ Relevant Order Types
 --------------------
 
 .. ebics:orders::
+  :sorted:
 
   BTD
     **Only EBICS3.0+**. Business Transaction Format Download.
@@ -244,6 +248,7 @@ The following order types are, for now, not relevant for LibEuFin:
 
 
 .. ebics:orders::
+  :sorted:
 
   AZV
     Type: Upload.
