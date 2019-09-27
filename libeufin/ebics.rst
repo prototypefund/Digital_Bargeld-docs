@@ -215,6 +215,21 @@ Relevant Order Types
   FDL
     **Before EBICS 3.0, France**.  File Download.  Mainly used by France-style EBICS.
 
+  HAA
+   Type: Download, Optional 
+
+   Download order types for which there is new data available.
+
+  HTD
+   Type: Download, Optional 
+
+   Download information about a subscriber.  From German "Teilnehmerdaten".
+
+  HKD
+   Type: Download, Optional 
+
+   Download information about a customer (=partner).  From German "Kundendaten".
+
   HIA
     Transmission of the subscriber keys for (1) identification and authentication and (2)
     encryption within the framework of subscriber initialisation.
@@ -236,7 +251,8 @@ Relevant Order Types
     Change keys without having to send a new INI/HIA letter.
 
   SPR
-    Suspend a subscriber.  Used when a key compromise is suspected.
+    From German "sperren". Suspend a subscriber.  Used when a key compromise is
+    suspected.
 
   HCS
     Change the subscribers keys (``K_SIG``, ``K_IA`` and ``K_ENC``).
@@ -290,6 +306,11 @@ The following order types are, for now, not relevant for LibEuFin:
 
     Retrieve VEU overview.
 
+  HVU
+    Type: Download.
+
+    Retrieve VEU extra information.  From German "Zusatzinformationen".
+
   HVS
     Type: Upload.
 
@@ -297,6 +318,8 @@ The following order types are, for now, not relevant for LibEuFin:
     from a previously uploaded order.
 
   HSA
+    Type: Optional
+
     Order to migrate from FTAM to EBICS.  **Removed in EBICS 3.0**.
 
   PUB
