@@ -115,7 +115,7 @@ HTTP API
         hash: string;
     }
 
-    HIA: {
+      HIA: {
         // The user ID that participates in a EBICS subscriber.
         userId: string;
 
@@ -149,4 +149,5 @@ HTTP API
 
         // RSA key hash
         hash: string;
-    }
+      }
+    } 
