@@ -81,7 +81,72 @@ HTTP API
   .. code-block:: tsref
 
     interface KeyLetterRequest {
-      partnerId: string;
-      userId: string;
-      // FIXME: other fields: see spec and put here
+
+      INI: {
+        // The user ID that participates in a EBICS subscriber.
+        userId: string;
+
+        // The customer ID specific to the bank (therefore not
+        // participating in a EBICS subscriber).
+        customerId: string;
+
+        // Human name of the user
+        name: string;
+
+        // Date of key creation.  DD.MM.YYYY format.
+        date: string;
+
+        // Time of key creation.  HH:MM:SS format.
+        time: string;
+
+        // Recipient.  Bank "ID" (FIXME to be specified).
+        recipient: string;
+
+        // Electronic signature version.  A004, for example.
+        es_version: string;
+
+        // RSA key exponent
+        exponent: string;
+
+        // RSA key modulus
+        modulus: string;
+
+        // RSA key hash
+        hash: string;
+    }
+
+    HIA: {
+        // The user ID that participates in a EBICS subscriber.
+        userId: string;
+
+        // The customer ID specific to the bank (therefore not
+        // participating in a EBICS subscriber).
+        customerId: string;
+
+        // Human name of the user
+        name: string;
+
+        // Date of key creation.  DD.MM.YYYY format.
+        date: string;
+
+        // Time of key creation.  HH:MM:SS format.
+        time: string;
+
+        // Recipient.  Bank "ID" (FIXME to be specified).
+        recipient: string;
+
+        // Identification and authentication signature version, X002 for example.
+        ia_version: string;
+
+        // Encryption version, E002 for example.
+        enc_version: string;
+
+        // RSA key exponent
+        exponent: string;
+
+        // RSA key modulus
+        modulus: string;
+
+        // RSA key hash
+        hash: string;
     }
