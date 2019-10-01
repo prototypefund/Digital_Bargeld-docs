@@ -141,6 +141,7 @@ runs a Buildbot worker.  The following commands set the ``docbuilder`` up,
 starting with a empty home directory.
 
 ::
+
   # Log-in as the 'docbuilder' user.
 
   $ cd $HOME
@@ -161,6 +162,7 @@ user ``taler-websites`` by the means of a Buildbot worker.  The following
 commands set the ``taler-websites`` up, starting with a empty home directory.
 
 ::
+
   # Log-in as the 'taler-websites' user.
 
   $ cd $HOME
@@ -200,7 +202,7 @@ The user ``demo-checker`` runs periodic checks to see if all the
 Buildbot, and can be bootstrapped as follows.
 
 ::
-  
+
   # Log-in as the 'demo-checker' user
 
   $ cd $HOME
@@ -220,11 +222,12 @@ by a Buildbot worker.  The following steps get the reserve topper
 prepared.
 
 ::
+
   # Log-in as <env>-topper, with <env> being either 'test' or 'demo'
 
   $ git clone git://git.taler.net/deployment
   $ ./deployment/prepare-reservetopper <env>
-  
+
   # If the previous steps worked, then it should suffice to start
   # the worker, with:
 
@@ -243,7 +246,7 @@ prepared.
 
   $ git clone git://git.taler.net/deployment
   $ ./deployment/prepare-auditorreporter <env>
-  
+
   # If the previous steps worked, then it should suffice to start
   # the worker, with:
 
