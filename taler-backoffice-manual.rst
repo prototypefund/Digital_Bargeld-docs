@@ -40,7 +40,7 @@ GNU-ish fashion.
    $ make install
 
 Note that to make the application work ``<PREFIX>/bin`` must be included
-in the ``$PATH``, and ``<PREFIX>/lib/python3.5/site-packages/`` in
+in the ``$PATH``, and ``<PREFIX>/lib/python3.7/site-packages/`` in
 ``$PYTHONPATH``.
 
 .. _Configuration:

@@ -55,7 +55,7 @@ do:
 
 ::
 
-   $ cd $HOME 
+   $ cd $HOME
    $ git clone git://git.taler.net/deployment
 
 Then run the prepare script that will (1) download all the repositories
@@ -64,7 +64,7 @@ needed data.
 
 ::
    $ ./deployment/bin/taler-deployment-prepare [test | int | demo]
-    
+
 ..
 
    **Note**
@@ -347,6 +347,12 @@ all the codebases are found at the following URL:
 A complete list of all the existing repositories is currently found at
 ``https://git.taler.net/``. Note: ``<repository>`` must NOT have the
 ``.git`` extension.
+
+.. _Python-Versions:
+Python Versions
+===============
+
+Python code should be written and build against version 3.7 of python.
 
 .. _Bugtracking:
 
