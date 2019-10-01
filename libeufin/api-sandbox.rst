@@ -101,7 +101,7 @@ HTTP API
         // "Time of processing of the corresponding EBICS order".  HH:MM:SS format.
         time: string;
 
-        // Recipient.  Bank "ID" (better explain this).
+        // Identification token of the bank.  Not required to obey to any particular standard.
         recipient: string;
 
         // Electronic signature version.  A004, for example.
@@ -140,7 +140,7 @@ HTTP API
         // "Time of processing of the corresponding EBICS order".  HH:MM:SS format.
         time: string;
 
-        // Recipient.  Bank "ID" (FIXME to be specified).
+        // Identification token of the bank.  Not required to obey to any particular standard.
         recipient: string;
 
         ////////////////////////////////////////////////////
