@@ -101,18 +101,20 @@ HTTP API
         // "Time of processing of the corresponding EBICS order".  HH:MM:SS format.
         time: string;
 
-        // Recipient.  Bank "ID" (FIXME to be specified).
+        // Recipient.  Bank "ID" (better explain this).
         recipient: string;
 
         // Electronic signature version.  A004, for example.
         version: string;
 
-        // RSA key exponent
+        // Length in bits of the key exponent.
         exponent_length: number;
+        // RSA key exponent in hexadecimaml notation.
         exponent: string;
 
-        // RSA key modulus
+        // Length in bits of the key modulus.
         modulus_length: number;
+        // RSA key modulus in hexadecimaml notation.
         modulus: string;
 
         // RSA key hash
@@ -142,7 +144,7 @@ HTTP API
         recipient: string;
 
         ////////////////////////////////////////////////////
-        // Identification and authentication key details. //
+        // Identification and Authentication key details. //
         ////////////////////////////////////////////////////
 
         // Identification and authentication signature version, X002
@@ -151,12 +153,12 @@ HTTP API
 
         // length of the exponent, in bits.
         ia_exp_length: number;
-        // RSA key exponent
+        // RSA key exponent in hexadecimaml notation.
         ia_exponent: string;
 
         // length of the modulus, in bits.
         ia_mod_length: number;
-        // RSA key modulus
+        // RSA key modulus in hexadecimaml notation.
         ia_modulus: string;
 
         // Hash of the identification and authentication key.
@@ -171,12 +173,12 @@ HTTP API
 
         // length of the exponent, in bits.
         enc_exp_length: number;
-        // RSA key exponent
+        // RSA key exponent in hexadecimaml notation.
         enc_exponent: string;
 
         // length of the modulus, in bits.
         enc_mod_length: number;
-        // RSA key modulus
+        // RSA key modulus in hexadecimaml notation.
         enc_modulus: string;
 
         // RSA key hash.
