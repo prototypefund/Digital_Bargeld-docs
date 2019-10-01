@@ -394,7 +394,7 @@ Code coverage
 
 Code coverage is done with the Gcov / Lcov
 (http://ltp.sourceforge.net/coverage/lcov.php) combo, and it is run
-\*nightly\* (once a day) by a Buildbot worker. The coverage results are
+*nightly* (once a day) by a Buildbot worker. The coverage results are
 then published at ``https://lcov.taler.net/``.
 
 
