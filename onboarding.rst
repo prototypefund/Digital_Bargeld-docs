@@ -243,6 +243,7 @@ by a Buildbot worker.  The following steps get the reports compiler
 prepared.
 
 ::
+
   # Log-in as <env>-auditor, with <env> being either 'test' or 'demo'
 
   $ git clone git://git.taler.net/deployment
