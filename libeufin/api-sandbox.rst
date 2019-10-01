@@ -93,10 +93,12 @@ HTTP API
         // Human name of the user
         name: string;
 
-        // Date of key creation.  DD.MM.YYYY format.
+        // As per specification, this value is:
+        // "Date of processing of the corresponding EBICS order".  DD.MM.YYYY format.
         date: string;
 
-        // Time of key creation.  HH:MM:SS format.
+        // As per specification, this value is:
+        // "Time of processing of the corresponding EBICS order".  HH:MM:SS format.
         time: string;
 
         // Recipient.  Bank "ID" (FIXME to be specified).
@@ -106,9 +108,11 @@ HTTP API
         es_version: string;
 
         // RSA key exponent
+        exponent_length: number;
         exponent: string;
 
         // RSA key modulus
+        modulus_length: number;
         modulus: string;
 
         // RSA key hash
@@ -126,28 +130,56 @@ HTTP API
         // Human name of the user
         name: string;
 
-        // Date of key creation.  DD.MM.YYYY format.
+        // As per specification, this value is:
+        // "Date of processing of the corresponding EBICS order".  DD.MM.YYYY format.
         date: string;
 
-        // Time of key creation.  HH:MM:SS format.
+        // As per specification, this value is:
+        // "Time of processing of the corresponding EBICS order".  HH:MM:SS format.
         time: string;
 
         // Recipient.  Bank "ID" (FIXME to be specified).
         recipient: string;
 
-        // Identification and authentication signature version, X002 for example.
+        ////////////////////////////////////////////////////
+        // Identification and authentication key details. //
+        ////////////////////////////////////////////////////
+
+        // Identification and authentication signature version, X002
+        // for example.
         ia_version: string;
+
+        // length of the exponent, in bits.
+        ia_exp_length: number;
+        // RSA key exponent
+        ia_exponent: string;
+
+        // length of the modulus, in bits.
+        ia_mod_length: number;
+        // RSA key modulus
+        ia_modulus: string;
+
+        // Hash of the identification and authentication key.
+        ia_hash: string;
+
+        /////////////////////////////
+        // Encryption key details. //
+        /////////////////////////////
 
         // Encryption version, E002 for example.
         enc_version: string;
 
+        // length of the exponent, in bits.
+        enc_exp_length: number;
         // RSA key exponent
-        exponent: string;
+        enc_exponent: string;
 
+        // length of the modulus, in bits.
+        enc_mod_length: number;
         // RSA key modulus
-        modulus: string;
+        enc_modulus: string;
 
-        // RSA key hash
-        hash: string;
+        // RSA key hash.
+        enc_hash: string;
       }
     } 
