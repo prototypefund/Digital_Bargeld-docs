@@ -105,7 +105,7 @@ HTTP API
         recipient: string;
 
         // Electronic signature version.  A004, for example.
-        es_version: string;
+        version: string;
 
         // RSA key exponent
         exponent_length: number;
