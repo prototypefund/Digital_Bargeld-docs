@@ -215,7 +215,6 @@ of some of the options.
 Configuration format
 --------------------
 
-configuration
 In Taler realm, any component obeys to the same pattern to get
 configuration values. According to this pattern, once the component has
 been installed, the installation deploys default values in
