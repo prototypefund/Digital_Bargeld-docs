@@ -113,7 +113,7 @@ master.
 
 The following commands do that:
 
-::
+.. code-block:: sh
 
    $ cd $REPO
 
@@ -141,7 +141,7 @@ All the Taler documentation is built by the user ``docbuilder`` that
 runs a Buildbot worker.  The following commands set the ``docbuilder`` up,
 starting with a empty home directory.
 
-::
+.. code-block:: sh
 
   # Log-in as the 'docbuilder' user.
 
@@ -162,7 +162,7 @@ Taler Websites, ``www.taler.net`` and ``stage.taler.net``, are built by the
 user ``taler-websites`` by the means of a Buildbot worker.  The following
 commands set the ``taler-websites`` up, starting with a empty home directory.
 
-::
+.. code-block:: sh
 
   # Log-in as the 'taler-websites' user.
 
@@ -181,7 +181,7 @@ Code coverage.
 Code coverage tests are run by the ``lcovworker`` user, and are also driven
 by Buildbot.
 
-::
+.. code-block:: sh
 
   # Log-in as the 'lcovworker' user.
 
@@ -202,7 +202,7 @@ The user ``demo-checker`` runs periodic checks to see if all the
 ``*.demo.taler.net`` services are up and running.  It is driven by
 Buildbot, and can be bootstrapped as follows.
 
-::
+.. code-block:: sh
 
   # Log-in as the 'demo-checker' user
 
@@ -222,7 +222,7 @@ Both 'test' and 'demo' setups get their tip reserve topped up
 by a Buildbot worker.  The following steps get the reserve topper
 prepared.
 
-::
+.. code-block:: sh
 
   # Log-in as <env>-topper, with <env> being either 'test' or 'demo'
 
@@ -242,7 +242,7 @@ Both 'test' and 'demo' setups get their auditor reports compiled
 by a Buildbot worker.  The following steps get the reports compiler
 prepared.
 
-::
+.. code-block:: sh
 
   # Log-in as <env>-auditor, with <env> being either 'test' or 'demo'
 
@@ -279,7 +279,7 @@ Tagging
 
 Tag releases with an **annotated** commit, like
 
-::
+.. code-block:: sh
 
    git tag -a v0.1.0 -m "Official release v0.1.0"
    git push origin v0.1.0
@@ -298,9 +298,9 @@ Set the version in ``configure.ac``. The commit being tagged should be
 the change of the version.
 
 For the exchange test cases to pass, ``make install`` must be run first.
-Without it, test cases will fail because plugins can’t be located.
+Without it, test cases will fail because plugins can't be located.
 
-::
+.. code-block:: sh
 
    ./bootstrap
    ./configure # add required options for your system
@@ -316,7 +316,7 @@ The version of the wallet is in *manifest.json*. The ``version_name``
 should be adjusted, and *version* should be increased independently on
 every upload to the WebStore.
 
-::
+.. code-block:: sh
 
    ./configure
    make dist
