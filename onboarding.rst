@@ -63,6 +63,7 @@ Then run the prepare script that will (1) download all the repositories
 needed data.
 
 ::
+
    $ ./deployment/bin/taler-deployment-prepare [test | int | demo]
 
 ..
