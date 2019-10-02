@@ -104,7 +104,7 @@ HTTP API
         // Identification token of the bank.  Not required to obey to any particular standard.
         recipient: string;
 
-        // Electronic signature version.  A004, for example.
+        // Electronic signature version.  Admitted values: A004, A005, A006.
         version: string;
 
         // Length in bits of the key exponent.
@@ -117,7 +117,10 @@ HTTP API
         // RSA key modulus in hexadecimaml notation.
         modulus: string;
 
-        // RSA key hash
+        // RSA key hash.
+        //
+        // A004 version requires hash type RIPEMD-160
+        // A005, A005 versions require hash type SHA-256.
         hash: string;
     }
 
@@ -147,41 +150,41 @@ HTTP API
         // Identification and Authentication key details. //
         ////////////////////////////////////////////////////
 
-        // Identification and authentication signature version, X002
-        // for example.
+        // Identification and authentication signature version.
+        // Admitted value: X002.
         ia_version: string;
 
         // length of the exponent, in bits.
-        ia_exp_length: number;
+        ia_exponent_length: number;
         // RSA key exponent in hexadecimaml notation.
         ia_exponent: string;
 
         // length of the modulus, in bits.
-        ia_mod_length: number;
+        ia_modulus_length: number;
         // RSA key modulus in hexadecimaml notation.
         ia_modulus: string;
 
-        // Hash of the identification and authentication key.
+        // SHA-256 hash of the identification and authentication key.
         ia_hash: string;
 
         /////////////////////////////
         // Encryption key details. //
         /////////////////////////////
 
-        // Encryption version, E002 for example.
+        // Encryption version.  Admitted value: E002.
         enc_version: string;
 
         // length of the exponent, in bits.
-        enc_exp_length: number;
+        enc_exponent_length: number;
         // RSA key exponent in hexadecimaml notation.
         enc_exponent: string;
 
         // length of the modulus, in bits.
-        enc_mod_length: number;
+        enc_modulus_length: number;
         // RSA key modulus in hexadecimaml notation.
         enc_modulus: string;
 
-        // RSA key hash.
+        // SHA-256 hash of the encryption key.
         enc_hash: string;
       }
     } 
