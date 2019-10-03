@@ -108,14 +108,14 @@ HTTP API
         version: string;
 
         // Length in bits of the key exponent.
-        exponent_length: number;
+        public_exponent_length: number;
         // RSA key exponent in hexadecimaml notation.
-        exponent: string;
+        public_exponent: string;
 
         // Length in bits of the key modulus.
-        modulus_length: number;
+        public_modulus_length: number;
         // RSA key modulus in hexadecimaml notation.
-        modulus: string;
+        public_modulus: string;
 
         // RSA key hash.
         //
@@ -155,14 +155,14 @@ HTTP API
         ia_version: string;
 
         // length of the exponent, in bits.
-        ia_exponent_length: number;
+        ia_public_exponent_length: number;
         // RSA key exponent in hexadecimaml notation.
-        ia_exponent: string;
+        ia_public_exponent: string;
 
         // length of the modulus, in bits.
-        ia_modulus_length: number;
+        ia_public_modulus_length: number;
         // RSA key modulus in hexadecimaml notation.
-        ia_modulus: string;
+        ia_public_modulus: string;
 
         // SHA-256 hash of the identification and authentication key.
         ia_hash: string;
@@ -175,14 +175,14 @@ HTTP API
         enc_version: string;
 
         // length of the exponent, in bits.
-        enc_exponent_length: number;
+        enc_public_exponent_length: number;
         // RSA key exponent in hexadecimaml notation.
-        enc_exponent: string;
+        enc_public_exponent: string;
 
         // length of the modulus, in bits.
-        enc_modulus_length: number;
+        enc_public_modulus_length: number;
         // RSA key modulus in hexadecimaml notation.
-        enc_modulus: string;
+        enc_public_modulus: string;
 
         // SHA-256 hash of the encryption key.
         enc_hash: string;
