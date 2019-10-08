@@ -21,50 +21,93 @@
 Anastasis
 =========
 
-**Anastasis** is a service that allows the user to securely deposit a master
-secret with an open set of escrow providers and recover it if it is lost.  To
-uniquely identify users, an "unforgettable" **identifier** is used.  This
-identifier should be difficult to guess for anybody but the user, but is not
-expected to have sufficient entropy or secrecy to be cryptographically
-secure. Examples for such identifier would be a concatenation of the full name
-of the user and their social security or passport number(s).  For Swiss
-citizens, the AHV number could also be used.  Some key material, but not the
-master secret, is then derived from this **identifier** using different HKDFs.
-These HKDFs are salted using the respective escrow provider's **server salt**,
-which ensures that the accounts for the same user cannot be easily correlated
-across the various Anastasis servers.
+**Anastasis** is a service that allows the user to securely deposit a **core
+ secret** with an open set of escrow providers and recover it if the secret is
+lost.  The **core secret** itself is protected from the escrow providers by
+encrypting it with a **master key**.  The main objective of Anastasis is to
+ensure that the user can reliably recover the **core secret**, while making
+this difficult for everyone else.  Furthermore, it is assumed that the user
+is unable to reliably remember any secret with sufficiently high entropy, so
+we cannot simply encrypt using some other key material in posession of the
+user.
 
-The Anastasis service uses an EdDSA **account key** to identify the account of
-the user.  The account private key is derived from the user's identifier using
-a computationally expensive cryptographic hash function H_1.  Using an
-expensive hash algorithm is supposed to make it difficult for an adversary to
-determine account keys by brute force without knowing the user's identifier.
-However, it is assumed that an adversary performing a targeted attack can
+To uniquely identify users, an "unforgettable" **identifier** is used.  This
+identifier should be difficult to guess for anybody but the user. However, the
+**identifier** is not expected to have sufficient entropy or secrecy to be
+cryptographically secure. Examples for such identifier would be a
+concatenation of the full name of the user and their social security or
+passport number(s).  For Swiss citizens, the AHV number could also be used.
+
+The adversary model of Anastasis has two types of adversaries: weak
+adversaries which do not know the user's **identifier**, and strong
+adversaries which somehow do know a user's **identifier**.  For weak
+adversaries the system guarantees full confidentiality.  For strong
+adversaries, breaking confidentiality additionally requires that Anastasis
+escrow providers must have colluded.  The user is able to define a **policy**
+which determines which Anastasis escrow providers would need to collude to
+break confidentiality. The policy also also sets the bar for the user to
+recover their core secret.
+
+A policy specifies a set of **escrow methods**, which specify how the user
+should convince the Anastasis server that they are "real".  Escrow methods can
+for example include SMS-based verification, Video-identfication or a security
+question.  For each escrow method, the Anastasis server is provided with
+**truth**, that is data the Anastasis operator may learn during the recovery
+process to authenticate the user.  Examples for truth would be a phone number
+(for SMS), a picture of the user (for video identification), or the (hash of)
+a security answer.  A strong adversary is assumed to be able to learn the
+truth, while weak adversaries must not.  In addition to a set of escrow
+methods and associated Anastasis server operators, the policy also specifies
+which combination(s) of these methods should suffice to obtain access.  For
+example, a policy could say that methods (A and B) suffice, and a second
+policy may permit (A and C).  A different user may choose to use the policy
+that (A and B and C) are all required.  Anastasis imposes no limit on the
+number of policies (per user's secret), or the set of providers or escrow
+methods involved in guarding a user's secret.  Weak adversaries must not be
+able to deduce information about a user's policies (except for their length
+if the weak adversary can monitor the user's network traffic).
+
+
+----------------------
+Anastasis Cryptography
+----------------------
+
+When a user needs to interact with Anastsis, the system first derives some key
+material, but not the master secret, from the user's **identifier** using
+different HKDFs.  These HKDFs are salted using the respective escrow
+provider's **server salt**, which ensures that the accounts for the same user
+cannot be easily correlated across the various Anastasis servers.
+
+Each Anastasis server uses an EdDSA **account key** to identify the account of
+the user.  The account private key is derived from the user's **identifier** using
+a computationally expensive cryptographic hash function.  Using an
+expensive hash algorithm is assumed to make it infeasible for a weak adversary to
+determine account keys by brute force (without knowing the user's identifier).
+However, it is assumed that a strong adversary performing a targeted attack can
 compute the account key pair.
 
 The public account key is Crockford base32-encoded in the URI to identify the
-account, and used to sign requests.  These signatures are provided in base32
-encoding using the HTTP header "Anastasis-Account-Signature".
+account, and used to sign requests.  These signatures are also provided in
+base32-encoding and transmitted using the HTTP header
+"Anastasis-Account-Signature".
 
-Payloads are encrypted using AES-GCM with a symmetric key and IV derived from
-the identifier and a nonce.  The nonce and the GCM tag are then pre-pended to
-the resulting ciphertext and uploaded to the Anastasis server.  This is done
-whenever encrypted data is stored with the server.
+When confidential data is uploaded to an Anastasis server, the respective
+payload is encrypted using AES-GCM with a symmetric key and initialization
+vector derived from the **identifier** and a high-entropy **nonce**.  The
+nonce and the GCM tag are prepended to the ciphertext before being uploaded to
+the Anastasis server.  This is done whenever confidential data is stored with
+the server.
 
-The **core secret** of the user is encrypted using a symmetric **master key**.
-Recovering the master key requires the user to satisfy a particular
-**policy**.  Policies specify a set of **escrow methods**, each of
-which leads the user to a **key share**. Combining those key shares then
-ultimately allows the user to obtain a **policy key**, which can be used to
-decrypt the **master key**.  There can be many policies, satisfying any of
-these will allow the user to recover the master key.  A **recovery document**
-contains the encrypted core secret, a set of escrow methods and a set
-of policies.
+The **core secret** of the user is (AES) encrypted using a symmetric **master
+key**.  Recovering this master key requires the user to satisfy a particular
+**policy**.  Policies specify a set of **escrow methods**, each of which leads
+the user to a **key share**. Combining those key shares (by hashing) allows
+the user to obtain a **policy key**, which can be used to decrypt the **master
+key**.  There can be many policies, satisfying any of these will allow the
+user to recover the master key.  A **recovery document** contains the
+encrypted **core secret**, a set of escrow methods and a set of policies.
 
-An escrow method specifies an Anastasis provider and how the user should
-authorize themself. The **truth** API allows the user to provide the
-(encrypted) key share to the respective escrow provider, as well as auxiliary
-data required for the respective authorization method.
+
 
 
 ---------------
@@ -80,25 +123,25 @@ To start, a user provides their private, unique and unforgettable
 **identifier** as a seed to identify their account.  For example, this could
 be a social security number together with their full name.  Specifics may
 depend on the cultural context, in this document we will simply refer to this
-information as the **user_identifier**.
+information as the **identifier**.
 
-This user_identifier will be first hashed with SCrypt, to provide a **kdf_id**
+This identifier will be first hashed with SCrypt, to provide a **kdf_id**
 which will be used to derive other keys later. The Hash must also include the
 respective **server_salt**. This also ensures that the **kdf_id** is different
 on each server. The use of SCrypt and the respective server_salt is intended
 to make it difficult to brute-force **kdf_id** values and help protect user's
 privacy. Also this ensures that the kdf_ids on every server differs. However,
-we do not assume that the **user_identifier** or the **kdf_id** cannot be
+we do not assume that the **identifier** or the **kdf_id** cannot be
 determined by an adversary performing a targeted attack, as a user's
-**user_identifier** is likely to always be known to state actors and may
+**identifier** is likely to always be known to state actors and may
 likely also be available to other actors.
 
 
 .. code-block:: tsref
 
-    kdf_id := SCrypt( user_identifier, server_salt, keysize )
+    kdf_id := SCrypt( identifier, server_salt, keysize )
 
-**user_identifier**: The secret defined from the user beforehand.
+**identifier**: The secret defined from the user beforehand.
 
 **server_salt**: The salt from the Server
 
@@ -131,7 +174,7 @@ kdf_id.
 
 **HKDF()**: The HKDF-function uses to phases: First we use HMAC-SHA512 for the extraction phase, then HMAC-SHA256 is used for expansion phase.
 
-**kdf_id**: Hashed user_identifier.
+**kdf_id**: Hashed identifier.
 
 **key_size**: Size of the output, here 32 bytes.
 
@@ -163,7 +206,7 @@ key material using an HKDF over a nonce and the kdf_id.
 
 **HKDF()**: The HKDF-function uses to phases: First we use HMAC-SHA512 for the extraction phase, then HMAC-SHA256 is used for expansion phase.
 
-**kdf_id**: Hashed user_identifier
+**kdf_id**: Hashed identifier
 
 **keysize**: Size of the AES symmetric key, here 32 bytes
 
@@ -207,7 +250,8 @@ Signatures
 ^^^^^^^^^^
 
 The EdDSA keys are used to sign the data sent from the client to the
-server. Everything the client sends to server is signed. The following algorithm is equivalent for **Anastasis-Policy-Signature**.
+server. Everything the client sends to server is signed. The following
+algorithm is equivalent for **Anastasis-Policy-Signature**.
 
 .. code-block:: tsref
 
@@ -219,6 +263,14 @@ server. Everything the client sends to server is signed. The following algorithm
 **h_body**: The hashed body.
 
 **ver_res**: A boolean value. True: Verification passed, False: Verification failed.
+
+
+-------------------
+Encryption of Truth
+-------------------
+
+FIXME: missing crypto! (See "EKS" below!)
+In particular, underspecified for the security answer ("may additionally include"...).
 
 
 
@@ -490,26 +542,28 @@ Managing truth
 ^^^^^^^^^^^^^^
 
 This API is used by the Anastasis client to deposit or request **truth** with
-the escrow provider.  As with the policy, the user may be identified and
-authorized by $ACCOUNT_PUB.  Note that authentification of the user is
-optional when uploading truth and depends on the server.  An Anastasis-server
-may agree to store truth for free for a certain time period, or charge per
-truth without associating the truth with an account.  Hence the "account"
-argument and signature may be optional.
+the escrow provider.
 
-.. http:post:: /truth/$UUID[?account=$ACCOUNT_PUB]
+An **escrow method** specifies an Anastasis provider and how the user should
+authorize themself.  The **truth** API allows the user to provide the
+(encrypted) key share to the respective escrow provider, as well as auxiliary
+data required for such an respective escrow method.
+
+An Anastasis-server may store truth for free for a certain time period, or
+charge per truth operation using GNU Taler.
+
+.. http:post:: /truth/$UUID
+
+  FIXME: high-level description missing.
 
   :status 204 No content:
     Truth stored successfully.
   :status 304 Not modified:
     The same truth was previously accepted and stored under this UUID.
-  :status 400 Bad request:
-    The $ACCOUNT_PUB is not an EdDSA public key.  The response body may elaborate on the error.
   :status 402 Payment Required:
-    The account's balance is too low for the specified operation (or the server
-    requires payment to store truth per item).
+    This server requires payment to store truth per item.
     See the Taler payment protocol specification for how to pay.
-    The response body SHOULD provide various means for payment.
+    The response body MAY provide alternative means for payment.
   :status 403 Forbidden:
     The required account signature was invalid.  The response body may elaborate on the error.
   :status 409 Conflict:
@@ -518,7 +572,6 @@ argument and signature may be optional.
   :status 412 Precondition Failed:
     The selected authentication method is not supported on this provider.
 
-  *Anastasis-Account-Signature*: The client must provide Base-32 encoded EdDSA signature over hash of body with $ACCOUNT_PRIV, affirming the desire to upload the truth; only present if "account" is specified in the URL.
 
   **Details:**
 
@@ -529,8 +582,8 @@ argument and signature may be optional.
       // Key share method, i.e. "security question", "SMS", "e-mail", ...
       method: String;
 
-      // The explicit key material to reveal (Q: as string in base32 encoding?)
-      // Contains a KeyShare_, but in compact binary encoding.
+      // The encrypted key material to reveal, in base32 encoding.
+      // Contains a KeyShare_.
       //
       // The salt of the HKDF for the encryption of this
       // value must include the string "EKS".   Depending
@@ -562,6 +615,8 @@ argument and signature may be optional.
 
 .. http:get:: /truth/$UUID[?response=$RESPONSE]
 
+  FIXME: high-level description missing.
+
   :status 200 OK:
     EncryptedKeyShare_ is returned in body (in binary).
   :status 202 Accepted:
@@ -573,10 +628,9 @@ argument and signature may be optional.
     given in the "Location" header and allow the user to re-try the operation
     after successful authorization.
   :status 402 Payment Required:
-    The account's balance is too low for the specified operation (or the server
-    requires payment to store truth per item).
+    The service requires payment for access to truth.
     See the Taler payment protocol specification for how to pay.
-    The response body SHOULD provide various means for payment.
+    The response body MAY provide alternative means for payment.
   :status 403 Forbidden:
     The server requires a valid "response" to the challenge associated with the UUID.
   :status 404 Not Found:
