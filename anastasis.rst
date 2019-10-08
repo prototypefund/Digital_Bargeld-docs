@@ -806,6 +806,8 @@ SMS (sms)
 ^^^^^^^^^
 
 Sends an SMS with a code to the users phone.
+The must send this code back with his request (see $RESPONSE under 'Managing truth').
+If the transmitted code is correct, the server responses with the requested encrypted key share.
 FIXME: details!
 
 Video identification (vid)
@@ -819,6 +821,9 @@ Security question (qa)
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Asks the user a security question.
+The user sends back a hash over the answer. 
+If the hash value matches with the one the server is expecting, the server answers
+with the requested encrypted key share
 FIXME: details!
 
 
