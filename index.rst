@@ -59,6 +59,8 @@ Documentation Overview
   taler-bank-manual
   taler-backoffice-manual
   onboarding
+  api-anastasis
+  crypto-anastasis
   libeufin/index
   global-licensing
   manindex
@@ -67,4 +69,3 @@ Documentation Overview
   :hidden:
 
   fdl-1.3
-
