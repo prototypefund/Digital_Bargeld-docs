@@ -59,8 +59,7 @@ Documentation Overview
   taler-bank-manual
   taler-backoffice-manual
   onboarding
-  api-anastasis
-  crypto-anastasis
+  anastasis
   libeufin/index
   global-licensing
   manindex
