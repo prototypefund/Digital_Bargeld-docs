@@ -348,18 +348,13 @@ Receiving Terms of Service
 
   **Response:**
 
-  Returns a `SyncTermsOfServiceResponse`_.
+  Returns a `EscrowTermsOfServiceResponse`_.
 
-  .. _SyncTermsOfServiceResponse:
-  .. _tsref-type-SyncTermsOfServiceResponse:
+  .. _EscrowTermsOfServiceResponse:
+  .. _tsref-type-EscrowTermsOfServiceResponse:
   .. code-block:: tsref
 
-    interface SyncTermsOfServiceResponse {
-      // maximum key database backup size supported
-      storage_limit_in_megabytes: number;
-
-      // maximum number of sync requests per day (per account)
-      daily_sync_limit: number;
+    interface EscrowTermsOfServiceResponse {
 
       // minimum supported protocol version
       min_version: number;
@@ -368,13 +363,48 @@ Receiving Terms of Service
       max_version: number;
 
       // supported authentication methods
-      auth_methods: string[];
+      auth_methods: AuthenticationMethod[];
 
-      // how long the service expire the deposited truth?
+      // Payment required to maintain an account to store policy documents for a month.
+      // Users can pay more, in which case the storage time will go up proportionally.
+      monthly_account_fee: Amount;
+
+      // Amount required per policy upload. Note that the amount is NOT charged additionally
+      // to the monthly_storage_fee. Instead, when a payment is made, the amount is
+      // divided by the policy_upload_fee (and rounded down) to determine how many
+      // uploads can be made under the associated **payment secret**.
+      policy_upload_ratio: Amount;
+
+      // maximum policy upload size supported
+      policy_size_limit_in_bytes: number;
+
+      // maximum truth upload size supported
+      truth_size_limit_in_bytes: number;
+
+      // how long until the service expires deposited truth
+      // (unless refreshed via another POST)?
       truth_expiration: relative-time;
 
-      // Fee per transaction.
-      transaction_fee: Amount;
+      // Payment required to upload truth.  To be paid per upload.
+      truth_upload_fee: Amount;
+
+      // Limit on the liability that the provider is offering with
+      // respect to the services provided.
+      liability_limit: Amount;
+
+      // HTML text describing the terms of service in legalese.
+      // May include placeholders like "${truth_upload_fee}" to
+      // reference entries in this response.
+      tos: String;
+
+    }
+
+    interface AuthenticationMethod {
+      // name of the authentication method
+      name: String;
+
+      // Fee for accessing truth using this method
+      usage_fee: Amount;
 
     }
 
@@ -724,3 +754,38 @@ charge per truth operation using GNU Taler.
       truth_mime: string;
 
     }
+
+
+----------------------
+Authentication Methods
+----------------------
+
+This section describes the supported authentication methods in
+detail.
+
+
+SMS (sms)
+^^^^^^^^^
+
+Sends an SMS with a code to the users phone.
+FIXME: details!
+
+Video identification (vid)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Requires the user to identify via video-call.
+FIXME: details!
+
+
+Security question (qa)
+^^^^^^^^^^^^^^^^^^^^^^
+
+Asks the user a security question.
+FIXME: details!
+
+
+Post-Indent (post)
+^^^^^^^^^^^^^^^^^^
+
+Physical address verification via snail mail.
+FIXME: details!
