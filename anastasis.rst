@@ -264,11 +264,25 @@ algorithm is equivalent for **Anastasis-Policy-Signature**.
     (anastasis-account-signature) = eddsa_sign(h_body, eddsa_priv)
     ver_res = eddsa_verifiy(h_body, anastasis-account-signature, eddsa_pub)
 
-**anastasis-account-signature**: Signature over the SHA-512 hash of the body using the purpose code TALER_SIGNATURE_ANASTASIS_POLICY_UPLOAD (1400) (see GNUnet EdDSA signature API for the use of purpose).
+**anastasis-account-signature**: Signature over the SHA-512 hash of the body using the purpose code TALER_SIGNATURE_ANASTASIS_POLICY_UPLOAD (1400) (see GNUnet EdDSA signature API for the use of purpose)
 
 **h_body**: The hashed body.
 
 **ver_res**: A boolean value. True: Signature verification passed, False: Signature verification failed.
+
+
+When requesting policy downloads, the client must also provide a signature:
+
+.. code-block:: tsref
+    (anastasis-account-signature) = eddsa_sign(version, eddsa_priv)
+    ver_res = eddsa_verifiy(version, anastasis-account-signature, eddsa_pub)
+
+**anastasis-account-signature**: Signature over the SHA-512 hash of the body using the purpose code TALER_SIGNATURE_ANASTASIS_POLICY_DOWNLOAD (1401) (see GNUnet EdDSA signature API for the use of purpose)
+
+**version**: The version requested as a 64-bit integer, 2^64-1 for the "latest version".
+
+**ver_res**: A boolean value. True: Signature verification passed, False: Signature verification failed.
+
 
 
 -------------------
@@ -432,8 +446,8 @@ public key using the Crockford base32-encoding.
 
 .. http:get:: /policy/$ACCOUNT_PUB[?version=$NUMBER]
 
-  Get the customer's policy and encrypted master key share data.  If "version"
-  is not specified, returns the latest available version.  If
+  Get the customer's encrypted recovery document.  If "version"
+  is not specified, the server returns the latest available version.  If
   "version" is specified, returns the policy with the respective
   "version".  The response must begin with the nonce and
   an AES-GCM tag and continue with the ciphertext.  Once decrypted, the
@@ -447,14 +461,14 @@ public key using the Crockford base32-encoding.
   The policy does provide sufficient information for the client to determine
   how to authorize requests for **truth**.
 
-  The client MAY provide an "If-not-modified-since" header with an Etag.
+  The client MAY provide an "If-None-Match" header with an Etag.
   In that case, the server MUST additionally respond with an "304" status
   code in case the resource matches the provided Etag.
 
   :status 200 OK:
     The escrow provider responds with an `EncryptedRecoveryDocument`_ object.
   :status 304 Not modified:
-    The client requested the same ressource he already owns.
+    The client requested the same ressource it already knows.
   :status 400 Bad request:
     The $ACCOUNT_PUB is not an EdDSA public key.
   :status 402 Payment Required:
@@ -465,53 +479,62 @@ public key using the Crockford base32-encoding.
   :status 404 Not Found:
     The requested resource was not found.
 
-  *Anastasis-Version*: $NUMBER --- The server must return actual version number in header;
-  the client specifies version number in the header of the request (if not specified in request, the server returns latest version of EncryptedRecoveryDocument_ ).
+  *Anastasis-Version*: $NUMBER --- The server must return actual version of the encrypted recovery document via this header.
+  If the client specified a version number in the header of the request, the server must return that version. If the client
+  did not specify a version in the request, the server returns latest version of the EncryptedRecoveryDocument_.
 
-  *Etag*: Etag, hash over the body for caching and to prevent redundancies. If status is 200 OK, the server must send the Etag.
+  *Etag*: Set by the server to the Base32-encoded SHA512 hash of the body. Used for caching and to prevent redundancies. The server MUST send the Etag if the status code is 200 OK.
 
-  *If-modified-since*: If the client has previously received an Etag from the server, he has to send it with this request (to avoid unnecessary downloads).
+  *If-None-Match*: If this is not the very first request of the client, this contains the Etag-value which the client has reveived before from the server.
+  The client SHOULD send this header with every request (except for the first request) to avoid unnecessary downloads.
 
-  *If-None-Match*: If this is not the very first request of the client, this contains the Etag-Value which the client has reveived before from the server.
-  The client must send this header with every request (except for the very first request).
-
-  *Anastasis-Account-Signature*: The client must provide Base-32 encoded EdDSA signature over hash of body with $ACCOUNT_PRIV, affirming desire to download the requested encrypted recovery document.
+  *Anastasis-Account-Signature*: The client must provide Base-32 encoded EdDSA signature over hash of body with $ACCOUNT_PRIV, affirming desire to download the requested encrypted recovery document.  The purpose used MUST be TALER_SIGNATURE_ANASTASIS_POLICY_DOWNLOAD (1401).
 
 .. http:post:: /policy/$ACCOUNT_PUB
 
-  Upload a new version of the customer's policy and encrypted master key share data.
+  Upload a new version of the customer's encrypted recovery document.
   If request has been seen before, the server should do nothing, and otherwise store the new version.
   The body must begin with a nonce, an AES-GCM tag and continue with the ciphertext.  The format
   is the same as specified for the response of the GET method. The
-  Anastasis server cannot validate the format, but MAY impose
+  Anastasis server cannot fully validate the format, but MAY impose
   minimum and maximum size limits.
 
   :status 204 No Content:
-    The policy was accepted and stored.  "Anastasis-Version" and "Anastasis-UUID" headers
-    incidate what version and UUID was assigned to this policy upload by the server.
+    The encrypted recovery document was accepted and stored.  "Anastasis-Version" and "Anastasis-UUID" headers
+    incidate what version and UUID was assigned to this encrypted recovery document upload by the server.
   :status 304 Not modified:
     The same encrypted recovery document was previously accepted and stored.  "Anastasis-Version" header
     incidates what version was previously assigned to this encrypted recovery document.
   :status 400 Bad request:
-    The $ACCOUNT_PUB is not an EdDSA public key.  The response body may elaborate on the error.
+    The $ACCOUNT_PUB is not an EdDSA public key or mandatory headers are missing.
+    The response body MUST elaborate on the error using a Taler error code in the typical JSON encoding.
   :status 402 Payment Required:
     The account's balance is too low for the specified operation.
     See the Taler payment protocol specification for how to pay.
-    The response body SHOULD provide various means for payment.
+    The response body MAY provide alternative means for payment.
   :status 403 Forbidden:
     The required account signature was invalid.  The response body may elaborate on the error.
+  :status 409 Conflict:
+    The *If-Match* Etag does not match the latest prior version known to the server.
   :status 413 Request Entity Too Large:
     The upload is too large *or* too small. The response body may elaborate on the error.
 
 
-  *Anastasis-Version*: $NUMBER --- The server must return the actual version number it determined.
-    Only generated if the status is 204 or 304.
+  *If-Match*: Unless the client expects to upload the first encrypted recovery document to this account, the client
+    SHOULD provide an Etag matching the latest version already known to the server.  If this
+    header is present, the server MUST refuse the upload if the latest known version prior to
+    this upload does not match the given Etag.
 
-  *If-not-modified-since*: The client must provide an Etag with the hash over the body (to avoid unnecessary re-uploads).
+  *If-None-Match*: This header MUST be present and set to the SHA512 hash (Etag) of the body by the client.
+    The client SHOULD also set the "Expect: 100-Continue" header and wait for "100 continue"
+    before uploading the body.  The server MUST
+    use the Etag to check whether it already knows the encrypted recovery document that is about to be uploaded.
+    The server MUST refuse the upload with a "304" status code if the Etag matches
+    the latest version already known to the server.
 
   *Anastasis-Policy-Signature*: The client must provide Base-32 encoded EdDSA signature over hash of body with $ACCOUNT_PRIV, affirming desire to upload an encrypted recovery document.
 
-  *Payment-Identifier*: Base-32 encoded 32-byte payment identifier that was included in a previous payment (see 402 status code). Used to allow the server to check that the client paid for the upload (to protect the server against DoS attacks) and that the client knows a real secret of financial value (as the kdf_id might be known to an attacker). If this header is missing in the client's request (or the associated payment has exceeded the upload limit), the server must return a 402 response.  When making payments, the server must include a fresh, randomly-generated payment-identifier in the payment request.
+  *Payment-Identifier*: Base-32 encoded 32-byte payment identifier that was included in a previous payment (see 402 status code). Used to allow the server to check that the client paid for the upload (to protect the server against DoS attacks) and that the client knows a real secret of financial value (as the **kdf_id** might be known to an attacker). If this header is missing in the client's request (or the associated payment has exceeded the upload limit), the server must return a 402 response.  When making payments, the server must include a fresh, randomly-generated payment-identifier in the payment request.
 
   **Details:**
 
