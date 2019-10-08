@@ -21,15 +21,14 @@
 Anastasis
 =========
 
-**Anastasis** is a service that allows the user to securely deposit a **core
- secret** with an open set of escrow providers and recover it if the secret is
+Anastasis is a service that allows the user to securely deposit a
+**core secret** with an open set of escrow providers and recover it if the secret is
 lost.  The **core secret** itself is protected from the escrow providers by
 encrypting it with a **master key**.  The main objective of Anastasis is to
 ensure that the user can reliably recover the **core secret**, while making
-this difficult for everyone else.  Furthermore, it is assumed that the user
-is unable to reliably remember any secret with sufficiently high entropy, so
-we cannot simply encrypt using some other key material in posession of the
-user.
+this difficult for everyone else.  Furthermore, it is assumed that the user is
+unable to reliably remember any secret with sufficiently high entropy, so we
+cannot simply encrypt using some other key material in posession of the user.
 
 To uniquely identify users, an "unforgettable" **identifier** is used.  This
 identifier should be difficult to guess for anybody but the user. However, the
