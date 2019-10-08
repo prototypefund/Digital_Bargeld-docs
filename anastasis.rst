@@ -43,36 +43,39 @@ adversaries which do not know the user's **identifier**, and strong
 adversaries which somehow do know a user's **identifier**.  For weak
 adversaries the system guarantees full confidentiality.  For strong
 adversaries, breaking confidentiality additionally requires that Anastasis
-escrow providers must have colluded.  The user is able to define a **policy**
-which determines which Anastasis escrow providers would need to collude to
-break confidentiality. The policy also also sets the bar for the user to
-recover their core secret.
+escrow providers must have colluded.  The user is able to specify a set of
+**policies** which determine which Anastasis escrow providers would need to
+collude to break confidentiality. These policies also set the bar for the user
+to recover their core secret.
 
-A policy specifies a set of **escrow methods**, which specify how the user
-should convince the Anastasis server that they are "real".  Escrow methods can
-for example include SMS-based verification, Video-identfication or a security
-question.  For each escrow method, the Anastasis server is provided with
-**truth**, that is data the Anastasis operator may learn during the recovery
-process to authenticate the user.  Examples for truth would be a phone number
-(for SMS), a picture of the user (for video identification), or the (hash of)
-a security answer.  A strong adversary is assumed to be able to learn the
-truth, while weak adversaries must not.  In addition to a set of escrow
-methods and associated Anastasis server operators, the policy also specifies
-which combination(s) of these methods should suffice to obtain access.  For
-example, a policy could say that methods (A and B) suffice, and a second
-policy may permit (A and C).  A different user may choose to use the policy
-that (A and B and C) are all required.  Anastasis imposes no limit on the
-number of policies (per user's secret), or the set of providers or escrow
-methods involved in guarding a user's secret.  Weak adversaries must not be
-able to deduce information about a user's policies (except for their length
-if the weak adversary can monitor the user's network traffic).
+A **recovery document** includes all of the information a user needs to
+recover access to their core secret.  It specifies a set of **escrow
+methods**, which specify how the user should convince the Anastasis server
+that they are "real".  Escrow methods can for example include SMS-based
+verification, Video-identfication or a security question.  For each escrow
+method, the Anastasis server is provided with **truth**, that is data the
+Anastasis operator may learn during the recovery process to authenticate the
+user.  Examples for truth would be a phone number (for SMS), a picture of the
+user (for video identification), or the (hash of) a security answer.  A strong
+adversary is assumed to be able to learn the truth, while weak adversaries
+must not.  In addition to a set of escrow methods and associated Anastasis
+server operators, the **recovery document** also specifies **policies**, which
+describe the combination(s) of the escrow methods that suffice to obtain
+access to the core secret.  For example, a **policy** could say that the
+escrow methods (A and B) suffice, and a second policy may permit (A and C).  A
+different user may choose to use the policy that (A and B and C) are all
+required.  Anastasis imposes no limit on the number of policies in a
+**recovery document**, or the set of providers or escrow methods involved in
+guarding a user's secret.  Weak adversaries must not be able to deduce
+information about a user's **recovery document** (except for its length, which
+may be exposed to an adversary which monitors the user's network traffic).
 
 
 ----------------------
 Anastasis Cryptography
 ----------------------
 
-When a user needs to interact with Anastsis, the system first derives some key
+When a user needs to interact with Anastasis, the system first derives some key
 material, but not the master secret, from the user's **identifier** using
 different HKDFs.  These HKDFs are salted using the respective escrow
 provider's **server salt**, which ensures that the accounts for the same user
@@ -151,19 +154,19 @@ likely also be available to other actors.
 Verification
 ^^^^^^^^^^^^
 
-For users to authorize **policy** operations we need an EdDSA key pair.  As we
+For users to authorize "policy" operations we need an EdDSA key pair.  As we
 cannot assure that the corresponding private key is truly secret, such policy
 operations must never be destructive: Should an adversary learn the private
 key, they could access (and with the kdf_id decrypt) the user's policy (but
-not the core secret), or upload a new version of the policy (but not delete an
-existing version).
+not the core secret), or upload a new version of the
+**encrypted recovery document** (but not delete an existing version).
 
-For the generation of the private key we use the kdf_id as the entropy source,
+For the generation of the private key we use the **kdf_id** as the entropy source,
 hash it to derive a base secret which will then be processed to fit the
 requirements for EdDSA private keys.  From the private key we can then
 generate the corresponding public key.  Here, "ver" is used as a salt for the
 HKDF to ensure that the result differs from other cases where we hash
-kdf_id.
+**kdf_id**.
 
 .. code-block:: tsref
 
@@ -225,8 +228,8 @@ key material using an HKDF over a nonce and the kdf_id.
 Key Usage
 ---------
 
-The keys we have generated, are now used to encrypt the recovery_document and
-the key_share of the user.
+The keys we have generated are then used to encrypt the **recovery document** and
+the **key_share** of the user.
 
 
 Encryption
@@ -234,17 +237,20 @@ Encryption
 
 Before every encryption a 32-byte nonce is generated.
 From this the symmetric key is computed as described above.
-We use AES256-GCM for the encryption of the recovery_document and
-key_share.
+We use AES256-GCM for the encryption of the **recovery document** and
+the **key_share**.
 
 .. code-block:: tsref
 
-    (encrypted_recovery_document, aes_gcm_tag) = AES256_GCM(recovery_document, key, iv)
-    (encrypted_key_share, aes_gcm_tag) = AES256_GCM(key_share, key, iv)
+    (iv0, key0) = HKDF(key_id, nonce0, keysize + ivsize)
+    (encrypted_recovery_document, aes_gcm_tag) = AES256_GCM(recovery_document, key0, iv0)
+    (iv_i, key_i) = HKDF(key_id, nonce_i, keysize + ivsize)
+    (encrypted_key_share_i, aes_gcm_tag_i) = AES256_GCM(key_share_i, key_i, iv_i)
 
-**encrypted_recovery_document**: The encrypted RecoveryDocument (recovery_document) which contains the policies.
+**encrypted_recovery_document**: The encrypted **recovery document** which contains the escrow methods, policies and the encrypted **core secret**.
 
-**encrypted_key_share**: The encrypted KeyShare (key_share).
+**encrypted_key_share_i**: The encrypted **key_share** which the escrow provider must release upon successful authentication.  Here, **i** must a positive number used to iterate over the various **key shares** used for the various **escrow methods** at the various providers.
+
 
 Signatures
 ^^^^^^^^^^
@@ -258,11 +264,11 @@ algorithm is equivalent for **Anastasis-Policy-Signature**.
     (anastasis-account-signature) = eddsa_sign(h_body, eddsa_priv)
     ver_res = eddsa_verifiy(h_body, anastasis-account-signature, eddsa_pub)
 
-**anastasis-account-signature**: Signature over the hash of body.
+**anastasis-account-signature**: Signature over the SHA-512 hash of the body using the purpose code TALER_SIGNATURE_ANASTASIS_POLICY_UPLOAD (1400) (see GNUnet EdDSA signature API for the use of purpose).
 
 **h_body**: The hashed body.
 
-**ver_res**: A boolean value. True: Verification passed, False: Verification failed.
+**ver_res**: A boolean value. True: Signature verification passed, False: Signature verification failed.
 
 
 -------------------
@@ -395,13 +401,13 @@ Receiving Terms of Service
       // HTML text describing the terms of service in legalese.
       // May include placeholders like "${truth_upload_fee}" to
       // reference entries in this response.
-      tos: String;
+      tos: string;
 
     }
 
     interface AuthenticationMethod {
       // name of the authentication method
-      name: String;
+      name: string;
 
       // Fee for accessing truth using this method
       usage_fee: Amount;
