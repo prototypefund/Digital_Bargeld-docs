@@ -216,7 +216,8 @@ key material using an HKDF over a nonce and the kdf_id.
 
 **prekey**: Original key material.
 
-**nonce**: 32-byte nonce, must never match "ver" (which it cannot as the length is different).
+**nonce**: 32-byte nonce, must never match "ver" (which it cannot as the length is different). Of course, we must
+avoid key reuse. So, we have to use different nonces to get different keys and ivs (see below).
 
 **key**: Symmetric key which is later used to encrypt the documents with AES256-GCM.
 
@@ -246,10 +247,18 @@ the **key_share**.
     (iv_i, key_i) = HKDF(key_id, nonce_i, keysize + ivsize)
     (encrypted_key_share_i, aes_gcm_tag_i) = AES256_GCM(key_share_i, key_i, iv_i)
 
-**encrypted_recovery_document**: The encrypted **recovery document** which contains the escrow methods, policies and the encrypted **core secret**.
+**encrypted_recovery_document**: The encrypted **recovery document** which contains the escrow methods, policies 
+and the encrypted **core secret**.
 
-**encrypted_key_share_i**: The encrypted **key_share** which the escrow provider must release upon successful authentication.  Here, **i** must a positive number used to iterate over the various **key shares** used for the various **escrow methods** at the various providers.
+**nonce0**: Nonce which is used to generate *key0* and *iv0* which are used for the encryption of the *recovery document*. 
+Nonce must contain the string "ERD".
 
+**encrypted_key_share_i**: The encrypted **key_share** which the escrow provider must release upon successful authentication.  
+Here, **i** must be a positive number used to iterate over the various **key shares** used for the various **escrow methods** 
+at the various providers.
+
+**nonce_i**: Nonce which is used to generate *key_i* and *iv_i* which are used for the encryption of the *key share*. **i** must be
+the same number as specified above for *encrypted_key_share_i*. Nonce must contain the string "EKS" plus the according *i*.
 
 Signatures
 ^^^^^^^^^^
@@ -281,15 +290,6 @@ When requesting policy downloads, the client must also provide a signature:
 **version**: The version requested as a 64-bit integer, 2^64-1 for the "latest version".
 
 **ver_res**: A boolean value. True: Signature verification passed, False: Signature verification failed.
-
-
-
--------------------
-Encryption of Truth
--------------------
-
-FIXME: missing crypto! (See "EKS" below!)
-In particular, underspecified for the security answer ("may additionally include"...).
 
 
 ---------------------------
@@ -550,8 +550,8 @@ public key using the Crockford base32-encoding.
 
       // Variable-size encrypted recovery document. After decryption,
       // this contains a gzip compressed JSON-encoded `RecoveryDocument`_.
-      // The salt of the HKDF for this encryption must include the
-      // string "EDR".
+      // The nonce of the HKDF for this encryption must include the
+      // string "ERD".
       encrypted_compressed_recovery_document: byte[]
 
     }
@@ -684,9 +684,11 @@ charge per truth operation using GNU Taler.
       // The encrypted key material to reveal, in base32 encoding.
       // Contains a KeyShare_.
       //
-      // The salt of the HKDF for the encryption of this
-      // value must include the string "EKS".   Depending
-      // on the method, the HKDF may additionally include
+      // The nonce of the HKDF for the encryption of this
+      // value must include the string "EKS" plus a positive 
+      // number which represents the key 
+      // share method. Depending on the method, 
+      // the HKDF may additionally include
       // bits from the response (i.e. some hash over the
       // answer to the security question)
       encrypted_key_share: byte[];
@@ -758,9 +760,11 @@ charge per truth operation using GNU Taler.
       // the KeyShare_ MUST be encoded as a fixed-size binary
       // block (instead of in JSON encoding).
       //
-      // The salt of the HKDF for the encryption of this
-      // value must include the string "EKS".   Depending
-      // on the method, the HKDF may additionally include
+      // The nonce of the HKDF for the encryption of this
+      // value must include the string "EKS" plus a positive number 
+      // which represents the key share method. 
+      // Depending on the method, 
+      // the HKDF may additionally include
       // bits from the response (i.e. some hash over the
       // answer to the security question)
       encrypted_key_share: byte[];
