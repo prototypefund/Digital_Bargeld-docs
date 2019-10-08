@@ -642,7 +642,13 @@ charge per truth operation using GNU Taler.
 
 .. http:post:: /truth/$UUID
 
-  FIXME: high-level description missing.
+  Upload a Truth-Object according to the policy the client created before (see RecoveryDocument_).
+  If request has been seen before, the server should do nothing, and otherwise store the new object.
+  The body must begin with a nonce, an AES-GCM tag and continue with the ciphertext.  In addition, 
+  the name of the chosen key share method, the Base32-encoded ground truth and the MIME type of 
+  Truth must be included in the body. 
+  The Anastasis server cannot fully validate the format, but MAY impose
+  minimum and maximum size limits.
 
   :status 204 No content:
     Truth stored successfully.
@@ -669,8 +675,11 @@ charge per truth operation using GNU Taler.
   .. code-block:: tsref
 
     interface Truth {
-      // Key share method, i.e. "security question", "SMS", "e-mail", ...
-      method: String;
+      // Nonce used to generate the (iv,key) from kdf_id to AES-GCM encrypt the truth.
+      nonce: byte[32];
+
+      // Authentication tag over the encrypted_key_share
+      key_share_aes_gcm_tag: byte[32];
 
       // The encrypted key material to reveal, in base32 encoding.
       // Contains a KeyShare_.
@@ -682,11 +691,8 @@ charge per truth operation using GNU Taler.
       // answer to the security question)
       encrypted_key_share: byte[];
 
-      // Nonce used to generate the (iv,key) from kdf_id to AES-GCM encrypt the truth.
-      nonce: byte[32];
-
-      // Authentication tag over the encrypted_key_share
-      key_share_aes_gcm_tag: byte[32];
+      // Key share method, i.e. "security question", "SMS", "e-mail", ...
+      method: String;
 
       // ground truth, i.e. H(challenge answer),
       // phone number, e-mail address, picture, fingerprint, ...
@@ -705,7 +711,11 @@ charge per truth operation using GNU Taler.
 
 .. http:get:: /truth/$UUID[?response=$RESPONSE]
 
-  FIXME: high-level description missing.
+  Get the stored encrypted key share. If $RESPONSE is specified by the client, the server checks
+  if $RESPONSE matches the expected response according to the challenge sent to the client before.
+  If $RESPONSE is not specified, the server will response with a challenge according to the key share 
+  method (e.g. ask the security question or send a SMS with a code) and await the answer within $RESPONSE. 
+  When $RESPONSE is correct, the server responses with the encrypted key share.
 
   :status 200 OK:
     EncryptedKeyShare_ is returned in body (in binary).
