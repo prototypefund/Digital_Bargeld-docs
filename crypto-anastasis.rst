@@ -23,9 +23,9 @@ Specification of Cryptography in Anastasis
 ==========================================
 This document specifies the Crypto used in Anastasis.
 
--------------------
-1. Key derivations
--------------------
+---------------
+Key derivations
+---------------
 
 EdDSA and ECDHE public keys are always points on Curve25519 and represented
 using the standard 256 bit Ed25519 compact format.  The binary representation
@@ -61,8 +61,8 @@ likely also be available to other actors.
 **keysize**: The desired output size of the KDF, here 32 bytes.
 
 
-1.1 Verification
-^^^^^^^^^^^^^^^^
+Verification
+^^^^^^^^^^^^
 
 For users to authorize **policy** operations we need an EdDSA key pair.  As we
 cannot assure that the corresponding private key is truly secret, such policy
@@ -105,8 +105,8 @@ kdf_id.
 **eddsa_pub**: The generated EdDSA public key.
 
 
-1.2 Encryption
-^^^^^^^^^^^^^^
+Encryption
+^^^^^^^^^^
 
 For symmetric encryption of data we use AES256-GCM. For this we need a
 symmetric key and an initialization vector (IV).  To ensure that the
@@ -130,35 +130,36 @@ key material using an HKDF over a nonce and the kdf_id.
 **nonce**: 32-byte nonce, must never match "ver" (which it cannot as the length is different).
 
 **key**: Symmetric key which is later used to encrypt the documents with AES256-GCM.
- 
+
 **iv**: IV which will be used for AES-GCM
 
 ----------------------------
-2. Key Usage
+Key Usage
 ----------------------------
 
 The keys we have generated, are now used to encrypt the recovery_document and
 the key_share of the user.
 
-2.1 Encryption
-^^^^^^^^^^^^^^
+
+Encryption
+^^^^^^^^^^
 
 Before every encryption a 32-byte nonce is generated.
 From this the symmetric key is computed as described above.
 We use AES256-GCM for the encryption of the recovery_document and
-key_share. 
+key_share.
 
 .. code-block:: tsref
 
     (encrypted_recovery_document, aes_gcm_tag) = AES256_GCM(recovery_document, key, iv)
     (encrypted_key_share, aes_gcm_tag) = AES256_GCM(key_share, key, iv)
 
-**encrypted_recovery_document**: The encrypted RecoveryDocument (recovery_document) which contains the policies. 
+**encrypted_recovery_document**: The encrypted RecoveryDocument (recovery_document) which contains the policies.
 
 **encrypted_key_share**: The encrypted KeyShare (key_share).
 
-2.2 Signatures
-^^^^^^^^^^^^^^
+Signatures
+^^^^^^^^^^
 
 The EdDSA keys are used to sign the data sent from the client to the
 server. Everything the client sends to server is signed. The following algorithm is equivalent for **Anastasis-Policy-Signature**.
@@ -168,7 +169,7 @@ server. Everything the client sends to server is signed. The following algorithm
     (anastasis-account-signature) = eddsa_sign(h_body, eddsa_priv)
     ver_res = eddsa_verifiy(h_body, anastasis-account-signature, eddsa_pub)
 
-**anastasis-account-signature**: Signature over the hash of body. 
+**anastasis-account-signature**: Signature over the hash of body.
 
 **h_body**: The hashed body.
 
