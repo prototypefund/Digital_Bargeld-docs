@@ -273,6 +273,36 @@ FIXME: missing crypto! (See "EKS" below!)
 In particular, underspecified for the security answer ("may additionally include"...).
 
 
+---------------------------
+Availability Considerations
+---------------------------
+
+Anastasis considers two main threats against availability. First, the
+Anastasis server operators must be protected against denial-of-service attacks
+where an adversary attempts to exhaust operator's resources.  The API protects
+against these attacks by allowing operators to set fees for all
+operations. Furthermore, all data stored comes with an expiration logic, so an
+attacker cannot force servers to store data indefinitively.
+
+A second availability issue arises from strong adversaries that may be able to
+compute the account keys of some user.  While we assume that such an adversary
+cannot successfully authenticate against the truth, the account key does
+inherently enable these adversaries to upload a new policy for the account.
+This cannot be prevented, as the legitimate user must be able to set or change
+a policy using only the account key.  To ensure that an adversary cannot
+exploit this, policy uploads first of all never delete existing policies, but
+merely create another version.  This way, even if an adversary uploads a
+malicious policy, a user can still retrieve an older version of the policy to
+recover access to their data.  This append-only storage for policies still
+leaves a strong adversary with the option of uploading many policies to
+exhaust the Anastasis server's capacity.  We limit this attack by requiring a
+policy upload to include a reference to a **payment secret** from a payment
+made by the user.  Thus, a policy upload requires both knowledge of the
+**identity** and making a payment.  This effectively prevents and adversary
+from using the append-only policy storage from exhausting Anastasis server
+capacity.
+
+
 
 -------------
 Anastasis API
@@ -559,7 +589,9 @@ charge per truth operation using GNU Taler.
   :status 204 No content:
     Truth stored successfully.
   :status 304 Not modified:
-    The same truth was previously accepted and stored under this UUID.
+    The same truth was previously accepted and stored under this UUID.  The
+    Anastasis server must still update the expiration time for the truth when returning
+    this response code.
   :status 402 Payment Required:
     This server requires payment to store truth per item.
     See the Taler payment protocol specification for how to pay.
