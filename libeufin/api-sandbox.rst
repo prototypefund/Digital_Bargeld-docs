@@ -82,7 +82,7 @@ HTTP API
 
     interface KeyLetterRequest {
 
-      INI: {
+      ini: {
         // The user ID that participates in a EBICS subscriber.
         userId: string;
 
@@ -122,68 +122,68 @@ HTTP API
         // A004 version requires hash type RIPEMD-160
         // A005, A005 versions require hash type SHA-256.
         hash: string;
-    }
+      }
 
-      HIA: {
+      hia: {
         // The user ID that participates in a EBICS subscriber.
         userId: string;
-
+  
         // The customer ID specific to the bank (therefore not
         // participating in a EBICS subscriber).
         customerId: string;
-
+  
         // Human name of the user
         name: string;
-
+  
         // As per specification, this value is:
         // "Date of processing of the corresponding EBICS order".  DD.MM.YYYY format.
         date: string;
-
+  
         // As per specification, this value is:
         // "Time of processing of the corresponding EBICS order".  HH:MM:SS format.
         time: string;
-
+  
         // Identification token of the bank.  Not required to obey to any particular standard.
         recipient: string;
-
+  
         ////////////////////////////////////////////////////
         // Identification and Authentication key details. //
         ////////////////////////////////////////////////////
-
+  
         // Identification and authentication signature version.
         // Admitted value: X002.
         ia_version: string;
-
+  
         // length of the exponent, in bits.
         ia_public_exponent_length: number;
         // RSA key exponent in hexadecimaml notation.
         ia_public_exponent: string;
-
+  
         // length of the modulus, in bits.
         ia_public_modulus_length: number;
         // RSA key modulus in hexadecimaml notation.
         ia_public_modulus: string;
-
+  
         // SHA-256 hash of the identification and authentication key.
         ia_hash: string;
-
+  
         /////////////////////////////
         // Encryption key details. //
         /////////////////////////////
-
+  
         // Encryption version.  Admitted value: E002.
         enc_version: string;
-
+  
         // length of the exponent, in bits.
         enc_public_exponent_length: number;
         // RSA key exponent in hexadecimaml notation.
         enc_public_exponent: string;
-
+  
         // length of the modulus, in bits.
         enc_public_modulus_length: number;
         // RSA key modulus in hexadecimaml notation.
         enc_public_modulus: string;
-
+  
         // SHA-256 hash of the encryption key.
         enc_hash: string;
       }
