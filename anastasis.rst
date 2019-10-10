@@ -496,6 +496,9 @@ public key using the Crockford base32-encoding.
 .. http:post:: /policy/$ACCOUNT_PUB
 
   Upload a new version of the customer's encrypted recovery document.
+  While the document's structure is described in JSON below, the upload
+  should just be the bytestream of the raw data (i.e. 32 bytes nonce followed
+  by 16 bytes tag followed by the encrypted document). 
   If request has been seen before, the server should do nothing, and otherwise store the new version.
   The body must begin with a nonce, an AES-GCM tag and continue with the ciphertext.  The format
   is the same as specified for the response of the GET method. The
@@ -679,24 +682,10 @@ charge per truth operation using GNU Taler.
   .. code-block:: tsref
 
     interface Truth {
-      // Nonce used to generate the (iv,key) from kdf_id to AES-GCM encrypt the truth.
-      nonce: byte[32];
-
-      // Authentication tag over the encrypted_key_share
-      key_share_aes_gcm_tag: byte[32];
-
-      // The encrypted key material to reveal, in base32 encoding.
-      // Contains a KeyShare_.
-      //
-      // The nonce of the HKDF for the encryption of this
-      // value must include the string "EKS" plus a positive 
-      // number which represents the key 
-      // share method. Depending on the method, 
-      // the HKDF may additionally include
-      // bits from the response (i.e. some hash over the
-      // answer to the security question)
-      encrypted_key_share: byte[];
-
+      // Contains the information of an `interface EncryptedKeyShare`_, but simply
+      // as one binary block (in Crockford Base32 encoding for JSON).
+      key_share_data: byte[];
+    
       // Key share method, i.e. "security question", "SMS", "e-mail", ...
       method: String;
 
@@ -714,7 +703,6 @@ charge per truth operation using GNU Taler.
 
     }
 
-
 .. http:get:: /truth/$UUID[?response=$RESPONSE]
 
   Get the stored encrypted key share. If $RESPONSE is specified by the client, the server checks
@@ -722,6 +710,7 @@ charge per truth operation using GNU Taler.
   If $RESPONSE is not specified, the server will response with a challenge according to the key share 
   method (e.g. ask the security question or send a SMS with a code) and await the answer within $RESPONSE. 
   When $RESPONSE is correct, the server responses with the encrypted key share.
+  The encrypted key share is returned simply as a byte array and not in JSON format.
 
   :status 200 OK:
     EncryptedKeyShare_ is returned in body (in binary).
