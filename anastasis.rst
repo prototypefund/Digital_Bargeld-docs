@@ -69,6 +69,11 @@ guarding a user's secret.  Weak adversaries must not be able to deduce
 information about a user's **recovery document** (except for its length, which
 may be exposed to an adversary which monitors the user's network traffic).
 
+-------------------
+Anastasis DB-Schema
+-------------------
+.. image:: anastasis-db.png
+
 
 ----------------------
 Anastasis Cryptography
