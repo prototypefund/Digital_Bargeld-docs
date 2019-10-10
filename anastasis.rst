@@ -755,7 +755,7 @@ charge per truth operation using GNU Taler.
       //
       // HKDF for the key generation must include the
       // string "eks" as salt.
-      // Depending on the meth od, 
+      // Depending on the method, 
       // the HKDF may additionally include
       // bits from the response (i.e. some hash over the
       // answer to the security question)
