@@ -353,12 +353,22 @@ A complete list of all the existing repositories is currently found at
 ``https://git.taler.net/``. Note: ``<repository>`` must NOT have the
 ``.git`` extension.
 
-.. _Python-Versions:
 
-Python Versions
-===============
+.. _Python:
 
-Python code should be written and build against version 3.7 of python.
+Python
+======
+
+Supported Python Versions
+-------------------------
+
+Python code should be written and build against version 3.7 of Python.
+
+Style
+-----
+
+We use `yapf <https://github.com/google/yapf>` to reformat the
+code to conform to our style instructions.
 
 .. _Bugtracking:
 
