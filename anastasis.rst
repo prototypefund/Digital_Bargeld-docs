@@ -238,13 +238,15 @@ Encryption
 Before every encryption a 32-byte nonce is generated.
 From this the symmetric key is computed as described above.
 We use AES256-GCM for the encryption of the **recovery document** and
-the **key_share**.
+the **key_share**.  To ensure that the key derivation for the encryption
+of the **recovery document** differs fundamentally from that of an
+individual **key share**, we use different salts ("erd" and "eks" respectively).
 
 .. code-block:: tsref
 
-    (iv0, key0) = HKDF(key_id, nonce0, keysize + ivsize)
+    (iv0, key0) = HKDF(key_id, nonce0, "erd", keysize + ivsize)
     (encrypted_recovery_document, aes_gcm_tag) = AES256_GCM(recovery_document, key0, iv0)
-    (iv_i, key_i) = HKDF(key_id, nonce_i, keysize + ivsize)
+    (iv_i, key_i) = HKDF(key_id, nonce_i, "eks", [optional data], keysize + ivsize)
     (encrypted_key_share_i, aes_gcm_tag_i) = AES256_GCM(key_share_i, key_i, iv_i)
 
 **encrypted_recovery_document**: The encrypted **recovery document** which contains the escrow methods, policies 
@@ -252,6 +254,8 @@ and the encrypted **core secret**.
 
 **nonce0**: Nonce which is used to generate *key0* and *iv0* which are used for the encryption of the *recovery document*. 
 Nonce must contain the string "ERD".
+
+**optional data**: Key material that optionally is contributed from the authentication method to further obfuscate the key share from the escrow provider.
 
 **encrypted_key_share_i**: The encrypted **key_share** which the escrow provider must release upon successful authentication.  
 Here, **i** must be a positive number used to iterate over the various **key shares** used for the various **escrow methods** 
@@ -750,24 +754,23 @@ charge per truth operation using GNU Taler.
 
     interface EncryptedKeyShare {
       // Nonce used to compute the decryption (iv,key) pair.
-      nonce: byte[32];
+      nonce_i: byte[32];
 
       // Authentication tag
-      aes_gcm_tag: byte[32];
+      aes_gcm_tag_i: byte[16];
 
       // Encrypted key-share in base32 encoding.
       // After decryption, this yields a KeyShare_.  Note that
       // the KeyShare_ MUST be encoded as a fixed-size binary
       // block (instead of in JSON encoding).
       //
-      // The nonce of the HKDF for the encryption of this
-      // value must include the string "EKS" plus a positive number 
-      // which represents the key share method. 
-      // Depending on the method, 
+      // HKDF for the key generation must include the
+      // string "eks" as salt.
+      // Depending on the meth od, 
       // the HKDF may additionally include
       // bits from the response (i.e. some hash over the
       // answer to the security question)
-      encrypted_key_share: byte[];
+      encrypted_key_share_i: byte[];
 
     }
 
@@ -824,11 +827,11 @@ FIXME: details!
 Security question (qa)
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Asks the user a security question.
-The user sends back a hash over the answer. 
-If the hash value matches with the one the server is expecting, the server answers
-with the requested encrypted key share
-FIXME: details!
+Asks the user a security question.  The user sends back a hash over the
+answer.  If the hash value matches with the one the server is expecting, the
+server answers with the requested encrypted key share.  A different hash
+function over the same security answer is used to provide **optional data**
+for the decryption of the (encrypted) **key share**.
 
 
 Post-Indent (post)
