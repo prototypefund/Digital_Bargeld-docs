@@ -367,7 +367,7 @@ Python code should be written and build against version 3.7 of Python.
 Style
 -----
 
-We use `yapf <https://github.com/google/yapf>` to reformat the
+We use `yapf <https://github.com/google/yapf>`_ to reformat the
 code to conform to our style instructions.
 A reusable yapf style file can be found in ``taler-build-scripts``,
 which is intended to be used as a git submodule.
@@ -378,9 +378,9 @@ Bugtracking
 ===========
 
 Bug tracking is done with Mantis (https://www.mantisbt.org/). All the
-bugs are then showed and managed at ``https://bugs.gnunet.org/``, under
+bugs are displayed and managed at ``https://bugs.gnunet.org/``, under
 the "Taler" project. A registration on the Web site is needed in order
-to use the bug tracker.
+to use the bug tracker, only read access is granted without a login.
 
 .. _Continuous-integration:
 
