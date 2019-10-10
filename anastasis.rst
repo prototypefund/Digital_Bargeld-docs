@@ -657,7 +657,7 @@ charge per truth operation using GNU Taler.
 
   Upload a Truth-Object according to the policy the client created before (see RecoveryDocument_).
   If request has been seen before, the server should do nothing, and otherwise store the new object.
-  The body must begin with a nonce, an AES-GCM tag and continue with the ciphertext.  In addition, 
+  FIXME: The body must begin with the EncryptedKeyShare_ as binary block (see below).  In addition, 
   the name of the chosen key share method, the Base32-encoded ground truth and the MIME type of 
   Truth must be included in the body. 
   The Anastasis server cannot fully validate the format, but MAY impose
