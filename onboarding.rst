@@ -369,6 +369,8 @@ Style
 
 We use `yapf <https://github.com/google/yapf>` to reformat the
 code to conform to our style instructions.
+A reusable yapf style file can be found in ``taler-build-scripts``,
+which is intended to be used as a git submodule.
 
 .. _Bugtracking:
 
