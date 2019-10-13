@@ -377,7 +377,7 @@ Receiving Terms of Service
 
   **Response:**
 
-  Returns a `EscrowTermsOfServiceResponse`_.
+  Returns an `EscrowTermsOfServiceResponse`_.
 
   .. _EscrowTermsOfServiceResponse:
   .. ts:def:: EscrowTermsOfServiceResponse
@@ -477,7 +477,7 @@ public key using the Crockford base32-encoding.
   code in case the resource matches the provided Etag.
 
   :status 200 OK:
-    The escrow provider responds with an `EncryptedRecoveryDocument`_ object.
+    The escrow provider responds with an EncryptedRecoveryDocument_ object.
   :status 304 Not modified:
     The client requested the same ressource it already knows.
   :status 400 Bad request:
@@ -564,7 +564,7 @@ public key using the Crockford base32-encoding.
       aes_gcm_tag: [16]; //bytearray
 
       // Variable-size encrypted recovery document. After decryption,
-      // this contains a gzip compressed JSON-encoded RecoveryDocument_.
+      // this contains a gzip compressed JSON-encoded `RecoveryDocument`.
       // The nonce of the HKDF for this encryption must include the
       // string "ERD".
       encrypted_compressed_recovery_document: []; //bytearray of undefined length
@@ -757,8 +757,8 @@ charge per truth operation using GNU Taler.
       aes_gcm_tag_i: [16]; //bytearray
 
       // Encrypted key-share in base32 encoding.
-      // After decryption, this yields a KeyShare_.  Note that
-      // the KeyShare_ MUST be encoded as a fixed-size binary
+      // After decryption, this yields a `KeyShare`.  Note that
+      // the `KeyShare` MUST be encoded as a fixed-size binary
       // block (instead of in JSON encoding).
       //
       // HKDF for the key generation must include the
