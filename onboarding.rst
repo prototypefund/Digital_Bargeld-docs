@@ -386,7 +386,7 @@ only reserved to "admin" users.
 
 .. _Code-coverage:
 
-Code coverage
+Code Coverage
 =============
 
 Code coverage is done with the Gcov / Lcov
