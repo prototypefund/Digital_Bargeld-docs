@@ -356,7 +356,8 @@ Obtain salt
   **Response:**
 
   Returns a `SaltResponse`_.
-
+  
+  .. _SaltResponse:
   .. ts:def:: SaltResponse
 
     interface SaltResponse {
@@ -378,6 +379,7 @@ Receiving Terms of Service
 
   Returns a `EscrowTermsOfServiceResponse`_.
 
+  .. _EscrowTermsOfServiceResponse:
   .. ts:def:: EscrowTermsOfServiceResponse
 
     interface EscrowTermsOfServiceResponse {
@@ -409,7 +411,7 @@ Receiving Terms of Service
 
       // how long until the service expires deposited truth
       // (unless refreshed via another POST)?
-      truth_expiration: relative-time;
+      truth_expiration: RelativeTime;
 
       // Payment required to upload truth.  To be paid per upload.
       truth_upload_fee: Amount;
@@ -425,6 +427,7 @@ Receiving Terms of Service
 
     }
 
+  .. _AuthenticationMethod:
   .. ts:def:: AuthenticationMethod
 
     interface AuthenticationMethod {
@@ -436,7 +439,7 @@ Receiving Terms of Service
 
     }
 
-.. _escrow:
+.. _manage-policy:
 
 
 Manage policy
@@ -549,24 +552,26 @@ public key using the Crockford base32-encoding.
 
   **Details:**
 
+  .. _EncryptedRecoveryDocument:
   .. ts:def:: EncryptedRecoveryDocument
 
     interface EncryptedRecoveryDocument {
       // Nonce used to compute the (iv,key) pair for encryption of the
       // encrypted_compressed_recovery_document.
-      nonce: byte[32];
+      nonce: [32]; //bytearray
 
       // Authentication tag
-      aes_gcm_tag: byte[16];
+      aes_gcm_tag: [16]; //bytearray
 
       // Variable-size encrypted recovery document. After decryption,
-      // this contains a gzip compressed JSON-encoded `RecoveryDocument`_.
+      // this contains a gzip compressed JSON-encoded RecoveryDocument_.
       // The nonce of the HKDF for this encryption must include the
       // string "ERD".
-      encrypted_compressed_recovery_document: byte[]
+      encrypted_compressed_recovery_document: []; //bytearray of undefined length
 
     }
 
+  .. _RecoveryDocument:
   .. ts:def:: RecoveryDocument
 
     interface RecoveryDocument {
@@ -575,16 +580,17 @@ public key using the Crockford base32-encoding.
       // https://sync.taler.net/$BACKUP_ID and
       // a private key to decrypt the backup.  Anastasis is oblivious
       // to the details of how this is ultimately encoded.
-      backup_account: byte[];
+      backup_account: []; //bytearray of undefined length
 
       // List of escrow providers and selected authentication method
       methods: EscrowMethod[];
 
       // List of possible decryption policies
-      policy: EscrowPolicy[];
+      policy: DecryptionPolicy[];
 
     }
 
+  .. _EscrowMethod:
   .. ts:def:: EscrowMethod
 
     interface EscrowMethod {
@@ -595,10 +601,10 @@ public key using the Crockford base32-encoding.
       escrow_method: string;
 
       // UUID of the escrow method (see /truth/ API below).
-      uuid: uuid;
+      uuid: string;
 
       // Salt used to encrypt the truth on the Anastasis server.
-      truth_salt: byte[32];
+      truth_salt: [32]; //bytearray
 
       // The challenge to give to the user (i.e. the security question
       // if this is challenge-response).
@@ -609,29 +615,30 @@ public key using the Crockford base32-encoding.
       //
       // The plaintext challenge is not revealed to the
       // Anastasis server.
-      challenge: byte[];
+      challenge: []; //bytearray of undefined length
 
     }
 
+  .. _DecryptionPolicy:
   .. ts:def:: DecryptionPolicy
 
     interface DecryptionPolicy {
       // Salt included to encrypt master key share when
       // using this decryption policy.
-      policy_salt: byte[32];
+      policy_salt: [32]; //bytearray
 
       // Master key, AES-encrypted with key derived from
       // salt and secrets revealed by the following list of
       // escrow methods identified by UUID.
-      encrypted_master_key: byte[32];
+      encrypted_master_key: [32]; //bytearray
 
       // List of escrow methods identified by their uuid
-      uuid: uuid[];
+      uuid: string[];
 
     }
 
 
-.. _truth:
+.. _manage-truth:
 
 
 Managing truth
@@ -679,15 +686,16 @@ charge per truth operation using GNU Taler.
 
   **Details:**
 
+  .. _Truth:
   .. ts:def:: Truth
 
     interface Truth {
-      // Contains the information of an `interface EncryptedKeyShare`_, but simply
+      // Contains the information of an interface `EncryptedKeyShare`, but simply
       // as one binary block (in Crockford Base32 encoding for JSON).
-      key_share_data: byte[];
+      key_share_data: []; //bytearray of undefined length
     
       // Key share method, i.e. "security question", "SMS", "e-mail", ...
-      method: String;
+      method: string;
 
       // ground truth, i.e. H(challenge answer),
       // phone number, e-mail address, picture, fingerprint, ...
@@ -738,14 +746,15 @@ charge per truth operation using GNU Taler.
 
   **Details:**
 
+  .. _EncryptedKeyShare:
   .. ts:def:: EncryptedKeyShare
 
     interface EncryptedKeyShare {
       // Nonce used to compute the decryption (iv,key) pair.
-      nonce_i: byte[32];
+      nonce_i: [32]; //bytearray
 
       // Authentication tag
-      aes_gcm_tag_i: byte[16];
+      aes_gcm_tag_i: [16]; //bytearray
 
       // Encrypted key-share in base32 encoding.
       // After decryption, this yields a KeyShare_.  Note that
@@ -758,28 +767,30 @@ charge per truth operation using GNU Taler.
       // the HKDF may additionally include
       // bits from the response (i.e. some hash over the
       // answer to the security question)
-      encrypted_key_share_i: byte[];
+      encrypted_key_share_i: []; //bytearray of undefined length
 
     }
 
+  .. _KeyShare:
   .. ts:def:: KeyShare
 
     interface KeyShare {
       // Key material to concatenate with policy_salt and KDF to derive
       // the key to decrypt the master key.
-      key_share: byte[32];
+      key_share: [32]; //bytearray
 
       // Signature over method, uuid, and key_share.
-      account_sig: EdDSA-Signature;
+      account_sig: EddsaSignature;
 
     }
 
+  .. _EscrowChallenge:
   .. ts:def:: EscrowChallenge
 
     interface EscrowChallenge {
       // ground truth, i.e. challenge question,
       // phone number, e-mail address, picture, fingerprint, ...
-      truth: byte[];
+      truth: []; //bytearray of undefined length
 
       // mime type of truth, i.e. text/ascii, image/jpeg, etc.
       truth_mime: string;
