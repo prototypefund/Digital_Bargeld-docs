@@ -3,8 +3,33 @@ Developer Onboarding Manual
 
 .. contents:: Table of Contents
 
-Taler installation
-==================
+Fundamentals
+============
+
+Bug Tracking
+------------
+
+Bug tracking is done with Mantis (https://www.mantisbt.org/).  The bug tracker
+is available at `<https://bugs.taler.net>`_. A registration on the Web site is
+needed in order to use the bug tracker, only read access is granted without a
+login.
+
+Code Repositories
+-----------------
+
+Taler code is versioned via Git. For those users without write access, all the
+codebases are found at the following URL:
+
+::
+
+   git://git.taler.net/<repository>
+
+A complete list of all the existing repositories is currently found at
+`<https://git.taler.net/>`_.
+
+
+Taler Deployment on gv.taler.net
+================================
 
 This section describes the GNU Taler deployment on ``gv.taler.net``.
 
@@ -132,10 +157,12 @@ The following commands do that:
    # continue development
    $ git checkout master
 
-.. _Testing-components:
 
-Building the documentation
-==========================
+Environments and Builders on taler.net
+======================================
+
+Documentation Builder
+---------------------
 
 All the Taler documentation is built by the user ``docbuilder`` that
 runs a Buildbot worker.  The following commands set the ``docbuilder`` up,
@@ -155,8 +182,9 @@ starting with a empty home directory.
   $ buildbot-worker start worker/
 
 
-Building the Websites.
-======================
+Website Builder
+---------------
+
 
 Taler Websites, ``www.taler.net`` and ``stage.taler.net``, are built by the
 user ``taler-websites`` by the means of a Buildbot worker.  The following
@@ -176,8 +204,9 @@ commands set the ``taler-websites`` up, starting with a empty home directory.
   $ buildbot-worker start worker/
 
 
-Code coverage.
-==============
+Code coverage
+-------------
+
 Code coverage tests are run by the ``lcovworker`` user, and are also driven
 by Buildbot.
 
@@ -196,8 +225,9 @@ by Buildbot.
 
 The results are then published at ``https://lcov.taler.net/``.
 
-Online services checker.
-========================
+Service Checker
+---------------
+
 The user ``demo-checker`` runs periodic checks to see if all the
 ``*.demo.taler.net`` services are up and running.  It is driven by
 Buildbot, and can be bootstrapped as follows.
@@ -216,8 +246,9 @@ Buildbot, and can be bootstrapped as follows.
   $ buildbot-worker start worker/
 
 
-Topping the tip reserve up
-==========================
+Tipping reserve top-up
+----------------------
+
 Both 'test' and 'demo' setups get their tip reserve topped up
 by a Buildbot worker.  The following steps get the reserve topper
 prepared.
@@ -236,7 +267,7 @@ prepared.
 
 
 Producing auditor reports
-=========================
+-------------------------
 
 Both 'test' and 'demo' setups get their auditor reports compiled
 by a Buildbot worker.  The following steps get the reports compiler
@@ -254,7 +285,6 @@ prepared.
 
   $ buildbot-worker start worker/
 
-.. _Releases:
 
 Releases
 ========
@@ -337,52 +367,6 @@ Directive file:
 
 Upload the files in **binary mode** to the ftp servers.
 
-.. _Code:
-
-Code
-====
-
-Taler code is versioned via Git. For those users without write access,
-all the codebases are found at the following URL:
-
-::
-
-   git://git.taler.net/<repository>
-
-A complete list of all the existing repositories is currently found at
-``https://git.taler.net/``. Note: ``<repository>`` must NOT have the
-``.git`` extension.
-
-
-.. _Python:
-
-Python
-======
-
-Supported Python Versions
--------------------------
-
-Python code should be written and build against version 3.7 of Python.
-
-Style
------
-
-We use `yapf <https://github.com/google/yapf>`_ to reformat the
-code to conform to our style instructions.
-A reusable yapf style file can be found in ``taler-build-scripts``,
-which is intended to be used as a git submodule.
-
-.. _Bugtracking:
-
-Bugtracking
-===========
-
-Bug tracking is done with Mantis (https://www.mantisbt.org/). All the
-bugs are displayed and managed at ``https://bugs.gnunet.org/``, under
-the "Taler" project. A registration on the Web site is needed in order
-to use the bug tracker, only read access is granted without a login.
-
-.. _Continuous-integration:
 
 Continuous integration
 ======================
@@ -411,8 +395,13 @@ nightly (once a day) by a Buildbot worker. The coverage results are
 then published at ``https://lcov.taler.net/``.
 
 
-Coding Style
-============
+Coding Conventions
+==================
+
+GNU Taler is developed primarily in C, Python and TypeScript.
+
+Components written in C
+-----------------------
 
 These are the general coding style rules for Taler.
 
@@ -420,7 +409,7 @@ These are the general coding style rules for Taler.
   by the GNUnet style: https://gnunet.org/style
 
 Naming conventions
-------------------
+^^^^^^^^^^^^^^^^^^
 
 * include files (very similar to GNUnet):
 
@@ -489,7 +478,50 @@ Naming conventions
 
   * must be called "perf_module-under-test_case-description.c"
 
+Shell Scripts
+-------------
 
+Shell scripts should be avoided if at all possible.  The only permissible uses of shell scripts
+in GNU Taler are:
+
+* Trivial invocation of other commands.
+* Scripts for compatibility (e.g. ``./configure``) that must run on
+  as many systems as possible.
+
+When shell scripts are used, they ``MUST`` begin with the following ``set`` command:
+
+.. code-block:: shell
+
+  # Make the shell fail on undefined variables and
+  # commands with non-zero exit status.
+  set -eu
+
+Python
+------
+
+Supported Python Versions
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Python code should be written and build against version 3.7 of Python.
+
+Style
+^^^^^
+
+We use `yapf <https://github.com/google/yapf>`_ to reformat the
+code to conform to our style instructions.
+A reusable yapf style file can be found in ``taler-build-scripts``,
+which is intended to be used as a git submodule.
+
+Python for Scripting
+^^^^^^^^^^^^^^^^^^^^
+
+When using Python for writing small utilities, the following libraries
+are useful:
+
+* ``click`` for argument parsing (should be prefered over argparse)
+* ``pathlib`` for path manipulation (part of the standard library)
+* ``subprocess`` for "shelling out" to other programs.  Prefer ``subprocess.run``
+  over the older APIs.
 
 Testing library
 ===============
