@@ -145,7 +145,7 @@ determined by an adversary performing a targeted attack, as a user's
 likely also be available to other actors.
 
 
-.. code-block:: tsref
+::
 
     kdf_id := SCrypt( identifier, server_salt, keysize )
 
@@ -173,7 +173,7 @@ generate the corresponding public key.  Here, "ver" is used as a salt for the
 HKDF to ensure that the result differs from other cases where we hash
 **kdf_id**.
 
-.. code-block:: tsref
+::
 
     ver_secret:= HKDF(kdf_id, "ver", keysize)
     eddsa_priv := eddsa_d_to_a(ver_secret)
@@ -190,7 +190,7 @@ HKDF to ensure that the result differs from other cases where we hash
 
 **eddsa_d_to_a()**: Function which converts the ver_key to a valid EdDSA private key. Specifically, assuming the value eddsa_priv is in a 32-byte array "digest", the function clears and sets certain bits as follows:
 
-.. code-block:: tsref
+::
 
    digest[0] = (digest[0] & 0x7f) | 0x40;
    digest[31] &= 0xf8;
@@ -208,7 +208,7 @@ symmetric key and an initialization vector (IV).  To ensure that the
 symmetric key changes for each encryption operation, we compute the
 key material using an HKDF over a nonce and the kdf_id.
 
-.. code-block:: tsref
+::
 
     (iv,key) := HKDF(kdf_id, nonce, keysize + ivsize)
 
@@ -248,7 +248,7 @@ the **key_share**.  To ensure that the key derivation for the encryption
 of the **recovery document** differs fundamentally from that of an
 individual **key share**, we use different salts ("erd" and "eks" respectively).
 
-.. code-block:: tsref
+::
 
     (iv0, key0) = HKDF(key_id, nonce0, "erd", keysize + ivsize)
     (encrypted_recovery_document, aes_gcm_tag) = AES256_GCM(recovery_document, key0, iv0)
@@ -277,7 +277,7 @@ The EdDSA keys are used to sign the data sent from the client to the
 server. Everything the client sends to server is signed. The following
 algorithm is equivalent for **Anastasis-Policy-Signature**.
 
-.. code-block:: tsref
+::
 
     (anastasis-account-signature) = eddsa_sign(h_body, eddsa_priv)
     ver_res = eddsa_verifiy(h_body, anastasis-account-signature, eddsa_pub)
@@ -291,7 +291,8 @@ algorithm is equivalent for **Anastasis-Policy-Signature**.
 
 When requesting policy downloads, the client must also provide a signature:
 
-.. code-block:: tsref
+::
+
     (anastasis-account-signature) = eddsa_sign(version, eddsa_priv)
     ver_res = eddsa_verifiy(version, anastasis-account-signature, eddsa_pub)
 
@@ -356,9 +357,7 @@ Obtain salt
 
   Returns a `SaltResponse`_.
 
-  .. _SaltResponse:
-  .. _tsref-type-SaltResponse:
-  .. code-block:: tsref
+  .. ts:def:: SaltResponse
 
     interface SaltResponse {
       // salt value, at least 128 bits of entropy
@@ -379,9 +378,7 @@ Receiving Terms of Service
 
   Returns a `EscrowTermsOfServiceResponse`_.
 
-  .. _EscrowTermsOfServiceResponse:
-  .. _tsref-type-EscrowTermsOfServiceResponse:
-  .. code-block:: tsref
+  .. ts:def:: EscrowTermsOfServiceResponse
 
     interface EscrowTermsOfServiceResponse {
 
@@ -427,6 +424,8 @@ Receiving Terms of Service
       tos: string;
 
     }
+
+  .. ts:def:: AuthenticationMethod
 
     interface AuthenticationMethod {
       // name of the authentication method
@@ -550,8 +549,7 @@ public key using the Crockford base32-encoding.
 
   **Details:**
 
-  .. _EncryptedRecoveryDocument:
-  .. code-block:: tsref
+  .. ts:def:: EncryptedRecoveryDocument
 
     interface EncryptedRecoveryDocument {
       // Nonce used to compute the (iv,key) pair for encryption of the
@@ -569,8 +567,7 @@ public key using the Crockford base32-encoding.
 
     }
 
-  .. _RecoveryDocument:
-  .. code-block:: tsref
+  .. ts:def:: RecoveryDocument
 
     interface RecoveryDocument {
       // Account identifier at backup provider, AES-encrypted with
@@ -588,8 +585,7 @@ public key using the Crockford base32-encoding.
 
     }
 
-  .. _EscrowMethod:
-  .. code-block:: tsref
+  .. ts:def:: EscrowMethod
 
     interface EscrowMethod {
       // URL of the escrow provider (including possibly this Anastasis server)
@@ -617,8 +613,7 @@ public key using the Crockford base32-encoding.
 
     }
 
-  .. _EscrowPolicy:
-  .. code-block:: tsref
+  .. ts:def:: DecryptionPolicy
 
     interface DecryptionPolicy {
       // Salt included to encrypt master key share when
@@ -657,7 +652,7 @@ charge per truth operation using GNU Taler.
 
   Upload a Truth-Object according to the policy the client created before (see RecoveryDocument_).
   If request has been seen before, the server should do nothing, and otherwise store the new object.
-  FIXME: The body must begin with the EncryptedKeyShare_ as binary block (see below).  In addition, 
+  The body must begin with the EncryptedKeyShare_ as binary block (see below).  In addition, 
   the name of the chosen key share method, the Base32-encoded ground truth and the MIME type of 
   Truth must be included in the body. 
   The Anastasis server cannot fully validate the format, but MAY impose
@@ -684,8 +679,7 @@ charge per truth operation using GNU Taler.
 
   **Details:**
 
-  .. _Truth:
-  .. code-block:: tsref
+  .. ts:def:: Truth
 
     interface Truth {
       // Contains the information of an `interface EncryptedKeyShare`_, but simply
@@ -744,8 +738,7 @@ charge per truth operation using GNU Taler.
 
   **Details:**
 
-  .. _EncryptedKeyShare:
-  .. code-block:: tsref
+  .. ts:def:: EncryptedKeyShare
 
     interface EncryptedKeyShare {
       // Nonce used to compute the decryption (iv,key) pair.
@@ -769,8 +762,7 @@ charge per truth operation using GNU Taler.
 
     }
 
-  .. _KeyShare:
-  .. code-block:: tsref
+  .. ts:def:: KeyShare
 
     interface KeyShare {
       // Key material to concatenate with policy_salt and KDF to derive
@@ -782,8 +774,7 @@ charge per truth operation using GNU Taler.
 
     }
 
-  .. _EscrowChallenge:
-  .. code-block:: tsref
+  .. ts:def:: EscrowChallenge
 
     interface EscrowChallenge {
       // ground truth, i.e. challenge question,
