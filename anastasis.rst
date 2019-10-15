@@ -768,7 +768,7 @@ charge per truth operation using GNU Taler.
     Server is out of Service.
 
   *Truth-Decryption-Key*: Key used to encrypt the Truth_ and which has to provided by the user. The key is stored with
-  the according EscrowMethod_. The server needs this key to get the info out of Truth_ needed to prepare an ExcrowChallenge_.
+  the according EscrowMethod_. The server needs this key to get the info out of Truth_ needed to prepare an EscrowChallenge_.
 
   **Details:**
 
