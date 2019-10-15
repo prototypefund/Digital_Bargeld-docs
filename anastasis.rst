@@ -603,6 +603,10 @@ public key using the Crockford base32-encoding.
       // UUID of the escrow method (see /truth/ API below).
       uuid: string;
 
+      // Key used to encrypt the `Truth` this `EscrowMethod` is related to.
+      // Client has to provide this key to the server when using /truth/
+      truth_encryption_key: [32]; //bytearray
+
       // Salt used to encrypt the truth on the Anastasis server.
       truth_salt: [32]; //bytearray
 
@@ -657,11 +661,11 @@ charge per truth operation using GNU Taler.
 
 .. http:post:: /truth/$UUID
 
-  Upload a Truth-Object according to the policy the client created before (see RecoveryDocument_).
+  Upload an EncryptedTruth_-Object according to the policy the client created before (see RecoveryDocument_).
   If request has been seen before, the server should do nothing, and otherwise store the new object.
-  The body must begin with the EncryptedKeyShare_ as binary block (see below).  In addition, 
-  the name of the chosen key share method, the Base32-encoded ground truth and the MIME type of 
-  Truth must be included in the body. 
+  While the document's structure is described in JSON below, the upload
+  should just be the bytestream of the raw data (i.e. 32 bytes nonce followed
+  by 16 bytes tag followed by the encrypted truth). 
   The Anastasis server cannot fully validate the format, but MAY impose
   minimum and maximum size limits.
 
@@ -686,6 +690,24 @@ charge per truth operation using GNU Taler.
 
   **Details:**
 
+  .. _EncryptedTruth:
+  .. ts:def:: EncryptedTruth
+
+    interface EncryptedTruth {
+      // Nonce used to compute the (iv,key) pair for encryption of the
+      // encrypted_compressed_truth.
+      nonce: [32]; //bytearray
+
+      // Authentication tag
+      aes_gcm_tag: [16]; //bytearray
+
+      // Variable-size truth. After decryption,
+      // this contains a gzip compressed JSON-encoded `Truth`.
+      // The nonce of the HKDF for this encryption must include the
+      // string "ECT".
+      encrypted_compressed_truth: []; //bytearray of undefined length
+    }
+
   .. _Truth:
   .. ts:def:: Truth
 
@@ -699,7 +721,7 @@ charge per truth operation using GNU Taler.
 
       // ground truth, i.e. H(challenge answer),
       // phone number, e-mail address, picture, fingerprint, ...
-      // base32 encoded
+      // **base32 encoded**
       //
       // The truth MUST NOT be revealed to the user, even
       // after successful authentication (of course the user
@@ -717,6 +739,7 @@ charge per truth operation using GNU Taler.
   if $RESPONSE matches the expected response according to the challenge sent to the client before.
   If $RESPONSE is not specified, the server will response with a challenge according to the key share 
   method (e.g. ask the security question or send a SMS with a code) and await the answer within $RESPONSE. 
+  Also, the user has to provide the correct *truth_encryption_key* with every get request (see below).
   When $RESPONSE is correct, the server responses with the encrypted key share.
   The encrypted key share is returned simply as a byte array and not in JSON format.
 
@@ -743,6 +766,9 @@ charge per truth operation using GNU Taler.
     details on the challenge the user has to satisfy (see below).
   :status 503 Service Unavailable:
     Server is out of Service.
+
+  *Truth-Decryption-Key*: Key used to encrypt the Truth_ and which has to provided by the user. The key is stored with
+  the according EscrowMethod_. The server needs this key to get the info out of Truth_ needed to prepare an ExcrowChallenge_.
 
   **Details:**
 
