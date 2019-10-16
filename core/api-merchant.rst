@@ -745,9 +745,6 @@ The contract terms must have the following structure:
       // before transfering it to the merchant.
       amount: Amount;
 
-      // The URL where the wallet has to send coins.
-      pay_url: string;
-
       // The URL for this purchase.  Every time is is visited, the merchant
       // will send back to the customer the same proposal.  Clearly, this URL
       // can be bookmarked and shared by users.
@@ -786,6 +783,10 @@ The contract terms must have the following structure:
       // Merchant's public key used to sign this proposal; this information
       // is typically added by the backend Note that this can be an ephemeral key.
       merchant_pub: EddsaPublicKey;
+
+      // Base URL of the (public!) merchant backend API.
+      // Must be an absolute URL that ends with a slash.
+      merchant_base_url: string;
 
       // More info about the merchant, see below
       merchant: Merchant;
