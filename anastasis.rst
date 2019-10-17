@@ -454,6 +454,9 @@ Operations by the client are identified and authorized by $ACCOUNT_PUB, which
 should be kept secret from third parties. $ACCOUNT_PUB should be an account
 public key using the Crockford base32-encoding.
 
+In the following, UUID is always defined and used according to `RFC 4122`_.
+
+.. _`RFC 4122`: https://tools.ietf.org/html/rfc4122
 
 .. http:get:: /policy/$ACCOUNT_PUB[?version=$NUMBER]
 
@@ -636,11 +639,10 @@ public key using the Crockford base32-encoding.
       // escrow methods identified by UUID.
       encrypted_master_key: [32]; //bytearray
 
-      // List of escrow methods identified by their uuid
+      // List of escrow methods identified by their uuid.
       uuid: string[];
 
     }
-
 
 .. _manage-truth:
 
