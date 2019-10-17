@@ -326,7 +326,7 @@ malicious policy, a user can still retrieve an older version of the policy to
 recover access to their data.  This append-only storage for policies still
 leaves a strong adversary with the option of uploading many policies to
 exhaust the Anastasis server's capacity.  We limit this attack by requiring a
-policy upload to include a reference to a **payment secret** from a payment
+policy upload to include a reference to a **payment identifier** from a payment
 made by the user.  Thus, a policy upload requires both knowledge of the
 **identity** and making a payment.  This effectively prevents and adversary
 from using the append-only policy storage from exhausting Anastasis server
@@ -400,7 +400,7 @@ Receiving Terms of Service
       // Amount required per policy upload. Note that the amount is NOT charged additionally
       // to the monthly_storage_fee. Instead, when a payment is made, the amount is
       // divided by the policy_upload_fee (and rounded down) to determine how many
-      // uploads can be made under the associated **payment secret**.
+      // uploads can be made under the associated **payment identifier**.
       policy_upload_ratio: Amount;
 
       // maximum policy upload size supported
