@@ -177,7 +177,7 @@ instruction ID (TID).  Currently, the following TIDs are used:
   * - TID (reader to wallet)
     - Description
   * - ``0x01``
-    - Dereference the UTF-8 ecoded ``taler://`` URI in the remainder of the command data.
+    - Dereference the UTF-8 encoded ``taler://`` URI in the remainder of the command data.
   * - ``0x02``
     - Accept the UTF-8 encoded JSON object in the remainder of the command data as a request tunneling response.
 
