@@ -663,13 +663,8 @@ charge per truth operation using GNU Taler.
 
 .. http:post:: /truth/$UUID
 
-  Upload an EncryptedTruth_-Object according to the policy the client created before (see RecoveryDocument_).
+  Upload a Truth_-Object according to the policy the client created before (see RecoveryDocument_).
   If request has been seen before, the server should do nothing, and otherwise store the new object.
-  While the document's structure is described in JSON below, the upload
-  should just be the bytestream of the raw data (i.e. 32 bytes nonce followed
-  by 16 bytes tag followed by the encrypted truth). 
-  The Anastasis server cannot fully validate the format, but MAY impose
-  minimum and maximum size limits.
 
   :status 204 No content:
     Truth stored successfully.
@@ -692,24 +687,6 @@ charge per truth operation using GNU Taler.
 
   **Details:**
 
-  .. _EncryptedTruth:
-  .. ts:def:: EncryptedTruth
-
-    interface EncryptedTruth {
-      // Nonce used to compute the (iv,key) pair for encryption of the
-      // encrypted_compressed_truth.
-      nonce: [32]; //bytearray
-
-      // Authentication tag
-      aes_gcm_tag: [16]; //bytearray
-
-      // Variable-size truth. After decryption,
-      // this contains a gzip compressed JSON-encoded `Truth`.
-      // The nonce of the HKDF for this encryption must include the
-      // string "ECT".
-      encrypted_compressed_truth: []; //bytearray of undefined length
-    }
-
   .. _Truth:
   .. ts:def:: Truth
 
@@ -721,14 +698,21 @@ charge per truth operation using GNU Taler.
       // Key share method, i.e. "security question", "SMS", "e-mail", ...
       method: string;
 
-      // ground truth, i.e. H(challenge answer),
+      // Nonce used to compute the (iv,key) pair for encryption of the
+      // encrypted_truth.
+      nonce: [32]; //bytearray
+
+      // Authentication tag of encrypted_truth
+      aes_gcm_tag: [16]; //bytearray
+
+      // Variable-size truth. After decryption,
+      // this contains the ground truth, i.e. H(challenge answer),
       // phone number, e-mail address, picture, fingerprint, ...
-      // **base32 encoded**
+      // **base32 encoded**.
       //
-      // The truth MUST NOT be revealed to the user, even
-      // after successful authentication (of course the user
-      // was originally aware when establishing the truth).
-      truth: string;
+      // The nonce of the HKDF for this encryption must include the
+      // string "ECT".
+      encrypted_truth: []; //bytearray of undefined length
 
       // mime type of truth, i.e. text/ascii, image/jpeg, etc.
       truth_mime: string;
