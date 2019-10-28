@@ -342,6 +342,21 @@ The following order types are, for now, not relevant for LibEuFin:
     HAC order type.
 
 
+EBICS Message Format
+====================
+
+The following elements are the allowed root elements of EBICS request/response messages:
+
+* ``ebicsHEVRequest`` / ``ebicsHEVResponse``:  Always unauthenticated and unencrypted.  Used
+  **only** for query/response of the host's EBICS version.
+* ``ebicsKeyManagementResponse``:  Unauthenticated response.  Used for key management responses and
+  sometimes **also** to deliver error messages that are not signed by the bank (such as "invalid request").
+* ``ebicsNoPubKeyDigestsRequest``: Signed request that *does not* contain the hash of the bank's
+  public key that the client expects.  Used for key management, specifically only the HPB order type.
+* ``ebicsRequest`` / ``ebicsResponse``
+
+
+
 EBICS Transaction
 =================
 
@@ -490,6 +505,43 @@ HypoVereinsbank
 ---------------
 
 See `this document <https://www.hypovereinsbank.de/content/dam/hypovereinsbank/shared/pdf/Auftragsarten_Internet_Nov2018_181118.pdf>`__.
+
+
+Cryptography
+============
+
+EBICS uses the XML Signature standard for signatures.  It does *not* use XML encryption.
+
+The EBICS specification doesn't directly reference the standardized URIs for the various
+signing algorithms.  Some of these URIs are defined in `<https://tools.ietf.org/html/rfc6931>`__.
+
+* A005 is http://www.w3.org/2001/04/xmldsig-more#rsa-sha256
+
+  * the ``RSASSA-PKCS1-v1_5`` signature scheme contains the ``EMSA-PKCS1-v1_5`` encoding scheme
+    mentioned in the EBICS spec.
+
+* A006 is `<http://www.w3.org/2007/05/xmldsig-more#rsa-pss>`__ as defined in RFC 6931.
+
+XML Signatures
+--------------
+
+XML Signatures can be a combination of:
+
+* detached (referencing another document)
+* enveloping (signs over ``Object`` tags *within* the ``Signature`` elements)
+* enveloped (signs over arbitrary data (via XPath expression) in other parts of the document
+  that contains the signature).
+
+In EBICS, only **enveloped** signatures are used.
+
+In the XML Signature standard, the element for a signature is ``Signature``.  EBICS violates this
+standard by always mandating ``AuthSignature`` as the name.  ``AuthSignature`` is an alias to
+the ``SignatureType`` xsd type in the XML Schema.
+
+Canonicalization vs transforms:
+ * Canonicalization refers to the processing of the ``SignedInfo`` element.
+ * Transformations apply to the data that ``Reference`` elements reference.  Canonicalization
+   algorithms can be used as a transformation on referenced data.
 
 Standards and Resources
 =======================
