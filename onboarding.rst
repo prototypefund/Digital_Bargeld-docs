@@ -28,6 +28,52 @@ A complete list of all the existing repositories is currently found at
 `<https://git.taler.net/>`_.
 
 
+Committing code
+---------------
+
+To obtain Git access, you need to send us your SSH public key.  You can
+find instructions on how to do so in the `Git book <https://git-scm.com/book/en/v2/Git-on-the-Server-Generating-Your-SSH-Public-Key>`_.
+If you have been granted write access, you fist of all must change the URL of
+the respective repository to:
+
+::
+
+   git://git@git.taler.net/<repository>
+
+For an existing checkout, this can be done by editing the `.git/config` file.
+
+The server is configured to reject all commits that have not been signed with
+GnuPG. If you do not yet have a GnuPG key, you must create one, as explained
+in the `GNU Privacy Handbook <https://www.gnupg.org/gph/en/manual/c14.html>`_.
+You do not need to share the respective public key with us to make commits.
+However, we recommend that you upload it to key servers, put it on your
+business card and personally meet with other GNU hackers to have it signed
+such that others can verify your commits later.
+
+To sign all commits, you should run
+
+::
+
+   $ git config --global commit.gpgsign true
+
+You can also sign individual commits only by adding the `-S` option to the
+`git commit` command. If you accidentally already made commits but forgot
+to sign them, you can retroactively add signatures using:
+
+::
+
+   $ git rebase -S
+
+
+Whether you commit to a personal branch, a feature branch or to master should
+depend on your level of comfort and the nature of the change.  As a general
+rule, the code in master must always build and tests should always pass, at
+least on your own system. However, we all make mistakes and you should expect
+to receive friendly reminders if your change did not live up to this simple
+standard.  We plan to move to a system where the CI guarantees this invariant
+in the future.
+
+
 Taler Deployment on gv.taler.net
 ================================
 
