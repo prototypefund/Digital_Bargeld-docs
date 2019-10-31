@@ -349,12 +349,13 @@ The following elements are the allowed root elements of EBICS request/response m
 
 * ``ebicsHEVRequest`` / ``ebicsHEVResponse``:  Always unauthenticated and unencrypted.  Used
   **only** for query/response of the host's EBICS version.
+* ``ebicsUnsecuredRequest``: Request without signature or encryption (beyond TLS).  Used for INI and HIA.
 * ``ebicsKeyManagementResponse``:  Unauthenticated response.  Used for key management responses and
   sometimes **also** to deliver error messages that are not signed by the bank (such as "invalid request").
 * ``ebicsNoPubKeyDigestsRequest``: Signed request that *does not* contain the hash of the bank's
   public key that the client expects.  Used for key management, specifically only the HPB order type.
 * ``ebicsRequest`` / ``ebicsResponse``
-
+* ``ebicsUnsignedRequest``: Not used anymore.  Was used in FTAM migration with the HSA order type.
 
 
 EBICS Transaction
@@ -447,7 +448,7 @@ RSA key pairs are used for three purposes:
 
 One subscriber *may* use three different key pairs for these purposes.
 The identification and authentication key pair may be the same as the encryption key pair.
-The bank-technical key pair may not be used for any other purpose..
+The bank-technical key pair may not be used for any other purpose.
 
 
 Real-time Transactions
