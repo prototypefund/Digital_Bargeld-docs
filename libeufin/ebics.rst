@@ -358,6 +358,12 @@ The following elements are the allowed root elements of EBICS request/response m
 * ``ebicsUnsignedRequest``: Not used anymore.  Was used in FTAM migration with the HSA order type.
 
 
+Order ID Allocation
+===================
+
+In practice, the Order ID seems to be allocated via number of counters at the level of the **PartnerID**.
+
+
 EBICS Transaction
 =================
 
