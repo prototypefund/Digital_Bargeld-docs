@@ -780,6 +780,10 @@ The contract terms must have the following structure:
       // After this deadline, the merchant won't accept payments for the contact
       pay_deadline: Timestamp;
 
+      // Transfer deadline for the exchange.  Must be in the
+      // deposit permissions of coins used to pay for this order.
+      wire_transfer_deadline: Timestamp;
+
       // Merchant's public key used to sign this proposal; this information
       // is typically added by the backend Note that this can be an ephemeral key.
       merchant_pub: EddsaPublicKey;
