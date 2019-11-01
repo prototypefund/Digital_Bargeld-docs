@@ -58,7 +58,7 @@ Documentation Overview
   taler-merchant-api-tutorial
   taler-bank-manual
   taler-backoffice-manual
-  onboarding
+  developers-manual.rst
   anastasis
   libeufin/index
   global-licensing

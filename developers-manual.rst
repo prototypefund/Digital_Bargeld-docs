@@ -1,5 +1,16 @@
-Developer Onboarding Manual
-###########################
+Developer's Manual
+##################
+
+.. toctree::
+   :hidden:
+
+   checklist-release
+
+
+.. note::
+
+  This manual contains information for developers working on GNU Taler
+  and related components.  It is not intended for a general audience.
 
 .. contents:: Table of Contents
 
@@ -40,7 +51,7 @@ the respective repository to:
 
    git://git@git.taler.net/<repository>
 
-For an existing checkout, this can be done by editing the `.git/config` file.
+For an existing checkout, this can be done by editing the ``.git/config`` file.
 
 The server is configured to reject all commits that have not been signed with
 GnuPG. If you do not yet have a GnuPG key, you must create one, as explained
@@ -56,8 +67,8 @@ To sign all commits, you should run
 
    $ git config --global commit.gpgsign true
 
-You can also sign individual commits only by adding the `-S` option to the
-`git commit` command. If you accidentally already made commits but forgot
+You can also sign individual commits only by adding the ``-S`` option to the
+``git commit`` command. If you accidentally already made commits but forgot
 to sign them, you can retroactively add signatures using:
 
 ::
@@ -337,6 +348,8 @@ Releases
 
 Release Process and Checklists
 ------------------------------
+
+Please use the :doc:`release checklist <checklist-release>`
 
 This document describes the process for releasing a new version of the
 various Taler components to the official GNU mirrors.
