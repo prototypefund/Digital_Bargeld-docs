@@ -19,16 +19,16 @@ Payments are requested with the ``pay`` action.  The parameters are a hierarchic
 
 .. code:: none
 
-  'taler://pay/' merchant-host '/' merchant-query '/' merchant-instance  '/' order-id [ '/' session-id ]
+  'taler://pay/' merchant-host '/' merchant-public-prefix '/' merchant-instance  '/' order-id [ '/' session-id ]
 
-The components ``merchant-host``, ``merchant-query`` and ``order-id`` identify the URL that is used to claim the contract
+The components ``merchant-host``, ``merchant-prefix`` and ``order-id`` identify the URL that is used to claim the contract
 for this payment request.
 
 To make the URI shorter (which is important for QR code payments), ``-`` (minus) can be substituted to get a default value
 for some components:
 
 * the default for ``merchant-instance`` is ``default``
-* the default for ``merchant-query`` is ``/public/proposal``
+* the default for ``merchant-public-prefix`` is ``public``
 
 The following is a minimal example for a payment request from the demo merchant, using the default instance and no session-bound payment:
 

@@ -115,8 +115,8 @@ Receiving Payments
       // Was the payment refunded (even partially)
       refunded: boolean;
 
-      // Amount that was refunded
-      refund_amount: Amount;
+      // Amount that was refunded, only present if refunded is true.
+      refund_amount?: Amount;
 
       // Contract terms
       contract_terms: ContractTerms;
@@ -130,6 +130,9 @@ Receiving Payments
       // URI that the wallet must process to complete the payment.
       taler_pay_uri: string;
 
+      // Alternative order ID which was paid for already in the same session.
+      // Only given if the same product was purchased before in the same session.
+      already_paid_order_id?: string;
     }
 
 
@@ -745,9 +748,6 @@ The contract terms must have the following structure:
       // before transfering it to the merchant.
       amount: Amount;
 
-      // The URL where the wallet has to send coins.
-      pay_url: string;
-
       // The URL for this purchase.  Every time is is visited, the merchant
       // will send back to the customer the same proposal.  Clearly, this URL
       // can be bookmarked and shared by users.
@@ -783,9 +783,17 @@ The contract terms must have the following structure:
       // After this deadline, the merchant won't accept payments for the contact
       pay_deadline: Timestamp;
 
+      // Transfer deadline for the exchange.  Must be in the
+      // deposit permissions of coins used to pay for this order.
+      wire_transfer_deadline: Timestamp;
+
       // Merchant's public key used to sign this proposal; this information
       // is typically added by the backend Note that this can be an ephemeral key.
       merchant_pub: EddsaPublicKey;
+
+      // Base URL of the (public!) merchant backend API.
+      // Must be an absolute URL that ends with a slash.
+      merchant_base_url: string;
 
       // More info about the merchant, see below
       merchant: Merchant;
@@ -1117,4 +1125,53 @@ both by the user's browser and their wallet.
 
       // The order of the signatures matches the planchets list.
       reserve_sigs: EddsaSignature[];
+    }
+
+
+.. http:get:: /public/poll-payment
+
+  Check the payment status of an order.
+
+  **Request:**
+
+  :query order_id: order id that should be used for the payment
+  :query h_contract: hash of the contract (used to authenticate customer)
+  :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
+  :query timeout: *Optional*. Timeout in seconds to wait for a payment if the answer would otherwise be negative (long polling).
+
+  **Response:**
+
+  Returns a `PollPaymentResponse`, whose format can differ based on the status of the payment.
+
+  .. ts:def:: PollPaymentResponse
+
+    type CheckPaymentResponse = PollPaymentPaidResponse | PollPaymentUnpaidResponse
+
+  .. ts:def:: PollPaymentPaidResponse
+
+    interface PollPaymentPaidResponse {
+      // value is always true;
+      paid: boolean;
+
+      // Was the payment refunded (even partially)
+      refunded: boolean;
+
+      // Amount that was refunded, only present if refunded is true.
+      refund_amount?: Amount;
+
+    }
+
+  .. ts:def:: PollPaymentUnpaidResponse
+
+    interface PollPaymentUnpaidResponse {
+      // value is always false;
+      paid: boolean;
+
+      // URI that the wallet must process to complete the payment.
+      taler_pay_uri: string;
+
+      // Alternative order ID which was paid for already in the same session.
+      // Only given if the same product was purchased before in the same session.
+      already_paid_order_id?: string;
+
     }

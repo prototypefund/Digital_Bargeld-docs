@@ -326,7 +326,7 @@ malicious policy, a user can still retrieve an older version of the policy to
 recover access to their data.  This append-only storage for policies still
 leaves a strong adversary with the option of uploading many policies to
 exhaust the Anastasis server's capacity.  We limit this attack by requiring a
-policy upload to include a reference to a **payment secret** from a payment
+policy upload to include a reference to a **payment identifier** from a payment
 made by the user.  Thus, a policy upload requires both knowledge of the
 **identity** and making a payment.  This effectively prevents and adversary
 from using the append-only policy storage from exhausting Anastasis server
@@ -400,7 +400,7 @@ Receiving Terms of Service
       // Amount required per policy upload. Note that the amount is NOT charged additionally
       // to the monthly_storage_fee. Instead, when a payment is made, the amount is
       // divided by the policy_upload_fee (and rounded down) to determine how many
-      // uploads can be made under the associated **payment secret**.
+      // uploads can be made under the associated **payment identifier**.
       policy_upload_ratio: Amount;
 
       // maximum policy upload size supported
@@ -454,6 +454,9 @@ Operations by the client are identified and authorized by $ACCOUNT_PUB, which
 should be kept secret from third parties. $ACCOUNT_PUB should be an account
 public key using the Crockford base32-encoding.
 
+In the following, UUID is always defined and used according to `RFC 4122`_.
+
+.. _`RFC 4122`: https://tools.ietf.org/html/rfc4122
 
 .. http:get:: /policy/$ACCOUNT_PUB[?version=$NUMBER]
 
@@ -636,11 +639,10 @@ public key using the Crockford base32-encoding.
       // escrow methods identified by UUID.
       encrypted_master_key: [32]; //bytearray
 
-      // List of escrow methods identified by their uuid
+      // List of escrow methods identified by their uuid.
       uuid: string[];
 
     }
-
 
 .. _manage-truth:
 
@@ -661,13 +663,8 @@ charge per truth operation using GNU Taler.
 
 .. http:post:: /truth/$UUID
 
-  Upload an EncryptedTruth_-Object according to the policy the client created before (see RecoveryDocument_).
+  Upload a Truth_-Object according to the policy the client created before (see RecoveryDocument_).
   If request has been seen before, the server should do nothing, and otherwise store the new object.
-  While the document's structure is described in JSON below, the upload
-  should just be the bytestream of the raw data (i.e. 32 bytes nonce followed
-  by 16 bytes tag followed by the encrypted truth). 
-  The Anastasis server cannot fully validate the format, but MAY impose
-  minimum and maximum size limits.
 
   :status 204 No content:
     Truth stored successfully.
@@ -690,24 +687,6 @@ charge per truth operation using GNU Taler.
 
   **Details:**
 
-  .. _EncryptedTruth:
-  .. ts:def:: EncryptedTruth
-
-    interface EncryptedTruth {
-      // Nonce used to compute the (iv,key) pair for encryption of the
-      // encrypted_compressed_truth.
-      nonce: [32]; //bytearray
-
-      // Authentication tag
-      aes_gcm_tag: [16]; //bytearray
-
-      // Variable-size truth. After decryption,
-      // this contains a gzip compressed JSON-encoded `Truth`.
-      // The nonce of the HKDF for this encryption must include the
-      // string "ECT".
-      encrypted_compressed_truth: []; //bytearray of undefined length
-    }
-
   .. _Truth:
   .. ts:def:: Truth
 
@@ -719,14 +698,21 @@ charge per truth operation using GNU Taler.
       // Key share method, i.e. "security question", "SMS", "e-mail", ...
       method: string;
 
-      // ground truth, i.e. H(challenge answer),
+      // Nonce used to compute the (iv,key) pair for encryption of the
+      // encrypted_truth.
+      nonce: [32]; //bytearray
+
+      // Authentication tag of encrypted_truth
+      aes_gcm_tag: [16]; //bytearray
+
+      // Variable-size truth. After decryption,
+      // this contains the ground truth, i.e. H(challenge answer),
       // phone number, e-mail address, picture, fingerprint, ...
-      // **base32 encoded**
+      // **base32 encoded**.
       //
-      // The truth MUST NOT be revealed to the user, even
-      // after successful authentication (of course the user
-      // was originally aware when establishing the truth).
-      truth: string;
+      // The nonce of the HKDF for this encryption must include the
+      // string "ECT".
+      encrypted_truth: []; //bytearray of undefined length
 
       // mime type of truth, i.e. text/ascii, image/jpeg, etc.
       truth_mime: string;

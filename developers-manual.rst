@@ -1,5 +1,17 @@
-Developer Onboarding Manual
-###########################
+Developer's Manual
+##################
+
+.. toctree::
+   :hidden:
+
+   checklist-release
+   checklist-demo-upgrade
+
+
+.. note::
+
+  This manual contains information for developers working on GNU Taler
+  and related components.  It is not intended for a general audience.
 
 .. contents:: Table of Contents
 
@@ -28,6 +40,52 @@ A complete list of all the existing repositories is currently found at
 `<https://git.taler.net/>`_.
 
 
+Committing code
+---------------
+
+To obtain Git access, you need to send us your SSH public key.  You can
+find instructions on how to do so in the `Git book <https://git-scm.com/book/en/v2/Git-on-the-Server-Generating-Your-SSH-Public-Key>`_.
+If you have been granted write access, you fist of all must change the URL of
+the respective repository to:
+
+::
+
+   git://git@git.taler.net/<repository>
+
+For an existing checkout, this can be done by editing the ``.git/config`` file.
+
+The server is configured to reject all commits that have not been signed with
+GnuPG. If you do not yet have a GnuPG key, you must create one, as explained
+in the `GNU Privacy Handbook <https://www.gnupg.org/gph/en/manual/c14.html>`_.
+You do not need to share the respective public key with us to make commits.
+However, we recommend that you upload it to key servers, put it on your
+business card and personally meet with other GNU hackers to have it signed
+such that others can verify your commits later.
+
+To sign all commits, you should run
+
+::
+
+   $ git config --global commit.gpgsign true
+
+You can also sign individual commits only by adding the ``-S`` option to the
+``git commit`` command. If you accidentally already made commits but forgot
+to sign them, you can retroactively add signatures using:
+
+::
+
+   $ git rebase -S
+
+
+Whether you commit to a personal branch, a feature branch or to master should
+depend on your level of comfort and the nature of the change.  As a general
+rule, the code in master must always build and tests should always pass, at
+least on your own system. However, we all make mistakes and you should expect
+to receive friendly reminders if your change did not live up to this simple
+standard.  We plan to move to a system where the CI guarantees this invariant
+in the future.
+
+
 Taler Deployment on gv.taler.net
 ================================
 
@@ -54,108 +112,126 @@ user can be switched to become active (see next section), and vice versa.
 -  ``demo-blue``
 -  ``demo-green``
 
-Compile and switch color.
--------------------------
 
-If the setup is already bootstrapped, then it should only be needed to
-login as ’demo-X’ (with X being the inactive color); and then:
+Demo Upgrade Procedure
+======================
+
+Upgrading the ``demo`` environment should be done with care, and ideally be
+coordinated on the mailing list before.  It is our goal for ``demo`` to always
+run a "working version" that is compatible with various published wallets.
+
+Before deploying on ``demo``, the same version of all components **must**
+be deployed *and* tested on ``int``.
+
+Please use the :doc:`demo upgrade checklist <checklist-demo-upgrade>` to make
+sure everything is working.
+
+
+Tagging components
+------------------
+
+All Taler components must be tagged with git before they are deployed on the
+``demo`` environment, using a tag of the following form:
 
 ::
 
-   $ source activate
-   $ taler-deployment-build
+  demo-YYYY-MM-DD-SS
+  YYYY = year
+  MM = month
+  DD = day
+  SS = serial
 
-and then switch the color by logging in as the *demo* user, and switch
-the color with the following command:
+
+Environment Layout
+------------------
+
+Environments have the following layout:
 
 ::
 
-   $ taler-deployment-switch-demo-X
+  $HOME/
+    deployment (deployment.git checkout)
+    envcfg.py  (configuration of the Taler environment)
+    activate   (bash file, sourced to set environment variables)
+    logs/      (log files)
+    local/     (locally installed software)
+    sources/   (sources repos of locally build components)
+    sockets/   (unix domain sockets of running components)
+    taler-data (on-disk state, public and private keys)
+    .config/taler.conf (main Taler configuration file)
 
-Full bootstrap.
+On ``demo-blue`` and ``demo-green``, ``taler-data`` is a symlink pointing to ``$HOME/demo/shared-data``
+instead of a directory.
+
+
+Using envcfg.py
 ---------------
 
-In order to bootstrap a Taler installation under a empty home directory,
-do:
+The ``$HOME/envcfg.py`` file contains (1) the name of the environment and (2) the version
+of all components we build (in the form of a git rev).
 
-::
+The ``envcfg.py`` for demo looks like this:
 
-   $ cd $HOME
-   $ git clone git://git.taler.net/deployment
+.. code-block:: python
 
-Then run the prepare script that will (1) download all the repositories
-(2) build the codebases, (3) configure the system, and (4) generate the
-needed data.
+  env = "demo"
+  tag = "demo-2019-10-05-01:
+  tag_gnunet = tag
+  tag_libmicrohttpd = tag
+  tag_exchange = tag
+  tag_merchant = tag
+  tag_bank = tag
+  tag_twister = tag
+  tag_landing = tag
+  tag_donations = tag
+  tag_blog = tag
+  tag_survey = tag
+  tag_backoffice = tag
 
-::
+Currently only the variables ``env`` and ``tag_${component}`` are used.
 
-   $ ./deployment/bin/taler-deployment-prepare [test | int | demo]
+When deploying to ``demo``, the ``envcfg.py`` should be committed to ``deployment.git/envcfg/envcfg-demo-YYYY-MM-DD-SS.py``.
 
-..
 
-   **Note**
-
-   If the DB schema of merchant/exchange/auditor changed, at this point
-   it MIGHT be necessary to reset all the tables. To this regard,
-   consider running one of the following commands:
-
-   ::
-
-      # To reset the merchant DB.
-      $ taler-merchant-dbinit -r
-
-      # To reset the exchange DB.
-      $ taler-exchange-dbinit -r
-
-      # To reset the exchange DB.
-      $ taler-auditor-dbinit -r
-
-If all the steps succeeded, then it should be possible to launch all the
-services. Give:
-
-::
-
-   $ taler-deployment-start
-
-   # or restart, if you want to kill old processes and
-   # start new ones.
-   $ taler-deployment-restart
-
-Verify that all services are up and running:
-
-::
-
-   $ taler-deployment-arm -I
-   $ tail logs/<component>-<date>.log
-
-How to upgrade the code.
-------------------------
-
-Some repositories, especially the ones from the released components,
-have a *stable* branch, that keeps older and more stable code.
-Therefore, upon each release we must rebase those stable branches on the
-master.
-
-The following commands do that:
+Bootstrapping an Environment
+----------------------------
 
 .. code-block:: sh
 
-   $ cd $REPO
+  $ git clone https://git.taler.net/deployment.git ~/deployment
+  $ cp ~/deployment/envcfg/$ENVCFGFILE ~/envcfg.py
+  $ ./deployment/bin/taler-deployment bootstrap
+  $ source ~/activate
+  $ taler-deployment build
+  $ taler-deployment-keyup
+  $ taler-deployment-sign
+  $ taler-deployment-start
 
-   $ git pull origin master stable
-   $ git checkout stable
 
-   # option a: resolve conflicts resulting from hotfixes
-   $ git rebase master
-   $ ...
+Upgrading an Existing Environment
+---------------------------------
 
-   # option b: force stable to master
-   $ git update-ref refs/heads/stable master
+.. code-block:: sh
 
-   $ git push # possibly with --force
+  $ rm -rf ~/sources ~/local
+  $ git -C ~/deployment pull
+  $ cp ~/deployment/envcfg/$ENVCFGFILE ~/envcfg.py
+  $ taler-deployment bootstrap
+  $ taler-deployment build
+  $ taler-deployment-keyup
+  $ taler-deployment-sign
+  $ taler-deployment-start
 
-   # continue development
-   $ git checkout master
+
+Switching Demo Colors
+---------------------
+
+As the ``demo`` user, to switch to color ``${COLOR}``,
+run the following script from ``deployment/bin``:
+
+.. code-block:: sh
+
+   $ taler-deployment-switch-demo-${COLOR}
 
 
 Environments and Builders on taler.net
@@ -291,6 +367,8 @@ Releases
 
 Release Process and Checklists
 ------------------------------
+
+Please use the :doc:`release checklist <checklist-release>`
 
 This document describes the process for releasing a new version of the
 various Taler components to the official GNU mirrors.

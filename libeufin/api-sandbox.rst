@@ -104,7 +104,7 @@ HTTP API
         // Identification token of the bank.  Not required to obey to any particular standard.
         recipient: string;
 
-        // Electronic signature version.  Admitted values: A004, A005, A006.
+        // Electronic signature version.  Admitted values: A005, A006.
         version: string;
 
         // Length in bits of the key exponent.
