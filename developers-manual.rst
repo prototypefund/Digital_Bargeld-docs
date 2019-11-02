@@ -203,13 +203,13 @@ The ``envcfg.py`` for demo looks like this:
 Currently only the variables ``env`` and ``tag_${component}`` are used.
 
 
-Bootstrapping an environment
+Bootstrapping an Environment
 ----------------------------
 
 .. code-block:: sh
 
-  $ cd $HOME
-  $ git clone https://git.taler.net/deployment.git
+  $ git clone https://git.taler.net/deployment.git ~/deployment
+  $ cp ~/deployment/envcfg.py.template ~/envcfg.py
   $ $EDITOR ~/envcfg.py
   $ ./deployment/bin/taler-deployment bootstrap
   $ source ~/activate
@@ -219,7 +219,21 @@ Bootstrapping an environment
   $ taler-deployment-start
 
 
-Switching demo colors
+Upgrading an Existing Environment
+---------------------------------
+
+.. code-block:: sh
+
+  $ rm -rf ~/sources ~/local
+  $ git -C ~/deployment pull
+  $ $EDITOR ~/envcfg.py
+  $ taler-deployment build
+  $ taler-deployment-keyup
+  $ taler-deployment-sign
+  $ taler-deployment-start
+
+
+Switching Demo Colors
 ---------------------
 
 As the ``demo`` user, to switch to color ``${COLOR}``,
