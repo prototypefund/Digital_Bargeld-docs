@@ -157,23 +157,11 @@ Environments have the following layout:
     local/     (locally installed software)
     sources/   (sources repos of locally build components)
     sockets/   (unix domain sockets of running components)
+    taler-data (on-disk state, public and private keys)
     .config/taler.conf (main Taler configuration file)
 
-Additionally, the ``demo-blue`` and ``demo-green`` environments have the following directory:
-
-::
-
-  $HOME/
-    ...
-    taler-shared (symlink to shared data directory between demo-green and demo-blue)
-
-The ``int`` and ``test`` environments instead have this additional directory:
-
-::
-
-  $HOME/
-    ...
-    taler-data/ (on-disk state of Taler components, public and private keys)
+On ``demo-blue`` and ``demo-green``, ``taler-data`` is a symlink pointing to ``$HOME/demo/shared-data``
+instead of a directory.
 
 
 Using envcfg.py
