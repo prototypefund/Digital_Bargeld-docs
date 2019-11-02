@@ -115,8 +115,8 @@ Receiving Payments
       // Was the payment refunded (even partially)
       refunded: boolean;
 
-      // Amount that was refunded
-      refund_amount: Amount;
+      // Amount that was refunded, only present if refunded is true.
+      refund_amount?: Amount;
 
       // Contract terms
       contract_terms: ContractTerms;
