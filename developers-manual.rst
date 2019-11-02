@@ -202,6 +202,8 @@ The ``envcfg.py`` for demo looks like this:
 
 Currently only the variables ``env`` and ``tag_${component}`` are used.
 
+When deploying to ``demo``, the ``envcfg.py`` should be committed to ``deployment.git/envcfg/envcfg-demo-YYYY-MM-DD-SS.py``.
+
 
 Bootstrapping an Environment
 ----------------------------
@@ -209,8 +211,7 @@ Bootstrapping an Environment
 .. code-block:: sh
 
   $ git clone https://git.taler.net/deployment.git ~/deployment
-  $ cp ~/deployment/envcfg.py.template ~/envcfg.py
-  $ $EDITOR ~/envcfg.py
+  $ cp ~/deployment/envcfg/$ENVCFGFILE ~/envcfg.py
   $ ./deployment/bin/taler-deployment bootstrap
   $ source ~/activate
   $ taler-deployment build
@@ -226,7 +227,8 @@ Upgrading an Existing Environment
 
   $ rm -rf ~/sources ~/local
   $ git -C ~/deployment pull
-  $ $EDITOR ~/envcfg.py
+  $ cp ~/deployment/envcfg/$ENVCFGFILE ~/envcfg.py
+  $ taler-deployment bootstrap
   $ taler-deployment build
   $ taler-deployment-keyup
   $ taler-deployment-sign
