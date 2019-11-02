@@ -5,6 +5,7 @@ Developer's Manual
    :hidden:
 
    checklist-release
+   checklist-demo-upgrade
 
 
 .. note::
@@ -111,108 +112,122 @@ user can be switched to become active (see next section), and vice versa.
 -  ``demo-blue``
 -  ``demo-green``
 
-Compile and switch color.
--------------------------
 
-If the setup is already bootstrapped, then it should only be needed to
-login as ’demo-X’ (with X being the inactive color); and then:
+Demo Upgrade Procedure
+======================
+
+Upgrading the ``demo`` environment should be done with care, and ideally be
+coordinated on the mailing list before.  It is our goal for ``demo`` to always
+run a "working version" that is compatible with various published wallets.
+
+Before deploying on ``demo``, the same version of all components **must**
+be deployed *and* tested on ``int``.
+
+Please use the :doc:`demo upgrade checklist <checklist-demo-upgrade>` to make
+sure everything is working.
+
+
+Tagging components
+------------------
+
+All Taler components must be tagged with git before they are deployed on the
+``demo`` environment, using a tag of the following form:
 
 ::
 
-   $ source activate
-   $ taler-deployment-build
+  demo-YYYY-MM-DD-SS
+  YYYY = year
+  MM = month
+  DD = day
+  SS = serial
 
-and then switch the color by logging in as the *demo* user, and switch
-the color with the following command:
+
+Environment Layout
+------------------
+
+Environments have the following layout:
 
 ::
 
-   $ taler-deployment-switch-demo-X
+  $HOME/
+    deployment (deployment.git checkout)
+    envcfg.py  (configuration of the Taler environment)
+    activate   (bash file, sourced to set environment variables)
+    logs/      (log files)
+    local/     (locally installed software)
+    sources/   (sources repos of locally build components)
+    sockets/   (unix domain sockets of running components)
+    .config/taler.conf (main Taler configuration file)
 
-Full bootstrap.
+Additionally, the ``demo-blue`` and ``demo-green`` environments have the following directory:
+
+::
+
+  $HOME/
+    ...
+    taler-shared (symlink to shared data directory between demo-green and demo-blue)
+
+The ``int`` and ``test`` environments instead have this additional directory:
+
+::
+
+  $HOME/
+    ...
+    taler-data/ (on-disk state of Taler components, public and private keys)
+
+
+Using envcfg.py
 ---------------
 
-In order to bootstrap a Taler installation under a empty home directory,
-do:
+The ``$HOME/envcfg.py`` file contains (1) the name of the environment and (2) the version
+of all components we build (in the form of a git rev).
 
-::
+The ``envcfg.py`` for demo looks like this:
 
-   $ cd $HOME
-   $ git clone git://git.taler.net/deployment
+.. code-block:: python
 
-Then run the prepare script that will (1) download all the repositories
-(2) build the codebases, (3) configure the system, and (4) generate the
-needed data.
+  env = "demo"
+  tag = "demo-2019-10-05-01:
+  tag_gnunet = tag
+  tag_libmicrohttpd = tag
+  tag_exchange = tag
+  tag_merchant = tag
+  tag_bank = tag
+  tag_twister = tag
+  tag_landing = tag
+  tag_donations = tag
+  tag_blog = tag
+  tag_survey = tag
+  tag_backoffice = tag
 
-::
+Currently only the variables ``env`` and ``tag_${component}`` are used.
 
-   $ ./deployment/bin/taler-deployment-prepare [test | int | demo]
 
-..
-
-   **Note**
-
-   If the DB schema of merchant/exchange/auditor changed, at this point
-   it MIGHT be necessary to reset all the tables. To this regard,
-   consider running one of the following commands:
-
-   ::
-
-      # To reset the merchant DB.
-      $ taler-merchant-dbinit -r
-
-      # To reset the exchange DB.
-      $ taler-exchange-dbinit -r
-
-      # To reset the exchange DB.
-      $ taler-auditor-dbinit -r
-
-If all the steps succeeded, then it should be possible to launch all the
-services. Give:
-
-::
-
-   $ taler-deployment-start
-
-   # or restart, if you want to kill old processes and
-   # start new ones.
-   $ taler-deployment-restart
-
-Verify that all services are up and running:
-
-::
-
-   $ taler-deployment-arm -I
-   $ tail logs/<component>-<date>.log
-
-How to upgrade the code.
-------------------------
-
-Some repositories, especially the ones from the released components,
-have a *stable* branch, that keeps older and more stable code.
-Therefore, upon each release we must rebase those stable branches on the
-master.
-
-The following commands do that:
+Bootstrapping an environment
+----------------------------
 
 .. code-block:: sh
 
-   $ cd $REPO
+  $ cd $HOME
+  $ git clone https://git.taler.net/deployment.git
+  $ $EDITOR ~/envcfg.py
+  $ ./deployment/bin/taler-deployment bootstrap
+  $ source ~/activate
+  $ taler-deployment build
+  $ taler-deployment-keyup
+  $ taler-deployment-sign
+  $ taler-deployment-start
 
-   $ git pull origin master stable
-   $ git checkout stable
 
-   # option a: resolve conflicts resulting from hotfixes
-   $ git rebase master
-   $ ...
+Switching demo colors
+---------------------
 
-   # option b: force stable to master
-   $ git update-ref refs/heads/stable master
+As the ``demo`` user, to switch to color ``${COLOR}``,
+run the following script from ``deployment/bin``:
 
-   $ git push # possibly with --force
+.. code-block:: sh
 
-   # continue development
-   $ git checkout master
+   $ taler-deployment-switch-demo-${COLOR}
 
 
 Environments and Builders on taler.net
