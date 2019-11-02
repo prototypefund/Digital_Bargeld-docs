@@ -130,6 +130,9 @@ Receiving Payments
       // URI that the wallet must process to complete the payment.
       taler_pay_uri: string;
 
+      // Alternative order ID which was paid for already in the same session.
+      // Only given if the same product was purchased before in the same session.
+      already_paid_order_id?: string;
     }
 
 
@@ -1122,4 +1125,53 @@ both by the user's browser and their wallet.
 
       // The order of the signatures matches the planchets list.
       reserve_sigs: EddsaSignature[];
+    }
+
+
+.. http:get:: /public/poll-payment
+
+  Check the payment status of an order.
+
+  **Request:**
+
+  :query order_id: order id that should be used for the payment
+  :query h_contract: hash of the contract (used to authenticate customer)
+  :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
+  :query timeout: *Optional*. Timeout in seconds to wait for a payment if the answer would otherwise be negative (long polling).
+
+  **Response:**
+
+  Returns a `PollPaymentResponse`, whose format can differ based on the status of the payment.
+
+  .. ts:def:: PollPaymentResponse
+
+    type CheckPaymentResponse = PollPaymentPaidResponse | PollPaymentUnpaidResponse
+
+  .. ts:def:: PollPaymentPaidResponse
+
+    interface PollPaymentPaidResponse {
+      // value is always true;
+      paid: boolean;
+
+      // Was the payment refunded (even partially)
+      refunded: boolean;
+
+      // Amount that was refunded, only present if refunded is true.
+      refund_amount?: Amount;
+
+    }
+
+  .. ts:def:: PollPaymentUnpaidResponse
+
+    interface PollPaymentUnpaidResponse {
+      // value is always false;
+      paid: boolean;
+
+      // URI that the wallet must process to complete the payment.
+      taler_pay_uri: string;
+
+      // Alternative order ID which was paid for already in the same session.
+      // Only given if the same product was purchased before in the same session.
+      already_paid_order_id?: string;
+
     }
