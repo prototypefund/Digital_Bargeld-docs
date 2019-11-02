@@ -509,7 +509,7 @@ Style
 
 We use `yapf <https://github.com/google/yapf>`_ to reformat the
 code to conform to our style instructions.
-A reusable yapf style file can be found in ``taler-build-scripts``,
+A reusable yapf style file can be found in ``build-common``,
 which is intended to be used as a git submodule.
 
 Python for Scripting
