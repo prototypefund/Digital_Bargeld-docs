@@ -119,7 +119,6 @@ HTTP API
 
         // RSA key hash.
         //
-        // A004 version requires hash type RIPEMD-160
         // A005, A005 versions require hash type SHA-256.
         hash: string;
       }
