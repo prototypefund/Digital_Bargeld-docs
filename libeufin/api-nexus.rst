@@ -83,7 +83,7 @@ Low-level EBICS API
   Get details about an EBICS subscriber.
 
 
-.. http:post:: <nexus>/ebics/subscriber/{id}/keyletter
+.. http:get:: <nexus>/ebics/subscriber/{id}/keyletter
 
   Get a nicely formatted key letter.  (Does not return JSON, but markdown-formatted text)
 
