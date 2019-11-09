@@ -98,6 +98,7 @@ Receiving Payments
 
   :query order_id: order id that should be used for the payment
   :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
+  :query timeout: *Optional*. Timeout in seconds to wait for a payment if the answer would otherwise be negative (long polling).
 
   **Response:**
 
