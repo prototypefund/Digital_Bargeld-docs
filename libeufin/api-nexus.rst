@@ -97,6 +97,10 @@ Low-level EBICS API
 
   Send HIA message to the EBICS host.
 
+.. http:get:: <nexus>/ebics/subscriber/{id}/sendHtd
+
+  Send HTD message to the EBICS host.
+
 .. http:post:: <nexus>/ebics/subscriber/{id}/sync
 
   Synchronize with the EBICS server.  Sends the HPB message
