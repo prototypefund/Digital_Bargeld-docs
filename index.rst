@@ -58,6 +58,7 @@ Documentation Overview
   taler-merchant-api-tutorial
   taler-bank-manual
   taler-backoffice-manual
+  taler-auditor-manual
   developers-manual.rst
   anastasis
   libeufin/index
