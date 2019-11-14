@@ -118,33 +118,9 @@ Receiving Terms of Service
       // maximum wallet database backup size supported
       storage_limit_in_megabytes: number;
 
-      // maximum number of sync requests per day (per account)
-      daily_sync_limit: number;
-
-      // how long after an account (or device) becomes dormant does the
-      // service expire the respective records?
-      inactive_expiration: RelativeTime;
-
       // Fee for an account, per year.
       annual_fee: Amount;
 
-    }
-
-
-.. http:get:: /salt
-
-  Obtain the salt used by the storage service.
-
-
-  **Response:**
-
-  Returns a `SaltResponse`.
-
-  .. ts:def:: SaltResponse
-
-    interface SaltResponse {
-      // salt value, at least 128 bits of entropy
-      salt: string;
     }
 
 
