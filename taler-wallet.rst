@@ -234,6 +234,19 @@ Pending Operations
 
   **Rendering**: The pending operation is rendered as "withdrawing digital cash".
 
+``pay``
+  Shown when a payment is in progress.
+
+  Details:
+
+  * ``amountPrice``: Price of the order that is being purchased
+  * ``amountEffectivePrice``: Effective price, including fees for refreshing *and*
+    coins that are too small to refresh.
+  * ``lastErrors``:  If present, contains the last error for every coin that is
+    part of this withdrawal operation.
+
+  **Rendering**: The pending operation is rendered as "paying".
+
 ``refresh``
   Shown when a refresh is in progress, either one that's manually forced, one
   after payment, or one after a refund.
