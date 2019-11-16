@@ -169,9 +169,8 @@ The following event types are available:
   A coin has been sent successfully to the merchant.
 
 ``pay-finished`` (Level 0)
-  An order has been paid for successfully.  Details:
-
-  * ``payType``: Can be ``initial`` or ``replay``
+  An order has been paid for successfully for the first time.
+  This event is not emitted for payment re-playing.
 
 ``refresh-started`` (Level 1)
   A refresh session (one or more coins) has been started.  Details:
