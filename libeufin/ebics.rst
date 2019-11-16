@@ -157,6 +157,9 @@ EBICS Glossary
   V001
     FTAM encryption algorithm ("Verschlüsselung"), superseeded in EBICS by E002.
 
+  E002
+    EBICS encryption process, used to encrypt the order payload.
+
   X002
     Identification and authentication signature in H004 and H005.
 
@@ -221,7 +224,7 @@ Relevant Order Types
    Download order types for which there is new data available.
 
   HTD
-   Type: Download, Optional 
+   Type: Download
 
    Download information about a subscriber.  From German "Teilnehmerdaten".
 
