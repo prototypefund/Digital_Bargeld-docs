@@ -240,10 +240,12 @@ Pending Operations
   Details:
 
   * ``amountPrice``: Price of the order that is being purchased
+  * ``coinsPaid``: Number of coins successfully submitted as payment.
+  * ``coinsPending``: Number of coins successfully submitted as payment.
   * ``amountEffectivePrice``: Effective price, including fees for refreshing *and*
     coins that are too small to refresh.
   * ``lastErrors``:  If present, contains the last error for every coin that is
-    part of this withdrawal operation.
+    part of this pay operation.
 
   **Rendering**: The pending operation is rendered as "paying".
 
