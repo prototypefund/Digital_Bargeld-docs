@@ -93,6 +93,9 @@ itself cannot not enforce these rules.
    database with a timestamp into the future, it must still
    increment it by the smallest possible amount when uploading an
    update.
+*  In general, the merge operation should be implemented in such a way
+   that it deals gracefully with adversarial devices from rouge
+   devices connected to the same account.
 
 It is assumed that the synchronization service is only ever accessed
 over TLS, and that the synchronization service is trusted to not build
@@ -121,12 +124,16 @@ Receiving Terms of Service
       // Fee for an account, per year.
       annual_fee: Amount;
 
+      // protocol version supported by the server,
+      // for now always "0.0".
+      version: Integer;
+
     }
 
 
 .. _sync:
 
-.. http:get:: /$ACCOUNT-KEY
+.. http:get:: /backups/$ACCOUNT-KEY
 
   Download latest version of the backup.
   The returned headers must include "Etags" based on
@@ -189,8 +196,8 @@ Receiving Terms of Service
 .. http:post:: /$ACCOUNT-KEY
 
   Upload a new version of the account's database, or download the
-  latest version.  The request must include the "Expect: 100 Continue"
-  header.  The client must wait for "100 Continue" before proceeding
+  latest version.  The request SHOULD include the "Expect: 100 Continue"
+  header.  The client then SHOULD wait for "100 Continue" before proceeding
   with the upload, regardless of the size of the upload.
 
   **Request**
