@@ -41,58 +41,58 @@ any version of the backup.  Still, except for the
 32 byte minimum upload size, the synchronization service
 itself cannot not enforce these rules.
 
-  *  First, the database should be compressed (i.e. gzip), then
-     padded to a power of 2 in kilobytes or a multiple of
-     megabytes, then encrypted and finally protected with
-     an HDKF.
-  *  The encryption should use an SHA-512 nonce which
-     is prefixed to the actual database, and combined with
-     the master key to create the encryption symmetric secret.
-     With every revision of the backup (but only real
-     revisions or merge operations), a fresh nonce must be
-     used to ensure that the symmetric secret differs every
-     time.  HKDFs are used to derive symmetric key material
-     for authenticated encryption (encrypt-then-mac or a
-     modern AEAD-cipher like Keccak).  Given that AES is more
-     easily available and will likey increase the code of
-     the wallet less, AES plus a SHA-512 HMAC should suffice
-     for now.
-  *  The client must enable merging databases in a way that is
-     associative and commutative.  For most activities, this implies
-     merging lists, applying expirations, dropping duplicates and
-     sorting the result.  For deletions (operations by which the user
-     removed records prior to their scheduled expiration), it means
-     keeping a summarizing log of all deletion operations and applying
-     the deletions after each merge.  A summarizing log of a deletion
-     operation would combine two deletion operations of the form
-     "delete all transactions smaller than amount X before time T" and
-     "delete all transactions smaller than amount Y before time T"
-     into "delete all transactions smaller than amount max(X,Y) before
-     time T".  Similar summarizations should be applied to all
-     deletion operations supported by the client.  Deletion operations
-     themselves are associated with an expiration time reflecting the
-     expiration of the longest lasting record that they explicitly
-     deleted.
-     Purchases do not have an expiration time, thus they create
-     a challenge if an indivdiual purchase is deleted. Thus, when
-     an individual purchase is deleted, the client is to keep track
-     of the deletion with a deletion record. The deletion record
-     still includes the purchase amount and purchase date.  Thus,
-     when purchases are deleted "in bulk" in a way that would have
-     covered the individual deletion, such deletion records may
-     still be subsumed by a more general deletion clause.  In addition
-     to the date and amount, the deletion record should only contain
-     a salted hash of the original purchase record's primary key,
-     so as to minimize information leakage.
-  *  The database should contain a "last modified" timestamp to ensure
-     we do not go backwards in time if the synchronization service is
-     malicious.  Merging two databases means taking the max of the
-     "last modified" timestamps, not setting it to the current time.
-     The client should reject a "fast forward" database update if the
-     result would imply going back in time.  If the client receives a
-     database with a timestamp into the future, it must still
-     increment it by the smallest possible amount when uploading an
-     update.
+*  First, the database should be compressed (i.e. gzip), then
+   padded to a power of 2 in kilobytes or a multiple of
+   megabytes, then encrypted and finally protected with
+   an HDKF.
+*  The encryption should use an SHA-512 nonce which
+   is prefixed to the actual database, and combined with
+   the master key to create the encryption symmetric secret.
+   With every revision of the backup (but only real
+   revisions or merge operations), a fresh nonce must be
+   used to ensure that the symmetric secret differs every
+   time.  HKDFs are used to derive symmetric key material
+   for authenticated encryption (encrypt-then-mac or a
+   modern AEAD-cipher like Keccak).  Given that AES is more
+   easily available and will likey increase the code of
+   the wallet less, AES plus a SHA-512 HMAC should suffice
+   for now.
+*  The client must enable merging databases in a way that is
+   associative and commutative.  For most activities, this implies
+   merging lists, applying expirations, dropping duplicates and
+   sorting the result.  For deletions (operations by which the user
+   removed records prior to their scheduled expiration), it means
+   keeping a summarizing log of all deletion operations and applying
+   the deletions after each merge.  A summarizing log of a deletion
+   operation would combine two deletion operations of the form
+   "delete all transactions smaller than amount X before time T" and
+   "delete all transactions smaller than amount Y before time T"
+   into "delete all transactions smaller than amount max(X,Y) before
+   time T".  Similar summarizations should be applied to all
+   deletion operations supported by the client.  Deletion operations
+   themselves are associated with an expiration time reflecting the
+   expiration of the longest lasting record that they explicitly
+   deleted.
+   Purchases do not have an expiration time, thus they create
+   a challenge if an indivdiual purchase is deleted. Thus, when
+   an individual purchase is deleted, the client is to keep track
+   of the deletion with a deletion record. The deletion record
+   still includes the purchase amount and purchase date.  Thus,
+   when purchases are deleted "in bulk" in a way that would have
+   covered the individual deletion, such deletion records may
+   still be subsumed by a more general deletion clause.  In addition
+   to the date and amount, the deletion record should only contain
+   a salted hash of the original purchase record's primary key,
+   so as to minimize information leakage.
+*  The database should contain a "last modified" timestamp to ensure
+   we do not go backwards in time if the synchronization service is
+   malicious.  Merging two databases means taking the max of the
+   "last modified" timestamps, not setting it to the current time.
+   The client should reject a "fast forward" database update if the
+   result would imply going back in time.  If the client receives a
+   database with a timestamp into the future, it must still
+   increment it by the smallest possible amount when uploading an
+   update.
 
 It is assumed that the synchronization service is only ever accessed
 over TLS, and that the synchronization service is trusted to not build
@@ -232,7 +232,7 @@ Receiving Terms of Service
      suggested is ``y`` for ``yes``.
      The client insists on making a payment for the respective
      account, even if this is not yet required. The server
-     will respond with a ``402 Payment required'', but only
+     will respond with a ``402 Payment required``, but only
      if the rest of the request is well-formed (account
      signature must match).  Clients that do not actually
      intend to make a new upload but that only want to pay
