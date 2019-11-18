@@ -126,14 +126,14 @@ Receiving Terms of Service
 
       // protocol version supported by the server,
       // for now always "0.0".
-      version: Integer;
+      version: string;
 
     }
 
 
 .. _sync:
 
-.. http:get:: /backups/$ACCOUNT-KEY
+.. http:get:: /backups/${ACCOUNT-KEY}
 
   Download latest version of the backup.
   The returned headers must include "Etags" based on
@@ -193,7 +193,7 @@ Receiving Terms of Service
     signature validation.
 
 
-.. http:post:: /$ACCOUNT-KEY
+.. http:post:: /backups/${ACCOUNT-KEY}
 
   Upload a new version of the account's database, or download the
   latest version.  The request SHOULD include the "Expect: 100 Continue"
