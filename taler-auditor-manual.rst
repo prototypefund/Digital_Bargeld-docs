@@ -40,27 +40,38 @@ to other parties.
 
 To perform this duty, you will need at least (read-only) access to the bank
 transactions of the exchange, as well as a continuously synchronized replica
-of the exchange's database.  Then, with the software provided, you can verify
-the cryptographic proofs collected by the exchange and detect if any improper
-bank transactions are made.  Naturally, as an auditor you do not have to limit
-yourself to this activity: auditing the source code, operational procedures,
-physical security and even checking the background of the individuals
-operating the exchange can be in-scope.  However, as those additional checks
-are not easily standardized, this manual only focuses on the audit of the
-exchange's database and wire transfers.
+of the exchange's database.
 
-Every auditor also needs to operate a Postgres database.  The data collected
-will include sensitive information about Taler users, including withdrawals
-made by consumers and income received by merchants.  As a result, the auditor
-is expected to provide high confidentiality for the database.  In general, the
-auditor does not have to offer high-availability: the exchange operator can
-continue operations without the auditor, and the auditor can catch up with it
-later when the auditor's systems are restored. However, of course any downtime
-would provide a window of opportunity for fraud and should thus be minimized.
-Finally, the auditor's copy of the exchange's database can be useful as a backup
-to the exchange in case the exchange experiences a loss of its own copies. Thus,
-business agreements between auditor and exchanges may include availability
-requirements as well.
+For this, every auditor needs to operate a Postgres database.  The data
+collected will include sensitive information about Taler users, including
+withdrawals made by consumers and income received by merchants.  As a result,
+the auditor is expected to provide high confidentiality for the database.  In
+general, the auditor does not have to offer high-availability: the exchange
+operator can continue operations without the auditor, and the auditor can
+catch up with it later when the auditor's systems are restored. However, of
+course any downtime would provide a window of opportunity for fraud and should
+thus be minimized.  Finally, the auditor's copy of the exchange's database can
+be useful as a backup to the exchange in case the exchange experiences a loss
+of its own copies. Thus, business agreements between auditor and exchanges may
+include availability requirements as well.
+
+Then, with the software provided, auditors can verify the cryptographic proofs
+collected by the exchange and detect if any improper bank transactions are
+made.  There are additional tasks which an auditor should perform.  While this
+manual only focuses on the audit of the exchange's database and wire transfers
+with the existing tools, a proper auditor should also perform the following
+tasks:
+
+- security audit of the source code
+- audit of the operational procedures of the exchange
+- audit of the physical security of the deployment
+- background check of the individuals operating the exchange
+- verification that the exchange properly implements the /link protocol
+  (feature yet to be implemented in common Taler wallets)
+- verification that the exchange properly reports coins issued during
+  the refresh protocol (by irregularly refreshing coins withdrawn by
+  the auditor and comparing against the exchange's database --- the
+  code required to support this is not yet implemented)
 
 
 Architecture overview
@@ -141,7 +152,7 @@ components:
    The report also includes figures on the losses of violations. Careful
    reading of the report is required, as not every detail in the report
    is necessarily indicative of a problem.
-   
+
 
 Installation
 ============
@@ -501,5 +512,77 @@ originate.  If some denominations remain operational, wallets will generally
 exchange old coins of revoked denominations for new coins -- while providing
 additional information to demonstrate that these coins were not forged from
 the compromised private key but obtained via a legitimate withdraw operation.
+
+
+
+Auditor implementation guide
+============================
+
+The auditor implementation is split into two main processes, taler-auditor and
+taler-wire-auditor.  The split was done to realize the principle of least
+priviledge, as the taler-wire-auditor must have (read-only) access to the
+exchange's bank account, while the taler-auditor only needs access to the
+database.
+
+Both programs basically start their audit from a certain transaction
+index (BIG SERIAL) in the auditor database which identifies where the
+last audit concluded. They then check that the transactions claimed in
+the exchange's database match up internally, including the cryptographic
+signatures and also with respect to amounts adding up. The auditor also
+calculates the exchange's profits and expected bank balances.  Once all
+existing transactions are processed, the auditor processes store the current
+checkpoint in its database and generate a JSON report.
+
+A separate script and Jinja2-TeX template are used to convert JSON reports
+into latex and then PDF.
+
+
+The auditor's database
+----------------------
+
+The database scheme used by the exchange look as follows:
+
+.. image:: auditor-db.png
+
+
+Testing the auditor
+-------------------
+
+The main objective of the auditor is to detect inconsistencies. Thus, the
+test-auditor.sh script deliberately introduces various inconsistencies into
+a synthetic exchange database.  For this, an "normal" exchange database is
+first generated using the taler-wallet-cli.  Then, various fields or rows
+of that database are manipulated, and the auditor is let loose on the modified
+database.  Afterwards, the test verifies that the JSON contains values
+indicating that the auditor found the inconsistencies.  The script also
+verifies that template expansion and LaTeX run work for the JSON output,
+but it does not verify the correctness of the final PDF.
+
+The test-auditor.sh script is written to maximize code coverage: it should
+cover as many code paths as possible in both the exchange and the auditor.  It
+should also ideally create all interesting possible variations of the exchange
+database fields (within the constraints of the database schema).
+
+.. TODO
+
+   The current code coverage is known to be inadequate,
+   as refunds and paybacks could not yet been tested due
+   to limitations of the CLI wallet.
+
+In general, test-auditor.sh runs the tests against an "old" database where
+some transactions are past the due-date (and hence the aggregator would trigger
+wire transfers), as well as a freshly generated exchange database where the
+auditor would not perform any transfers.  Auditor interactions can be made
+before or after the aggregator, depending on what is being tested.
+
+The current script also rudimentarily tests the auditor's resume logic,
+by re-starting the auditor once against a database that the auditor has
+already seen.
+
+.. TODO
+
+   More extensive auditor testing where additional transactions
+   have been made against the database when the audit is being resumed
+   should be done in the future.
 
 
