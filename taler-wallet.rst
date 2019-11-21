@@ -112,6 +112,15 @@ verbosity level ``<=`` the queried level are returned.
 
 The following event types are available:
 
+``exchange-added``
+  Emitted when an exchange has ben added to the wallet.
+
+``exchange-update-started``
+  Emitted when updating an exchange has started.
+
+``exchange-update-finished``
+  Emitted when updating an exchange has started.
+
 ``reserve-created`` (Level 1)
   A reserve has been created.  Contains the following detail fields:
 
@@ -199,6 +208,10 @@ The following event types are available:
 Pending Operations
 ------------------
 
+
+``exchange-update``:
+  Shown when exchange information (``/keys`` and ``/wire``) is being updated.
+
 ``reserve``:
   Shown when a reserve has been created (manually or via dereferencing a ``taler://withdraw`` URI),
   but the reserve has not been confirmed yet.
@@ -267,3 +280,8 @@ Pending Operations
   **Rendering**: The pending operation is rendered as "fetching change", optionally
   with "(after manual request)", "(after payment") or "(after refund)".
 
+``refund``
+  Shown when a merchant's refund permission is handed to the exchange.
+
+``tip``
+  Shown when a tip is being picked up from the merchant
