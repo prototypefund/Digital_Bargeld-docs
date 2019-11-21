@@ -315,9 +315,12 @@ withdraw digital coins using the corresponding private key.  All incoming and
 outgoing transactions are recorded under the corresponding public key by the
 exchange.
 
-  .. note::
+.. note::
 
-     Eventually the exchange will need to advertise a policy for how long it will keep transaction histories for inactive or even fully drained reserves.  We will therefore need some additional handler similar to ``/keys`` to advertise those terms of service.
+   Eventually the exchange will need to advertise a policy for how long it will
+   keep transaction histories for inactive or even fully drained reserves.  We
+   will therefore need some additional handler similar to ``/keys`` to
+   advertise those terms of service.
 
 
 .. http:get:: /reserve/status
