@@ -215,6 +215,7 @@ Bootstrapping an Environment
   $ ./deployment/bin/taler-deployment bootstrap
   $ source ~/activate
   $ taler-deployment build
+  $ taler-deployment-config-generate
   $ taler-deployment-keyup
   $ taler-deployment-sign
   $ taler-deployment-start
