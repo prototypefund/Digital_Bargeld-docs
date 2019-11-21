@@ -72,7 +72,7 @@ Low-level EBICS API
 
   .. ts:def:: NexusEbicsBackupResponse
     
-    interface NexusEbicsBackupRequest {
+    interface NexusEbicsBackupResponse {
       
       // The three passphrase-protected private keys in the PKCS#8 format
 
