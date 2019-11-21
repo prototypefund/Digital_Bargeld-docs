@@ -29,7 +29,7 @@ login.
 Code Repositories
 -----------------
 
-Taler code is versioned via Git. For those users without write access, all the
+Taler code is versioned with Git. For those users without write access, all the
 codebases are found at the following URL:
 
 ::
@@ -45,12 +45,12 @@ Committing code
 
 To obtain Git access, you need to send us your SSH public key.  You can
 find instructions on how to do so in the `Git book <https://git-scm.com/book/en/v2/Git-on-the-Server-Generating-Your-SSH-Public-Key>`_.
-If you have been granted write access, you fist of all must change the URL of
+If you have been granted write access, you first of all must change the URL of
 the respective repository to:
 
 ::
 
-   git://git@git.taler.net/<repository>
+   ssh://git@git.taler.net/<repository>
 
 For an existing checkout, this can be done by editing the ``.git/config`` file.
 
@@ -84,6 +84,18 @@ least on your own system. However, we all make mistakes and you should expect
 to receive friendly reminders if your change did not live up to this simple
 standard.  We plan to move to a system where the CI guarantees this invariant
 in the future.
+
+In order to keep a linear and clean commits history, we advise to avoid
+merge commits and instead always rebase your changes before pushing to
+the master branch.  If you commit and later find out that new commits were
+pushed, the following command will pull the new commits and rebase yours
+on top of them.
+  
+::
+
+   # -S instructs Git to (re)sign your commits
+   $ git pull --rebase -S 
+
 
 
 Taler Deployment on gv.taler.net
