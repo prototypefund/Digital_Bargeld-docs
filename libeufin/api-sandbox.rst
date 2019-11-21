@@ -5,17 +5,17 @@ Sandbox API
 Entities
 ========
 
-Customer
-  ...
-
 Bank Account
   ...
+
+EBICS Host
 
 EBICS Subscriber
   ...
 
+EBICS Partner
+  ...
 
-Assumption for sandbox:  One customer corresponds to exactly one EBICS subscriber.
 
 
 HTTP API

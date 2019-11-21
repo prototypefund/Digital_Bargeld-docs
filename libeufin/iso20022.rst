@@ -1,0 +1,39 @@
+ISO 20022
+#########
+
+ISO 20022 is the standard that defines many XML messages for FinTech.  It is
+very general, and often countries/orgs define subsets (TVS, technical
+validation subset) of the schema.
+
+
+Cash Management (camt)
+======================
+
+camt.052: Bank to Customer Account Report
+-----------------------------------------
+
+* pending and booked transaction
+
+Schema versions:
+
+* GLS uses camt.052.001.02
+
+.. code-block:: none
+
+  + Document/BkToCstmrAcctRpt
+  ++ GroupHeader [1..1]
+  ++ Report [1..*]
+  +++ Account [1..1]
+  +++ Balance [1..*]
+  +++ Entry [1..*]
+  ++++ Amount [1..1]
+  ++++ Status [1..1]
+  ++++ EntryDetails [1..1]
+
+
+camt.053: Bank to Customer Statement
+------------------------------------
+
+* only booked transactions
+* only for the last day (?)
+
