@@ -57,6 +57,53 @@ Bank Account Management
 Low-level EBICS API
 -------------------
 
+.. http:put:: <nexus>/ebics/subscribers/{id}/backup
+  
+  Ask the server to export the three keys, protected with passphrase.
+
+  .. ts:def:: NexusEbicsBackupRequest
+    
+    interface NexusEbicsBackupRequest {
+    
+      passphrase: string;
+
+    }
+
+
+  .. ts:def:: NexusEbicsBackupResponse
+    
+    interface NexusEbicsBackupRequest {
+      
+      // The three passphrase-protected private keys in the PKCS#8 format
+
+      authBlob: binary;
+      encBlob: binary;
+      sigBlob: binary;
+    }
+
+
+.. http:post:: <nexus>/ebics/subscribers/{id}/restoreBackup
+  
+  Ask the server to restore the keys.
+
+  .. ts:def:: NexusEbicsRestoreBackupRequest
+
+    interface NexusEbicsRestoreBackupRequest {
+      
+      // passphrase to decrypt the keys
+      passphrase: string;
+
+      // The three passphrase-protected private keys in the PKCS#8 format
+      authBlob: binary;
+      encBlob: binary;
+      sigBlob: binary;
+    }
+
+
+
+
+  .. ts:def:: NexusEbicsCreateSubscriber
+
 .. http:post:: <nexus>/ebics/subscribers
 
   Create a new subscriber.  Create keys for the subscriber that
