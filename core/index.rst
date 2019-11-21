@@ -38,3 +38,4 @@ interfaces between the core components of Taler.
   wireformats
   api-sync
   taler-uri
+  errors
