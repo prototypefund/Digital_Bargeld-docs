@@ -218,6 +218,8 @@ Bootstrapping an Environment
   $ taler-deployment-config-generate
   $ taler-deployment-keyup
   $ taler-deployment-sign
+  $ taler-exchange-dbinit -r
+  $ taler-merchant-dbinit -r
   $ taler-deployment-start
 
 
