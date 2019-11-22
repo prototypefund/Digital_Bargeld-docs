@@ -57,7 +57,7 @@ Bank Account Management
 Low-level EBICS API
 -------------------
 
-.. http:put:: <nexus>/ebics/subscribers/{id}/backup
+.. http:post:: <nexus>/ebics/subscribers/{id}/backup
   
   Ask the server to export the three keys, protected with passphrase.
 
