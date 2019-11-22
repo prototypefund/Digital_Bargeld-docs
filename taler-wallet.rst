@@ -16,6 +16,7 @@ Building from source
 .. code-block:: sh
 
   $ git clone https://git.taler.net/wallet-core.git
+  $ ./bootstrap
   $ cd wallet-core
   $ ./configure --prefix=$INSTALL_PREFIX
   $ make && make install
