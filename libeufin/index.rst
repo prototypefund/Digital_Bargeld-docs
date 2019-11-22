@@ -10,3 +10,4 @@ LibEuFin is a project providing free software tooling for European FinTech.
   architecture
   api-sandbox
   api-nexus
+  iso20022
