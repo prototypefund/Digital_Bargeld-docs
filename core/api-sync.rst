@@ -405,3 +405,12 @@ $SYNC-PATH the (usually empty) path.  By putting the private key after
 "#", we may succeed in disclosing the value even to eager Web-ish
 interpreters of URLs.  Note that the actual synchronization service
 must use the HTTPS protocol, which means we can leave out this prefix.
+
+
+---------------------------
+Web Security Considerations
+---------------------------
+
+To ensure that the Taler Web extension (and others) can access the
+service despite Web "security", all service endpoints must set the
+"Access-Control-Allow-Origin: *".
