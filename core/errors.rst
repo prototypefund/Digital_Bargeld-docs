@@ -66,3 +66,14 @@ Error Conditions
   The wallet encountered a programming bug that should be reported to the developers.
 
   **Handling**:  The wallet should allow the user to report this bug to the wallet developers.
+
+
+End-To-End Testing Scenarios
+============================
+
+This section describes some advanced end-to-end testing scenarios that should
+eventually be covered by our tests.
+
+* Reserve is created, closed, and then money is sent again to the reserve
+
+* Amount from payback should end up in customer's account again

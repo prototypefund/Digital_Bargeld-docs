@@ -37,9 +37,9 @@ The following is a minimal example for a payment request from the demo merchant,
   taler://pay/backend.demo.taler.net/-/-/2019.08.26-ABCED
 
 
------------
-Withdrawing
------------
+------------------------
+Withdrawing (Initiation)
+------------------------
 
 .. code:: none
 
@@ -52,6 +52,22 @@ Example:
 .. code:: none
 
   'taler://withdraw/bank.taler.net/-/ABDE123
+
+--------------------------
+Withdrawing (Confirmation)
+--------------------------
+
+.. code:: none
+
+  'taler://notify-reserve/' [ reserve-pub ]
+
+Notify the wallet that the status of a reserve has changed.  Used
+by the bank to indicate that the withdrawal has been confirmed by the
+user (e.g. via 2FA / mTAN / ...).  The wallet the re-checks the
+status of all unconfirmed reserves.
+
+Optionally, ``reserve-pub`` can be specified to also indicate the reserve that
+has been updated.
 
 
 -------------------------
