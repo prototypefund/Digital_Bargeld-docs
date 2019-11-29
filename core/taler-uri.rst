@@ -70,6 +70,14 @@ Optionally, ``reserve-pub`` can be specified to also indicate the reserve that
 has been updated.
 
 
+-------
+Refunds
+-------
+
+.. code:: none
+
+  'taler://refund/' merchant-host '/' merchant-public-prefix '/' merchant-instance  '/' order-id
+
 -------------------------
 Low-level Reserve Actions
 -------------------------
