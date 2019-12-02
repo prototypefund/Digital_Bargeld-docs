@@ -620,10 +620,69 @@ To change these settings, edit the following values in section
    ``taler-exchange-keyup`` will generate a quantity of signing keys
    which is sufficient to cover all the gap.
 
+
+Terms of Service
+----------------
+
+The exchange has an endpoint "/terms" to return the terms of service
+(in legal language) of the exchange operator.  The wallet will show
+those terms of service to the user when the user is first withdrawing
+coins.  Terms of service are optional for experimental deployments,
+if none are configured, the exchange will return a simple statement
+saying that there are no terms of service available.
+
+To configure the terms of service response, there are two options
+in the [exchange] section:
+
+-   TERMS_ETAG: The current "Etag" to return for the terms of service.
+    This value must be changed whenever the terms of service are
+    updated. A common value to use would be a version number.
+    Note that if you change the TERMS_ETAG, you MUST also provide
+    the respective files in TERMS_DIR (see below).
+-   TERMS_DIR: The directory that contains the terms of service.
+    The files in the directory must be readable to the exchange
+    process.
+
+The TERMS_DIR directory structure must follow a particular layout.
+First, inside of TERMS_DIR, there should be sub-directories using
+two-letter language codes like "en", "de", or "jp".  Each of these
+directories would then hold translations of the current terms of
+service into the respective language.  Empty directories are
+permitted in case translations are not available.
+
+Then, inside each language directory, files with the name of the
+value set as the TERMS_ETAG must be provided. The extension of
+each of the files should be typical for the respective mime type.
+The set of supported mime types is currently hard-coded in the
+exchange, and includes HTML, PDF and TXT files. If other files are
+present, the exchange may show a warning on startup.
+
+Example
+~~~~~~~
+
+A sample file structure for a TERMS_ETAG of "v1" would be:
+
+-   TERMS_DIR/en/v1.txt
+-   TERMS_DIR/en/v1.html
+-   TERMS_DIR/en/v1.pdf
+-   TERMS_DIR/de/v1.txt
+-   TERMS_DIR/de/v1.html
+-   TERMS_DIR/de/v1.pdf
+-   TERMS_DIR/fr/v1.pdf
+
+If the user requests an HTML with language preferences "fr" followed by "en",
+the exchange would return "TERMS_DIR/en/v1.html" lacking an HTML version in
+French.
+
+
 .. _Deployment:
 
 Deployment
 ==========
+
+This chapter describes how to deploy the exchange once it has been
+properly configured.
+
 
 .. _Keys-generation:
 
@@ -865,4 +924,3 @@ TALER_SIGNATURE_AUDITOR_EXCHANGE_KEYS purpose.
 
 .. [3]
    https://api.taler.net/api-exchange.html#wire-req
-

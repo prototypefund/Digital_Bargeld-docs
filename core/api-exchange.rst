@@ -41,6 +41,22 @@ hard-coded into the wallet as they are the trust anchors for Taler; (3)
 possibly by using HTTPS.
 
 
+.. http:get:: /terms
+
+  Get the terms of service of the exchange.
+  The exchange will consider the "Accept" and "Accept-Language" and
+  "Accept-Encoding" headers when generating a response. Specifically,
+  it will try to find a response with an acceptable mime-type, then
+  pick the version in the most preferred language of the user, and
+  finally apply compression if that is allowed by the client and
+  deemed beneficial.
+
+  The exchange will set an "Etag", and subsequent requests of the
+  same client should provide the tag in an "If-None-Match" header
+  to detect if the terms of service have changed.  If not, a
+  "204 Not Modified" response will be returned.
+
+
 .. http:get:: /keys
 
   Get a list of all denomination keys offered by the bank,
