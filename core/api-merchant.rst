@@ -821,6 +821,25 @@ The contract terms must have the following structure:
       // in this field when the proposal is generated.
       nonce: string;
 
+      // Specifies for how long the wallet should try to get an
+      // automatic refund for the purchase. If this field is
+      // present, the wallet should wait for a few seconds after
+      // the purchase and then automatically attempt to obtain
+      // a refund.  The wallet should probe until "delay"
+      // after the payment was successful (i.e. via long polling
+      // or via explicit requests with exponential back-off).
+      //
+      // In particular, if the wallet is offline
+      // at that time, it MUST repeat the request until it gets
+      // one response from the merchant after the delay has expired.
+      // If the refund is granted, the wallet MUST automatically
+      // recover the payment.  This is used in case a merchant
+      // knows that it might be unable to satisfy the contract and
+      // desires for the wallet to attempt to get the refund without any
+      // customer interaction.  Note that it is NOT an error if the
+      // merchant does not grant a refund.
+      auto_refund?: RelativeTime;
+
       // Extra data that is only interpreted by the merchant frontend.
       // Useful when the merchant needs to store extra information on a
       // contract without storing it separately in their database.
