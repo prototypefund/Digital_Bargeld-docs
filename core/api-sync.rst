@@ -212,15 +212,13 @@ Receiving Terms of Service
   for example due to concurrent activities from other accounts on the
   same account!
 
-  The request must also include an "Sync-Signature" signing
+  The request MUST also include an "Sync-Signature" signing
   the "If-Match" SHA-512 value and the SHA-512 hash of the body with
   the account private key.
 
-  Finally, the SHA-512 hash of the body must also be given in an
-  "Etag" header of the request (so that the signature can be verified
-  before the upload is allowed to proceed).  We note that the use
-  of "ETag" in HTTP requests is non-standard, but in this case
-  logical.
+  Finally, the SHA-512 hash of the body MUST also be given in an
+  "If-None-Match" header of the request (so that the signature can be verified
+  before the upload is allowed to proceed).
 
   The uploaded body must have at least 32 bytes of payload (see
   suggested upload format beginning with an ephemeral key).
