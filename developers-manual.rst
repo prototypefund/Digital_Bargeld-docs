@@ -100,17 +100,54 @@ on top of them.
    $ git pull --rebase -S
 
 
+Observing changes
+-----------------
+
+Every commit to the master branch of any of our public repositories
+(and almost all are public) is automatically sent to the
+gnunet-svn@gnu.org mailinglist.  That list is for Git commits only,
+and must not be used for discussions. It also carries commits from
+our main dependencies, namely GNUnet and GNU libmicrohttpd.  While
+it can be high volume, the lists is a good way to follow overall
+development.
+
+
+Communication
+-------------
+
+We use the #taler channel on the Freenode IRC network and the taler@gnu.org
+public mailinglist for discussions.  Not all developers are active on IRC, but
+all developers should probably subscribe to the low-volume Taler mailinglist.
+There are separate low-volume mailinglists for gnunet-developers (@gnu.org)
+and for libmicrohttpd (@gnu.org).
+
 
 Taler Deployment on gv.taler.net
 ================================
 
 This section describes the GNU Taler deployment on ``gv.taler.net``.
+``gv`` is our server at BFH. It hosts the Git repositories, Web sites,
+CI and other services.  Developers can receive an SSH account and
+e-mail alias for the system.  As with Git, ask your primary team
+contact for shell access if you think you need it.
+
+Our old server, ``tripwire``, is currently offline and will likely
+go back online to host ``production`` systems for operating real
+Taler payments at BFH in the future.
+
+DNS
+---
+
+DNS records for taler.net are controlled by the GNU Taler
+maintainers, specifically Christian and Florian. If you
+need a sub-domain to be added, please contact one of them.
+
 
 User Acccounts
 --------------
 
-On ``gv.taler.net``, there are four users that are set up to serve Taler on
-the internet:
+On ``gv.taler.net``, there are four system users that are set up to
+serve Taler on the Internet:
 
 -  ``taler-test``: serves ``*.test.taler.net`` and gets automatically
    built by Buildbot.
