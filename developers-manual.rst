@@ -43,8 +43,11 @@ A complete list of all the existing repositories is currently found at
 Committing code
 ---------------
 
-To obtain Git access, you need to send us your SSH public key.  You can
-find instructions on how to do so in the `Git book <https://git-scm.com/book/en/v2/Git-on-the-Server-Generating-Your-SSH-Public-Key>`_.
+To obtain Git access, you need to send us your SSH public key. Most core
+team members have administrative Git access, so simply contact whoever
+is your primary point of contact so far. You can
+find instructions on how to generate an SSH key
+in the `Git book <https://git-scm.com/book/en/v2/Git-on-the-Server-Generating-Your-SSH-Public-Key>`_.
 If you have been granted write access, you first of all must change the URL of
 the respective repository to:
 
@@ -90,11 +93,11 @@ merge commits and instead always rebase your changes before pushing to
 the master branch.  If you commit and later find out that new commits were
 pushed, the following command will pull the new commits and rebase yours
 on top of them.
-  
+
 ::
 
    # -S instructs Git to (re)sign your commits
-   $ git pull --rebase -S 
+   $ git pull --rebase -S
 
 
 
@@ -466,7 +469,7 @@ Continuous integration
 
 CI is done with Buildbot (https://buildbot.net/), and builds are
 triggered by the means of Git hooks. The results are published at
-``https://buildbot.wild.gv.taler.net/``.
+``https://buildbot.taler.net/``.
 
 In order to avoid downtimes, CI uses a "blue/green" deployment
 technique. In detail, there are two users building code on the system,
@@ -491,7 +494,7 @@ then published at ``https://lcov.taler.net/``.
 Coding Conventions
 ==================
 
-GNU Taler is developed primarily in C, Python and TypeScript.
+GNU Taler is developed primarily in C, Kotlin, Python and TypeScript.
 
 Components written in C
 -----------------------
@@ -588,6 +591,13 @@ When shell scripts are used, they ``MUST`` begin with the following ``set`` comm
   # Make the shell fail on undefined variables and
   # commands with non-zero exit status.
   set -eu
+
+Kotlin
+------
+
+We so far have no specific guidelines, please follow best practices
+for the language.
+
 
 Python
 ------
