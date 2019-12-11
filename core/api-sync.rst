@@ -260,15 +260,15 @@ Receiving Terms of Service
   :status 400 Bad request:
     Most likely, the uploaded body is too short (less than 32 bytes).
 
-  :status 401 Unauthorized:
-    The signature is invalid or missing (or body does not match).
-
   :status 402 Payment required:
     The synchronization service requires payment before the
     account can continue to be used.  The fulfillment URL
     should be the /$ACCOUNT-KEY URL, but can be safely ignored
     by the client.  The contract should be shown to the user
     in the canonical dialog, possibly in a fresh tab.
+
+  :status 403 Forbidden:
+    The signature is invalid or missing (or body does not match).
 
   :status 409 Conflict:
     The server has a more recent version than what is given
