@@ -43,6 +43,14 @@ A complete list of all the existing repositories is currently found at
 Committing code
 ---------------
 
+Before you can obtain Git write access, you must sign the copyright
+agreement. As we collaborate closely with GNUnet, we use their
+copyright agreement -- with the understanding that your contributions
+to GNU Taler are included in the assignment.  You can find the
+agreement on the `GNUnet site <https://gnunet.org/en/copyright.html>`_.
+Please sign and mail it to Christian Grothoff as he currently collects
+all the documents for GNUnet e.V. 
+
 To obtain Git access, you need to send us your SSH public key. Most core
 team members have administrative Git access, so simply contact whoever
 is your primary point of contact so far. You can
