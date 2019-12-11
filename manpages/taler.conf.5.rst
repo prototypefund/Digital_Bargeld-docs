@@ -90,6 +90,24 @@ LOOKAHEAD_PROVIDE
    How long into the future do we provide signing and denomination keys
    to clients?
 
+TERMS_DIR
+   Directory where the terms of service of the exchange operator can be fund. The directory must contain sub-directories for every supported language, using the two-character language code in lower case, i.e. "en/" or "fr/".  Each subdirectory must then contain files with the terms of service in various formats.  The basename of the file of the current policy must be specified under TERMS_ETAG.  The extension defines the mime type. Supported extensions include "html", "htm", "txt", "pdf", "jpg", "jpeg", "png" and "gif".  For example, using a TERMS_ETAG of "0", the structure could be the following:
+   - $TERMS_DIR/en/0.pdf
+   - $TERMS_DIR/en/0.html
+   - $TERMS_DIR/en/0.txt
+   - $TERMS_DIR/fr/0.pdf
+   - $TERMS_DIR/fr/0.html
+   - $TERMS_DIR/de/0.txt
+
+TERMS_ETAG
+   Basename of the file(s) in the TERMS_DIR with the current terms of service.  The value is also used for the "Etag" in the HTTP request to control caching. Whenever the terms of service change, the TERMS_ETAG MUST also change, and old values MUST NOT be repeated.  For example, the date or version number of the terms of service SHOULD be used for the Etag.  If there are minor (i.e. spelling) fixes to the terms of service, the TERMS_ETAG probably SHOULD NOT be changed. However, whenever users must approve the new terms, the TERMS_ETAG MUST change.
+
+PRIVACY_DIR
+   Works the same as TERMS_DIR, just for the privacy policy.
+PRIVACY_ETAG
+   Works the same as TERMS_ETAG, just for the privacy policy.
+
+   
 EXCHANGE POSTGRES BACKEND DATABASE OPTIONS
 ------------------------------------------
 
