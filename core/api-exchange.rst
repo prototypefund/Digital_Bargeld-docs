@@ -56,6 +56,25 @@ possibly by using HTTPS.
   to detect if the terms of service have changed.  If not, a
   "204 Not Modified" response will be returned.
 
+  If the "Etag" is missing, the client should not cache the response and instead prompt the user again at the next opportunity. This is usually only the case if the terms of service were not configured correctly.
+
+
+  .. http:get:: /privacy
+
+  Get the privacy policy of the exchange.
+  The exchange will consider the "Accept" and "Accept-Language" and
+  "Accept-Encoding" headers when generating a response. Specifically,
+  it will try to find a response with an acceptable mime-type, then
+  pick the version in the most preferred language of the user, and
+  finally apply compression if that is allowed by the client and
+  deemed beneficial.
+
+  The exchange will set an "Etag", and subsequent requests of the
+  same client should provide the tag in an "If-None-Match" header
+  to detect if the privacy policy has changed.  If not, a
+  "204 Not Modified" response will be returned.
+
+  If the "Etag" is missing, the client should not cache the response and instead prompt the user again at the next opportunity. This is usually only the case if the privacy policy was not configured correctly.
 
 .. http:get:: /keys
 
