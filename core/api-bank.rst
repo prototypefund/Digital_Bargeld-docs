@@ -314,7 +314,7 @@ Querying Transactions
 
   Transactions are identified by an opaque string identifier, referred to here
   as "row ID".  The semantics of the row ID (including its sorting order) are
-  up to the bank server to determine completely opaque to the client.
+  determined by the bank server and completely opaque to the client.
 
   The list of returned transactions is determined by a row ID *starting point*
   and a signed non-zero integer *delta*:
