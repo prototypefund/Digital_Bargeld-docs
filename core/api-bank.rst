@@ -21,10 +21,17 @@
 Bank API
 =========
 
-This API provides programmatic user registration at the bank.
+.. contents:: Table of Contents
+
+
+-------
+Testing
+-------
 
 .. _bank-register:
 .. http:post:: /register
+
+  This API provides programmatic user registration at the bank.
 
   **Request** The body of this request must have the format of a
   `BankRegistrationRequest`.
@@ -55,62 +62,73 @@ This API provides programmatic user registration at the bank.
     password: string;
   }
 
+-----------
+Withdrawing
+-----------
 
-This API provides programmatic withdrawal of cash via Taler to all the
-users registered at the bank.  It triggers a wire transfer from the client
-bank account to the exchange's.
 
 .. _bank-withdraw:
 .. http:post:: /taler/withdraw
 
-**Request** The body of this request must have the format of a `BankTalerWithdrawRequest`.
+  This API provides programmatic withdrawal of cash via Taler to all the
+  users registered at the bank.  It triggers a wire transfer from the client
+  bank account to the exchange's.
 
-**Response**
+  **Request** The body of this request must have the format of a `BankTalerWithdrawRequest`.
 
-:status 200 OK: The withdrawal was correctly initiated, therefore the exchange received the payment.  A `BankTalerWithdrawResponse` object is returned.
-:status 406 Not Acceptable: the user does not have sufficient credit to fulfill their request.
-:status 404 Not Found: The exchange wire details did not point to any valid bank account.
+  **Response**
 
-**Details**
+  :status 200 OK:
+    The withdrawal was correctly initiated, therefore the exchange received the
+    payment.  A `BankTalerWithdrawResponse` object is returned.
+  :status 406 Not Acceptable: the user does not have sufficient credit to fulfill their request.
+  :status 404 Not Found: The exchange wire details did not point to any valid bank account.
 
-.. ts:def:: BankTalerWithdrawRequest
+  **Details**
 
-  interface BankTalerWithdrawRequest {
+  .. ts:def:: BankTalerWithdrawRequest
 
-    // Authentication method used
-    auth: BankAuth;
-  
-    // Amount to withdraw.
-    amount: Amount;
+    interface BankTalerWithdrawRequest {
 
-    // Reserve public key.
-    reserve_pub: string;
+      // Authentication method used
+      auth: BankAuth;
+    
+      // Amount to withdraw.
+      amount: Amount;
 
-    // Exchange bank details specified in the 'payto'
-    // format.  NOTE: this field is optional, therefore
-    // the bank will initiate the withdrawal with the
-    // default exchange, if not given.
-    exchange_wire_details: string;
-  }
+      // Reserve public key.
+      reserve_pub: string;
 
-.. ts:def:: BankTalerWithdrawResponse
+      // Exchange bank details specified in the 'payto'
+      // format.  NOTE: this field is optional, therefore
+      // the bank will initiate the withdrawal with the
+      // default exchange, if not given.
+      exchange_wire_details: string;
+    }
 
-  interface BankTalerWithdrawResponse {
+  .. ts:def:: BankTalerWithdrawResponse
 
-    // Sender account details in 'payto' format.
-    sender_wire_details: string;
+    interface BankTalerWithdrawResponse {
 
-    // Exchange base URL.  Optional: only returned
-    // if the user used the default exchange.
-    exchange_url: string;
-  }
+      // Sender account details in 'payto' format.
+      sender_wire_details: string;
 
-This API allows one user to send money to another user, within the same "test"
-bank.  The user calling it has to authenticate by including his credentials in the
-request.
+      // Exchange base URL.  Optional: only returned
+      // if the user used the default exchange.
+      exchange_url: string;
+    }
+
+---------------------------------
+Making and Rejecting Transactions
+---------------------------------
 
 .. _bank-deposit:
 .. http:post:: /admin/add/incoming
+
+  This API allows one user to send money to another user, within the same "test"
+  bank.  The user calling it has to authenticate by including his credentials in the
+  request.
+
 
   **Request:** The body of this request must have the format of a `BankDepositRequest`.
 
@@ -242,6 +260,11 @@ request.
   :status 404 Not Found: The bank does not know this rowid for this account.
 
 
+---------------------
+Querying Transactions
+---------------------
+
+
 .. http:get:: /history-range
 
   Filters and returns the list of transactions in the time range specified by
@@ -284,78 +307,95 @@ request.
 
 .. http:get:: /history
 
-  Filters and returns the list of transactions of the customer specified in the request.
+  Filters and returns the list of transactions for the bank account of the
+  customer specified in the request.  Clients must provide authentication
+  information via the ``X-Taler-Bank-Username`` and ``Taler-Bank-Password``
+  headers.
+
+  The list of returned transactions is determined by a row ID *starting point*
+  and a signed non-zero integer *delta*:
+
+  * If *delta* is positive, return a list of up to *delta* transactions (all matching
+    the filter criteria) strictly **after** the starting point.  The transactions are sorted
+    in **ascending** order of the row ID.
+  * If *delta* is negative, return a list of up to *-delta* transactions (allmatching
+    the filter criteria) strictly **before** the starting point.  The transactions are sorted
+    in **descending** order of the row ID.
+
+  If *starting point* is not explicitly given, it defaults to:
+
+  * A value that is **smaller** than all other row IDs if *delta* is **positive**.
+  * A value that is **larger** than all other row IDs if *delta* is **negative**.
 
   **Request**
 
-  :query auth:
-    authentication method used.  At this stage of development, only
-    value ``basic`` is accepted.  Note that username and password need to be given
-    as request's headers.  The dedicated headers are: ``X-Taler-Bank-Username`` and
-    ``X-Taler-Bank-Password``.
+  :query start: *Optional.*
+    Row identifier to explicitly set the *starting point* of the query.
   :query delta:
-    returns the first ``N`` records younger (older) than ``start`` if
-    ``+N`` (``-N``) is specified.
-  :query start:
-    according to ``delta``, only those records with row id strictly
-    greater (lesser) than ``start`` will be returned.  This argument is optional;
-    if not given, it defaults to "MAX_UINT64".
+    The *delta* value that determines the range of the query.
   :query direction:
-    argument taking values ``debit`` or ``credit``, according
-    to the caller willing to receive both incoming and outgoing, only outgoing,
-    or only incoming records.  Use ``both`` to return both directions.
+    Filter transactions by type.  Can be ``debit`` to return only
+    transactions that debit this account, ``credit`` to return only transactions
+    that credit this account, or ``both`` for both types.
   :query cancelled:
-    argument taking values ``omit`` or ``show`` to filter out rejected transactions
+    Filter transactions by their cancellation state.
+    Can be ``omit`` to omit rejected transactions or ``show`` to keep rejected transaction.
   :query account_number:
-    bank account whose history is to be returned.
+    Bank account whose history is to be returned.
     *Currently ignored*, as multiple bank accounts per user are not implemented
     yet.
-  :query ordering:
-    can be ``descending`` or ``ascending`` and regulates whether the
-    row are returned youger-to-older or vice versa.  Defaults to ``descending``.
-
+  :query long_poll_ms: *Optional.*  If this parameter is specified and the
+    result of the query would be empty, the bank will wait up to ``long_poll_ms``
+    milliseconds for new transactions that match the query to arrive and only
+    then send the HTTP response.  A client must never rely on this behavior, as
+    the bank may return a response immediately or after waiting only a fraction
+    of ``long_poll_ms``.
 
   **Response**
 
   :status 200 OK: JSON object whose field ``data`` is an array of type `BankTransaction`.
   :status 204 No content: in case no records exist for the targeted user.
 
-.. ts:def:: BankTransaction
+  .. ts:def:: BankTransaction
 
-  interface BankTransaction {
+    interface BankTransaction {
 
-    // identification number of the record
-    row_id: number;
+      // identification number of the record
+      row_id: number;
 
-    // Date of the transaction
-    date: Timestamp;
+      // Date of the transaction
+      date: Timestamp;
 
-    // Amount transferred
-    amount: Amount;
+      // Amount transferred
+      amount: Amount;
 
-    // "-" if the transfer was outgoing, "+" if it was
-    // incoming; "cancel+" or "cancel-" if the transfer
-    // was /reject-ed by the receiver.
-    sign: string;
+      // "-" if the transfer was outgoing, "+" if it was
+      // incoming; "cancel+" or "cancel-" if the transfer
+      // was /reject-ed by the receiver.
+      sign: string;
 
-    // Bank account number of the other party involved in the
-    // transaction.
-    counterpart: number;
+      // Bank account number of the other party involved in the
+      // transaction.
+      counterpart: number;
 
-    // Wire transfer subject line.
-    wt_subject: string;
+      // Wire transfer subject line.
+      wt_subject: string;
 
-  }
+    }
 
-..
-  The counterpart currently only points to the same bank as
-  the client using the bank.  A reasonable improvement is to
-  specify a bank URL too, so that Taler can run across multiple
-  banks.
+  ..
+    The counterpart currently only points to the same bank as
+    the client using the bank.  A reasonable improvement is to
+    specify a bank URL too, so that Taler can run across multiple
+    banks.
 
 ------------------------
 Interactions with wallet
 ------------------------
+
+.. warning::
+
+  This section is completely outdated.
 
 A bank and a wallet need to communicate for (1) make some elements visible
 only if the wallet is installed, (2) exchange information when the user withdraws
