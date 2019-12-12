@@ -284,6 +284,9 @@ Obtaining wire-transfer information
 
     interface WireResponse {
 
+      // Master public key of the exchange, must match the key returned in /keys.
+      master_public_key: EddsaPublicKey;
+    
       // Array of wire accounts operated by the exchange for
       // incoming wire transfers.
       accounts: WireAccount[];
