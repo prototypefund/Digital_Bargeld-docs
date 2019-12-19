@@ -158,7 +158,7 @@ Timestamps are represented by the following structure:
 
 .. ts:def:: RelativeTime
 
-  type Duration {
+  interface Duration {
     // Duration in milliseconds or "forever"
     // to represent an infinite duration.
     d_ms: number | "forever";
