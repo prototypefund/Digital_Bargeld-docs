@@ -145,22 +145,24 @@ as other binary data in Crockford Base32 encoding.
 Timestamps
 ^^^^^^^^^^
 
-Timestamps are represented in JSON as a string literal ``"\\/Date(x)\\/"``,
-where ``x`` is the decimal representation of the number of seconds past the
-Unix Epoch (January 1, 1970).  The escaped slash (``\\/``) is interpreted in
-JSON simply as a normal slash, but distinguishes the timestamp from a normal
-string literal.  We use the type "date" in the documentation below.
-Additionally, the special strings ``"\\/never\\/"`` and ``"\\/forever\\/"`` are
-recognized to represent the end of time.
+Timestamps are represented by the following structure:
 
 .. ts:def:: Timestamp
 
-  type Timestamp = string;
-
+  interface Timestamp {
+    // Milliseconds since epoch, or the special
+    // value "forever" to represent an event that will
+    // never happen.
+    t_ms: number | "never";
+  }
 
 .. ts:def:: RelativeTime
 
-  type RelativeTime = string;
+  type Duration {
+    // Duration in milliseconds or "forever"
+    // to represent an infinite duration.
+    d_ms: number | "forever";
+  }
 
 
 .. _public\ key:
