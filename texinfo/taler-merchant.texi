@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-GNU Taler 0.6.0pre1, Sep 18, 2019
+GNU Taler 0.6.0pre1, Dec 20, 2019
 
 GNU Taler team
 
@@ -621,7 +621,7 @@ The option
 @end example
 
 specifies which DBMS is to be used. However, currently only the value
-"postgres" is supported. This is also the default.
+“postgres” is supported. This is also the default.
 
 In addition to selecting the DBMS software, the backend requires
 DBMS-specific options to access the database.
@@ -703,7 +703,7 @@ instance
 The backend allows the user to run multiple instances of shops with
 distinct business entities against a single backend. Each instance
 uses its own bank accounts and key for signing contracts. It is
-mandatory to configure a "default" instance.
+mandatory to configure a “default” instance.
 
 
 @itemize -
@@ -856,7 +856,7 @@ Given the above configuration, the backend will use a database named
 
 The backend will deposit the coins it receives to the exchange at
 @indicateurl{https://exchange.demo.taler.net/}, which has the master key
-"CQQZ9DY3MZ1ARMN5K1VKDETS04Y2QCKMMCFHZSWJWWVN82BTTH00".
+“CQQZ9DY3MZ1ARMN5K1VKDETS04Y2QCKMMCFHZSWJWWVN82BTTH00”.
 
 Please note that @code{doc/config.sh} will walk you through all
 configuration steps, showing how to invoke @code{taler-config} for each of
@@ -955,7 +955,7 @@ Please NOTE that the generator contains @emph{hardcoded} values, as for
 deposit fees of the coins it uses. In order to work against the used
 exchange, those values MUST match the ones used by the exchange.
 
-The following example shows how the generator "sets" a deposit fee of
+The following example shows how the generator “sets” a deposit fee of
 EUR:0.01 for the 5 EURO coin.
 
 @example
@@ -1304,7 +1304,7 @@ be able to find the bank details in a human-readable format on the main
 page of the exchange.
 
 Make your wire transfer and (optionally) check at
-“@indicateurl{https://exchange:443/reserve/status/reserve_pub=QPE24X}...” whether your
+“@indicateurl{https://exchange:443/reserve/status/reserve_pub=QPE24X}…” whether your
 transfer has arrived at the exchange.
 
 Once the funds have arrived, you can start to use the reserve for
@@ -1448,14 +1448,14 @@ options:
 @item 
 @code{--tracks-number=TN} Instructs the tool to perform @emph{TN} tracking
 operations. Note that the @strong{total} amount of operations will be two
-times @emph{TN}, since "one" tracking operation accounts for
+times @emph{TN}, since “one” tracking operation accounts for
 @code{/track/transaction} and @code{/track/transfer}. This command should
 only be used to see if the operation ends without problems, as no
 actual measurement of performance is provided (despite of the
 ’benchmark’ work used in the tool’s name).
 @end itemize
-@anchor{17}@w{                              }
 @anchor{taler-merchant-manual Using-taler_002dconfig}@w{                              }
+@anchor{17}@w{                              }
 
 @c %**end of body
 @bye

@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-GNU Taler 0.6.0pre1, Sep 18, 2019
+GNU Taler 0.6.0pre1, Dec 20, 2019
 
 GNU Taler team
 
@@ -936,10 +936,10 @@ and they is also allowed to have additional fields. Contract
 renderers must render at least the fields listed above, and should
 render fields that they do not understand as a key-value list.
 @end table
-@anchor{taler-merchant-api-tutorial The-Taler-Order-Format}@w{                              }
 @anchor{d}@w{                              }
 @anchor{b}@w{                              }
 @anchor{taler-merchant-api-tutorial Session_002dBound-Payments}@w{                              }
+@anchor{taler-merchant-api-tutorial The-Taler-Order-Format}@w{                              }
 
 @c %**end of body
 @bye

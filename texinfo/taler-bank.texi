@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-GNU Taler 0.6.0pre1, Sep 18, 2019
+GNU Taler 0.6.0pre1, Dec 20, 2019
 
 GNU Taler team
 
@@ -191,7 +191,7 @@ transmit to the exchange when transmitting the funds.
 
 @item @code{confirm-reserve}
 
-To secure the operation, the (demo) bank then shows a "CAPTCHA page"
+To secure the operation, the (demo) bank then shows a “CAPTCHA page”
 – a real bank would instead show some PIN entry dialog or similar
 security method – where the customer can finally prove she their
 identity and thereby confirm the withdraw operation to the bank.
@@ -237,7 +237,7 @@ API, providing those arguments it got along the @code{X-Taler-Callback-Url}
 URL. (In the future, the exchange will poll for this information.)
 However, the bank will define two additional values for this API:
 @code{execution_date} (a operation’s timestamp), and @code{transfer_details}
-(just a "seed" to make unique the operation). See
+(just a “seed” to make unique the operation). See
 @indicateurl{https://docs.taler.net/api/api-exchange.html#administrative-api-bank-transactions}.
 
 The polling mechanism is possbile thanks to the @code{/history} API

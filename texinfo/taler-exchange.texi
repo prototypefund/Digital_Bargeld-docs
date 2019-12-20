@@ -21,7 +21,7 @@
 
 @copying
 @quotation
-GNU Taler 0.6.0pre1, Sep 18, 2019
+GNU Taler 0.6.0pre1, Dec 20, 2019
 
 GNU Taler team
 
@@ -76,12 +76,17 @@ Configuration
 * Database:: 
 * Coins (denomination keys): Coins denomination keys. 
 * Keys duration:: 
+* Terms of Service:: 
 
 Bank account
 
 * Wire plugin “taler_bank”:: 
 * Wire plugin “ebics”:: 
 * Wire fee structure:: 
+
+Terms of Service
+
+* Example:: 
 
 Deployment
 
@@ -382,6 +387,7 @@ of some of the options.
 * Database:: 
 * Coins (denomination keys): Coins denomination keys. 
 * Keys duration:: 
+* Terms of Service:: 
 
 @end menu
 
@@ -390,7 +396,6 @@ of some of the options.
 @section Configuration format
 
 
-configuration
 In Taler realm, any component obeys to the same pattern to get
 configuration values. According to this pattern, once the component has
 been installed, the installation deploys default values in
@@ -774,7 +779,7 @@ CONFIG = postgres:///talerdemo
 
 
 Sections specifying denomination (coin) information start with @code{coin_}.
-By convention, the name continues with "$CURRENCY_[$SUBUNIT]_$VALUE",
+By convention, the name continues with “$CURRENCY_[$SUBUNIT]_$VALUE”,
 i.e. @code{[coin_eur_ct_10]} for a 10 cent piece. However, only the @code{coin_}
 prefix is mandatory. Each @code{coin_}-section must then have the following
 options:
@@ -784,7 +789,7 @@ options:
 
 @item 
 value: How much is the coin worth, the format is
-CURRENCY:VALUE.FRACTION. For example, a 10 cent piece is "EUR:0.10".
+CURRENCY:VALUE.FRACTION. For example, a 10 cent piece is “EUR:0.10”.
 
 @item 
 duration_withdraw: How long can a coin of this type be withdrawn?
@@ -816,7 +821,7 @@ rsa_keysize: How many bits should the RSA modulus (product of the two
 primes) have for this type of coin.
 @end itemize
 
-@node Keys duration,,Coins denomination keys,Configuration
+@node Keys duration,Terms of Service,Coins denomination keys,Configuration
 @anchor{taler-exchange-manual id11}@anchor{1e}@anchor{taler-exchange-manual keys-duration}@anchor{1f}
 @section Keys duration
 
@@ -860,10 +865,99 @@ Note that if SIGNKEY_DURATION is bigger than LOOKAHEAD_SIGN,
 which is sufficient to cover all the gap.
 @end itemize
 
+@node Terms of Service,,Keys duration,Configuration
+@anchor{taler-exchange-manual terms-of-service}@anchor{20}
+@section Terms of Service
+
+
+The exchange has an endpoint “/terms” to return the terms of service
+(in legal language) of the exchange operator.  The wallet will show
+those terms of service to the user when the user is first withdrawing
+coins.  Terms of service are optional for experimental deployments,
+if none are configured, the exchange will return a simple statement
+saying that there are no terms of service available.
+
+To configure the terms of service response, there are two options
+in the [exchange] section:
+
+
+@itemize -
+
+@item 
+TERMS_ETAG: The current “Etag” to return for the terms of service.
+This value must be changed whenever the terms of service are
+updated. A common value to use would be a version number.
+Note that if you change the TERMS_ETAG, you MUST also provide
+the respective files in TERMS_DIR (see below).
+
+@item 
+TERMS_DIR: The directory that contains the terms of service.
+The files in the directory must be readable to the exchange
+process.
+@end itemize
+
+The TERMS_DIR directory structure must follow a particular layout.
+First, inside of TERMS_DIR, there should be sub-directories using
+two-letter language codes like “en”, “de”, or “jp”.  Each of these
+directories would then hold translations of the current terms of
+service into the respective language.  Empty directories are
+permitted in case translations are not available.
+
+Then, inside each language directory, files with the name of the
+value set as the TERMS_ETAG must be provided. The extension of
+each of the files should be typical for the respective mime type.
+The set of supported mime types is currently hard-coded in the
+exchange, and includes HTML, PDF and TXT files. If other files are
+present, the exchange may show a warning on startup.
+
+@menu
+* Example:: 
+
+@end menu
+
+@node Example,,,Terms of Service
+@anchor{taler-exchange-manual example}@anchor{21}
+@subsection Example
+
+
+A sample file structure for a TERMS_ETAG of “v1” would be:
+
+
+@itemize -
+
+@item 
+TERMS_DIR/en/v1.txt
+
+@item 
+TERMS_DIR/en/v1.html
+
+@item 
+TERMS_DIR/en/v1.pdf
+
+@item 
+TERMS_DIR/de/v1.txt
+
+@item 
+TERMS_DIR/de/v1.html
+
+@item 
+TERMS_DIR/de/v1.pdf
+
+@item 
+TERMS_DIR/fr/v1.pdf
+@end itemize
+
+If the user requests an HTML with language preferences “fr” followed by “en”,
+the exchange would return “TERMS_DIR/en/v1.html” lacking an HTML version in
+French.
+
 @node Deployment,Diagnostics,Configuration,Top
-@anchor{taler-exchange-manual deployment}@anchor{20}@anchor{taler-exchange-manual id12}@anchor{21}
+@anchor{taler-exchange-manual deployment}@anchor{22}@anchor{taler-exchange-manual id12}@anchor{23}
 @chapter Deployment
 
+
+This chapter describes how to deploy the exchange once it has been
+properly configured.
 
 @menu
 * Keys generation:: 
@@ -872,13 +966,13 @@ which is sufficient to cover all the gap.
 @end menu
 
 @node Keys generation,Database upgrades,,Deployment
-@anchor{taler-exchange-manual id13}@anchor{22}@anchor{taler-exchange-manual keys-generation}@anchor{23}
+@anchor{taler-exchange-manual id13}@anchor{24}@anchor{taler-exchange-manual keys-generation}@anchor{25}
 @section Keys generation
 
 
 Once the configuration is properly set up, all the keys can be generated
 by the tool @code{taler-exchange-keyup}. The following command generates
-denomkeys and signkeys, plus the "blob" that is to be signed by the
+denomkeys and signkeys, plus the “blob” that is to be signed by the
 auditor.
 
 @example
@@ -920,7 +1014,7 @@ option @code{[exchange]/master_public_key}.
 @code{OUTPUT_FILE} must then be copied into the directory specified by the
 option @code{AUDITOR_BASE_DIR} under the section @code{[exchangedb]}. Assuming
 @code{AUDITOR_BASE_DIR = $@{HOME@}/.local/share/taler/auditors}, the
-following command will "add" the auditor identified by @code{AUDITOR_URL}
+following command will “add” the auditor identified by @code{AUDITOR_URL}
 to the exchange.
 
 @example
@@ -932,7 +1026,7 @@ response must contain an entry in the @code{auditors} array mentioning the
 auditor’s URL.
 
 @node Database upgrades,,Keys generation,Deployment
-@anchor{taler-exchange-manual database-upgrades}@anchor{24}@anchor{taler-exchange-manual id14}@anchor{25}
+@anchor{taler-exchange-manual database-upgrades}@anchor{26}@anchor{taler-exchange-manual id14}@anchor{27}
 @section Database upgrades
 
 
@@ -951,7 +1045,7 @@ exchange can then not detect double-spending. Hence this operation must
 not be performed in a production system.
 
 @node Diagnostics,,Deployment,Top
-@anchor{taler-exchange-manual diagnostics}@anchor{26}@anchor{taler-exchange-manual id15}@anchor{27}
+@anchor{taler-exchange-manual diagnostics}@anchor{28}@anchor{taler-exchange-manual id15}@anchor{29}
 @chapter Diagnostics
 
 
@@ -970,7 +1064,7 @@ diagnostics.
 @end menu
 
 @node Reserve management,Database Scheme,,Diagnostics
-@anchor{taler-exchange-manual id16}@anchor{28}@anchor{taler-exchange-manual reserve-management}@anchor{29}
+@anchor{taler-exchange-manual id16}@anchor{2a}@anchor{taler-exchange-manual reserve-management}@anchor{2b}
 @section Reserve management
 
 
@@ -980,7 +1074,7 @@ tool taler-exchange-reservemod allows create and add money to reserves
 in the exchange’s database.
 
 @node Database Scheme,Signing key storage,Reserve management,Diagnostics
-@anchor{taler-exchange-manual database-scheme}@anchor{2a}@anchor{taler-exchange-manual id17}@anchor{2b}
+@anchor{taler-exchange-manual database-scheme}@anchor{2c}@anchor{taler-exchange-manual id17}@anchor{2d}
 @section Database Scheme
 
 
@@ -996,13 +1090,13 @@ The database scheme used by the exchange look as follows:
 @image{taler-exchange-figures/exchange-db,,,,png}
 
 @node Signing key storage,Denomination key storage,Database Scheme,Diagnostics
-@anchor{taler-exchange-manual id18}@anchor{2c}@anchor{taler-exchange-manual signing-key-storage}@anchor{2d}
+@anchor{taler-exchange-manual id18}@anchor{2e}@anchor{taler-exchange-manual signing-key-storage}@anchor{2f}
 @section Signing key storage
 
 
 The private online signing keys of the exchange are stored in a
-subdirectory "signkeys/" of the "KEYDIR" which is an option in the
-"[exchange]" section of the configuration file. The filename is the
+subdirectory “signkeys/” of the “KEYDIR” which is an option in the
+“[exchange]” section of the configuration file. The filename is the
 starting time at which the signing key can be used in microseconds since
 the Epoch. The file format is defined by the struct
 TALER_EXCHANGEDB_PrivateSigningKeyInformationP:
@@ -1015,19 +1109,19 @@ struct TALER_EXCHANGEDB_PrivateSigningKeyInformationP @{
 @end example
 
 @node Denomination key storage,Auditor signature storage,Signing key storage,Diagnostics
-@anchor{taler-exchange-manual denomination-key-storage}@anchor{2e}@anchor{taler-exchange-manual id19}@anchor{2f}
+@anchor{taler-exchange-manual denomination-key-storage}@anchor{30}@anchor{taler-exchange-manual id19}@anchor{31}
 @section Denomination key storage
 
 
 The private denomination keys of the exchange are store in a
-subdirectory "denomkeys/" of the "KEYDIR" which is an option in the
-"[exchange]" section of the configuration file. "denomkeys/" contains
+subdirectory “denomkeys/” of the “KEYDIR” which is an option in the
+“[exchange]” section of the configuration file. “denomkeys/” contains
 further subdirectories, one per denomination. The specific name of the
-subdirectory under "denomkeys/" is ignored by the exchange. However, the
-name is important for the "taler-exchange-keyup" tool that generates the
+subdirectory under “denomkeys/” is ignored by the exchange. However, the
+name is important for the “taler-exchange-keyup” tool that generates the
 keys. The tool combines a human-readable encoding of the denomination
-(i.e. for EUR:1.50 the prefix would be "EUR_1_5-", or for EUR:0.01 the
-name would be "EUR_0_01-") with a postfix that is a truncated
+(i.e. for EUR:1.50 the prefix would be “EUR_1_5-“, or for EUR:0.01 the
+name would be “EUR_0_01-“) with a postfix that is a truncated
 Crockford32 encoded hash of the various attributes of the denomination
 key (relative validity periods, fee structure and key size). Thus, if
 any attributes of a coin change, the name of the subdirectory will also
@@ -1057,7 +1151,7 @@ GNUNET_CRYPTO_rsa_private_key_decode().
 @end menu
 
 @node Revocations,,,Denomination key storage
-@anchor{taler-exchange-manual id20}@anchor{30}@anchor{taler-exchange-manual revocations}@anchor{31}
+@anchor{taler-exchange-manual id20}@anchor{32}@anchor{taler-exchange-manual revocations}@anchor{33}
 @subsection Revocations
 
 
@@ -1089,13 +1183,13 @@ under highly unusual (“emergency”) conditions and not under normal
 conditions.
 
 @node Auditor signature storage,,Denomination key storage,Diagnostics
-@anchor{taler-exchange-manual auditor-signature-storage}@anchor{32}@anchor{taler-exchange-manual id21}@anchor{33}
+@anchor{taler-exchange-manual auditor-signature-storage}@anchor{34}@anchor{taler-exchange-manual id21}@anchor{35}
 @section Auditor signature storage
 
 
 Signatures from auditors are stored in the directory specified in the
-exchange configuration section "exchangedb" under the option
-"AUDITOR_BASE_DIR". The exchange does not care about the specific names
+exchange configuration section “exchangedb” under the option
+“AUDITOR_BASE_DIR”. The exchange does not care about the specific names
 of the files in this directory.
 
 Each file must contain a header with the public key information of the
