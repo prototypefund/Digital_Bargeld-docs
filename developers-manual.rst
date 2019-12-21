@@ -49,7 +49,7 @@ copyright agreement -- with the understanding that your contributions
 to GNU Taler are included in the assignment.  You can find the
 agreement on the `GNUnet site <https://gnunet.org/en/copyright.html>`_.
 Please sign and mail it to Christian Grothoff as he currently collects
-all the documents for GNUnet e.V. 
+all the documents for GNUnet e.V.
 
 To obtain Git access, you need to send us your SSH public key. Most core
 team members have administrative Git access, so simply contact whoever
@@ -468,6 +468,38 @@ Exchange, merchant
 Set the version in ``configure.ac``. The commit being tagged should be
 the change of the version.
 
+Update the Texinfo documentation using the files from docs.git:
+
+.. code-block::
+   # Get the latest documentation repository
+   cd $GIT/docs
+   git pull
+   make texinfo
+   # The *.texi files are now in _build/texinfo
+   #
+   # This checks out the prebuilt branch in the prebuilt directory
+   git worktree add prebuilt prebuilt
+   cd prebuilt
+   # Copy the pre-built documentation into the prebuilt directory
+   cp -r ../_build/texinfo .
+   # Push and commit to branch
+   git commit -a -S -m "updating texinfo"
+   git status
+   # Verify that all files that should be tracked are tracked,
+   # new files will have to be added to the Makefile.am in
+   # exchange.git as well!
+   git push
+   # Remember $REVISION of commit
+   #
+   # Go to exchange
+   cd $GIT/exchange/doc/prebuilt
+   # Update submodule to point to latest commit
+   git checkout $REVISION
+
+Finally, the Automake ``Makefile.am`` files may have to be adjusted to
+include new *.texi files or images.
+
+
 For the exchange test cases to pass, ``make install`` must be run first.
 Without it, test cases will fail because plugins can't be located.
 
@@ -741,4 +773,3 @@ to tamper with the data exchanged by A and B.
 
 Please refer to the Twister codebase (under the ``test`` directory) in
 order to see how to configure it.
-
