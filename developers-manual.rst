@@ -795,12 +795,54 @@ Coin
   Coins are an internal construct, the user should never be aware that their balance
   is represented by coins if different denominations.
 
-  **User instead**: "(Digital) Cash" or "Wallet Balance"
+  **Use instead**: "(Digital) Cash" or "Wallet Balance"
+
+Proposal
+  The term used to describe the process of the merchant facilitating the download
+  of the signed contract terms for an order.
+
+  **Avoid**.  Generally events that relate to proposal downloads
+  should not be shown to normal users, only developers.  Instead, use
+  "communication with mechant failed" if a proposed order can't be downloaded.
+
+Anonymous E-Cash
+  Should be generally avoided, since Taler is only anonymous for
+  the customer.
+
+  **Use instead**:  "Privacy-preserving", "Privacy-friedly"
+
+Payment Replay
+  
+  **Use instead**:  In the event history, "re-activated digital content purchase"
+  could be used.
+
+Session ID
+  See Payment Replay.
+
+Order
+  Too ambiguous in the wallet.
+
+  **Use instead**: Purchase
 
 
 Terms to Use
 ------------
 
+Exchange Provider
+  The entity/service that gives out digital cash in exchange for some
+  other means of payment.
+
 Refund
   A refund is given by a merchant to the customer (rather the customer's wallet)
   and "undoes" a previous payment operation.
+
+Payment
+  The act of sending digital cash to a merchant to pay for an order.
+
+Contract Terms
+  Partially machine-readable representation of the merchant's obligation after the
+  customer makes a payment.
+
+Wallet
+  Also "Taler Wallet".  Software component that manages the user's digital cash
+  and payments.
