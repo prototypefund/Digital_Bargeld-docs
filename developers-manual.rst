@@ -471,6 +471,7 @@ the change of the version.
 Update the Texinfo documentation using the files from docs.git:
 
 .. code-block::
+
    # Get the latest documentation repository
    cd $GIT/docs
    git pull
@@ -497,7 +498,7 @@ Update the Texinfo documentation using the files from docs.git:
    git checkout $REVISION
 
 Finally, the Automake ``Makefile.am`` files may have to be adjusted to
-include new *.texi files or images.
+include new ``*.texi`` files or images.
 
 
 For the exchange test cases to pass, ``make install`` must be run first.
@@ -773,3 +774,33 @@ to tamper with the data exchanged by A and B.
 
 Please refer to the Twister codebase (under the ``test`` directory) in
 order to see how to configure it.
+
+
+User-Facing Terminology
+=======================
+
+This section contains terminology that should be used and that should not be
+used in the user interface and help materials.
+
+Terms to Avoid
+--------------
+
+Refreshing
+  Refreshing is the internal technical terminology for the protocol to
+  give change for partially spent coins
+
+  **Use instead**: "Obtaining change"
+
+Coin
+  Coins are an internal construct, the user should never be aware that their balance
+  is represented by coins if different denominations.
+
+  **User instead**: "(Digital) Cash" or "Wallet Balance"
+
+
+Terms to Use
+------------
+
+Refund
+  A refund is given by a merchant to the customer (rather the customer's wallet)
+  and "undoes" a previous payment operation.
