@@ -817,6 +817,8 @@ Anonymous E-Cash
   **Use instead**:  "Privacy-preserving", "Privacy-friedly"
 
 Payment Replay
+  The process of proving to the merchant that the customer is entitled
+  to view a digital product again, as they already paid for it.
   
   **Use instead**:  In the event history, "re-activated digital content purchase"
   could be used.
