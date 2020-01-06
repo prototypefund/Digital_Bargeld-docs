@@ -797,6 +797,11 @@ Coin
 
   **Use instead**: "(Digital) Cash" or "Wallet Balance"
 
+Consumer
+  Has bad connotation.
+
+  **Use instead**: Customer or user.
+
 Proposal
   The term used to describe the process of the merchant facilitating the download
   of the signed contract terms for an order.
@@ -824,6 +829,10 @@ Order
 
   **Use instead**: Purchase
 
+Fulfillment URL
+  URL that the serves the digital content that the user purchased
+  with their payment.  Can also be something like a donation receipt.
+
 
 Terms to Use
 ------------
@@ -839,9 +848,16 @@ Refund
 Payment
   The act of sending digital cash to a merchant to pay for an order.
 
+Purchase
+  Used to refer to the "result" of a payment, as in "view purchase".
+  Use sparsingly, as the word doesn't fit for all payments, such as donations.
+
 Contract Terms
   Partially machine-readable representation of the merchant's obligation after the
   customer makes a payment.
+
+Merchant
+  Party that receives a payment.
 
 Wallet
   Also "Taler Wallet".  Software component that manages the user's digital cash
