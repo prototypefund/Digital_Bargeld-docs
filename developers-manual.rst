@@ -839,9 +839,15 @@ Fulfillment URL
 Terms to Use
 ------------
 
+Auditor
+  Regulatory entity that certifies exchanges and oversees their operation.
+
 Exchange Provider
   The entity/service that gives out digital cash in exchange for some
   other means of payment.
+
+  In some contexts, using "Issuer" could also be appropriate.  When showing a balance breakdown,
+  we can say "100 Eur (issued by exchange.euro.taler.net)".
 
 Refund
   A refund is given by a merchant to the customer (rather the customer's wallet)
