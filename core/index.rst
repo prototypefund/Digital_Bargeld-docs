@@ -32,6 +32,7 @@ interfaces between the core components of Taler.
   api-common
   api-error
   api-exchange
+  api-wire-plugin-bank
   api-merchant
   api-auditor
   api-bank
