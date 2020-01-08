@@ -68,7 +68,7 @@ Making Transactions
 
   .. ts:def:: TransactionRequest
 
-    interface TransactionResponse {
+    interface TransactionRequest {
       // Nonce to make the request idempotent.  Requests with the same
       // transaction_uid that differ in any of the other fields
       // are rejected.
