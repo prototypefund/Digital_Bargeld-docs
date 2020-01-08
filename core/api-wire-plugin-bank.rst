@@ -26,8 +26,8 @@ LibEuFin (work in progress).
 Authentication
 --------------
 
-The wire plugin authenticates requests to the bank service via the
-``X-Taler-Bank-Username`` and ``X-Taler-Bank-Password`` headers.
+The wire plugin authenticates requests to the bank service via
+`HTTP basic auth <https://tools.ietf.org/html/rfc7617>`.
 
 -------------------
 Making Transactions
@@ -108,7 +108,7 @@ Querying the transaction history
   list shall be filtered to only include transactions that include a valid
   reserve public key.
 
-  The bank account of the exchange is determined via the user name in the ``X-Taler-Bank-Username`` header.
+  The bank account of the exchange is determined via the user name in the ``Authorization`` header.
   In fact the transaction history might come from a "virtual" account, where multiple real bank accounts
   are merged into one history.
 
