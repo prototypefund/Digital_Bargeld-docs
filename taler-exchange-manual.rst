@@ -398,9 +398,9 @@ information:
    “x-taler-bank”) is called the wire method.
 
 -  A matching wire plugin that implements a protocol to interact with
-   the banking system. For example, the EBICS plugin can be used for
-   SEPA transfers, or the “taler-bank” plugin can interact with the
-   Taler bank demonstrator. A wire plugin only supports one particular
+   the banking system. For example, the “taler-bank” plugin can interact
+   with the Taler bank demonstrator or with libeufin.
+   A wire plugin only supports one particular
    wire method. Thus, you must make sure to pick a plugin that supports
    the wire method used in the URL.
 
@@ -452,8 +452,10 @@ The generated file will be echoed by the exchange when serving
 Wire plugin “taler_bank”
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-x-taler-bank
-taler_bank plugin
+.. meta::
+   :keywords: x-taler-bank
+   :keywords: taler_bank plugin
+
 The ``taler_bank`` plugin implements the wire method “x-taler-bank”.
 
 The format of the ``payto://`` URL is
@@ -476,28 +478,15 @@ the “USERNAME” and “PASSWORD” of the respective account at the bank.
    USERNAME = exchange
    PASSWORD = super-secure
 
-.. _Wire-plugin-_0060_0060ebics_0027_0027:
-
-Wire plugin “ebics”
-~~~~~~~~~~~~~~~~~~~
-
-The “ebics” wire plugin is not fully implemented and today does not
-support actual wire transfers.
-
-   **Note**
-
-   The rationale behind having multiple bank accounts is that the
-   exchange operator, as a security measure, may want to instruct the
-   bank that the incoming bank account is only supposed to *receive*
-   money.
-
 .. _Wire-fee-structure:
 
 Wire fee structure
 ~~~~~~~~~~~~~~~~~~
 
-wire fee
-fee
+.. meta::
+  :keywords: wire fee
+  :keywords: fee
+
 For each wire method (“sepa” or “x-taler-wire”, but not per plugin!) the
 exchange configuration must specify applicable wire fees. This is done
 in configuration sections of the format ``fees-METHOD``. There are two

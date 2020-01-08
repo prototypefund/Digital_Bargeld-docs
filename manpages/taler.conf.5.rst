@@ -107,7 +107,7 @@ PRIVACY_DIR
 PRIVACY_ETAG
    Works the same as TERMS_ETAG, just for the privacy policy.
 
-   
+
 EXCHANGE POSTGRES BACKEND DATABASE OPTIONS
 ------------------------------------------
 
@@ -237,7 +237,7 @@ WIRE_RESPONSE
 
 PLUGIN
    Name of the plugin can be used to access the account
-   (i.e. “taler-bank” or “ebics”). Used by the merchant backend for back
+   (i.e. “taler_bank”). Used by the merchant backend for back
    office operations (i.e. to identify incoming wire transfers) and by
    the exchange.
 
@@ -280,16 +280,6 @@ PASSWORD
    Password to use for authentication. Used with the “basic”
    authentication method.
 
-EBICS AUTHENTICATION OPTIONS
-----------------------------
-
-The following authentication options are supported by the “ebics” wire
-plugin. They must be specified in the “[account-]” section that uses the
-“ebics” plugin.
-
-NONE
-   Currently the “ebics” implementation is incomplete and does not
-   support authentication.
 
 EXCHANGE WIRE FEE OPTIONS
 -------------------------
