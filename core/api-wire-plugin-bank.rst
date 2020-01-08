@@ -27,7 +27,7 @@ Authentication
 --------------
 
 The wire plugin authenticates requests to the bank service via
-`HTTP basic auth <https://tools.ietf.org/html/rfc7617>`.
+`HTTP basic auth <https://tools.ietf.org/html/rfc7617>`_.
 
 -------------------
 Making Transactions
