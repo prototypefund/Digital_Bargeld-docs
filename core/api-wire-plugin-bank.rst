@@ -62,7 +62,13 @@ Making Transactions
 
     interface TransactionResponse {
 
-      // Timestamp related to the transaction being made.
+      // Timestamp that indicates when the wire transfer will be executed.
+      // In cases where the wire transfer gateway is unable to know when
+      // the wire transfer will be executed, the time at which the request
+      // has been received and stored will be returned.
+      // The purpose of this field is for debugging (humans trying to find
+      // the transaction) as well as for taxation (determining which
+      // time period a transaction belongs to).
       timestamp: Timestamp;
 
       // Opaque of the transaction that the bank has made.
