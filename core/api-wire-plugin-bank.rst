@@ -52,6 +52,9 @@ Making Transactions
     the recipient's account.  The body is a `TransactionResponse`
   :status 400 Bad Request: The bank replies a `BankError` object.
   :status 406 Not Acceptable: The request had wrong currency; the bank replies a `BankError` object.
+  :status 409 Conflict:
+    A transaction with the same ``transaction_uid`` but different transaction details
+    has been submitted before.
 
   **Details:**
 
