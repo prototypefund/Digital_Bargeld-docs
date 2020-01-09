@@ -342,7 +342,7 @@ Tracking Wire Transfers
       merchant_pub: EddsaPublicKey;
 
       // hash of the wire details (identical for all deposits)
-      H_wire: HashCode;
+      h_wire: HashCode;
 
       // Time of the execution of the wire transfer by the exchange
       execution_time: Timestamp;
@@ -800,9 +800,9 @@ The contract terms must have the following structure:
       merchant: Merchant;
 
       // The hash of the merchant instance's wire details.
-      H_wire: HashCode;
+      h_wire: HashCode;
 
-      // Wire transfer method identifier for the wire method associated with H_wire.
+      // Wire transfer method identifier for the wire method associated with h_wire.
       // The wallet may only select exchanges via a matching auditor if the
       // exchange also supports this wire method.
       // The wire transfer fees must be added based on this wire transfer method.

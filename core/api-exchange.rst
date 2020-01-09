@@ -286,7 +286,7 @@ Obtaining wire-transfer information
 
       // Master public key of the exchange, must match the key returned in /keys.
       master_public_key: EddsaPublicKey;
-    
+
       // Array of wire accounts operated by the exchange for
       // incoming wire transfers.
       accounts: WireAccount[];
@@ -600,8 +600,7 @@ denomination.
 
       // SHA-512 hash of the merchant's payment details from ``wire``.  Although
       // strictly speaking redundant, this helps detect inconsistencies.
-      // TODO: change to 'h_wire'.
-      H_wire: HashCode;
+      h_wire: HashCode;
 
       // SHA-512 hash of the contact of the merchant with the customer.  Further
       // details are never disclosed to the exchange.
@@ -1161,7 +1160,7 @@ typically also view the balance.)
       merchant_pub: EddsaPublicKey;
 
       // hash of the wire details (identical for all deposits)
-      H_wire: HashCode;
+      h_wire: HashCode;
 
       // Time of the execution of the wire transfer by the exchange
       execution_time: Timestamp;
@@ -1222,7 +1221,7 @@ typically also view the balance.)
 
     interface TrackTransactionRequest {
       // SHA-512 hash of the merchant's payment details.
-      H_wire: HashCode;
+      h_wire: HashCode;
 
       // SHA-512 hash of the contact of the merchant with the customer.
       h_contract_terms: HashCode;
