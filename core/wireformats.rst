@@ -15,12 +15,12 @@ ones currently supported by the exchange.
 X-TALER-BANK
 ------------
 
-The "x-taler-bank" wire format is used for testing and for integration with Taler's
+The ``x-taler-bank`` wire format is used for testing and for integration with Taler's
 simple "bank" system which in the future might be useful to setup a bank
 for a local / regional currency or accounting system.  Using ``x-taler-bank``
 wire method in combination with the Taler's bank, it is thus possible to
 fully test the Taler system without using "real" currencies.  The URL
-format for "x-taler-bank" is simple, in that it only specifies an account
+format for ``x-taler-bank`` is simple, in that it only specifies an account
 number and the URL of the bank:
 
 ::
@@ -29,10 +29,10 @@ number and the URL of the bank:
 
 The account identifier given must be a non-empty alphanumeric ASCII string.  As with
 any payto://-URI, additional fields may be present (after a ?), but
-are not required.  The BANK_URI may include a port number. If none is
+are not required.  The ``BANK_URI`` may include a port number. If none is
 given, ``https`` over port 443 is assumed.  If a port number is
 given, ``http`` over the given port is to be used.  Note that this
-means that you cannot run an x-taler-bank over @code{https} on a
+means that you cannot run an x-taler-bank over ``https`` on a
 non-canonical port.
 
 Note that a particular exchange is usually only supporting one particular bank
