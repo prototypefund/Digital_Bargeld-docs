@@ -72,8 +72,9 @@ Making Transactions
       timestamp: Timestamp;
 
       // Opaque of the transaction that the bank has made.
-      row_id: string;
+      row_id: SafeUint64;
     }
+
 
   .. ts:def:: TransactionRequest
 
@@ -81,14 +82,19 @@ Making Transactions
       // Nonce to make the request idempotent.  Requests with the same
       // transaction_uid that differ in any of the other fields
       // are rejected.
-      transaction_uid: HashCode;
+      request_uid: HashCode;
 
       // Amount to transfer.
       amount: Amount;
 
-      // Reserve public key, will be included in the details
-      // of the wire transfer.
-      reserve_pub: string;
+      // Base URL of the exchange.  Shall be included by the bank gateway
+      // in the approriate section of the wire transfer details.
+      exchange_base_url: string;
+
+      // Wire transfer identifier chosen by the exchange,
+      // used by the merchant to identify the Taler order
+      // associated with this wire transfer.
+      wtid: ShortHashCode;
 
       // The recipient's account identifier as a payto URI
       credit_account: string;
@@ -113,9 +119,12 @@ Querying the transaction history
 
 .. http:get:: /taler/history
 
-  Return a list of transactions made to the exchange.  The transaction
-  list shall be filtered to only include transactions that include a valid
-  reserve public key.
+  Return a list of transactions made from or to the exchange.  The query
+  can be restricted to only include incoming or outgoing transactions.
+
+  Incoming transactions must contain a valid reserve public key and outgoing transactions
+  must include a valid wire transfer ID.  If a bank transaction does not confirm to the right syntax,
+  it must be ignored (and money sent back to the sender if possible).
 
   The bank account of the exchange is determined via the user name in the ``Authorization`` header.
   In fact the transaction history might come from a "virtual" account, where multiple real bank accounts
@@ -131,7 +140,7 @@ Querying the transaction history
   * If *delta* is positive, return a list of up to *delta* transactions (all matching
     the filter criteria) strictly **after** the starting point.  The transactions are sorted
     in **ascending** order of the row ID.
-  * If *delta* is negative, return a list of up to *-delta* transactions (allmatching
+  * If *delta* is negative, return a list of up to *-delta* transactions (all matching
     the filter criteria) strictly **before** the starting point.  The transactions are sorted
     in **descending** order of the row ID.
 
@@ -146,6 +155,11 @@ Querying the transaction history
     Row identifier to explicitly set the *starting point* of the query.
   :query delta:
     The *delta* value that determines the range of the query.
+  :direction:
+    Filter transaction history by the direction of the transaction.
+    Can be "incoming" to only return transactions *to* the exchange,
+    *outgoing* to only return transactions *from* the exchange, or *both* (default)
+    to return both directions.
   :query long_poll_ms: *Optional.*  If this parameter is specified and the
     result of the query would be empty, the bank will wait up to ``long_poll_ms``
     milliseconds for new transactions that match the query to arrive and only
@@ -163,7 +177,7 @@ Querying the transaction history
     interface BankTransaction {
 
       // Opaque identifier of the returned record
-      row_id: string;
+      row_id: SafeUint64;
 
       // Date of the transaction
       date: Timestamp;
@@ -171,10 +185,23 @@ Querying the transaction history
       // Amount transferred
       amount: Amount;
 
+      // Direction of the transfer
+      direction: "incoming" | "outgoing";
+
+      // Payto URI to identify the receiver of funds.
+      // If direction is "incoming", this is one of the exchange's bank accounts.
+      credit_account: string;
+
       // Payto URI to identify the sender of funds
+      // If direction is "outgoing", this is one of the exchange's bank accounts.
       debit_account: string;
 
-      // The reserve public key extracted from the transaction details
-      reserve_pub: string;
+      // The reserve public key extracted from the transaction details.
+      // Must be present iff the direction is "incoming".
+      reserve_pub?: EddsaPublicKey;
+
+      // The reserve public key extracted from the transaction details,
+      // Must be present iff the direction is "outgoing".
+      wtid?: ShortHashCode;
     }
 

@@ -129,12 +129,30 @@ resulting encoding.
 
 Hash codes
 ^^^^^^^^^^
-Hashcodes are strings representing base32 encoding of the respective hashed
+Hash codes are strings representing base32 encoding of the respective hashed
 data. See `base32`_.
 
 .. ts:def:: HashCode
 
+  // 64-byte hash code
   type HashCode = string;
+
+.. ts:def:: ShortHashCode
+
+  // 32-byte hash code
+  type HashCode = string;
+
+Safe Integers
+^^^^^^^^^^^^^
+
+For easier browser-side processing, we restrict some integers to
+the range that is safely representable in JavaScript.
+
+.. ts:def:: SafeUint64
+
+  // Subset of numbers:  Integers in the
+  // inclusive range 0 .. (2^53 - 1)
+  type SafeUint64 = number;
 
 Large numbers
 ^^^^^^^^^^^^^
