@@ -13,11 +13,14 @@
   You should have received a copy of the GNU Lesser General Public License along with
   TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
 
-==========================
-Taler Bank Wire Plugin API
-==========================
+===========================
+Taler Wire Gateway HTTP API
+===========================
 
-This section describes the API that the ``taler-bank`` wire plugin expects.
+This section describes the API offered by the Taler wire gateway. The API is
+used by the exchange to trigger transaction and query incoming transactions, as
+well as by the auditor to query incoming and outgoing transactions.
+
 This API is currently implemented by the Taler Demo Bank, as well as by
 LibEuFin (work in progress).
 
@@ -26,7 +29,7 @@ LibEuFin (work in progress).
 Authentication
 --------------
 
-The wire plugin authenticates requests to the bank service via
+The wire plugin authenticates requests to the wire gatway via
 `HTTP basic auth <https://tools.ietf.org/html/rfc7617>`_.
 
 -------------------
@@ -34,11 +37,11 @@ Making Transactions
 -------------------
 
 
-.. http:post:: /taler/transaction
+.. http:post:: ${BASE_URL}/transaction
 
   This API allows the exchange to make a transaction, typically to a merchant.  The bank account
   of the exchange is not included in the request, but instead derived from the user name in the
-  authentication header.
+  authentication header and/or the request base URL.
 
   To make the API idempotent, the client must include a nonce.  Requests with the same nonce
   are rejected unless the request is the same.
@@ -50,8 +53,8 @@ Making Transactions
   :status 200 OK:
     The request has been correctly handled, so the funds have been transferred to
     the recipient's account.  The body is a `TransactionResponse`
-  :status 400 Bad Request: The bank replies a `BankError` object.
-  :status 406 Not Acceptable: The request had wrong currency; the bank replies a `BankError` object.
+  :status 400 Bad Request: The bank replies with a `BankError` object.
+  :status 406 Not Acceptable: The request had wrong currency; the bank replies with a `BankError` object.
   :status 409 Conflict:
     A transaction with the same ``transaction_uid`` but different transaction details
     has been submitted before.
@@ -117,20 +120,21 @@ Making Transactions
 Querying the transaction history
 --------------------------------
 
-.. http:get:: /taler/history
 
-  Return a list of transactions made from or to the exchange.  The query
-  can be restricted to only include incoming or outgoing transactions.
+.. http:get:: ${BASE_URL}/history/incoming
 
-  Incoming transactions must contain a valid reserve public key and outgoing transactions
-  must include a valid wire transfer ID.  If a bank transaction does not confirm to the right syntax,
-  it must be ignored (and money sent back to the sender if possible).
+  Return a list of transactions made from or to the exchange.
 
-  The bank account of the exchange is determined via the user name in the ``Authorization`` header.
-  In fact the transaction history might come from a "virtual" account, where multiple real bank accounts
-  are merged into one history.
+  Incoming transactions must contain a valid reserve public key.  If a bank
+  transaction does not confirm to the right syntax, the wire gatway must not
+  report it to the exchange, and sent funds back to the sender if possible.
 
-  Transactions are identified by an opaque string identifier, referred to here
+  The bank account of the exchange is determined via the base URL and/or the
+  user name in the ``Authorization`` header.  In fact the transaction history
+  might come from a "virtual" account, where multiple real bank accounts are
+  merged into one history.
+
+  Transactions are identified by an opaque numeric identifier, referred to here
   as "row ID".  The semantics of the row ID (including its sorting order) are
   determined by the bank server and completely opaque to the client.
 
@@ -155,11 +159,6 @@ Querying the transaction history
     Row identifier to explicitly set the *starting point* of the query.
   :query delta:
     The *delta* value that determines the range of the query.
-  :direction:
-    Filter transaction history by the direction of the transaction.
-    Can be "incoming" to only return transactions *to* the exchange,
-    *outgoing* to only return transactions *from* the exchange, or *both* (default)
-    to return both directions.
   :query long_poll_ms: *Optional.*  If this parameter is specified and the
     result of the query would be empty, the bank will wait up to ``long_poll_ms``
     milliseconds for new transactions that match the query to arrive and only
@@ -169,12 +168,12 @@ Querying the transaction history
 
   **Response**
 
-  :status 200 OK: JSON object whose field ``transactions`` is an array of type `BankTransaction`.
+  :status 200 OK: JSON object whose field ``incoming_transactions`` is an array of type `IncomingBankTransaction`.
   :status 204 No content: in case no records exist for the targeted user.
 
-  .. ts:def:: BankTransaction
+  .. ts:def:: IncomingBankTransaction
 
-    interface BankTransaction {
+    interface IncomingBankTransaction {
 
       // Opaque identifier of the returned record
       row_id: SafeUint64;
@@ -185,23 +184,87 @@ Querying the transaction history
       // Amount transferred
       amount: Amount;
 
-      // Direction of the transfer
-      direction: "incoming" | "outgoing";
-
       // Payto URI to identify the receiver of funds.
-      // If direction is "incoming", this is one of the exchange's bank accounts.
+      // This must be one of the exchange's bank accounts.
       credit_account: string;
 
       // Payto URI to identify the sender of funds
-      // If direction is "outgoing", this is one of the exchange's bank accounts.
       debit_account: string;
 
       // The reserve public key extracted from the transaction details.
-      // Must be present iff the direction is "incoming".
-      reserve_pub?: EddsaPublicKey;
-
-      // The reserve public key extracted from the transaction details,
-      // Must be present iff the direction is "outgoing".
-      wtid?: ShortHashCode;
+      reserve_pub: EddsaPublicKey;
     }
 
+
+.. http:get:: ${BASE_URL}/history/outgoing
+
+  Return a list of transactions made by the exchange, typically to a merchant.
+
+  The bank account of the exchange is determined via the base URL and/or the
+  user name in the ``Authorization`` header.  In fact the transaction history
+  might come from a "virtual" account, where multiple real bank accounts are
+  merged into one history.
+
+  Transactions are identified by an opaque integer, referred to here as "row
+  ID".  The semantics of the row ID (including its sorting order) are
+  determined by the bank server and completely opaque to the client.
+
+  The list of returned transactions is determined by a row ID *starting point*
+  and a signed non-zero integer *delta*:
+
+  * If *delta* is positive, return a list of up to *delta* transactions (all matching
+    the filter criteria) strictly **after** the starting point.  The transactions are sorted
+    in **ascending** order of the row ID.
+  * If *delta* is negative, return a list of up to *-delta* transactions (all matching
+    the filter criteria) strictly **before** the starting point.  The transactions are sorted
+    in **descending** order of the row ID.
+
+  If *starting point* is not explicitly given, it defaults to:
+
+  * A value that is **smaller** than all other row IDs if *delta* is **positive**.
+  * A value that is **larger** than all other row IDs if *delta* is **negative**.
+
+  **Request**
+
+  :query start: *Optional.*
+    Row identifier to explicitly set the *starting point* of the query.
+  :query delta:
+    The *delta* value that determines the range of the query.
+  :query long_poll_ms: *Optional.*  If this parameter is specified and the
+    result of the query would be empty, the bank will wait up to ``long_poll_ms``
+    milliseconds for new transactions that match the query to arrive and only
+    then send the HTTP response.  A client must never rely on this behavior, as
+    the bank may return a response immediately or after waiting only a fraction
+    of ``long_poll_ms``.
+
+  **Response**
+
+  :status 200 OK:
+    JSON object whose field ``outgoing_transactions`` is
+    an array of type `OutgoingBankTransaction`.
+  :status 204 No content:
+    in case no records exist for the query
+
+  .. ts:def:: OutgoingBankTransaction
+
+    interface OutgoingBankTransaction {
+
+      // Opaque identifier of the returned record
+      row_id: SafeUint64;
+
+      // Date of the transaction
+      date: Timestamp;
+
+      // Amount transferred
+      amount: Amount;
+
+      // Payto URI to identify the receiver of funds.
+      credit_account: string;
+
+      // Payto URI to identify the sender of funds
+      // This must be one of the exchange's bank accounts.
+      debit_account: string;
+
+      // The wire transfer ID in the outgoing transaction.
+      wtid: ShortHashCode;
+    }
