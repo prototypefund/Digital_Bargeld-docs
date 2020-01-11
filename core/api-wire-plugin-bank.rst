@@ -36,8 +36,7 @@ The wire plugin authenticates requests to the wire gatway via
 Making Transactions
 -------------------
 
-
-.. http:post:: ${BASE_URL}/transaction
+.. http:post:: ${BASE_URL}/transfer
 
   This API allows the exchange to make a transaction, typically to a merchant.  The bank account
   of the exchange is not included in the request, but instead derived from the user name in the
@@ -267,4 +266,34 @@ Querying the transaction history
 
       // The wire transfer ID in the outgoing transaction.
       wtid: ShortHashCode;
+    }
+
+
+-----------------------
+Wire Transfer Test APIs
+-----------------------
+
+Endpoints in this section are only used for integration tests and never
+exposed by bank gateways in production.
+
+.. http:post:: ${BASE_URL}/admin/add-incoming
+
+  Simulate a transfer from a customer to the exchange.  This API is *not*
+  idempotent since it's only used in testing.
+
+  .. ts:def:: OutgoingBankTransaction
+
+    interface AddIncomingRequest {
+      // Amount to transfer.
+      amount: Amount;
+
+      // Reserve public key that is included in the wire transfer details
+      // to identify the reserve that is being topped up.
+      reserve_pub: EddsaPublicKey
+
+      // Account (as payto URI) that makes the wire transfer to the exchange.
+      // Usually this account must be created by the test harness before this API is
+      // used.  An exception is the "exchange-fakebank", where any debit account can be
+      // specified, as it is automatically created.
+      debit_account: string;
     }
