@@ -54,9 +54,6 @@ Withdrawing
 
     interface BankTalerWithdrawRequest {
 
-      // Authentication method used
-      auth: BankAuth;
-    
       // Amount to withdraw.
       amount: Amount;
 
