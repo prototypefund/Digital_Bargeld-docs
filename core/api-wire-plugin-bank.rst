@@ -18,7 +18,7 @@ Taler Wire Gateway HTTP API
 ===========================
 
 This section describes the API offered by the Taler wire gateway. The API is
-used by the exchange to trigger transaction and query incoming transactions, as
+used by the exchange to trigger transactions and query incoming transactions, as
 well as by the auditor to query incoming and outgoing transactions.
 
 This API is currently implemented by the Taler Demo Bank, as well as by
