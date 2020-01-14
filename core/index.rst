@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014-2018 GNUnet e.V.
+  Copyright (C) 2014-2020 Taler Systems SA
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -32,7 +32,7 @@ interfaces between the core components of Taler.
   api-common
   api-error
   api-exchange
-  api-wire-plugin-bank
+  api-wire
   api-merchant
   api-auditor
   api-bank

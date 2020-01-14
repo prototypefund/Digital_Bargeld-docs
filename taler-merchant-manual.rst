@@ -561,15 +561,6 @@ Accounts
          $ taler-config -s ACCOUNT-bank -o WIRE_RESPONSE \
            -V '{$TALER_CONFIG_HOME}/merchant/bank.json'
 
-   -  The “PLUGIN” option specifies which wire plugin should be used for
-      this account. The plugin must support the wire method used by the
-      URL. For example, use:
-
-      ::
-
-         $ taler-config -s ACCOUNT-bank -o PLUGIN \
-           -V taler_bank
-
    -  For each ``instance`` that should use this account, you should set
       ``HONOR_instance`` and ``ACTIVE_instance`` to YES. The first
       option will cause the instance to accept payments to the account
@@ -586,21 +577,6 @@ Accounts
            -V YES
 
       to use “account-bank” for the “default” instance.
-
-   Depending on which PLUGIN you configured, you may additionally
-   specfiy authentication options to enable the plugin to use the
-   account.
-
-   For example, with ``taler_bank`` plugin, use:
-
-   ::
-
-      $ taler-config -s ACCOUNT-bank -o TALER_BANK_AUTH_METHOD \
-        -V basic
-      $ taler-config -s ACCOUNT-bank -o USERNAME \
-        -V user42
-      $ taler-config -s ACCOUNT-bank -o PASSWORD \
-        -V pass42
 
    Note that additional instances can be specified using different
    tokens in the section name instead of ``default``.
@@ -633,7 +609,6 @@ The following is an example for a complete backend configuration:
    [ACCOUNT-bank]
    URL = payto://x-taler-bank/bank.demo.taler.net/4
    WIRE_RESPONSE = $DATADIR/bank.json
-   PLUGIN = taler_bank
    HONOR_default = YES
    ACTIVE_default = YES
    TALER_BANK_AUTH_METHOD = basic
@@ -941,34 +916,6 @@ public key using the ``gnunet-ecc`` command-line tool:
    $ gnunet-ecc -p                                  \
      $(taler-config -f -s INSTANCE-default \
                     -o KEYFILE)
-
-.. _SEPA-configuration:
-
-Using the SEPA wire transfer method
------------------------------------
-
-SEPA
-EBICS
-The following is a sample configuration for the SEPA wire transfer
-method: [2]_.
-
-Then, to configure the EBICS backend for SEPA payments in EUR, the
-following configuration options need to be set:
-
-::
-
-   $ taler-config -s TALER -o CURRENCY -V EUR
-   $ taler-config -s ACCOUNT-e -o PLUGIN -V ebics
-   $ taler-config -s ACCOUNT-e -o URL \
-    -V payto://sepa/XY00111122223333444455556666
-   $ taler-config -s ACCOUNT-e -o WIRE_RESPONSE
-    -V '${DATADIR}/b.json'
-
-Please note that you will also have to configure an exchange and/or
-auditors that support SEPA. However, we cannot explain how to do this
-yet as such entities do not yet exist. Once such entities do exist, we
-expect future versions of the Taler backend to ship with pre-configured
-exchanges and auditors for common denominations.
 
 .. _Tipping-visitors:
 

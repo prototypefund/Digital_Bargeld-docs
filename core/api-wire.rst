@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2019 Taler Systems SA
+  Copyright (C) 2019-2020 Taler Systems SA
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -29,7 +29,7 @@ LibEuFin (work in progress).
 Authentication
 --------------
 
-The wire plugin authenticates requests to the wire gatway via
+The bank library authenticates requests to the wire gatway via
 `HTTP basic auth <https://tools.ietf.org/html/rfc7617>`_.
 
 -------------------

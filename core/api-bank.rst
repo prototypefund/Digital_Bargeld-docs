@@ -21,7 +21,8 @@
 Taler Bank API
 ==============
 
-This chapter describe the APIs that banks need to offer to tightly integrate with GNU Taler.
+This chapter describe the APIs that banks need to offer towards Taler wallets
+to tightly integrate with GNU Taler.
 
 .. contents:: Table of Contents
 

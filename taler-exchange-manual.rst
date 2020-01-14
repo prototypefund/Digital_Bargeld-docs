@@ -1,3 +1,21 @@
+..
+  This file is part of GNU TALER.
+
+  Copyright (C) 2014-2020 Taler Systems SA
+
+  TALER is free software; you can redistribute it and/or modify it under the
+  terms of the GNU General Public License as published by the Free Software
+  Foundation; either version 2.1, or (at your option) any later version.
+
+  TALER is distributed in the hope that it will be useful, but WITHOUT ANY
+  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+  A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License along with
+  TALER; see the file COPYING.  If not, see <http://www.gnu.org/licenses/>
+
+  @author Christian Grothoff
+
 GNU Taler Exchange Operator Manual
 ##################################
 
@@ -110,14 +128,19 @@ components:
    computes the expected bank balance, revenue and risk exposure of the
    exchange operator. The main binary is the ``taler-auditor``.
 
--  Wire plugin
-   A wire plugin enables the HTTP frontend to talk to the bank. Its role
-   is to allow the exchange to validate bank addresses (i.e. IBAN
-   numbers), for the aggregator to execute wire transfers and for the
-   auditor to query bank transaction histories. Wire plugins are
-   *plugins* as there can be many different implementations to deal with
-   different banking standards. Wire plugins are automatically located
-   and used by the exchange, aggregator and auditor.
+-  Wire adapter
+   A wire adapter is a component that enables exchange to talk to a bank.
+   (1) The libtalerfakebank implements a bank with a wire adapter API
+       inside of a testcase.
+   (2) For the demonstration Web site (or local currencies),
+       the Python bank provides a bank that directly provides
+       the wire adapter API.
+   (3) For production, libeufin's Nexus component implements a wire
+       adapter towards the traditional SEPA banking system with IBAN
+       accounts.
+   The client-side wire adapter API is implemented in libtalerbank and
+   is used by the aggregator to execute wire transfers and for the
+   auditor to query bank transaction histories.
 
 -  DBMS
    Postgres
@@ -397,21 +420,14 @@ information:
    The first part of the URL following ``payto://`` (“sepa” or
    “x-taler-bank”) is called the wire method.
 
--  A matching wire plugin that implements a protocol to interact with
-   the banking system. For example, the “taler-bank” plugin can interact
-   with the Taler bank demonstrator or with libeufin.
-   A wire plugin only supports one particular
-   wire method. Thus, you must make sure to pick a plugin that supports
-   the wire method used in the URL.
-
 -  A file containing the signed JSON-encoded bank account details for
    the /wire API. This is necessary as Taler supports offline signing
    for bank accounts for additional security.
 
--  Finally, the plugin needs to be provided resources for authentication
+-  Finally, the exchange needs to be provided resources for authentication
    to the respective banking service. The format in which the
-   authentication information must be provided depends on the wire
-   plugin.
+   authentication information is currently a username and password
+   for HTTP basic authentication, or nothing for the fakebank.
 
 You can configure multiple accounts for an exchange by creating sections
 starting with “account-” for the section name. You can ENABLE for each
@@ -424,16 +440,21 @@ wire transfers):
    URL = "payto://sepa/CH9300762011623852957"
    WIRE_RESPONSE = ${TALER_CONFIG_HOME}/account-1.json
 
-   # Currently, only the 'taler_bank' plugin is implemented.
-   PLUGIN = <plugin_name_here>
+   # Wire method supported for merchants, i.e. "IBAN" or
+   # "x-taler-bank"
+   METHOD = <method>
 
    # Use for exchange-aggregator (outgoing transfers)
    ENABLE_DEBIT = YES
    # Use for exchange-wirewatch (and listed in /wire)
    ENABLE_CREDIT = YES
 
-   # Authentication options for the chosen plugin go here.
+   # Authentication options for exchange bank account go here.
    # (Next sections have examples of authentication mechanisms)
+   TALER_BANK_AUTH_METHOD = basic
+   USERNAME = exchange
+   PASSWORD = super-secure
+
 
 The command line tool taler-exchange-wire is used to create the
 ``account-1.json`` file. For example, the utility may be invoked as
@@ -447,37 +468,6 @@ specified by the configuration):
 The generated file will be echoed by the exchange when serving
 /wire [3]_ requests.
 
-.. _Wire-plugin-_0060_0060taler_005fbank_0027_0027:
-
-Wire plugin “taler_bank”
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. meta::
-   :keywords: x-taler-bank
-   :keywords: taler_bank plugin
-
-The ``taler_bank`` plugin implements the wire method “x-taler-bank”.
-
-The format of the ``payto://`` URL is
-``payto://x-taler-bank/HOSTNAME[:PORT]``.
-
-For basic authentication, the ``taler_bank`` plugin only supports simple
-password-based authentication. For this, the configuration must contain
-the “USERNAME” and “PASSWORD” of the respective account at the bank.
-
-::
-
-   [account-1]
-
-   # Bank account details here..
-   # ..
-
-   # Authentication options for the taler_bank plugin below:
-
-   TALER_BANK_AUTH_METHOD = basic
-   USERNAME = exchange
-   PASSWORD = super-secure
-
 .. _Wire-fee-structure:
 
 Wire fee structure
@@ -487,7 +477,7 @@ Wire fee structure
   :keywords: wire fee
   :keywords: fee
 
-For each wire method (“sepa” or “x-taler-wire”, but not per plugin!) the
+For each wire method (“sepa” or “x-taler-wire”) the
 exchange configuration must specify applicable wire fees. This is done
 in configuration sections of the format ``fees-METHOD``. There are two
 types of fees, simple wire fees and closing fees. Wire fees apply
