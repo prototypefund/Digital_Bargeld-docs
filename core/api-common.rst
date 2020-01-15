@@ -321,18 +321,18 @@ Internally, amounts are parsed into the following object:
 Binary Formats
 --------------
 
-  .. note::
+.. note::
 
-     Due to the way of handling "big" numbers by some platforms (such as
-     JavaScript, for example), wherever the following specification mentions
-     a 64-bit value, the actual implementations are strongly advised to rely on
-     arithmetic up to 53 bits.
+   Due to the way of handling "big" numbers by some platforms (such as
+   JavaScript, for example), wherever the following specification mentions
+   a 64-bit value, the actual implementations are strongly advised to rely on
+   arithmetic up to 53 bits.
 
-  .. note::
+.. note::
 
-     Taler uses ``libgnunetutil`` for interfacing itself with the operating system,
-     doing crypto work, and other "low level" actions, therefore it is strongly
-     connected with the `GNUnet project <https://gnunet.org>`_.
+   Taler uses ``libgnunetutil`` for interfacing itself with the operating system,
+   doing crypto work, and other "low level" actions, therefore it is strongly
+   connected with the `GNUnet project <https://gnunet.org>`_.
 
 This section specifies the binary representation of messages used in Taler's
 protocols. The message formats are given in a C-style pseudocode notation.

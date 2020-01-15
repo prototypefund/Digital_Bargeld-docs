@@ -888,3 +888,158 @@ Merchant
 Wallet
   Also "Taler Wallet".  Software component that manages the user's digital cash
   and payments.
+
+
+Developer Glossary
+==================
+
+This glossary is meant for developers.  It contains some terms that we usually do not
+use when talking to end users or even system administrators.
+
+.. glossary::
+  :sorted:
+
+  auditor
+    trusted third party that verifies that the :term:`exchange` is operating correctly
+
+  bank
+    traditional financial service provider who offers wire :term:`transfers <transfer>` between accounts
+
+  coin
+    coins are individual token representing a certain amount of value, also known as the :term:`denomination` of the coin
+
+  contract
+    the proposal signed by the wallet.
+
+    FIXME: this one is totally wrong!
+
+  denomination
+    unit of currency, specifies both the currency and the face value of a :term:`coin`,
+    as well as associated fees and validity periods
+
+  denomination key
+    RSA key used by the exchange to certify that a given :term:`coin` is valid and of a
+    particular denomination
+
+  deposit
+    operation by which a merchant passes coins to an exchange, expecting the
+    exchange to credit his bank account in the future using a wire transfer
+
+  dirty
+    a coin is dirty if its public key may be known to an entity other than
+    the customer, thereby creating the danger of some entity being able to
+    link multiple transactions of coin's owner if the coin is not refreshed
+
+  exchange
+    Taler's payment service provider.  Issues electronic coins during
+    withdrawal and redeems them when they are deposited by merchants.
+
+  expired
+    Various operations come with time limits. In particular, denomination keys
+    come with strict time limits for the various operations involving the
+    coin issued under the denomination. The most important limit is the
+    deposit expiration, which specifies until when wallets are allowed to
+    use the coin in deposit or refreshing operations. There is also a "legal"
+    expiration, which specifies how long the exchange keeps records beyond the
+    deposit expiration time.  This latter expiration matters for legal disputes
+    in courts and also creates an upper limit for refreshing operations on
+    special zombie coin.
+
+  WebExtension
+    Cross-browser API used to implement the GNU Taler wallet browser extension.
+
+  fresh
+  fresh coin
+    a coin is fresh if its public key is only known to the customer
+
+  master key
+    offline key used by the exchange to certify denomination keys and
+    message signing keys
+
+  message signing key
+     key used by the exchange to sign online messages, other than coins
+
+  offer
+    specification of the details of a transaction, specifies the payment obligations
+    for the customer (i.e. the amount), the deliverables of the merchant and other
+    related information, such as deadlines or locations; However, it lacks some
+    information that the backend is supposed to provide.
+    In other words, after the backend adds the missing information to the offer and
+    signs it, it becomes a proposal.
+
+    FIXME: completely wrong
+
+  owner
+    a coin is owned by the entity that knows the private key of the coin
+
+  payback
+    Operation by which an exchange returns the value of coins affected
+    by a :term:`revocation` to their :term:`owner`, either by allowing the owner to
+    withdraw new coins or wiring funds back to the bank account of the :term:`owner`.
+
+    Also called "recoup".
+
+  proof
+    Message that cryptographically demonstrates that a particular claim is correct.
+
+  proposal
+    a sketch that has been completed and signed by the merchant backend.
+
+    FIXME: completely wrong
+
+  reserve
+    Funds set aside for future use; either the balance of a customer at the
+    exchange ready for withdrawal, or the funds kept in the exchange;s bank
+    account to cover obligations from coins in circulation.
+
+  refreshing
+    operation by which a :term:`dirty` :term:`coin` is converted into one or more
+    :term:`fresh` coins
+
+  refund
+    operation by which a merchant steps back from the right to funds that he
+    obtained from a :term:`deposit` operation, giving the right to the funds back
+    to the customer
+
+  revocation
+    exceptional operation by which an exchange withdraws a denomination from
+    circulation, either because the signing key was compromised or because
+    the exchange is going out of operation; unspent coins of a revoked
+    denomination are subjected to payback.
+
+  sharing
+    users can share ownership of a :term:`coin` by sharing access to the coin&#39;s
+    private key, thereby allowing all co-owners to spend the coin at any
+    time.
+
+  spending
+    operation by which a customer gives a merchant the right to deposit
+    coins in return for merchandise
+
+  transfer
+  wire transfer
+  transfer
+    method of sending funds between :term:`bank` accounts
+
+  wtid
+  wire transfer identifier
+    Subject of a wire transfer; usually a random string to uniquely
+    identify the transfer.
+
+    FIXME: inaccurate
+
+  transaction
+    method by which ownership is exclusively transferred from one entity
+
+  transaction id
+     unique number by which a merchant identifies a :term:`transaction`
+
+     FIXME: completely obsolete by now
+
+  wallet
+    software running on a customer's computer; withdraws, stores and
+    spends coins
+
+  withdrawal
+    operation by which a :term:`wallet` can convert funds from a reserve to
+    fresh coins
