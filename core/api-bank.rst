@@ -46,7 +46,7 @@ Withdrawing
   :status 200 OK:
     The withdrawal was correctly initiated, therefore the exchange received the
     payment.  A `BankTalerWithdrawResponse` object is returned.
-  :status 406 Not Acceptable: the user does not have sufficient credit to fulfill their request.
+  :status 409 Conflict: the user does not have sufficient credit to fulfill their request.
   :status 404 Not Found: The exchange wire details did not point to any valid bank account.
 
   **Details**

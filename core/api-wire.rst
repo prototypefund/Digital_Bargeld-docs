@@ -52,8 +52,7 @@ Making Transactions
   :status 200 OK:
     The request has been correctly handled, so the funds have been transferred to
     the recipient's account.  The body is a `TransactionResponse`
-  :status 400 Bad Request: The bank replies with a `BankError` object.
-  :status 406 Not Acceptable: The request had wrong currency; the bank replies with a `BankError` object.
+  :status 400 Bad Request: The bank replies with an `ErrorDetail` object.
   :status 409 Conflict:
     A transaction with the same ``transaction_uid`` but different transaction details
     has been submitted before.
@@ -100,18 +99,6 @@ Making Transactions
 
       // The recipient's account identifier as a payto URI
       credit_account: string;
-    }
-
-
-  .. ts:def:: BankError
-
-    interface BankError {
-
-      // Human readable explanation of the failure.
-      error: string;
-
-      // Numeric Taler error code (`TALER_ErrorCode`)
-      ec: number;
     }
 
 
@@ -168,7 +155,6 @@ Querying the transaction history
   **Response**
 
   :status 200 OK: JSON object whose field ``incoming_transactions`` is an array of type `IncomingBankTransaction`.
-  :status 204 No content: in case no records exist for the targeted user.
 
   .. ts:def:: IncomingBankTransaction
 
@@ -241,8 +227,6 @@ Querying the transaction history
   :status 200 OK:
     JSON object whose field ``outgoing_transactions`` is
     an array of type `OutgoingBankTransaction`.
-  :status 204 No content:
-    in case no records exist for the query
 
   .. ts:def:: OutgoingBankTransaction
 

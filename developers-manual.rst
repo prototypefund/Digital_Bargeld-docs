@@ -1043,3 +1043,18 @@ use when talking to end users or even system administrators.
   withdrawal
     operation by which a :term:`wallet` can convert funds from a reserve to
     fresh coins
+
+  fakebank
+    FIXME: explain
+
+  LibEuFin
+    FIXME: explain
+
+  GNUnet
+    FIXME: explain
+
+  bank
+    FIXME: explain
+
+  wire gateway
+    FIXME: explain

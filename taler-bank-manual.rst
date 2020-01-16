@@ -48,10 +48,11 @@ be switched off during a production deployment.
     The new user has been correctly registered.
   :status 409 Conflict:
     The username requested by the client is not available anymore.
-  :status 406 Not Acceptable:
-    Unacceptable characters were given for the username. See
-    https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.username
-    for the accepted character set.
+  :status 400 Bad Request:
+
+    * Unacceptable characters were given for the username. See
+      https://docs.djangoproject.com/en/2.2/ref/contrib/auth/#django.contrib.auth.models.User.username
+      for the accepted character set.
 
 **Details**
 
