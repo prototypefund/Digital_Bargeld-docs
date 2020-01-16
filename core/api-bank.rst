@@ -26,37 +26,75 @@ to tightly integrate with GNU Taler.
 
 .. contents:: Table of Contents
 
-
 -----------
 Withdrawing
 -----------
 
+Withdrawals with a Taler-integrated bank are based on withdrawal operations.
+Some user interaction (on the Bank's website or a Taler-enabled ATM) creates a
+withdrawal operation record in the Bank's database.  The wallet can use a unique identifier
+for the withdrawal operation (the ``wopid``) to interact with the withdrawal operation.
 
-.. _bank-withdraw:
-.. http:post:: /taler/withdraw
+.. http:get:: ${BANK_API_BASE_URL}/withdrawal-operation/${wopid}
 
-  This API provides programmatic withdrawal of cash via Taler to all the
-  users registered at the bank.  It triggers a wire transfer from the client
-  bank account to the exchange's.
-
-  **Request** The body of this request must have the format of a `BankTalerWithdrawRequest`.
+  Query information about a withdrawal operation, identified by the ``wopid``.
 
   **Response**
 
   :status 200 OK:
-    The withdrawal was correctly initiated, therefore the exchange received the
-    payment.  A `BankTalerWithdrawResponse` object is returned.
-  :status 409 Conflict: the user does not have sufficient credit to fulfill their request.
-  :status 404 Not Found: The exchange wire details did not point to any valid bank account.
+    The withdrawal operation is known to the bank, and details are given
+    in the `BankWithdrawalOperationStatus` response body.
+
+
+  .. ts:def:: BankWithdrawalOperationStatus
+
+    export class BankWithdrawalOperationStatus {
+      // has the wallet selected parameters for the withdrawal operation
+      // (exchange and reserve public key) and successfully sent it
+      // to the bank?
+      selection_done: boolean;
+
+      // The transfer has been confirmed and registered by the bank.
+      // Does not guarantee that the funds have arrived at the exchange already.
+      transfer_done: boolean;
+
+      // Amount that will be withdrawn with this operation
+      // (raw amount without fee considerations).
+      amount: Amount;
+
+      // Bank account of the customer that is withdrawing, as a
+      // payto URI.
+      sender_wire?: string;
+
+      // Suggestion for an exchange given by the bank.
+      suggested_exchange?: string;
+
+      // URL that the user needs to navigate to in order to
+      // complete some final confirmation (e.g. 2FA).
+      confirm_transfer_url?: string;
+
+      // Wire transfer types supported by the bank.
+      wire_types: string[];
+    }
+
+.. http:post:: ${BANK_API_BASE_URL}/withdrawal-operation/${wopid}
+
+  **Request** The body of this request must have the format of a `BankWithdrawalOperationPostRequest`.
+
+  **Response**
+
+  :status 200 OK:
+    The bank has accepted the withdrawal operation parameters chosen by the wallet.
+    The response is a `BankWithdrawalOperationPostResponse`.
+
+  :status 404 Not Found:
+    The bank does not know about a withdrawal operation with the specified ``wopid``.
 
   **Details**
 
-  .. ts:def:: BankTalerWithdrawRequest
+  .. ts:def:: BankWithdrawalOperationPostRequest
 
-    interface BankTalerWithdrawRequest {
-
-      // Amount to withdraw.
-      amount: Amount;
+    interface BankWithdrawalOperationPostRequest {
 
       // Reserve public key.
       reserve_pub: string;
@@ -68,14 +106,37 @@ Withdrawing
       exchange_wire_details: string;
     }
 
-  .. ts:def:: BankTalerWithdrawResponse
+  .. ts:def:: BankWithdrawalOperationPostResponse
 
-    interface BankTalerWithdrawResponse {
+    interface BankWithdrawalOperationPostResponse {
 
-      // Sender account details in 'payto' format.
-      sender_wire_details: string;
+      // The transfer has been confirmed and registered by the bank.
+      // Does not guarantee that the funds have arrived at the exchange already.
+      transfer_done: boolean;
 
-      // Exchange base URL.  Optional: only returned
-      // if the user used the default exchange.
-      exchange_url: string;
+      // URL that the user needs to navigate to in order to
+      // complete some final confirmation (e.g. 2FA).
+      //
+      // Only applicable when 'transfer_done' is false.
+      confirm_transfer_url?: string;
     }
+
+
+------------
+Testing APIs
+------------
+
+The following APIs are exposed by some bank API implementations **for testing** as part
+of the wallet's integration tests.
+
+.. warning::
+
+  These APIs **must not** be offered by any production systems.
+
+.. http:post:: ${BANK_API_BASE_URL}/testing/register
+
+.. http:post:: ${BANK_API_BASE_URL}/testing/withdraw
+
+.. http:post:: ${BANK_API_BASE_URL}/testing/withdraw-uri
+
+  
