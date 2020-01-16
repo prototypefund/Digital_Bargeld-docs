@@ -132,9 +132,9 @@ paid out first.
 
 .. http:put:: /deposit-confirmation
 
-   Submits a `DepositConfirmation` to the exchange. Should succeed
-   unless the signature provided is invalid or the exchange is not
-   audited by this auditor.
+  Submits a `DepositConfirmation` to the exchange. Should succeed
+  unless the signature provided is invalid or the exchange is not
+  audited by this auditor.
 
   **Response:**
 
@@ -217,10 +217,10 @@ Complaints
 This API is used by the wallet or merchants to submit proof of
 misbehavior of an exchange to the auditor.
 
-  .. note::
+.. note::
 
-     To be designed and implemented.
+   To be designed and implemented.
 
-  .. http:put:: /complain
+.. http:put:: /complain
 
-  Complain about missbehavior to the auditor.
+Complain about missbehavior to the auditor.
