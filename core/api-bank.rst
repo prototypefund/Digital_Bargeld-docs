@@ -39,6 +39,14 @@ for the withdrawal operation (the ``wopid``) to interact with the withdrawal ope
 
   Query information about a withdrawal operation, identified by the ``wopid``.
 
+  **Request**
+
+  :query long_poll_ms:
+    *Optional.*  If specified, the bank will wait up to ``long_poll_ms``
+    milliseconds for completion of the transfer before sending the HTTP
+    response.  A client must never rely on this behavior, as the bank may
+    return a response immediately.
+
   **Response**
 
   :status 200 OK:
@@ -86,7 +94,6 @@ for the withdrawal operation (the ``wopid``) to interact with the withdrawal ope
   :status 200 OK:
     The bank has accepted the withdrawal operation parameters chosen by the wallet.
     The response is a `BankWithdrawalOperationPostResponse`.
-
   :status 404 Not Found:
     The bank does not know about a withdrawal operation with the specified ``wopid``.
 
