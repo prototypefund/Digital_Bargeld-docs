@@ -250,6 +250,9 @@ Querying the transaction history
 
       // The wire transfer ID in the outgoing transaction.
       wtid: ShortHashCode;
+
+      // Base URL of the exchange.
+      exchange_base_url: string;
     }
 
 
