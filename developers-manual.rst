@@ -443,6 +443,22 @@ prepared.
   $ buildbot-worker start worker/
 
 
+Database schema versioning
+--------------------------
+
+The Postgres databases of the exchange and the auditor are versioned.
+See the 0000.sql file in the respective directory for documentation.
+
+Every set of changes to the database schema must be stored in a new
+versioned SQL script. The scripts must have contiguous numbers. After
+any release (or version being deployed to a production or staging
+environment), existing scripts MUST be immutable.
+
+Developers and operators MUST NOT make changes to database schema
+outside of this versioning.
+
+
+
 Releases
 ========
 
@@ -472,6 +488,7 @@ Tag releases with an **annotated** commit, like
 
    git tag -a v0.1.0 -m "Official release v0.1.0"
    git push origin v0.1.0
+
 
 Database for tests
 ------------------
