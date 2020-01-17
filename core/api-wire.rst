@@ -51,7 +51,7 @@ Making Transactions
 
   :status 200 OK:
     The request has been correctly handled, so the funds have been transferred to
-    the recipient's account.  The body is a `TransactionResponse`
+    the recipient's account.  The body is a `TransferResponse`
   :status 400 Bad Request: The bank replies with an `ErrorDetail` object.
   :status 409 Conflict:
     A transaction with the same ``transaction_uid`` but different transaction details
@@ -59,9 +59,9 @@ Making Transactions
 
   **Details:**
 
-  .. ts:def:: TransactionResponse
+  .. ts:def:: TransferResponse
 
-    interface TransactionResponse {
+    interface TransferResponse {
 
       // Timestamp that indicates when the wire transfer will be executed.
       // In cases where the wire transfer gateway is unable to know when
@@ -265,7 +265,15 @@ exposed by bank gateways in production.
   Simulate a transfer from a customer to the exchange.  This API is *not*
   idempotent since it's only used in testing.
 
-  .. ts:def:: OutgoingBankTransaction
+  **Request:** The body of this request must have the format of a `AddIncomingRequest`.
+
+  **Response:**
+
+  :status 200 OK:
+    The request has been correctly handled, so the funds have been transferred to
+    the recipient's account.  The body is a `AddIncomingResponse`
+
+  .. ts:def:: AddIncomingRequest
 
     interface AddIncomingRequest {
       // Amount to transfer.
@@ -280,4 +288,22 @@ exposed by bank gateways in production.
       // used.  An exception is the "exchange-fakebank", where any debit account can be
       // specified, as it is automatically created.
       debit_account: string;
+    }
+
+
+  .. ts:def:: AddIncomingResponse
+
+    interface AddIncomingResponse {
+
+      // Timestamp that indicates when the wire transfer will be executed.
+      // In cases where the wire transfer gateway is unable to know when
+      // the wire transfer will be executed, the time at which the request
+      // has been received and stored will be returned.
+      // The purpose of this field is for debugging (humans trying to find
+      // the transaction) as well as for taxation (determining which
+      // time period a transaction belongs to).
+      timestamp: Timestamp;
+
+      // Opaque of the transaction that the bank has made.
+      row_id: SafeUint64;
     }
