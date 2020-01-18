@@ -76,4 +76,4 @@ eventually be covered by our tests.
 
 * Reserve is created, closed, and then money is sent again to the reserve
 
-* Amount from payback should end up in customer's account again
+* Amount from recoup should end up in customer's account again

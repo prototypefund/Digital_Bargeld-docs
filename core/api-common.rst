@@ -824,12 +824,12 @@ within the
   };
 
 
-.. _TALER_PaybackRequestPS:
+.. _TALER_RecoupRequestPS:
 .. sourcecode:: c
 
-  struct TALER_PaybackRequestPS {
+  struct TALER_RecoupRequestPS {
     /**
-     *  purpose.purpose = TALER_SIGNATURE_WALLET_COIN_PAYBACK
+     *  purpose.purpose = TALER_SIGNATURE_WALLET_COIN_RECOUP
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
     struct TALER_CoinSpendPublicKeyP coin_pub;
@@ -837,21 +837,21 @@ within the
     struct TALER_DenominationBlindingKeyP coin_blind;
   };
 
-.. _TALER_PaybackRefreshConfirmationPS:
+.. _TALER_RecoupRefreshConfirmationPS:
 .. sourcecode:: c
 
   // FIXME: put definition here
 
-.. _TALER_PaybackConfirmationPS:
+.. _TALER_RecoupConfirmationPS:
 .. sourcecode:: c
 
-  struct TALER_PaybackConfirmationPS {
+  struct TALER_RecoupConfirmationPS {
     /**
-     *  purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK
+     *  purpose.purpose = TALER_SIGNATURE_EXCHANGE_CONFIRM_RECOUP
      */
     struct GNUNET_CRYPTO_EccSignaturePurpose purpose;
     struct GNUNET_TIME_AbsoluteNBO timestamp;
-    struct TALER_AmountNBO payback_amount;
+    struct TALER_AmountNBO recoup_amount;
     struct TALER_CoinSpendPublicKeyP coin_pub;
     struct TALER_ReservePublicKeyP reserve_pub;
   };

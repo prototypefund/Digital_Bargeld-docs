@@ -989,7 +989,7 @@ use when talking to end users or even system administrators.
   owner
     a coin is owned by the entity that knows the private key of the coin
 
-  payback
+  recoup
     Operation by which an exchange returns the value of coins affected
     by a :term:`revocation` to their :term:`owner`, either by allowing the owner to
     withdraw new coins or wiring funds back to the bank account of the :term:`owner`.
@@ -1022,7 +1022,7 @@ use when talking to end users or even system administrators.
     exceptional operation by which an exchange withdraws a denomination from
     circulation, either because the signing key was compromised or because
     the exchange is going out of operation; unspent coins of a revoked
-    denomination are subjected to payback.
+    denomination are subjected to recoup.
 
   sharing
     users can share ownership of a :term:`coin` by sharing access to the coin&#39;s

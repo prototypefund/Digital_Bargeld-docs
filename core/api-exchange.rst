@@ -111,8 +111,8 @@ possibly by using HTTPS.
       // Denominations offered by this exchange.
       denoms: Denom[];
 
-      // Denominations for which the exchange currently offers/requests payback.
-      payback: Payback[];
+      // Denominations for which the exchange currently offers/requests recoup.
+      recoup: Recoup[];
 
       // The date when the denomination keys were last updated.
       list_issue_date: Timestamp;
@@ -184,17 +184,17 @@ possibly by using HTTPS.
   different currency, but this is not currently supported by the
   implementation.
 
-  .. ts:def:: Payback
+  .. ts:def:: Recoup
 
-    interface Payback {
+    interface Recoup {
       // hash of the public key of the denomination that is being revoked under
-      // emergency protocol (see /payback).
+      // emergency protocol (see /recoup).
       h_denom_pub: HashCode;
 
       // We do not include any signature here, as the primary use-case for
       // this emergency involves the exchange having lost its signing keys,
       // so such a signature here would be pretty worthless.  However, the
-      // exchange will not honor /payback requests unless they are for
+      // exchange will not honor /recoup requests unless they are for
       // denomination keys listed here.
     }
 
@@ -401,7 +401,7 @@ exchange.
   .. ts:def:: TransactionHistoryItem
 
     interface TransactionHistoryItem {
-      // Either "WITHDRAW", "DEPOSIT", "PAYBACK", or "CLOSING"
+      // Either "WITHDRAW", "DEPOSIT", "RECOUP", or "CLOSING"
       type: string;
 
       // The amount that was withdrawn or deposited (incl. fee)
@@ -429,10 +429,10 @@ exchange.
       // Sender account payto://-URL, only present if type is "DEPOSIT".
       sender_account_url?: string;
 
-      // Receiver account details, only present if type is "PAYBACK".
+      // Receiver account details, only present if type is "RECOUP".
       receiver_account_details?: any;
 
-      // Wire transfer identifier, only present if type is "PAYBACK".
+      // Wire transfer identifier, only present if type is "RECOUP".
       wire_transfer?: any;
 
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
@@ -445,9 +445,9 @@ exchange.
       // returned to, present if type is "CLOSING".
       h_wire?: Base32;
 
-      // If ``type`` is "PAYBACK", this is a signature over
-      // a struct `TALER_PaybackConfirmationPS` with purpose
-      // TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK.
+      // If ``type`` is "RECOUP", this is a signature over
+      // a struct `TALER_RecoupConfirmationPS` with purpose
+      // TALER_SIGNATURE_EXCHANGE_CONFIRM_RECOUP.
       // If ``type`` is "CLOSING", this is a signature over a
       // struct `TALER_ReserveCloseConfirmationPS` with purpose
       // TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
@@ -458,11 +458,11 @@ exchange.
       // ``exchange_sig`` is present.
       exchange_pub?: EddsaPublicKey;
 
-      // Public key of the coin that was paid back; only present if type is "PAYBACK".
+      // Public key of the coin that was paid back; only present if type is "RECOUP".
       coin_pub?: CoinPublicKey;
 
-      // Timestamp when the exchange received the /payback or executed the
-      // wire transfer. Only present if ``type`` is "DEPOSIT", "PAYBACK" or
+      // Timestamp when the exchange received the /recoup or executed the
+      // wire transfer. Only present if ``type`` is "DEPOSIT", "RECOUP" or
       // "CLOSING".
       timestamp?: Timestamp;
    }
@@ -675,8 +675,8 @@ denomination.
   .. ts:def:: CoinSpendHistoryItem
 
     interface CoinSpendHistoryItem {
-      // Either "DEPOSIT", "MELT", "REFUND", "PAYBACK",
-      // "OLD-COIN-PAYBACK" or "PAYBACK-REFRESH"
+      // Either "DEPOSIT", "MELT", "REFUND", "RECOUP",
+      // "OLD-COIN-RECOUP" or "RECOUP-REFRESH"
       type: string;
 
       // The total amount of the coin's value absorbed (or restored in the
@@ -695,8 +695,8 @@ denomination.
       merchant_pub?: EddsaPublicKey;
 
       // date when the operation was made.
-      // Only for "DEPOSIT", "PAYBACK", "OLD-COIN-PAYBACK" and
-      // "PAYBACK-REFRESH" operations.
+      // Only for "DEPOSIT", "RECOUP", "OLD-COIN-RECOUP" and
+      // "RECOUP-REFRESH" operations.
       timestamp?: Timestamp;
 
       // date until which the merchant can issue a refund to the customer via the
@@ -733,13 +733,13 @@ denomination.
       // Only present if ``type`` is "REFUND"
       merchant_sig?: EddsaSignature;
 
-      // public key of the reserve that will receive the funds, for "PAYBACK" operations.
+      // public key of the reserve that will receive the funds, for "RECOUP" operations.
       reserve_pub?: EddsaPublicKey;
 
-      // Signature by the exchange, only present if ``type`` is "PAYBACK",
-      // "OLD-COIN-PAYBACK" or "PAYBACK-REFRESH".  Signature is
-      // of type TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK for "PAYBACK",
-      // and of type TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK_REFRESH otherwise.
+      // Signature by the exchange, only present if ``type`` is "RECOUP",
+      // "OLD-COIN-RECOUP" or "RECOUP-REFRESH".  Signature is
+      // of type TALER_SIGNATURE_EXCHANGE_CONFIRM_RECOUP for "RECOUP",
+      // and of type TALER_SIGNATURE_EXCHANGE_CONFIRM_RECOUP_REFRESH otherwise.
       exchange_sig?: EddsaSignature;
 
       // public key used to sign ``exchange_sig``,
@@ -747,11 +747,11 @@ denomination.
       exchange_pub?: EddsaPublicKey;
 
       // Blinding factor of the revoked new coin,
-      // only present if ``type`` is "REFRESH_PAYBACK".
+      // only present if ``type`` is "REFRESH_RECOUP".
       new_coin_blinding_secret: RsaBlindingKeySecret;
 
       // Blinded public key of the revoked new coin,
-      // only present if ``type`` is "REFRESH_PAYBACK".
+      // only present if ``type`` is "REFRESH_RECOUP".
       new_coin_ev: RsaBlindingKeySecret;
     }
 
@@ -1018,15 +1018,15 @@ in using this API.
 
   This is a proposed API, we are implementing it as bug #3887.
 
-.. http:post:: /payback
+.. http:post:: /recoup
 
   Demand that a coin be refunded via wire transfer to the original owner.
 
-  **Request:** The request body must be a `PaybackRequest` object.
+  **Request:** The request body must be a `RecoupRequest` object.
 
   **Response:**
   :status 200 OK:
-  The request was succesful, and the response is a `PaybackConfirmation`.
+  The request was succesful, and the response is a `RecoupConfirmation`.
   Note that repeating exactly the same request
   will again yield the same response, so if the network goes down during the
   transaction or before the client can commit the coin signature to disk, the
@@ -1041,9 +1041,9 @@ in using this API.
 
   **Details:**
 
-  .. ts:def:: PaybackRequest
+  .. ts:def:: RecoupRequest
 
-    interface PaybackRequest {
+    interface RecoupRequest {
       // Hash of denomination public key (RSA), specifying the type of coin the client
       // would like the exchange to pay back.
       denom_pub_hash: HashCode;
@@ -1057,23 +1057,23 @@ in using this API.
       // coin's blinding factor
       coin_blind_key_secret: RsaBlindingKeySecret;
 
-      // Signature of `TALER_PaybackRequestPS` created with the `coin's private key <coin-priv>`
+      // Signature of `TALER_RecoupRequestPS` created with the `coin's private key <coin-priv>`
       coin_sig: EddsaSignature;
 
-      // Was the coin refreshed (and thus the payback should go to the old coin)?
+      // Was the coin refreshed (and thus the recoup should go to the old coin)?
       // Optional (for backwards compatibility); if absent, "false" is assumed
       refreshed?: boolean;
     }
 
 
-  .. ts:def:: PaybackConfirmation
+  .. ts:def:: RecoupConfirmation
 
-    interface PaybackConfirmation {
-      // public key of the reserve that will receive the payback,
+    interface RecoupConfirmation {
+      // public key of the reserve that will receive the recoup,
       // provided if refreshed was false.
       reserve_pub?: EddsaPublicKey;
 
-      // public key of the old coin that will receive the payback,
+      // public key of the old coin that will receive the recoup,
       // provided if refreshed was true.
       old_coin_pub?: EddsaPublicKey;
 
@@ -1081,15 +1081,15 @@ in using this API.
       // case coin was partially spent and wallet got restored from backup)
       amount: Amount;
 
-      // Time by which the exchange received the /payback request.
+      // Time by which the exchange received the /recoup request.
       timestamp: Timestamp;
 
-      // the EdDSA signature of `TALER_PaybackConfirmationPS` (refreshed false)
-      // or `TALER_PaybackRefreshConfirmationPS` (refreshed true) using a current
+      // the EdDSA signature of `TALER_RecoupConfirmationPS` (refreshed false)
+      // or `TALER_RecoupRefreshConfirmationPS` (refreshed true) using a current
       // `signing key of the exchange <sign-key-priv>` affirming the successful
-      // payback request, and that the exchange promises to transfer the funds
+      // recoup request, and that the exchange promises to transfer the funds
       // by the date specified (this allows the exchange delaying the transfer
-      // a bit to aggregate additional payback requests into a larger one).
+      // a bit to aggregate additional recoup requests into a larger one).
       exchange_sig: EddsaSignature;
 
       // Public EdDSA key of the exchange that was used to generate the signature.

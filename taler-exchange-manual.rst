@@ -834,9 +834,9 @@ Revocations
 When an exchange goes out of business or detects that the private key of
 a denomination key pair has been compromised, it may revoke some or all
 of its denomination keys. At this point, the hashes of the revoked keys
-must be returned as part of the ``/keys`` response under “payback”.
+must be returned as part of the ``/keys`` response under “recoup”.
 Wallets detect this, and then return unspent coins of the respective
-denomination key using the ``/payback`` API.
+denomination key using the ``/recoup`` API.
 
 When a denomination key is revoked, a revocation file is placed into the
 respective subdirectory of “denomkeys/”. The file has the same prefix as

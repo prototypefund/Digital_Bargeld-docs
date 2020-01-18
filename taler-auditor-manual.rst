@@ -576,7 +576,7 @@ database fields (within the constraints of the database schema).
 .. TODO
 
    The current code coverage is known to be inadequate,
-   as refunds and paybacks could not yet been tested due
+   as refunds and recoups could not yet been tested due
    to limitations of the CLI wallet.
 
 In general, test-auditor.sh runs the tests against an "old" database where
