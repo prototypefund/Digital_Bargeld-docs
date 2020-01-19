@@ -21,7 +21,7 @@ for a local / regional currency or accounting system.  Using ``x-taler-bank``
 wire method in combination with the Taler's bank, it is thus possible to
 fully test the Taler system without using "real" currencies.  The URL
 format for ``x-taler-bank`` is simple, in that it only specifies an account
-number and the URL of the bank:
+number and the origin (domain and optionally a port) of the bank:
 
 ::
 

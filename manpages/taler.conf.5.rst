@@ -215,31 +215,59 @@ AUDITOR_KEY
 CURRENCY
    Name of the currency for which this auditor is trusted, i.e. “KUDOS”
 
-ACCOUNT OPTIONS (for exchanges and merchants)
----------------------------------------------
+MERCHANT ACCOUNT OPTIONS
+------------------------
+
+PAYTO_URI
+   Specifies the payto://-URL of the account. The general format is
+   payto://METHOD/DETAILS.
+
+WIRE_RESPONSE (exchange and merchant)
+   Specifies the name of the file in which the wire details for this merchant
+   account should be located. Used by the Taler exchange service and the
+   taler-merchant-httpd (to generate and then use the file).
+
+HONOR_instance
+   Must be set to YES for the instances (where "instance" is the section
+   name of the instance) of the merchant backend that should allow
+   incoming wire transfers for this bank account.
+
+ACTIVE_instance
+   Must be set to YES for the instances (where “instance” is the section
+   name of the instance) of the merchant backend that should use this
+   bank account in new offers/contracts. Setting ACTIVE_instance to YES
+   requires also setting HONOR_instance to YES.
+
+
+EXCHANGE ACCOUNT OPTIONS
+------------------------
 
 An exchange (or merchant) can have multiple bank accounts. The following
 options are for sections named “[account-SOMETHING]”. The SOMETHING is
 arbitrary and should be chosen to uniquely identify the bank account for
-the operator. Additional authentication options may need to be specified
-in the account section depending on the PLUGIN used.
+the operator.
 
-URL
+PAYTO_URI
    Specifies the payto://-URL of the account. The general format is
-   payto://METHOD/DETAILS. This option is used for exchanges and
-   merchants.
+   payto://METHOD/DETAILS.
+
+WIRE_GATEWAY_URL
+  URL of the wire gateway
+
+WIRE_GATEWAY_AUTH_METHOD
+  This option determines how the exchange (auditor/wirewatch/aggregator)
+  authenticates with the wire gateway.  Choices are ``basic`` and ``none``.
+
+USERNAME
+  User name for ``basic`` authentication with the wire gateway.
+
+PASSWORD
+  Password for ``basic`` authentication with the wire gateway.
 
 WIRE_RESPONSE
    Specifies the name of the file in which the /wire response for this
    account should be located. Used by the Taler exchange service and the
-   taler-exchange-wire tool and the taler-merchant-httpd (to generate
-   the files).
-
-PLUGIN
-   Name of the plugin can be used to access the account
-   (i.e. “taler_bank”). Used by the merchant backend for back
-   office operations (i.e. to identify incoming wire transfers) and by
-   the exchange.
+   taler-exchange-wire tool.
 
 ENABLE_DEBIT
    Must be set to YES for the accounts that the
@@ -250,16 +278,6 @@ ENABLE_CREDIT
    should check for credits. It is yet uncertain if the merchant
    implementation may check this flag as well.
 
-HONOR_instance
-   Must be set to YES for the instances (where “instance” is the section
-   name of the instance) of the merchant backend that should allow
-   incoming wire transfers for this bank account.
-
-ACTIVE_instance
-   Must be set to YES for the instances (where “instance” is the section
-   name of the instance) of the merchant backend that should use this
-   bank account in new offers/contracts. Setting ACTIVE_instance to YES
-   requires also setting ENABLE_instance to YES.
 
 TALER-BANK AUTHENTICATION OPTIONS (for accounts)
 ------------------------------------------------
