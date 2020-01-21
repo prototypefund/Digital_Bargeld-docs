@@ -650,7 +650,7 @@ In the following, UUID is always defined and used according to `RFC 4122`_.
 Managing truth
 ^^^^^^^^^^^^^^
 
-This API is used by the Anastasis client to deposit or request **truth** with
+This API is used by the Anastasis client to deposit **truth** or request a (encrypted) **key share** with
 the escrow provider.
 
 An **escrow method** specifies an Anastasis provider and how the user should
@@ -663,7 +663,7 @@ charge per truth operation using GNU Taler.
 
 .. http:post:: /truth/$UUID
 
-  Upload a Truth_-Object according to the policy the client created before (see RecoveryDocument_).
+  Upload a TruthUploadRequest_-Object according to the policy the client created before (see RecoveryDocument_).
   If request has been seen before, the server should do nothing, and otherwise store the new object.
 
   :status 204 No content:
@@ -676,8 +676,6 @@ charge per truth operation using GNU Taler.
     This server requires payment to store truth per item.
     See the Taler payment protocol specification for how to pay.
     The response body MAY provide alternative means for payment.
-  :status 403 Forbidden:
-    The required account signature was invalid.  The response body may elaborate on the error.
   :status 409 Conflict:
     The server already has some truth stored under this UUID. The client should check that it
     is generating UUIDs with enough entropy.
@@ -687,10 +685,10 @@ charge per truth operation using GNU Taler.
 
   **Details:**
 
-  .. _Truth:
-  .. ts:def:: Truth
+  .. _TruthUploadRequest:
+  .. ts:def:: TruthUploadRequest
 
-    interface Truth {
+    interface TruthUploadRequest {
       // Contains the information of an interface `EncryptedKeyShare`, but simply
       // as one binary block (in Crockford Base32 encoding for JSON).
       key_share_data: []; //bytearray of undefined length
@@ -722,9 +720,7 @@ charge per truth operation using GNU Taler.
 .. http:get:: /truth/$UUID[?response=$RESPONSE]
 
   Get the stored encrypted key share. If $RESPONSE is specified by the client, the server checks
-  if $RESPONSE matches the expected response according to the challenge sent to the client before.
-  If $RESPONSE is not specified, the server will response with a challenge according to the key share 
-  method (e.g. ask the security question or send a SMS with a code) and await the answer within $RESPONSE. 
+  if $RESPONSE matches the expected response specified before within the TruthUploadRequest_ (see encrypted_truth).  
   Also, the user has to provide the correct *truth_encryption_key* with every get request (see below).
   When $RESPONSE is correct, the server responses with the encrypted key share.
   The encrypted key share is returned simply as a byte array and not in JSON format.
@@ -747,14 +743,11 @@ charge per truth operation using GNU Taler.
     The server requires a valid "response" to the challenge associated with the UUID.
   :status 404 Not Found:
     The server does not know any truth under the given UUID.
-  :status 412 Precondition Failed:
-    The escrow provider responds with an EscrowChallenge_ object containing
-    details on the challenge the user has to satisfy (see below).
   :status 503 Service Unavailable:
     Server is out of Service.
 
-  *Truth-Decryption-Key*: Key used to encrypt the Truth_ and which has to provided by the user. The key is stored with
-  the according EscrowMethod_. The server needs this key to get the info out of Truth_ needed to prepare an EscrowChallenge_.
+  *Truth-Decryption-Key*: Key used to encrypt the **truth** (see encrypted_truth within TruthUploadRequest_) and which has to provided by the user. The key is stored with
+  the according EscrowMethod_. The server needs this key to get the info out of TruthUploadRequest_ needed to verify the $RESPONSE.
 
   **Details:**
 
@@ -796,18 +789,6 @@ charge per truth operation using GNU Taler.
 
     }
 
-  .. _EscrowChallenge:
-  .. ts:def:: EscrowChallenge
-
-    interface EscrowChallenge {
-      // ground truth, i.e. challenge question,
-      // phone number, e-mail address, picture, fingerprint, ...
-      truth: []; //bytearray of undefined length
-
-      // mime type of truth, i.e. text/ascii, image/jpeg, etc.
-      truth_mime: string;
-
-    }
 
 
 ----------------------
@@ -829,7 +810,10 @@ FIXME: details!
 Video identification (vid)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Requires the user to identify via video-call.
+Requires the user to identify via video-call. The user is expected to delete all metadata revealing 
+information about him/her from the images before uploading them. Since the respective images must 
+be passed on to the video identification service in the event of password recovery, it must be 
+ensured that no further information about the user can be derived from them. 
 FIXME: details!
 
 
