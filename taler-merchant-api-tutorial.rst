@@ -655,6 +655,9 @@ locations
    transmitted) once, and can otherwise be referred to via the label. A
    non-exhaustive list of location attributes is the following:
 
+   name
+      receiver name for delivery, either business or person name.
+
    country
       Name of the country for delivery, as found on a postal package,
       i.e. “France”.
@@ -672,17 +675,15 @@ locations
    city
       Name of the city for delivery, as found on a postal package.
 
-   ZIP code
+   zip_code
       ZIP code for delivery, as found on a postal package.
 
    street
       Street name for delivery, as found on a postal package.
 
-   street number
+   street_number
       Street number (number of the house) for delivery, as found on a
       postal package.
-
-   name receiver name for delivery, either business or person name.
 
    Note that locations are not required to specify all of these fields,
    and they is also allowed to have additional fields. Contract
