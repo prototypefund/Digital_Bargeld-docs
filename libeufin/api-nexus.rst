@@ -64,43 +64,45 @@ Low-level EBICS API
   .. ts:def:: NexusEbicsBackupRequest
     
     interface NexusEbicsBackupRequest {
-    
       passphrase: string;
-
     }
 
 
   .. ts:def:: NexusEbicsBackupResponse
-    
     interface NexusEbicsBackupResponse {
       
       // The three passphrase-protected private keys in the PKCS#8 format
 
-      authBlob: binary;
-      encBlob: binary;
-      sigBlob: binary;
+      authBlob: string; // base64
+      encBlob: string; // base64
+      sigBlob: string; // base64
+      hostID: string;
+      userID: string;
+      partnerID: string;
+      ebicsURL: string;
     }
 
 
 .. http:post:: <nexus>/ebics/subscribers/{id}/restoreBackup
   
-  Ask the server to restore the keys.
+  Ask the server to restore the keys.  Always creates a NEW
+  "{id}" account, and fails if it exists already.
 
   .. ts:def:: NexusEbicsRestoreBackupRequest
-
     interface NexusEbicsRestoreBackupRequest {
       
       // passphrase to decrypt the keys
       passphrase: string;
 
       // The three passphrase-protected private keys in the PKCS#8 format
-      authBlob: binary;
-      encBlob: binary;
-      sigBlob: binary;
+      authBlob: string; // base64
+      encBlob: string; // base64
+      sigBlob: string; // base64
+      hostID: string;
+      userID: string;
+      partnerID: string;
+      ebicsURL: string;
     }
-
-
-
 
   .. ts:def:: NexusEbicsCreateSubscriber
 
@@ -129,16 +131,13 @@ Low-level EBICS API
 
   Get details about an EBICS subscriber.
 
-
 .. http:get:: <nexus>/ebics/subscriber/{id}/keyletter
 
-  Get a nicely formatted key letter.  (Does not return JSON, but markdown-formatted text)
-
+  Get a formatted letter (mark-down) to confirm keys via ordinary mail.
 
 .. http:post:: <nexus>/ebics/subscriber/{id}/sendIni
 
   Send INI message to the EBICS host.
-
 
 .. http:post:: <nexus>/ebics/subscriber/{id}/sendHia
 
