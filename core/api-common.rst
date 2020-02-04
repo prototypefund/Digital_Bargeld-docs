@@ -73,9 +73,7 @@ handle the error as if an internal error (500) had been returned.
 
       // Human-readable description of the error, i.e. "missing parameter", "commitment violation", ...
       // The other arguments are specific to the error value reported here.
-      error: string;
-
-      // Hint about error nature
+      // Should give a human-readable hint about the error's nature. Optional.
       hint?: string;
 
       // Name of the parameter that was bogus (if applicable)

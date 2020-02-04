@@ -535,7 +535,7 @@ exchange.
 
     interface WithdrawError {
       // Constant "Insufficient funds"
-      error: string;
+      hint: string;
 
       // Amount left in the reserve
       balance: Amount;
@@ -665,7 +665,7 @@ denomination.
 
     interface DepositDoubleSpendError {
       // The string constant "insufficient funds"
-      error: string;
+      hint: string;
 
       // Transaction history for the coin that is
       // being double-spended
@@ -848,7 +848,7 @@ the API during normal operation.
 
     interface MeltForbiddenResponse {
       // Always "insufficient funds"
-      error: string;
+      hint: string;
 
       // public key of a melted coin that had insufficient funds
       coin_pub: EddsaPublicKey;
@@ -938,7 +938,7 @@ the API during normal operation.
 
     interface RevealConflictResponse {
       // Constant "commitment violation"
-      error: string;
+      hint: string;
 
       // Detailed error code
       code: Integer;
