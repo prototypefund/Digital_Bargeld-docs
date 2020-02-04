@@ -1,7 +1,7 @@
 ..
   This file is part of GNU TALER.
 
-  Copyright (C) 2014, 2015, 2016, 2017 Taler Systems SA
+  Copyright (C) 2014-2020 Taler Systems SA
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -25,6 +25,34 @@ This chapter describe the APIs that banks need to offer towards Taler wallets
 to tightly integrate with GNU Taler.
 
 .. contents:: Table of Contents
+
+.. http:get:: /config
+
+  Get a configuration information about the bank.
+
+  **Request:**
+
+  **Response:**
+
+  :status 200 OK:
+    The exchange responds with a `BankVersion` object. This request should
+    virtually always be successful.
+
+  **Details:**
+
+  .. ts:def:: BankVersion
+
+    interface BankVersion {
+      // libtool-style representation of the Bank protocol version, see
+      // https://www.gnu.org/software/libtool/manual/html_node/Versioning.html#Versioning
+      // The format is "current:revision:age".
+      version: string;
+
+      // currency used by this bank
+      currency: string;
+
+    }
+
 
 -----------
 Withdrawing
@@ -145,5 +173,3 @@ of the wallet's integration tests.
 .. http:post:: ${BANK_API_BASE_URL}/testing/withdraw
 
 .. http:post:: ${BANK_API_BASE_URL}/testing/withdraw-uri
-
-  
