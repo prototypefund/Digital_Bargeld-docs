@@ -43,7 +43,17 @@ handle the error as if an internal error (500) had been returned.
   **Response:**
 
   :resheader Content-Type: application/json
-  :status 200: The request was successful.
+  :status 200:
+    The request was successful.
+  :status 301 Moved Permanently:
+    The server responsible for the reserve
+    changed, the client MUST follow the link to the new location. If possible,
+    the client SHOULD remember the new URL for the reserve for future
+    requests.
+  :status 302 Found:
+    The server responsible for the reserve changed, the
+    client MUST follow the link to the new location, but MUST NOT retain the
+    new URL for future requests.
   :status 500 Internal server error:
     This always indicates some serious internal operational error of the exchange,
     such as a program bug, database problems, etc., and must not be used for
@@ -57,7 +67,8 @@ handle the error as if an internal error (500) had been returned.
     should naturally be able to address them in a timely fashion, especially
     within 24h.  When generating an internal server error, the exchange responds with
     a JSON object containing the following fields:
-  :status 400 Bad Request: One of the arguments to the request is missing or malformed.
+  :status 400 Bad Request:
+    One of the arguments to the request is missing or malformed.
 
   Unless specified otherwise, all error status codes (4xx and 5xx) have a message
   body with an `ErrorDetail` JSON object.

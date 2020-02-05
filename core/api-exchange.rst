@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014-2018 Taler Systems SA
+  Copyright (C) 2014-2020 Taler Systems SA
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -361,7 +361,7 @@ exchange.
    advertise those terms of service.
 
 
-.. http:get:: /reserve/status
+.. http:get:: /reserves/$RESERVE_PUB
 
   Request information about a reserve.
 
@@ -376,13 +376,12 @@ exchange.
 
   **Request:**
 
-  :query reserve_pub: EdDSA reserve public key identifying the reserve.
-
   **Response:**
 
   :status 200 OK:
     The exchange responds with a `ReserveStatus` object;  the reserve was known to the exchange,
-  :status 404 Not Found: The reserve key does not belong to a reserve known to the exchange.
+  :status 404 Not Found:
+    The reserve key does not belong to a reserve known to the exchange.
 
   **Details:**
 
@@ -468,7 +467,7 @@ exchange.
    }
 
 
-.. http:post:: /reserve/withdraw
+.. http:post:: /reserves/$RESERVE_PUB
 
   Withdraw a coin of the specified denomination.  Note that the client should
   commit all of the request details, including the private key of the coin and
@@ -513,13 +512,9 @@ exchange.
       // denomination private key
       coin_ev: CoinEnvelope;
 
-      // `public (EdDSA) key <reserve-pub>` of the reserve from which the coin should be
-      // withdrawn.  The total amount deducted will be the coin's value plus the
-      // withdrawal fee as specified with the denomination information.
-      reserve_pub: EddsaPublicKey;
-
       // Signature of `TALER_WithdrawRequestPS` created with the `reserves's private key <reserve-priv>`
       reserve_sig: EddsaSignature;
+
     }
 
 
@@ -529,6 +524,7 @@ exchange.
       // The blinded RSA signature over the ``coin_ev``, affirms the coin's
       // validity after unblinding.
       ev_sig: BlindedRsaSignature;
+
     }
 
   .. ts:def:: WithdrawError
@@ -560,11 +556,17 @@ denomination.
 
 .. _deposit:
 
-.. http:POST:: /deposit
+.. http:POST:: /coins/$COIN_PUB/deposit
 
   Deposit the given coin and ask the exchange to transfer the given :ref:`amount`
   to the merchants bank account.  This API is used by the merchant to redeem
-  the digital coins.  The request should contain a JSON object with the
+  the digital coins.
+
+  The base URL for "/coins/"-requests may differ from the main base URL of the
+  exchange. The exchange MUST return a 301 or 302 redirection to the correct
+  base URL if this is the case.
+
+  The request should contain a JSON object with the
   following fields:
 
   **Request:** The request body must be a `DepositRequest` object.
@@ -606,9 +608,6 @@ denomination.
       // details are never disclosed to the exchange.
       h_contract_terms: HashCode;
 
-      // `coin's public key <eddsa-coin-pub>`, both ECDHE and EdDSA.
-      coin_pub: CoinPublicKey;
-
       // Hash of denomination RSA key with which the coin is signed
       denom_pub_hash: HashCode;
 
@@ -644,21 +643,29 @@ denomination.
   .. ts:def:: DepositSuccess
 
      interface DepositSuccess {
-      // The string constant "DEPOSIT_OK"
-      status: string;
+      // Optional base URL of the exchange for looking up wire transfers
+      // associated with this transaction.  If not given,
+      // the base URL is the same as the one used for this request.
+      // Can be used if the base URL for /transactions/ differs from that
+      // for /coins/, i.e. for load balancing.  Clients SHOULD
+      // respect the transaction_base_url if provided.  Any HTTP server
+      // belonging to an exchange MUST generate a 301/302 redirection
+      // to the correct base URL should a client uses the wrong base
+      // URL, or if the base URL has changed since the deposit.
+      transaction_base_url?: string;
 
       // the EdDSA signature of `TALER_DepositConfirmationPS` using a current
       // `signing key of the exchange <sign-key-priv>` affirming the successful
       // deposit and that the exchange will transfer the funds after the refund
       // deadline, or as soon as possible if the refund deadline is zero.
-      sig: EddsaSignature;
+      exchange_sig: EddsaSignature;
 
       // `public EdDSA key of the exchange <sign-key-pub>` that was used to
       // generate the signature.
       // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
-      pub: EddsaPublicKey;
+      exchange_pub: EddsaPublicKey;
     }
 
   .. ts:def:: DepositDoubleSpendError
@@ -772,14 +779,17 @@ the exchange to achieve taxability, wallets do not really ever need that part of
 the API during normal operation.
 
 .. _refresh:
-.. http:post:: /refresh/melt
+.. http:post:: /coins/$COIN_PUB/melt
 
-  "Melts" coins.  Invalidates the coins and prepares for exchangeing of fresh
+  "Melts" a coin.  Invalidates the coins and prepares for exchangeing of fresh
   coins.  Taler uses a global parameter ``kappa`` for the cut-and-choose
   component of the protocol, for which this request is the commitment.  Thus,
   various arguments are given ``kappa``-times in this step.  At present ``kappa``
   is always 3.
 
+  The base URL for "/coins/"-requests may differ from the main base URL of the
+  exchange. The exchange MUST return a 301 or 302 redirection to the correct
+  base URL if this is the case.
 
   :status 401 Unauthorized:
     One of the signatures is invalid.
@@ -798,9 +808,6 @@ the API during normal operation.
   .. ts:def:: MeltRequest
 
     interface MeltRequest {
-
-      // `Coin public key <eddsa-coin-pub>`, uniquely identifies the coin to be melted
-      coin_pub: string;
 
       // Hash of the denomination public key, to determine total coin value.
       denom_pub_hash: HashCode;
@@ -841,6 +848,22 @@ the API during normal operation.
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
       exchange_pub: EddsaPublicKey;
+
+      // Base URL to use for operations on the refresh context
+      // (so the reveal operation).  If not given,
+      // the base URL is the same as the one used for this request.
+      // Can be used if the base URL for /refreshes/ differs from that
+      // for /coins/, i.e. for load balancing.  Clients SHOULD
+      // respect the refresh_base_url if provided.  Any HTTP server
+      // belonging to an exchange MUST generate a 301/302 redirection
+      // to the correct base URL should a client uses the wrong base
+      // URL, or if the base URL has changed since the melt.
+      //
+      // When melting the same coin twice (technically allowed
+      // as the response might have been lost on the network),
+      // the exchange may return different values for the refresh_base_url.
+      refresh_base_url?: string;
+
     }
 
 
@@ -869,10 +892,20 @@ the API during normal operation.
     }
 
 
-.. http:post:: /refresh/reveal
+.. http:post:: /refreshes/$RCH
 
   Reveal previously commited values to the exchange, except for the values
-  corresponding to the ``noreveal_index`` returned by the /exchange/melt step.
+  corresponding to the ``noreveal_index`` returned by the /coins/-melt step.
+
+  The $RCH is the hash over the refresh commitment from the /coins/-melt step
+  (note that the value is calculated independently by both sides and has never
+  appeared *explicitly* in the protocol before).
+
+  The base URL for "/refreshes/"-requests may differ from the main base URL of
+  the exchange. Clients SHOULD respect the "refresh_base_url" returned for the
+  coin during melt operations. The exchange MUST return a
+  301 or 302 redirection to the correct base URL if the client failed to
+  respect the "refresh_base_url" or if the allocation has changed.
 
   Errors such as failing to do proper arithmetic when it comes to calculating
   the total of the coin values and fees are simply reported as bad requests.
@@ -918,19 +951,14 @@ the API during normal operation.
       // Signs over a `TALER_CoinLinkSignaturePS`
       link_sigs: EddsaSignature[];
 
-      // The original commitment, used to match the /refresh/reveal
-      // to the corresponding /refresh/melt operation.
-      rc: HashCode;
     }
 
 
   .. ts:def:: RevealResponse
 
     interface RevealResponse {
-      // List of the exchange's blinded RSA signatures on the new coins.  Each
-      // element in the array is another JSON object which contains the signature
-      // in the "ev_sig" field.
-      ev_sigs: BlindedRsaSignature[];
+      // List of the exchange's blinded RSA signatures on the new coins.
+      ev_sigs : BlindedRsaSignature[];
     }
 
 
@@ -949,13 +977,11 @@ the API during normal operation.
     }
 
 
-.. http:get:: /refresh/link
+.. http:get:: /coins/$COIN_PUB
 
   Link the old public key of a melted coin to the coin(s) that were exchangeed during the refresh operation.
 
   **Request:**
-
-  :query coin_pub: melted coin's public key
 
   **Response:**
 
@@ -987,12 +1013,11 @@ the API during normal operation.
       // RSA public key of the exchangeed coin.
       denom_pub: RsaPublicKey;
 
-      // Exchange's blinded signature over the exchangeed coin.
+      // Exchange's blinded signature over the fresh coin.
       ev_sig: BlindedRsaSignature;
 
-      // Blinded coin, to be verified by the wallet to protect against
-      // a malicious exchange.
-      coin_ev: CoinEnvelope;
+      // Blinded coin.
+      coin_ev : CoinEnvelope;
 
       // Signature made by the old coin over the refresh request.
       // Signs over a `TALER_CoinLinkSignaturePS`
@@ -1014,30 +1039,33 @@ part of the /keys response.  If and only if this has happened,
 coins that were signed with those denomination keys can be cashed
 in using this API.
 
-.. note::
-
-  This is a proposed API, we are implementing it as bug #3887.
-
-.. http:post:: /recoup
+.. http:post:: /coins/$COIN_PUB/recoup
 
   Demand that a coin be refunded via wire transfer to the original owner.
+
+  The base URL for "/coins/"-requests may differ from the main base URL of the
+  exchange. The exchange MUST return a 301 or 302 redirection to the correct
+  base URL if this is the case.
+
 
   **Request:** The request body must be a `RecoupRequest` object.
 
   **Response:**
   :status 200 OK:
-  The request was succesful, and the response is a `RecoupConfirmation`.
-  Note that repeating exactly the same request
-  will again yield the same response, so if the network goes down during the
-  transaction or before the client can commit the coin signature to disk, the
-  coin is not lost.
-  :status 401 Unauthorized: The coin's signature is invalid.
-  :status 403 Forbidden: The coin was already used for payment.
-  The response is a `DepositDoubleSpendError`.
+    The request was succesful, and the response is a `RecoupConfirmation`.
+    Note that repeating exactly the same request
+    will again yield the same response, so if the network goes down during the
+    transaction or before the client can commit the coin signature to disk, the
+    coin is not lost.
+  :status 401 Unauthorized:
+    The coin's signature is invalid.
+  :status 403 Forbidden:
+    The coin was already used for payment.
+    The response is a `DepositDoubleSpendError`.
   :status 404 Not Found:
-  The denomination key is not in the set of denomination
-  keys where emergency pay back is enabled, or the blinded
-  coin is not known to have been withdrawn.
+    The denomination key is not in the set of denomination
+    keys where emergency pay back is enabled, or the blinded
+    coin is not known to have been withdrawn.
 
   **Details:**
 
@@ -1050,9 +1078,6 @@ in using this API.
 
       // Signature over the `coin public key <eddsa-coin-pub>` by the denomination.
       denom_sig: RsaSignature;
-
-      // coin's public key
-      coin_pub: CoinPublicKey;
 
       // coin's blinding factor
       coin_blind_key_secret: RsaBlindingKeySecret;
@@ -1131,13 +1156,13 @@ an adversary that has access to the line-items of bank statements can
 typically also view the balance.)
 
 
-.. http:get:: /track/transfer
+.. http:get:: /transfers/$WTID
 
-  Provides deposits associated with a given wire transfer.
+  Provides deposits associated with a given wire transfer.  The
+  wire transfer identifier (WTID) and the base URL for tracking
+  the wire transfer are both given in the wire transfer subject.
 
   **Request:**
-
-  :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
 
   **Response:**
 
@@ -1196,11 +1221,16 @@ typically also view the balance.)
 
     }
 
-.. http:post:: /track/transaction
+.. http:get:: /transaction/$H_WIRE/$MERCHANT_PUB/$H_CONTRACT_TERMS/$COIN_PUB
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
+  The arguments are the hash of the merchant's payment details (H_WIRE), the
+  merchant's public key (EdDSA), the hash of the contract terms that were paid
+  (H_CONTRACT_TERMS) and the public key of the coin used for the payment (COIN_PUB).
 
-  **Request:** The request body must be a `TrackTransactionRequest` JSON object.
+  **Request:**
+
+  :query merchant_sig: EdDSA signature of the merchant made with purpose `TALER_SIGNATURE_MERCHANT_TRACK_TRANSACTION` , affirming that it is really the merchant who requires obtaining the wire transfer identifier.
 
   **Response:**
 
@@ -1216,29 +1246,6 @@ typically also view the balance.)
   :status 404 Not Found: The deposit operation is unknown to the exchange
 
   **Details:**
-
-  .. ts:def:: TrackTransactionRequest
-
-    interface TrackTransactionRequest {
-      // SHA-512 hash of the merchant's payment details.
-      h_wire: HashCode;
-
-      // SHA-512 hash of the contact of the merchant with the customer.
-      h_contract_terms: HashCode;
-
-      // coin's public key, both ECDHE and EdDSA.
-      coin_pub: CoinPublicKey;
-
-      // the EdDSA public key of the merchant, so that the client can identify
-      // the merchant for refund requests.
-      merchant_pub: EddsaPublicKey;
-
-      // the EdDSA signature of the merchant made with purpose
-      // `TALER_SIGNATURE_MERCHANT_TRACK_TRANSACTION` , affirming that it is really the
-      // merchant who requires obtaining the wire transfer identifier.
-      merchant_sig: EddsaSignature;
-    }
-
 
   .. ts:def:: TrackTransactionResponse
 
@@ -1279,7 +1286,7 @@ Refunds
 -------
 
 .. _refund:
-.. http:POST:: /refund
+.. http:POST:: /coins/$COIN_PUB/refund
 
   Undo deposit of the given coin, restoring its value.
 
@@ -1314,9 +1321,6 @@ Refunds
       // SHA-512 hash of the contact of the merchant with the customer.
       h_contract_terms: HashCode;
 
-      // coin's public key, both ECDHE and EdDSA.
-      coin_pub: CoinPublicKey;
-
       // 64-bit transaction id of the refund transaction between merchant and customer
       rtransaction_id: number;
 
@@ -1331,17 +1335,15 @@ Refunds
   .. ts:def:: RefundSuccess
 
     interface RefundSuccess {
-      // The string constant "REFUND_OK"
-      status: string;
 
       // the EdDSA :ref:`signature` (binary-only) with purpose
       // `TALER_SIGNATURE_EXCHANGE_CONFIRM_REFUND` using a current signing key of the
       // exchange affirming the successful refund
-      sig: EddsaSignature;
+      exchange_sig: EddsaSignature;
 
       // public EdDSA key of the exchange that was used to generate the signature.
       // Should match one of the exchange's signing keys from /keys.  It is given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
-      pub: EddsaPublicKey;
+      exchange_pub: EddsaPublicKey;
    }
