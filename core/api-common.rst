@@ -49,11 +49,20 @@ handle the error as if an internal error (500) had been returned.
     The server responsible for the reserve
     changed, the client MUST follow the link to the new location. If possible,
     the client SHOULD remember the new URL for the reserve for future
-    requests.
+    requests.  Only applicable if the request method is GET.
   :status 302 Found:
     The server responsible for the reserve changed, the
     client MUST follow the link to the new location, but MUST NOT retain the
+    new URL for future requests.  Only applicable if the request method is GET.
+  :status 307 Temporary Redirect:
+    The server responsible for the reserve changed, the
+    client MUST follow the link to the new location, but MUST NOT retain the
     new URL for future requests.
+  :status 308 Permanent Redirect:
+    The server responsible for the reserve
+    changed, the client MUST follow the link to the new location. If possible,
+    the client SHOULD remember the new URL for the reserve for future
+    requests.
   :status 500 Internal server error:
     This always indicates some serious internal operational error of the exchange,
     such as a program bug, database problems, etc., and must not be used for

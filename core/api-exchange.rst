@@ -467,7 +467,7 @@ exchange.
    }
 
 
-.. http:post:: /reserves/$RESERVE_PUB
+.. http:post:: /reserves/$RESERVE_PUB/withdraw
 
   Withdraw a coin of the specified denomination.  Note that the client should
   commit all of the request details, including the private key of the coin and
@@ -530,8 +530,11 @@ exchange.
   .. ts:def:: WithdrawError
 
     interface WithdrawError {
-      // Constant "Insufficient funds"
+      // Text describing the error
       hint: string;
+
+      // Detailed error code
+      code: Integer;
 
       // Amount left in the reserve
       balance: Amount;
@@ -563,7 +566,7 @@ denomination.
   the digital coins.
 
   The base URL for "/coins/"-requests may differ from the main base URL of the
-  exchange. The exchange MUST return a 301 or 302 redirection to the correct
+  exchange. The exchange MUST return a 307 or 308 redirection to the correct
   base URL if this is the case.
 
   The request should contain a JSON object with the
@@ -649,7 +652,7 @@ denomination.
       // Can be used if the base URL for /transactions/ differs from that
       // for /coins/, i.e. for load balancing.  Clients SHOULD
       // respect the transaction_base_url if provided.  Any HTTP server
-      // belonging to an exchange MUST generate a 301/302 redirection
+      // belonging to an exchange MUST generate a 307 or 308 redirection
       // to the correct base URL should a client uses the wrong base
       // URL, or if the base URL has changed since the deposit.
       transaction_base_url?: string;
@@ -788,7 +791,7 @@ the API during normal operation.
   is always 3.
 
   The base URL for "/coins/"-requests may differ from the main base URL of the
-  exchange. The exchange MUST return a 301 or 302 redirection to the correct
+  exchange. The exchange MUST return a 307 or 308 redirection to the correct
   base URL if this is the case.
 
   :status 401 Unauthorized:
@@ -855,7 +858,7 @@ the API during normal operation.
       // Can be used if the base URL for /refreshes/ differs from that
       // for /coins/, i.e. for load balancing.  Clients SHOULD
       // respect the refresh_base_url if provided.  Any HTTP server
-      // belonging to an exchange MUST generate a 301/302 redirection
+      // belonging to an exchange MUST generate a 307 or 308 redirection
       // to the correct base URL should a client uses the wrong base
       // URL, or if the base URL has changed since the melt.
       //
@@ -870,8 +873,11 @@ the API during normal operation.
   .. ts:def:: MeltForbiddenResponse
 
     interface MeltForbiddenResponse {
-      // Always "insufficient funds"
+      // Text describing the error.
       hint: string;
+
+      // Detailed error code
+      code: Integer;
 
       // public key of a melted coin that had insufficient funds
       coin_pub: EddsaPublicKey;
@@ -892,7 +898,7 @@ the API during normal operation.
     }
 
 
-.. http:post:: /refreshes/$RCH
+.. http:post:: /refreshes/$RCH/reveal
 
   Reveal previously commited values to the exchange, except for the values
   corresponding to the ``noreveal_index`` returned by the /coins/-melt step.
@@ -904,7 +910,7 @@ the API during normal operation.
   The base URL for "/refreshes/"-requests may differ from the main base URL of
   the exchange. Clients SHOULD respect the "refresh_base_url" returned for the
   coin during melt operations. The exchange MUST return a
-  301 or 302 redirection to the correct base URL if the client failed to
+  307 or 308 redirection to the correct base URL if the client failed to
   respect the "refresh_base_url" or if the allocation has changed.
 
   Errors such as failing to do proper arithmetic when it comes to calculating
@@ -965,7 +971,7 @@ the API during normal operation.
   .. ts:def:: RevealConflictResponse
 
     interface RevealConflictResponse {
-      // Constant "commitment violation"
+      // Text describing the error
       hint: string;
 
       // Detailed error code
@@ -977,7 +983,7 @@ the API during normal operation.
     }
 
 
-.. http:get:: /coins/$COIN_PUB
+.. http:get:: /coins/$COIN_PUB/link
 
   Link the old public key of a melted coin to the coin(s) that were exchangeed during the refresh operation.
 
@@ -1044,7 +1050,7 @@ in using this API.
   Demand that a coin be refunded via wire transfer to the original owner.
 
   The base URL for "/coins/"-requests may differ from the main base URL of the
-  exchange. The exchange MUST return a 301 or 302 redirection to the correct
+  exchange. The exchange MUST return a 307 or 308 redirection to the correct
   base URL if this is the case.
 
 
@@ -1221,7 +1227,7 @@ typically also view the balance.)
 
     }
 
-.. http:get:: /transaction/$H_WIRE/$MERCHANT_PUB/$H_CONTRACT_TERMS/$COIN_PUB
+.. http:get:: /deposits/$H_WIRE/$MERCHANT_PUB/$H_CONTRACT_TERMS/$COIN_PUB
 
   Provide the wire transfer identifier associated with an (existing) deposit operation.
   The arguments are the hash of the merchant's payment details (H_WIRE), the
