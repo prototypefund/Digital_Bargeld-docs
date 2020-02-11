@@ -163,22 +163,6 @@ Querying the transaction history
       // Array of incoming transactions
       incoming_transactions : IncomingBankTransaction[];
 
-      // Sum of all incoming transactions (ever) after the most
-      // recent transaction reported in the history.
-      total_incoming_end: Amount;
-
-      // Sum of all incoming transactions before the oldest
-      // transaction reported in the history.
-      total_incoming_start: Amount;
-
-      // Total amount that has been outgoing from this account
-      // from the beginning of time until now. Note that this
-      // number is always the latest value and thus independent
-      // of the time region covered by the history.  If the
-      // history includes the latest incoming transactions, this
-      // value can be used to calculate the balance after that
-      // latest transaction.
-      current_outgoing: Amount;
     }
 
   .. ts:def:: IncomingBankTransaction
@@ -258,22 +242,6 @@ Querying the transaction history
       // Array of outgoing transactions
       outgoing_transactions : OutgoingBankTransaction[];
 
-      // Sum of all outgoing transactions (ever) after the most
-      // recent transaction reported in the history.
-      total_outgoing_end: Amount;
-
-      // Sum of all outgoing transactions before the oldest
-      // transaction reported in the history.
-      total_outgoing_start: Amount;
-
-      // Total amount that has been incoming into this account
-      // from the beginning of time until now. Note that this
-      // number is always the latest value and thus independent
-      // of the time region covered by the history.  If the
-      // history includes the latest outgoing transactions, this
-      // value can be used to calculate the balance after that
-      // latest transaction.
-      current_incoming: Amount;
     }
 
   .. ts:def:: OutgoingBankTransaction
