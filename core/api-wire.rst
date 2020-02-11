@@ -160,8 +160,8 @@ Querying the transaction history
 
     interface IncomingHistory {
 
-      // The incoming transactions
-      incoming_transactions : IncomingBankTransaction;
+      // Array of incoming transactions
+      incoming_transactions : IncomingBankTransaction[];
 
       // Sum of all incoming transactions (ever) after the most
       // recent transaction reported in the history.
@@ -255,8 +255,8 @@ Querying the transaction history
 
     interface OutgoingHistory {
 
-      // The outgoing transactions
-      outgoing_transactions : OutgoingBankTransaction;
+      // Array of outgoing transactions
+      outgoing_transactions : OutgoingBankTransaction[];
 
       // Sum of all outgoing transactions (ever) after the most
       // recent transaction reported in the history.
