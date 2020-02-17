@@ -16,14 +16,19 @@
 
   @author Florian Dold
 
-=============================
-Taler Bank Account Access API
-=============================
+=====================
+Taler Bank Access API
+=====================
 
 This chapter describes the API that the GNU Taler demonstrator bank offers to access accounts.
 
 This API differes from the "Bank Integration API" in that it provides advanced API access to accounts, as opposed
 to enabling wallets to withdraw with an better user experience ("tight integration").
+
+
+------------------------
+Accounts and Withdrawals
+------------------------
 
 
 .. http:get:: ${BANK_API_BASE_URL}/accounts/${account_name}/balance
@@ -141,3 +146,29 @@ to enabling wallets to withdraw with an better user experience ("tight integrati
   :status 409 Conflict:  The reserve operation has been aborted previously and can't be confirmed.
 
 
+
+
+----------------------
+Registration (Testing)
+----------------------
+
+
+.. http:POST:: ${BANK_API_BASE_URL}/testing/register
+
+  Create a new bank account.  This endpoint should be disabled for most deployments, but is useful
+  for automated testing / integration tests.
+
+  **Request**
+
+  .. ts:def:: BankRegistrationRequest
+
+    interface BankRegistrationRequest {
+      username: string;
+
+      password: string;
+    }
+
+
+  **Response**
+
+  :status 200 OK:  Registration was successful
