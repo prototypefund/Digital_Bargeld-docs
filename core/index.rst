@@ -35,7 +35,8 @@ interfaces between the core components of Taler.
   api-wire
   api-merchant
   api-auditor
-  api-bank
+  api-bank-integration
+  api-bank-access
   wireformats
   api-sync
   taler-uri

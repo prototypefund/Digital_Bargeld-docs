@@ -335,6 +335,14 @@ Internally, amounts are parsed into the following object:
   }
 
 
+An amount that is prefixed with a ``+`` or ``-`` character is also used in certain contexts.
+When no sign is present, the amount is assumed to be positive.
+
+.. ts:def:: SignedAmount
+
+  type SignedAmount = string;
+
+
 --------------
 Binary Formats
 --------------

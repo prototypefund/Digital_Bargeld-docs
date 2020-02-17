@@ -17,9 +17,9 @@
   @author Marcello Stanisci
   @author Christian Grothoff
 
-==============
-Taler Bank API
-==============
+==========================
+Taler Bank Integration API
+==========================
 
 This chapter describe the APIs that banks need to offer towards Taler wallets
 to tightly integrate with GNU Taler.
@@ -156,20 +156,3 @@ for the withdrawal operation (the ``wopid``) to interact with the withdrawal ope
       confirm_transfer_url?: string;
     }
 
-
-------------
-Testing APIs
-------------
-
-The following APIs are exposed by some bank API implementations **for testing** as part
-of the wallet's integration tests.
-
-.. warning::
-
-  These APIs **must not** be offered by any production systems.
-
-.. http:post:: ${BANK_API_BASE_URL}/testing/register
-
-.. http:post:: ${BANK_API_BASE_URL}/testing/withdraw
-
-.. http:post:: ${BANK_API_BASE_URL}/testing/withdraw-uri

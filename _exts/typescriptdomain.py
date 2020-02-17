@@ -388,7 +388,7 @@ class LinkingHtmlFormatter(HtmlFormatter):
         if tok_getprop(tok, "is_identifier"):
             if xref.startswith('"'):
                 return value
-            if xref in ("number", "object", "string", "boolean", "any", "true", "false"):
+            if xref in ("number", "object", "string", "boolean", "any", "true", "false", "null"):
                 return value
 
         if xref is None:

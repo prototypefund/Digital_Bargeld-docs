@@ -69,6 +69,7 @@ Low-level EBICS API
 
 
   .. ts:def:: NexusEbicsBackupResponse
+
     interface NexusEbicsBackupResponse {
       
       // The three passphrase-protected private keys in the PKCS#8 format
@@ -89,6 +90,7 @@ Low-level EBICS API
   "{id}" account, and fails if it exists already.
 
   .. ts:def:: NexusEbicsRestoreBackupRequest
+
     interface NexusEbicsRestoreBackupRequest {
       
       // passphrase to decrypt the keys
