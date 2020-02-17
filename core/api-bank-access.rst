@@ -55,25 +55,6 @@ name and account password, at least in the GNU Taler demo bank implementation.
 
   Create a withdrawal operation, resulting in a ``taler://withdraw`` URI.
 
-  **Response**
-
-  **Details**
-
-  .. ts:def:: BankAccountCreateWithdrawalResponse
-
-    interface BankAccountCreateWithdrawalResponse {
-      // ID of the withdrawal, can be used to view/modify the withdrawal operation
-      withdrawal_id: string;
-
-      // URI that can be passed to the wallet to initiate the withdrawal
-      taler_withdraw_uri: string;
-    }
-
-
-.. http:POST:: ${BANK_API_BASE_URL}/accounts/${account_name}/withdrawals
-
-  Create a withdrawal operation, resulting in a ``taler://withdraw`` URI.
-
   **Request**
 
   .. ts:def:: BankAccountCreateWithdrawalRequest
