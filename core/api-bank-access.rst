@@ -30,6 +30,9 @@ to enabling wallets to withdraw with an better user experience ("tight integrati
 Accounts and Withdrawals
 ------------------------
 
+The following endpoints require HTTP "Basic" authentication with the account
+name and account password, at least in the GNU Taler demo bank implementation.
+
 
 .. http:get:: ${BANK_API_BASE_URL}/accounts/${account_name}/balance
 
