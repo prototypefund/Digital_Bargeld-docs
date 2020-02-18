@@ -265,6 +265,7 @@ The ``envcfg.py`` for demo looks like this:
   tag_blog = tag
   tag_survey = tag
   tag_backoffice = tag
+  tag_sync = tag
 
 Currently only the variables ``env`` and ``tag_${component}`` are used.
 
@@ -281,12 +282,13 @@ Bootstrapping an Environment
   $ ./deployment/bin/taler-deployment bootstrap
   $ source ~/activate
   $ taler-deployment build
-  $ taler-deployment-config-generate
-  $ taler-deployment-keyup
-  $ taler-deployment-sign
-  $ taler-exchange-dbinit -r
-  $ taler-merchant-dbinit -r
+  $ taler-deployment-prepare
   $ taler-deployment-start
+  $ taler-deployment-arm -I # check everything works
+
+  Caution: there is currently a known bug in the part that sets up the bank
+  account password of the exchange might either not exist or be broken.
+  Thus, that must currently still be done manually! (#6099).
 
 
 Upgrading an Existing Environment
@@ -299,10 +301,9 @@ Upgrading an Existing Environment
   $ cp ~/deployment/envcfg/$ENVCFGFILE ~/envcfg.py
   $ taler-deployment bootstrap
   $ taler-deployment build
-  $ taler-deployment-keyup
-  $ taler-deployment-sign
-  $ taler-deployment-start
-
+  $ taler-deployment-prepare
+  $ taler-deployment-restart
+  $ taler-deployment-arm -I # check everything works
 
 Switching Demo Colors
 ---------------------
