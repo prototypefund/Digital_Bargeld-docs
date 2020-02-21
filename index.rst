@@ -33,7 +33,7 @@ while providing anonymity for Customers.
 
 Cryptography is used to ensure that none of the participants can
 defraud the others without being detected immediately; however, in
-practice a fradulent Exchange might go bankrupt instead of paying the
+practice a fraudulent Exchange might go bankrupt instead of paying the
 Merchants and thus the Exchange will need to be audited regularly like
 any other banking institution.
 
@@ -56,6 +56,7 @@ Documentation Overview
   taler-wallet
   taler-nfc-guide.rst
   taler-merchant-api-tutorial
+  taler-merchant-pos-terminal
   taler-bank-manual
   taler-backoffice-manual
   taler-auditor-manual
