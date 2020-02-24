@@ -63,7 +63,7 @@ that gets published in a F-Droid repository.
 If you don't have it already, download the `F-Droid app <https://f-droid.org/>`_
 and then click the following link (on your phone) to add the nightly repository.
 
-    `GNU Taler Nightly F-Droid Repository <fdroids://gnu-taler.gitlab.io/fdroid-repo-nightly/fdroid/repo?fingerprint=55F8A24F97FAB7B0960016AF393B7E57E7A0B13C2D2D36BAC50E1205923A7843>`_
+    `GNU Taler Nightly F-Droid Repository <fdroidrepos://gnu-taler.gitlab.io/fdroid-repo-nightly/fdroid/repo?fingerprint=55F8A24F97FAB7B0960016AF393B7E57E7A0B13C2D2D36BAC50E1205923A7843>`_
 
 .. note::
     Nightly apps can be installed alongside official releases
