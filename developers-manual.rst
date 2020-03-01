@@ -831,10 +831,10 @@ Coin
   Coins are an internal construct, the user should never be aware that their balance
   is represented by coins if different denominations.
 
-  **Use instead**: "(Digital) Cash" or "Wallet Balance"
+  **Use instead**: "(Digital) Cash" or "(Wallet) Balance"
 
 Consumer
-  Has bad connotation.
+  Has bad connotation of consumption.
 
   **Use instead**: Customer or user.
 
@@ -848,7 +848,8 @@ Proposal
 
 Anonymous E-Cash
   Should be generally avoided, since Taler is only anonymous for
-  the customer.
+  the customer. Also some people are scared of anonymity (which as
+  a term is also way too absolute, as anonymity is hardly ever perfect).
 
   **Use instead**:  "Privacy-preserving", "Privacy-friedly"
 
@@ -857,7 +858,7 @@ Payment Replay
   to view a digital product again, as they already paid for it.
 
   **Use instead**:  In the event history, "re-activated digital content purchase"
-  could be used.
+  could be used. (FIXME: this is still not nice.)
 
 Session ID
   See Payment Replay.
@@ -882,8 +883,11 @@ Exchange Provider
   The entity/service that gives out digital cash in exchange for some
   other means of payment.
 
-  In some contexts, using "Issuer" could also be appropriate.  When showing a balance breakdown,
+  In some contexts, using "Issuer" could also be appropriate.
+  When showing a balance breakdown,
   we can say "100 Eur (issued by exchange.euro.taler.net)".
+  Sometimes we may also use the more generic term "Payment Service Provider"
+  when the concept of an "Exchange" is still unclear to the reader.
 
 Refund
   A refund is given by a merchant to the customer (rather the customer's wallet)
@@ -917,42 +921,84 @@ use when talking to end users or even system administrators.
 .. glossary::
   :sorted:
 
+  absolute time
+    method of keeping time in :term:`GNUnet` where the time is represented
+    as the number of microseconds since 1.1.1970 (UNIX epoch).  Called
+    absolute time in contrast to :term:`relative time`.
+
+  aggregate
+    the :term:`exchange` combines multiple payments received by the
+    same :term:`merchant` into one larger :term:`wire transfer` to
+    the respective merchant's :term:`bank` account
+
   auditor
     trusted third party that verifies that the :term:`exchange` is operating correctly
 
   bank
     traditional financial service provider who offers wire :term:`transfers <transfer>` between accounts
 
+  close
+  closes
+  closed
+  closing
+    operation an :term:`exchange` performs on a :term:`reserve` that has not been
+    :term:`drained` by :term:`withdraw` operations. When closing a reserve, the
+    exchange wires the remaining funds back to the customer, minus a :term:`fee`
+    for closing
+
+  customer
+    individual in control of a Taler :term:`wallet`, usually using it to
+    :term:`spend` the :term:`coins` on :term:`contracts`.
+
   coin
+  coins
     coins are individual token representing a certain amount of value, also known as the :term:`denomination` of the coin
 
   contract
-    the proposal signed by the wallet.
+  contracts
+    formal agreement between :term:`merchant` and :term:`customer` specifying the
+    :term:`contract terms` and signed by the merchant and the :term:`coins` of the
+    customer
 
-    FIXME: this one is totally wrong!
+  contract terms
+    the individual clauses specifying what the buyer is purchasing from the
+    :term:`merchant`
 
   denomination
     unit of currency, specifies both the currency and the face value of a :term:`coin`,
     as well as associated fees and validity periods
 
   denomination key
-    RSA key used by the exchange to certify that a given :term:`coin` is valid and of a
-    particular denomination
+    (RSA) key used by the exchange to certify that a given :term:`coin` is valid and of a
+    particular :term:`denomination`
 
   deposit
+  deposits
+  depositing
     operation by which a merchant passes coins to an exchange, expecting the
-    exchange to credit his bank account in the future using a wire transfer
+    exchange to credit his bank account in the future using an
+    :term:`aggregate` :term:`wire transfer`
+
+  drain
+  drained
+    a :term:`reserve` is being drained when a :term:`wallet` is using the
+    reserve's private key to :term:`withdraw` coins from it. This reduces
+    the balance of the reserve. Once the balance reaches zero, we say that
+    the reserve has been (fully) drained.  Reserves that are not drained
+    (which is the normal process) are :term:`closed` by the exchange.
 
   dirty
+  dirty coin
     a coin is dirty if its public key may be known to an entity other than
     the customer, thereby creating the danger of some entity being able to
     link multiple transactions of coin's owner if the coin is not refreshed
 
   exchange
     Taler's payment service provider.  Issues electronic coins during
-    withdrawal and redeems them when they are deposited by merchants.
+    withdrawal and redeems them when they are deposited by merchants
 
   expired
+  expiration
     Various operations come with time limits. In particular, denomination keys
     come with strict time limits for the various operations involving the
     coin issued under the denomination. The most important limit is the
@@ -961,64 +1007,130 @@ use when talking to end users or even system administrators.
     expiration, which specifies how long the exchange keeps records beyond the
     deposit expiration time.  This latter expiration matters for legal disputes
     in courts and also creates an upper limit for refreshing operations on
-    special zombie coin.
+    special zombie coin
 
-  WebExtension
-    Cross-browser API used to implement the GNU Taler wallet browser extension.
+  GNUnet
+    Codebase of various libraries for a better Internet, some of which
+    GNU Taler depends upon.
+
+  fakebank
+    implementation of the :term:`bank` API in memory to be used only for test
+    cases.
+
+  fee
+    an :term:`exchange` charges various fees for its service. The different
+    fees are specified in the protocol. There are fees per coin for
+    :term:`withdrawing`, :term:`depositing`, :term:`melting`, and
+    :term:`refunding`.  Furthermore, there are fees per wire transfer
+    for :term:`closing` a :term:`reserve`: and for
+    :term:`aggregate` :term:`wire transfers` to the :term:`merchant`.
 
   fresh
   fresh coin
     a coin is fresh if its public key is only known to the customer
 
+  json
+  JSON
+  JavaScript Object Notation
+    serialization format derived from the JavaScript language which is
+    commonly used in the Taler protocol as the payload of HTTP requests
+    and responses.
+
+  LibEuFin
+    FIXME: explain
+
+  link
+  linking
+    specific step in the :term:`refresh` protocol that an exchange must offer
+    to prevent abuse of the :term:`refresh` mechanism.  The link step is
+    not needed in normal operation, it just must be offered.
+
   master key
     offline key used by the exchange to certify denomination keys and
     message signing keys
 
+  melt
+  melted
+  melting
+    step of the :term:`refresh` protocol where a :term:`dirty coin`
+    is invalidated to be reborn :term:`fresh` in a subsequent
+    :term:`reveal` step.
+
+  merchant
+    party receiving payments (usually in return for goods or services)
+
   message signing key
      key used by the exchange to sign online messages, other than coins
 
-  offer
-    specification of the details of a transaction, specifies the payment obligations
-    for the customer (i.e. the amount), the deliverables of the merchant and other
-    related information, such as deadlines or locations; However, it lacks some
-    information that the backend is supposed to provide.
-    In other words, after the backend adds the missing information to the offer and
-    signs it, it becomes a proposal.
-
-    FIXME: completely wrong
+  order
+    FIXME: to be written!
 
   owner
     a coin is owned by the entity that knows the private key of the coin
+
+  relative time
+    method of keeping time in :term:`GNUnet` where the time is represented
+    as a relative number of microseconds.  Thus, a relative time specifies
+    an offet or a duration, but not a date.  Called relative time in
+    contrast to :term:`absolute time`.
 
   recoup
     Operation by which an exchange returns the value of coins affected
     by a :term:`revocation` to their :term:`owner`, either by allowing the owner to
     withdraw new coins or wiring funds back to the bank account of the :term:`owner`.
 
-    Also called "recoup".
+  purchase
+    Refers to the overall process of negotiating a :term:`contract` and then
+    making a payment with :term:`coins` to a :term:`merchant`.
+
+  privacy policy
+    Statment of an operator how they will protect the privacy of users.
 
   proof
     Message that cryptographically demonstrates that a particular claim is correct.
 
   proposal
-    a sketch that has been completed and signed by the merchant backend.
-
-    FIXME: completely wrong
+    a list of :term:`contract terms` that has been completed and signed by the
+    merchant backend.
 
   reserve
     Funds set aside for future use; either the balance of a customer at the
     exchange ready for withdrawal, or the funds kept in the exchange;s bank
     account to cover obligations from coins in circulation.
 
+  refresh
   refreshing
-    operation by which a :term:`dirty` :term:`coin` is converted into one or more
-    :term:`fresh` coins
+    operation by which a :term:`dirty coin` is converted into one or more
+    :term:`fresh` coins.  Involves :term:`melting` the :term:`dirty coin` and
+    then :term:`revealing` so-called :term:`transfer keys`.
 
   refund
+  refunding
     operation by which a merchant steps back from the right to funds that he
     obtained from a :term:`deposit` operation, giving the right to the funds back
     to the customer
 
+  refund transaction id
+    unique number by which a merchant identifies a :term:`refund`. Needed
+    as refunds can be partial and thus there could be multiple refunds for
+    the same :term:`purchase`.
+
+  reserve
+    accounting mechanism used by the exchange to track customer funds
+    from incoming :term:`wire transfers`.  A reserve is created whenever
+    a customer wires money to the exchange using a well-formed public key
+    in the subject.  The exchange then allows the customer's :term:`wallet`
+    to :term:`withdraw` up to the amount received in :term:`fresh`
+    :term:`coins` from the reserve, thereby draining the reserve. If a
+    reserve is not drained, the exchange eventually :term:`closes` it.
+
+  reveal
+  revealing
+    step in the :term:`refresh` protocol where some of the transfer private
+    keys are revealed to prove honest behavior on the part of the wallet.
+    In the reveal step, the exchange returns the signed :term:`fresh` coins.
+
+  revoke
   revocation
     exceptional operation by which an exchange withdraws a denomination from
     circulation, either because the signing key was compromised or because
@@ -1030,49 +1142,68 @@ use when talking to end users or even system administrators.
     private key, thereby allowing all co-owners to spend the coin at any
     time.
 
+  spend
   spending
     operation by which a customer gives a merchant the right to deposit
     coins in return for merchandise
 
   transfer
+  transfers
   wire transfer
-  transfer
+  wire transfers
     method of sending funds between :term:`bank` accounts
 
-  wtid
-  wire transfer identifier
-    Subject of a wire transfer; usually a random string to uniquely
-    identify the transfer.
+  transfer key
+  transfer keys
+    special cryptographic key used in the :term:`refresh` protocol, some of which
+    are revealed during the :term:`reveal` step. Note that transfer keys have,
+    despite the name, no relationship to :term:`wire transfers`.  They merely
+    help to transfer the value from a :term:`dirty coin` to a :term:`fresh coin`
 
-    FIXME: inaccurate
+  terms
+    the general terms of service of an operator, possibly including
+    the :term:`privacy policy`.  Not to be confused with the
+    :term:`contract terms` which are about the specific purchase.
 
   transaction
     method by which ownership is exclusively transferred from one entity
 
-  transaction id
-     unique number by which a merchant identifies a :term:`transaction`
-
-     FIXME: completely obsolete by now
+  version
+    Taler uses various forms of versioning. There is a database
+    schema version (stored itself in the database, see \*-0000.sql) describing
+    the state of the table structure in the database of an :term:`exchange`,
+    :term:`auditor` or :term:`merchant`. There is a protocol
+    version (CURRENT:REVISION:AGE, see GNU libtool) which specifies
+    the network protocol spoken by an :term:`exchange` or :term:`merchant`
+    including backwards-compatibility. And finally there is the software
+    release version (MAJOR.MINOR.PATCH, see https://semver.org/) of
+    the respective code base.
 
   wallet
     software running on a customer's computer; withdraws, stores and
     spends coins
 
-  withdrawal
-    operation by which a :term:`wallet` can convert funds from a reserve to
-    fresh coins
-
-  fakebank
-    FIXME: explain
-
-  LibEuFin
-    FIXME: explain
-
-  GNUnet
-    FIXME: explain
-
-  bank
-    FIXME: explain
+  WebExtension
+    Cross-browser API used to implement the GNU Taler wallet browser extension.
 
   wire gateway
     FIXME: explain
+
+  wire transfer identifier
+  wtid
+    Subject of a wire transfer from the exchange to a merchant;
+    set by the aggregator to a random nonce which uniquely
+    identifies the transfer.
+
+  withdraw
+  withdrawing
+  withdrawal
+    operation by which a :term:`wallet` can convert funds from a :term:`reserve` to
+    fresh coins
+
+  zombie
+  zombie coin
+    coin where the respective :term:`denomination key` is past its
+    :term:`deposit` :term:`expiration` time, but which is still (again) valid
+    for an operation because it was :term:`melted` while it was still
+    valid, and then later again credited during a :term:`recoup` process
