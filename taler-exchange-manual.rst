@@ -130,6 +130,7 @@ components:
 
 -  Wire adapter
    A wire adapter is a component that enables exchange to talk to a bank.
+
    (1) The libtalerfakebank implements a bank with a wire adapter API
        inside of a testcase.
    (2) For the demonstration Web site (or local currencies),
@@ -138,6 +139,7 @@ components:
    (3) For production, libeufin's Nexus component implements a wire
        adapter towards the traditional SEPA banking system with IBAN
        accounts.
+
    The client-side wire adapter API is implemented in libtalerbank and
    is used by the aggregator to execute wire transfers and for the
    auditor to query bank transaction histories.

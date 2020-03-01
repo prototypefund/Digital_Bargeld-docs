@@ -954,6 +954,14 @@ use when talking to end users or even system administrators.
   coins
     coins are individual token representing a certain amount of value, also known as the :term:`denomination` of the coin
 
+  commitment
+  refresh commitment
+    data that the wallet commits to during the :term:`melt` stage of the
+    :term:`refresh` protocol where it
+    has to prove to the :term:`exchange` that it is deriving the :term:`fresh`
+    coins as specified by the Taler protocol.  The commitment is verified
+    probabilistically (see: :term:`kappa`) during the :term:`reveal` stage.
+
   contract
   contracts
     formal agreement between :term:`merchant` and :term:`customer` specifying the
@@ -1036,6 +1044,11 @@ use when talking to end users or even system administrators.
     commonly used in the Taler protocol as the payload of HTTP requests
     and responses.
 
+  kappa
+    security parameter used in the :term:`refresh` protocol. Defined to be 3.
+    The probability of successfully evading the income transparency with the
+    refresh protocol is 1:kappa.
+
   LibEuFin
     FIXME: explain
 
@@ -1078,6 +1091,13 @@ use when talking to end users or even system administrators.
     Operation by which an exchange returns the value of coins affected
     by a :term:`revocation` to their :term:`owner`, either by allowing the owner to
     withdraw new coins or wiring funds back to the bank account of the :term:`owner`.
+
+  planchet
+    precursor data for a :term:`coin`. A planchet includes the coin's internal
+    secrets (coin private key, blinding factor), but lacks the RSA signature
+    of the :term:`exchange`.  When :term:`withdrawing`, a :term:`wallet`
+    creates and persists a planchet before asking the exchange to sign it to
+    get the coin.
 
   purchase
     Refers to the overall process of negotiating a :term:`contract` and then
