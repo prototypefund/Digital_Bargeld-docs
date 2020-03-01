@@ -77,6 +77,10 @@ BASE_URL
    Specifies the base URL under which the exchange can be reached. Added
    to wire transfers to enable tracking by merchants.
 
+AGGREGATOR_IDLE_SLEEP_INTERVAL
+   For how long should the aggregator sleep when it is idle before trying
+   to look for more work? Default is 60 seconds.
+
 SIGNKEY_DURATION
    For how long is a signing key valid?
 
