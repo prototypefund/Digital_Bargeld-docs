@@ -153,6 +153,10 @@ components:
 Installation
 ============
 
+Before installing a Taler exchange, please make sure that your
+system does not have swap space enabled.  Swap space is a security
+risk that Taler does not try to mitigate against.
+
 Please install the following packages before proceeding with the
 exchange compilation.
 
