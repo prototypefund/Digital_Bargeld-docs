@@ -734,7 +734,10 @@ The contract terms must have the following structure:
 
     interface ContractTerms {
       // Human-readable description of the whole purchase
-      summary: TranslatableString;
+      summary: string;
+
+      // Map from IETF BCP 47 language tags to localized summaries
+      summary_i18n?: { [lang_tag: string]: string };
 
       // Unique, free-form identifier for the proposal.
       // Must be unique within a merchant instance.
@@ -746,7 +749,7 @@ The contract terms must have the following structure:
 
       // Total price for the transaction.
       // The exchange will subtract deposit fees from that amount
-      // before transfering it to the merchant.
+      // before transferring it to the merchant.
       amount: Amount;
 
       // The URL for this purchase.  Every time is is visited, the merchant
@@ -846,8 +849,8 @@ The contract terms must have the following structure:
       extra?: any;
     }
 
-  The wallet must select a exchange that either the mechant accepts directly by
-  listing it in the exchanges arry, or for which the merchant accepts an auditor
+  The wallet must select a exchange that either the merchant accepts directly by
+  listing it in the exchanges array, or for which the merchant accepts an auditor
   that audits that exchange by listing it in the auditors array.
 
   The `Product` object describes the product being purchased from the merchant. It has the following structure:
@@ -856,7 +859,10 @@ The contract terms must have the following structure:
 
     interface Product {
       // Human-readable product description.
-      description: TranslatableString;
+      description: string;
+
+      // Map from IETF BCP 47 language tags to localized descriptions
+      description_i18n?: { [lang_tag: string]: string };
 
       // The quantity of the product to deliver to the customer (optional, if applicable)
       quantity?: string;
@@ -878,17 +884,6 @@ The contract terms must have the following structure:
       // or a location label defined inside the proposition's 'locations'.
       // The presence of a colon (':') indicates the use of an URL.
       delivery_location: string;
-    }
-
-
-  .. ts:def:: TranslatableString
-
-    interface TranslatableString {
-      // default string to be shown when there is no string for the user's locale available
-      _: string;
-      // [locale] is replaced with an IETF BCP 47 language tag for a localized string (optional)
-      // more than one locale might be added, the UI chooses the most suitable one for display
-      [locale]?: string;
     }
 
   .. ts:def:: Merchant
