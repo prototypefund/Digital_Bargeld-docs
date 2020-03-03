@@ -52,8 +52,9 @@ Making Transactions
   :status 200 OK:
     The request has been correctly handled, so the funds have been transferred to
     the recipient's account.  The body is a `TransferResponse`
-  :status 400 Bad Request: The bank replies with an `ErrorDetail` object.
+  :status 400 Bad Request: Request malformed. The bank replies with an `ErrorDetail` object.
   :status 401 Unauthorized: Authentication failed, likely the credentials are wrong.
+  :status 404 Not found: The endpoint is wrong or the user name is unknown. The bank replies with an `ErrorDetail` object.
   :status 409 Conflict:
     A transaction with the same ``transaction_uid`` but different transaction details
     has been submitted before.
@@ -156,6 +157,9 @@ Querying the transaction history
   **Response**
 
   :status 200 OK: JSON object of type `IncomingHistory`.
+  :status 400 Bad Request: Request malformed. The bank replies with an `ErrorDetail` object.
+  :status 401 Unauthorized: Authentication failed, likely the credentials are wrong.
+  :status 404 Not found: The endpoint is wrong or the user name is unknown. The bank replies with an `ErrorDetail` object.
 
   .. ts:def:: IncomingHistory
 
@@ -235,6 +239,9 @@ Querying the transaction history
   **Response**
 
   :status 200 OK: JSON object of type `OutgoingHistory`.
+  :status 400 Bad Request: Request malformed. The bank replies with an `ErrorDetail` object.
+  :status 401 Unauthorized: Authentication failed, likely the credentials are wrong.
+  :status 404 Not found: The endpoint is wrong or the user name is unknown. The bank replies with an `ErrorDetail` object.
 
   .. ts:def:: OutgoingHistory
 
@@ -294,7 +301,7 @@ exposed by bank gateways in production.
     the recipient's account.  The body is a `AddIncomingResponse`
   :status 400 Bad Request: The request is malformed. The bank replies with an `ErrorDetail` object.
   :status 401 Unauthorized: Authentication failed, likely the credentials are wrong.
-  :status 404 Not found: The user name is unknown. The bank replies with an `ErrorDetail` object.
+  :status 404 Not found: The endpoint is wrong or the user name is unknown. The bank replies with an `ErrorDetail` object.
 
   .. ts:def:: AddIncomingRequest
 
