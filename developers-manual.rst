@@ -594,6 +594,44 @@ for that.
 There is also the possibility to trigger builds manually, but this is
 only reserved to "admin" users.
 
+Android App Nightly Builds
+==========================
+
+There are currently three Android apps:
+
+* Wallet
+  [`Git Repo <https://git.taler.net/wallet-android.git>`__]
+  [`Git Mirror <https://gitlab.com/gnu-taler/wallet-android>`__]
+  [`CI <https://git.taler.net/wallet-android.git/tree/.gitlab-ci.yml>`__]
+* Merchant PoS Terminal
+  [`Git Repo <https://git.taler.net/merchant-terminal-android.git/>`__]
+  [`Git Mirror <https://gitlab.com/gnu-taler/merchant-terminal-android>`__]
+  [`CI <https://git.taler.net/merchant-terminal-android.git/tree/.gitlab-ci.yml>`__]
+* Cashier
+  [`Git Repo <https://git.taler.net/cashier-terminal-android.git/>`__]
+  [`Git Mirror <https://gitlab.com/gnu-taler/cashier-terminal-android>`__]
+  [`CI <https://git.taler.net/cashier-terminal-android.git/tree/.gitlab-ci.yml>`__]
+
+Their git repositories are mirrored at Gitlab to utilize their CI
+and `F-Droid <https://f-droid.org>`_'s Gitlab integration
+to `publish automatic nightly builds <https://f-droid.org/docs/Publishing_Nightly_Builds/>`_
+for each change on the ``master`` branch.
+
+All three apps publish their builds to the same F-Droid nightly repository
+(which is stored as a git repository):
+https://gitlab.com/gnu-taler/fdroid-repo-nightly
+
+You can download the APK files directly from that repository
+or add it to the F-Droid app for automatic updates
+by clicking the following link (on the phone that has F-Droid installed).
+
+    `GNU Taler Nightly F-Droid Repository <fdroidrepos://gnu-taler.gitlab.io/fdroid-repo-nightly/fdroid/repo?fingerprint=55F8A24F97FAB7B0960016AF393B7E57E7A0B13C2D2D36BAC50E1205923A7843>`_
+
+.. note::
+    Nightly apps can be installed alongside official releases
+    and thus are meant **only for testing purposes**.
+    Use at your own risk!
+
 .. _Code-coverage:
 
 Code Coverage

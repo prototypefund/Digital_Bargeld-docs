@@ -70,6 +70,9 @@ and then click the following link (on your phone) to add the nightly repository.
     and thus are meant **only for testing purposes**.
     Use at your own risk!
 
+While not recommended, APKs can also be
+`downloaded directly <https://gitlab.com/gnu-taler/fdroid-repo-nightly/-/tree/master/fdroid%2Frepo>`__.
+
 Building from source
 --------------------
 
