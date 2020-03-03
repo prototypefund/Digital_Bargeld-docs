@@ -126,6 +126,9 @@ The elements of the JSON file are defined as follows:
 
       // The name of the category. This will be shown to users and used in the order summary.
       name: string;
+
+      // Map from IETF BCP 47 language tags to localized names
+      name_i18n?: { [lang_tag: string]: string };
     }
 
 
@@ -138,6 +141,9 @@ The elements of the JSON file are defined as follows:
       // Human-readable product description
       // that will be shown to the user and used in contract terms
       description: string;
+
+      // Map from IETF BCP 47 language tags to localized descriptions
+      description_i18n?: { [lang_tag: string]: string };
 
       // The price of the product
       price: Amount;

@@ -736,6 +736,9 @@ The contract terms must have the following structure:
       // Human-readable description of the whole purchase
       summary: string;
 
+      // Map from IETF BCP 47 language tags to localized summaries
+      summary_i18n?: { [lang_tag: string]: string };
+
       // Unique, free-form identifier for the proposal.
       // Must be unique within a merchant instance.
       // For merchants that do not store proposals in their DB
@@ -746,7 +749,7 @@ The contract terms must have the following structure:
 
       // Total price for the transaction.
       // The exchange will subtract deposit fees from that amount
-      // before transfering it to the merchant.
+      // before transferring it to the merchant.
       amount: Amount;
 
       // The URL for this purchase.  Every time is is visited, the merchant
@@ -846,8 +849,8 @@ The contract terms must have the following structure:
       extra?: any;
     }
 
-  The wallet must select a exchange that either the mechant accepts directly by
-  listing it in the exchanges arry, or for which the merchant accepts an auditor
+  The wallet must select a exchange that either the merchant accepts directly by
+  listing it in the exchanges array, or for which the merchant accepts an auditor
   that audits that exchange by listing it in the auditors array.
 
   The `Product` object describes the product being purchased from the merchant. It has the following structure:
@@ -857,6 +860,9 @@ The contract terms must have the following structure:
     interface Product {
       // Human-readable product description.
       description: string;
+
+      // Map from IETF BCP 47 language tags to localized descriptions
+      description_i18n?: { [lang_tag: string]: string };
 
       // The quantity of the product to deliver to the customer (optional, if applicable)
       quantity?: string;
