@@ -50,10 +50,18 @@ At the bottom of the main UI there is a row of buttons:
 * Restart: Clears the current order and turns into an Undo button which restores the order.
 * -1/+1: Available when ordered items are selected
   and allows you to increment/decrement their quantity.
-* Reconfigure: Allows you to change the app configuration settings (URL and username/password)
-  and to forget the password (for locking the app).
-* History: Shows the payment history.
+* Prev: Goes to the previous order (if available)
+* Next: Goes to the next order or creates a new one
+  if the current is not empty and there is no next.
 * Complete: Finalize an order and prompt the customer to pay.
+
+The top left corner features a hamburger icon.
+Clicking this opens a menu with these items:
+
+* Orders: Show current open orders.
+* History: Shows the payment history.
+* Settings: Allows you to change the app configuration settings (URL and username/password)
+  and to forget the password (for locking the app).
 
 Testing nightly builds
 ----------------------
