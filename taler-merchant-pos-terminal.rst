@@ -147,7 +147,7 @@ The elements of the JSON file are defined as follows:
 
     interface MerchantProduct {
       // A merchant-internal unique identifier for the product
-      product_id: string;
+      product_id?: string;
 
       // Human-readable product description
       // that will be shown to the user and used in contract terms
