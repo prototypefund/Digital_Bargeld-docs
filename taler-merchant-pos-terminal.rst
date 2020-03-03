@@ -50,10 +50,18 @@ At the bottom of the main UI there is a row of buttons:
 * Restart: Clears the current order and turns into an Undo button which restores the order.
 * -1/+1: Available when ordered items are selected
   and allows you to increment/decrement their quantity.
-* Reconfigure: Allows you to change the app configuration settings (URL and username/password)
-  and to forget the password (for locking the app).
-* History: Shows the payment history.
+* Prev: Goes to the previous order (if available)
+* Next: Goes to the next order or creates a new one
+  if the current is not empty and there is no next.
 * Complete: Finalize an order and prompt the customer to pay.
+
+The top left corner features a hamburger icon.
+Clicking this opens a menu with these items:
+
+* Orders: Show current open orders.
+* History: Shows the payment history.
+* Settings: Allows you to change the app configuration settings (URL and username/password)
+  and to forget the password (for locking the app).
 
 Testing nightly builds
 ----------------------
@@ -69,6 +77,9 @@ and then click the following link (on your phone) to add the nightly repository.
     Nightly apps can be installed alongside official releases
     and thus are meant **only for testing purposes**.
     Use at your own risk!
+
+While not recommended, APKs can also be
+`downloaded directly <https://gitlab.com/gnu-taler/fdroid-repo-nightly/-/tree/master/fdroid%2Frepo>`__.
 
 Building from source
 --------------------
@@ -136,7 +147,7 @@ The elements of the JSON file are defined as follows:
 
     interface MerchantProduct {
       // A merchant-internal unique identifier for the product
-      product_id: string;
+      product_id?: string;
 
       // Human-readable product description
       // that will be shown to the user and used in contract terms
