@@ -1,0 +1,272 @@
+{
+  "config": {
+    "base_url": "https://backend.demo.taler.net",
+    "instance": "default",
+    "api_key": "sandbox"
+  },
+  "categories": [
+    {
+      "id": 1,
+      "name": "Snacks"
+    },
+    {
+      "id": 2,
+      "name": "Beverages",
+      "name_i18n": {
+        "de": "Getränke",
+        "pt_BR": "Bebidas"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Breakfast",
+      "name_i18n": {
+        "de_DE": "Frühstück",
+        "pt_BR": "Cafe da manha"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Pizza"
+    },
+    {
+      "id": 7,
+      "name": "Juices",
+      "name_i18n": {
+        "pt": "Sucos"
+      }
+    }
+  ],
+  "products": [
+    {
+      "product_id": "631361561",
+      "description": "Chips",
+      "price": "KUDOS:1.00",
+      "categories": [
+        1
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "631361562",
+      "description": "Peanuts",
+      "description_i18n": {
+        "de_DE": "Erdnüsse",
+        "pt_BR": "Amendoins"
+      },
+      "price": "KUDOS:0.80",
+      "categories": [
+        1
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "631361563",
+      "description": "Salty Sticks",
+      "price": "KUDOS:0.80",
+      "categories": [
+        1
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "324876",
+      "description": "Lemonade",
+      "price": "KUDOS:1.00",
+      "categories": [
+        2
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "324877",
+      "description": "Beer",
+      "description_i18n": {
+        "de": "Bier",
+        "pt": "Cerveja"
+      },
+      "price": "KUDOS:3.50",
+      "categories": [
+        2
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "324878",
+      "description": "Wine",
+      "price": "KUDOS:4.00",
+      "categories": [
+        2
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "3215643",
+      "description": "Toast with Cheese",
+      "price": "KUDOS:5.25",
+      "categories": [
+        3
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "2123465",
+      "description": "Toast with Jam",
+      "price": "KUDOS:5.25",
+      "categories": [
+        3
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "98461321",
+      "description": "Vegetarian Sausage & 2 Eggs",
+      "price": "KUDOS:5.25",
+      "categories": [
+        3
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "346346163",
+      "description": "Continental",
+      "price": "KUDOS:7.95",
+      "categories": [
+        3
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "35461654",
+      "description": "Bircher Musli",
+      "price": "KUDOS:3.70",
+      "categories": [
+        3
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "11651613210",
+      "description": "Organic Scrambled Eggs",
+      "price": "KUDOS:4.25",
+      "categories": [
+        3
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "2316516",
+      "description": "Bread rolls and Coffee",
+      "price": "KUDOS:3.95",
+      "categories": [
+        3
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "234234232",
+      "description": "Pepperoni",
+      "price": "KUDOS:7.50",
+      "categories": [
+        6
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "234234231",
+      "description": "Napoletana",
+      "price": "KUDOS:7.25",
+      "categories": [
+        6
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "23423452557",
+      "description": "Margherita",
+      "price": "KUDOS:6.50",
+      "categories": [
+        6
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "54315",
+      "description": "Quattro Stagioni",
+      "price": "KUDOS:7.75",
+      "categories": [
+        6
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "654432",
+      "description": "Quattro Formaggi",
+      "price": "KUDOS:7.75",
+      "categories": [
+        6
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "1894103",
+      "description": "Romana",
+      "price": "KUDOS:7.75",
+      "categories": [
+        6
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "1894104",
+      "description": "Mediterranea",
+      "price": "KUDOS:8.75",
+      "categories": [
+        6
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "684546533",
+      "description": "Orange Juice",
+      "price": "KUDOS:1.00",
+      "categories": [
+        2,
+        7
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "684546534",
+      "description": "Pineapple Juice",
+      "price": "KUDOS:1.50",
+      "categories": [
+        2,
+        7
+      ],
+      "delivery_location": "cafeteria"
+    },
+    {
+      "product_id": "23525676587",
+      "description": "Hot Tea",
+      "price": "KUDOS:0.90",
+      "categories": [
+        2
+      ],
+      "delivery_location": "cafeteria"
+    }
+  ],
+  "locations": {
+    "cafeteria": {
+      "name": "Casa in LR",
+      "country": "France",
+      "state": "",
+      "region": "Nouvelle-Aquitaine",
+      "province": "Charente-Maritime",
+      "city": "La Rochelle",
+      "zip_code": "5R4V+G7",
+      "street": "Bis Rue St Jean du Pérot",
+      "street_number": "48"
+    }
+  }
+}
