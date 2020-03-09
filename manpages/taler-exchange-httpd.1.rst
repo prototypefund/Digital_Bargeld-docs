@@ -14,7 +14,7 @@ Synopsis
 **taler-exchange-httpd** [**-C** | **–connection-close**]
 [**-c** *FILENAME* | **–config=**\ ‌\ *FILENAME*]
 [**-f** *FILENAME* | **–file-input=**\ ‌\ *FILENAME*]
-[**-h** | **–help**] [**-i** | **–init-db**]
+[**-h** | **–help**]
 [**-L** *LOGLEVEL* | **–loglevel=**\ ‌\ *LOGLEVEL*]
 [**-t** *SECONDS* | **–timeout=**\ ‌\ *SECONDS*] [**-v** | **–version**]
 
@@ -37,9 +37,6 @@ Its options are as follows:
 
 **-h** \| **–help**
    Print short help on options.
-
-**-i** \| **–init-db**
-   Initialize the database by creating tables and indices if necessary.
 
 **-v** \| **–version**
    Print version information.
