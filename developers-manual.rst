@@ -594,8 +594,11 @@ for that.
 There is also the possibility to trigger builds manually, but this is
 only reserved to "admin" users.
 
+Android Apps
+============
+
 Android App Nightly Builds
-==========================
+--------------------------
 
 There are currently three Android apps:
 
@@ -631,6 +634,73 @@ by clicking the following link (on the phone that has F-Droid installed).
     Nightly apps can be installed alongside official releases
     and thus are meant **only for testing purposes**.
     Use at your own risk!
+
+.. _Build-apps-from-source:
+
+Building apps from source
+-------------------------
+
+Note that this guide is different from other guides for building Android apps,
+because it does not require you to run non-free software.
+It uses the Merchant PoS Terminal as an example, but works as well for the other apps.
+
+First, ensure that you have the required dependencies installed:
+
+* Java Development Kit 8 or higher (default-jdk-headless)
+* git
+* unzip
+
+Then you can get the app's source code using git:
+
+.. code-block:: shell
+
+  # Start by cloning the git repository
+  git clone https://git.taler.net/merchant-terminal-android.git
+
+  # Change into the directory of the cloned app
+  cd merchant-terminal-android
+
+  # Find out which Android SDK version you will need
+  grep -i compileSdkVersion app/build.gradle
+
+The last command will return something like ``compileSdkVersion 29``.
+So visit the `Android Rebuilds <http://android-rebuilds.beuc.net/>`_ project
+and look for that version of the Android SDK there.
+If the SDK version is not yet available as a free rebuild,
+you can try to lower the ``compileSdkVersion`` in the app's ``app/build.gradle`` file.
+Note that this might break things
+or require you to also lower other versions such as ``targetSdkVersion``.
+
+In our example, the version is ``29`` which is available,
+so download the "SDK Platform" package of "Android 10.0.0 (API 29)"
+and unpack it:
+
+.. code-block:: shell
+
+  # Change into the directory that contains your downloaded SDK
+  cd $HOME
+
+  # Unpack/extract the Android SDK
+  unzip android-sdk_eng.10.0.0_r14_linux-x86.zip
+
+  # Tell the build system where to find the SDK
+  export ANDROID_SDK_ROOT="$HOME/android-sdk_eng.10.0.0_r14_linux-x86"
+
+  # Change into the directory of the cloned app
+  cd merchant-terminal-android
+
+  # Build the app
+  ./gradlew assembleRelease
+
+If you get an error message complaining about build-tools
+
+    > Failed to install the following Android SDK packages as some licences have not been accepted.
+         build-tools;29.0.3 Android SDK Build-Tools 29.0.3
+
+you can try changing the ``buildToolsVersion`` in the app's ``app/build.gradle`` file
+to the latest "Android SDK build tools" version supported by the Android Rebuilds project.
+
+After the build finished successfully, you find your APK in ``app/build/outputs/apk/release/``.
 
 .. _Code-coverage:
 

@@ -92,6 +92,10 @@ Import in and build with Android Studio or run on the command line:
   $ cd merchant-terminal-android
   $ ./gradlew assembleRelease
 
+If you do not have the proprietary Android SDK installed,
+see the :doc:`developers-manual`
+for :ref:`build instructions using free SDK rebuilds <Build-apps-from-source>`.
+
 APIs and Data Formats
 =====================
 
