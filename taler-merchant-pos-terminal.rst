@@ -163,6 +163,9 @@ The elements of the JSON file are defined as follows:
       // The price of the product
       price: Amount;
 
+      // An optional base64-encoded product image
+      image?: ImageDataUrl;
+
       // A list of category IDs this product belongs to.
       // Typically, a product only belongs to one category, but more than one is supported.
       categories: number[];

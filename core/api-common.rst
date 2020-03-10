@@ -342,6 +342,20 @@ When no sign is present, the amount is assumed to be positive.
 
   type SignedAmount = string;
 
+Images
+^^^^^^
+
+.. ts:def:: ImageDataUrl
+
+  // The string must be a data URL according to RFC 2397
+  // with explicit mediatype and base64 parameters.
+  //
+  //     ``data:<mediatype>;base64,<data>``
+  //
+  // Supported mediatypes are ``image/jpeg`` and ``image/png``.
+  // Invalid strings will be rejected by the wallet.
+  type ImageDataUrl = string;
+
 
 --------------
 Binary Formats

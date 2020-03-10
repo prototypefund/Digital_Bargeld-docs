@@ -873,6 +873,9 @@ The contract terms must have the following structure:
       // merchant-internal identifier for the product
       product_id?: string;
 
+      // An optional base64-encoded product image
+      image?: ImageDataUrl;
+
       // a list of objects indicating a 'taxname' and its amount. Again, italics denotes the object field's name.
       taxes?: any[];
 
