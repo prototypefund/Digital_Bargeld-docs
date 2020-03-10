@@ -59,7 +59,7 @@ possibly by using HTTPS.
   If the "Etag" is missing, the client should not cache the response and instead prompt the user again at the next opportunity. This is usually only the case if the terms of service were not configured correctly.
 
 
-  .. http:get:: /privacy
+.. http:get:: /privacy
 
   Get the privacy policy of the exchange.
   The exchange will consider the "Accept" and "Accept-Language" and
@@ -1057,6 +1057,7 @@ in using this API.
   **Request:** The request body must be a `RecoupRequest` object.
 
   **Response:**
+
   :status 200 OK:
     The request was succesful, and the response is a `RecoupConfirmation`.
     Note that repeating exactly the same request
