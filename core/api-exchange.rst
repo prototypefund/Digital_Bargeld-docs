@@ -428,11 +428,8 @@ exchange.
       // Sender account payto://-URL, only present if type is "DEPOSIT".
       sender_account_url?: string;
 
-      // Receiver account details, only present if type is "RECOUP".
+      // Receiver account details, only present if type is "CLOSING".
       receiver_account_details?: any;
-
-      // Wire transfer identifier, only present if type is "RECOUP".
-      wire_transfer?: any;
 
       // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
       wire_reference?: any;
