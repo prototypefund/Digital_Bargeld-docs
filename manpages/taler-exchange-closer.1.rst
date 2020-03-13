@@ -1,4 +1,4 @@
-taler-exchange-aggregator(1)
+taler-exchange-closer(1)
 ############################
 
 .. only:: html
@@ -6,21 +6,21 @@ taler-exchange-aggregator(1)
    Name
    ====
 
-   **taler-exchange-aggregator** - aggregate deposits into wire transfers
+   **taler-exchange-closer** - close idle reserves
 
 Synopsis
 ========
 
-**taler-exchange-aggregator**
+**taler-exchange-closer**
 [**-d** *DIRNAME* | **--exchange-dir=**\ ‌\ *DIRNAME*]
 [**-h** | **--help**] [**-t** | **--test**] [**-v** | **--version**]
 
 Description
 ===========
 
-**taler-exchange-aggregator** is a command line tool to run aggregate deposits
-to the same merchant into larger wire transfers. The actual transfers are then
-done by **taler-exchange-transfer**.
+**taler-exchange-closer** is a command line tool to run close
+reserves that have been idle for too long, causing transfers
+to the originating bank account to be scheduled.
 
 **-d** *DIRNAME* \| **--exchange-dir=**\ ‌\ *DIRNAME*
    Use the configuration and other resources for the exchange to operate
@@ -38,8 +38,7 @@ done by **taler-exchange-transfer**.
 See Also
 ========
 
-taler-exchange-transfer(1), taler-exchange-closer(1),
-taler-exchange-httpd(1), taler.conf(5).
+taler-exchange-transfer(1), taler-exchange-httpd(1), taler.conf(5).
 
 Bugs
 ====

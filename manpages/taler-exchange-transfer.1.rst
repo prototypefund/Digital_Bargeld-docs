@@ -1,4 +1,4 @@
-taler-exchange-aggregator(1)
+taler-exchange-transfer(1)
 ############################
 
 .. only:: html
@@ -6,21 +6,20 @@ taler-exchange-aggregator(1)
    Name
    ====
 
-   **taler-exchange-aggregator** - aggregate deposits into wire transfers
+   **taler-exchange-transfer** - execute scheduled wire transfers
 
 Synopsis
 ========
 
-**taler-exchange-aggregator**
+**taler-exchange-transfer**
 [**-d** *DIRNAME* | **--exchange-dir=**\ ‌\ *DIRNAME*]
 [**-h** | **--help**] [**-t** | **--test**] [**-v** | **--version**]
 
 Description
 ===========
 
-**taler-exchange-aggregator** is a command line tool to run aggregate deposits
-to the same merchant into larger wire transfers. The actual transfers are then
-done by **taler-exchange-transfer**.
+**taler-exchange-transfer** is a command line tool to actually execute scheduled wire transfers (using the bank/wire gateway).
+The transfers are prepared by the **taler-exchange-aggregator** and **taler-exchange-closer** tools.
 
 **-d** *DIRNAME* \| **--exchange-dir=**\ ‌\ *DIRNAME*
    Use the configuration and other resources for the exchange to operate
@@ -38,7 +37,7 @@ done by **taler-exchange-transfer**.
 See Also
 ========
 
-taler-exchange-transfer(1), taler-exchange-closer(1),
+taler-exchange-aggregator(1), taler-exchange-closer(1),
 taler-exchange-httpd(1), taler.conf(5).
 
 Bugs
