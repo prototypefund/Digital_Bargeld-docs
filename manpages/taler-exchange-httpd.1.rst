@@ -27,6 +27,12 @@ must exist before running this command.
 
 Its options are as follows:
 
+**-a** \| **–allow-timetravel**
+   Allow clients to request /keys for arbitrary timestamps.
+   This should only be enabled for testing and development,
+   as clients could abuse this in denial of service attacks,
+   as it makes the /keys response generation much more expensive.
+
 **-C** \| **–connection-close**
    Force each HTTP connection to be closed after each request (useful in
    combination with **-f** to avoid having to wait for nc to time out).
