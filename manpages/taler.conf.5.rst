@@ -112,6 +112,25 @@ PRIVACY_ETAG
    Works the same as TERMS_ETAG, just for the privacy policy.
 
 
+EXCHANGE DATABASE OPTIONS
+-------------------------
+
+The following options must be in the section "[exchangedb]".
+
+DURATION_OVERLAP
+   How much should validity periods for coins overlap?
+   Should be long enough to avoid problems with
+   wallets picking one key and then due to network latency
+   another key being valid.  The DURATION_WITHDRAW period
+   must be longer than this value.
+
+IDLE_RESERVE_EXPIRATION_TIME
+   After which time period should reserves be closed if they are idle?
+
+LEGAL_RESERVE_EXPIRATION_TIME
+   After what time do we forget about (drained) reserves during garbage collection?
+
+
 EXCHANGE POSTGRES BACKEND DATABASE OPTIONS
 ------------------------------------------
 
@@ -332,9 +351,6 @@ are used by taler-exchange-keyup to create denomination keys.
 VALUE
    Value of the coin, i.e. “EUR:1.50” for 1 Euro and 50 Cents (per
    coin).
-
-DURATION_OVERLAP
-   How much should validity periods for these coins overlap?
 
 DURATION_WITHDRAW
    How long should the same key be used for clients to withdraw coins of
