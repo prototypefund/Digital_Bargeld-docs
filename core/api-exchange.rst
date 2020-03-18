@@ -1110,16 +1110,18 @@ in using this API.
 
   .. ts:def:: RecoupWithdrawalConfirmation
 
-    // type of response provided if refreshed was false.
     interface RecoupWithdrawalConfirmation {
+      // Tag to distinguish the RecoupConfirmation response type
+      refreshed: false;
       // public key of the reserve that will receive the recoup,
       reserve_pub: EddsaPublicKey;
     }
 
   .. ts:def:: RecoupRefreshConfirmation
 
-    // type of response provided if refreshed was true.
     interface RecoupRefreshConfirmation {
+      // Tag to distinguish the RecoupConfirmation response type
+      refreshed: true;
       // public key of the old coin that will receive the recoup
       old_coin_pub: EddsaPublicKey;
     }
