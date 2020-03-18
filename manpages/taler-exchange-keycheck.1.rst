@@ -26,12 +26,19 @@ that the files are correct.
 
 Its options are as follows:
 
-**-d** *DIRNAME* \| **–exchange-dir=**\ ‌\ *DIRNAME*
-   Use the configuration and other resources for the exchange to operate
-   from *DIRNAME*.
+**-c** *FILENAME* \| **–config=**\ ‌\ *FILENAME*
+   Use the configuration and other resources for the merchant to operate
+   from *FILENAME*.
 
 **-h** \| **–help**
    Print short help on options.
+
+**-i** *AMOUNT* \| **–denomination-info-hash=**\ ‌\ *AMOUNT*
+   Output the full denomination key hashes and the validity starting times of all denomination keys for the given *AMOUNT*.  Useful to identify hashes when revoking keys.
+
+**-L** *LOGLEVEL* \| **–loglevel=**\ ‌\ *LOGLEVEL*
+   Specifies the log level to use. Accepted values are: DEBUG, INFO,
+   WARNING, ERROR.
 
 **-v** \| **–version**
    Print version information.

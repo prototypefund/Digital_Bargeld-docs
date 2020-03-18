@@ -32,15 +32,28 @@ operates.
 
 Its options are as follows:
 
-**-d** *DIRNAME* \| **–exchange-dir=**\ ‌\ *DIRNAME*
-   Use the configuration and other resources for the exchange to operate
-   from *DIRNAME*.
+**-c** *FILENAME* \| **–config=**\ ‌\ *FILENAME*
+   Use the configuration and other resources for the merchant to operate
+   from FILENAME.
+
+**-f** *DIRNAME* \| **–feedir=**\ ‌\ *DIRNAME*
+   Directory where to write the wire transfer fee structure. If not given,
+   the one from the main configuration will be used.
 
 **-h** \| **–help**
    Print short help on options.
 
+**-L** *LOGLEVEL* \| **–loglevel=**\ ‌\ *LOGLEVEL*
+   Specifies the log level to use. Accepted values are: DEBUG, INFO,
+   WARNING, ERROR.
+
+**-k** *BITS* \| **–replacement-keysize=**\ ‌\ *BITS*
+   When revoke an active denomination key (see **--r** option), use
+   *BITS* bit for the replacement denomination key. Default is 2048 (bits).
+
 **-m** *FILE* \| **–master-key=**\ ‌\ *FILE*
-   Location of the private EdDSA offline master key of the exchange.
+   Location of the private EdDSA offline master key of the exchange. If not
+   given, the location given in the configuration file will be used.
 
 **-o** *FILE* \| **–output=**\ ‌\ *FILE*
    Where to write a denomination key signing request file to be given to
@@ -49,6 +62,9 @@ Its options are as follows:
 **-r** *DKH* \| **–revoke=**\ ‌\ *DKH*
    Revoke the denomination key where the denomination public key’s hash
    is DKH.
+
+**-T** *[+/-]MICROSECONDS* \| **–timetravel=**\ ‌\ *[+/-]MICROSECONDS*
+   Modify system time (as seen by this process) by the given offset (for debugging/testing).
 
 **-t** *TIMESTAMP* \| **–time=**\ ‌\ *TIMESTAMP*
    Operate as if the current time was *TIMESTAMP*.
