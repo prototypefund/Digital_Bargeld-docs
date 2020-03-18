@@ -1050,6 +1050,12 @@ in using this API.
   exchange. The exchange MUST return a 307 or 308 redirection to the correct
   base URL if this is the case.
 
+  Depending whether ``$COIN_PUB`` is a withdrawn coin or a refreshed coin,
+  the remaining amount on the coin will be credited either on the reserve or
+  the old coin that ``$COIN_PUB`` was withdrawn/refreshed from.
+
+  Note that the original withdrawal/refresh fees will **not** be recouped.
+
 
   **Request:** The request body must be a `RecoupRequest` object.
 
@@ -1090,42 +1096,34 @@ in using this API.
       coin_sig: EddsaSignature;
 
       // Was the coin refreshed (and thus the recoup should go to the old coin)?
-      // Optional (for backwards compatibility); if absent, "false" is assumed
+      // While this information is technically redundant, it helps the exchange
+      // to respond faster.
+      // *Optional* (for backwards compatibility); if absent, "false" is assumed
       refreshed?: boolean;
     }
 
 
   .. ts:def:: RecoupConfirmation
 
-    interface RecoupConfirmation {
+    type RecoupConfirmation = | RecoupRefreshConfirmation
+                              | RecoupWithdrawalConfirmation;
+
+  .. ts:def:: RecoupWithdrawalConfirmation
+
+    interface RecoupWithdrawalConfirmation {
+      // Tag to distinguish the RecoupConfirmation response type
+      refreshed: false;
       // public key of the reserve that will receive the recoup,
-      // provided if refreshed was false.
-      reserve_pub?: EddsaPublicKey;
+      reserve_pub: EddsaPublicKey;
+    }
 
-      // public key of the old coin that will receive the recoup,
-      // provided if refreshed was true.
-      old_coin_pub?: EddsaPublicKey;
+  .. ts:def:: RecoupRefreshConfirmation
 
-      // How much will the exchange pay back (needed by wallet in
-      // case coin was partially spent and wallet got restored from backup)
-      amount: Amount;
-
-      // Time by which the exchange received the /recoup request.
-      timestamp: Timestamp;
-
-      // the EdDSA signature of `TALER_RecoupConfirmationPS` (refreshed false)
-      // or `TALER_RecoupRefreshConfirmationPS` (refreshed true) using a current
-      // `signing key of the exchange <sign-key-priv>` affirming the successful
-      // recoup request, and that the exchange promises to transfer the funds
-      // by the date specified (this allows the exchange delaying the transfer
-      // a bit to aggregate additional recoup requests into a larger one).
-      exchange_sig: EddsaSignature;
-
-      // Public EdDSA key of the exchange that was used to generate the signature.
-      // Should match one of the exchange's signing keys from /keys.  It is given
-      // explicitly as the client might otherwise be confused by clock skew as to
-      // which signing key was used.
-      exchange_pub: EddsaPublicKey;
+    interface RecoupRefreshConfirmation {
+      // Tag to distinguish the RecoupConfirmation response type
+      refreshed: true;
+      // public key of the old coin that will receive the recoup
+      old_coin_pub: EddsaPublicKey;
     }
 
 
