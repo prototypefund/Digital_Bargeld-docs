@@ -331,7 +331,7 @@ Internally, amounts are parsed into the following object:
     // Unsigned 32 bit fractional value to be added to ``value`` representing
     // an additional currency fraction, in units of one hundred millionth (1e-8)
     // of the base currency value.  For example, a fraction
-    // of 500,000 would correspond to 50 cents.
+    // of 50,000,000 would correspond to 50 cents.
     fraction: number;
   }
 
