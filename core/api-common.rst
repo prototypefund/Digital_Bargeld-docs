@@ -317,18 +317,19 @@ Internally, amounts are parsed into the following object:
 .. ts:def:: ParsedAmount
 
   interface ParsedAmount {
-    // name of the currency using either a three-character ISO 4217 currency
+    // Name of the currency using either a three-character ISO 4217 currency
     // code, or a regional currency identifier starting with a "*" followed by
     // at most 10 characters.  ISO 4217 exponents in the name are not supported,
     // although the "fraction" is corresponds to an ISO 4217 exponent of 6.
     currency: string;
 
-    // unsigned 32 bit value in the currency, note that "1" here would
-    // correspond to 1 EUR or 1 USD, depending on `currency`, not 1 cent.
+    // Non-negative integer value in the currency, can be at most 2^52.
+    // Note that "1" here would correspond to 1 EUR or 1 USD,
+    // depending on `currency`, not 1 cent.
     value: number;
 
-    // unsigned 32 bit fractional value to be added to ``value`` representing
-    // an additional currency fraction, in units of one millionth (1e-6)
+    // Unsigned 32 bit fractional value to be added to ``value`` representing
+    // an additional currency fraction, in units of one hundred millionth (1e-8)
     // of the base currency value.  For example, a fraction
     // of 500,000 would correspond to 50 cents.
     fraction: number;
