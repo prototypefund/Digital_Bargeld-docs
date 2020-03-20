@@ -909,3 +909,57 @@ TALER_SIGNATURE_AUDITOR_EXCHANGE_KEYS purpose.
 
 .. [3]
    https://api.taler.net/api-exchange.html#wire-req
+
+
+
+.. _Benchmarking:
+
+Benchmarking
+============
+
+This chapter describes how to run the Taler exchange benchmark.
+The benchmark can be used to measure the performance of the exchange
+by running a (possibly large) number of simulated clients against one
+Taler deployment with a bank, exchange and auditor.  For the bank, both
+a "fakebank" (``-f``) and a "Pythonbank" deployment are currently supported.
+The taler-exchange-benchmark program can launch all required services
+and clients, or only launch the parallel clients (``-m``), for example for
+distributed testing over a network.
+
+For each *parallel* (``-p``) client, a number of *reserves* (``-r``) is first established by
+**transfering** money from a "user" account (42) to the Exchange's account
+with the respective reserve public key as wire subject.  Next, the
+client will **withdraw** a *number of coins* (``-n``) from the reserve and
+**deposit** them. Additionally, a *fraction* (``-R``) of the dirty coins will then be
+subject to **refreshing**.  For some deposits, the auditor will receive
+**deposit confirmations**.
+
+Operations that are not covered today include closing reserves, refunds and
+recoups.
+
+The existing ``benchmark.conf`` file in ``src/benchmark/`` can be used as a
+starting point for a configuration to run the benchmark. The existing
+configuration file only requires that the ``talercheck`` database already
+exists and will launch all required services locally as needed.
+Note that by default the benchmark requires that the database is already
+initialized using ``taler-exchange-keyup``.
+
+You can run a first simple benchmark using:
+
+::
+
+   $ taler-exchange-benchmark -c benchmark.conf -p 4 -r 1 -n 10
+
+This will run 4 parallel clients withdrawing 10 coins from 1 reserve and then
+depositing those coins. The default refresh probability is 10 percent.  Note
+that the tiny run should only take a few seconds, most of it will be spent in
+the setup of the original key material. For meaningful runs, all three values
+should likely be increased.
+
+The output of ``taler-exchange-benchmark`` will include for each parallel
+client the total time spent in each of the major operations, possible
+repetitions (i.e. if the operation failed the first time), total execution
+time (operating system and user space) and other details.
+
+Naturally, additional instrumentation (including using features of the
+Postgres database itself) may help discover performance issues.

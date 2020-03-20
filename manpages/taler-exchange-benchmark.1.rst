@@ -15,7 +15,7 @@ Synopsis
 
 **taler-exchange-benchmark**
 [**-c** *CONFIG_FILENAME* | **--config=**\ ‌\ *CONFIG_FILENAME*]
-[**-b** *BANK_URL* | **—bank-url=**\ ‌\ *BANK_URL*]
+[**-b** *BANK_URL* | **—bank-url=**\ ‌\ *BANK_URL*] [-f] [-K]
 [**-n** *HOWMANY_COINS* | **--coins-number=**\ ‌\ *HOWMANY_COINS*]
 [**-l** *LOGLEVEL* | **--log-level=**\ ‌\ *LOGLEVEL*]
 [**-h** | **--help**]
@@ -37,6 +37,16 @@ that table are always erased during a single benchmark run.
    (Mandatory) The URL where the fakebank listens at. Must match the
    host component in the exchange’s escrow account “payto” URL.
 
+**-f** \| **--fakebank**
+   Launch a fakebank instead of the Python bank. Only meaningful if the
+   mode is to launch more than just a client.  Note that using the
+   fakebank will cause the benchmark application to reset all databases
+   as the fakebank is stateless and thus previous database state would
+   inherently cause trouble.
+
+**-K** \| **--linger**
+   Linger around until keypress after the benchmark is done.
+
 **-n** *HOWMANY_COINS* \| **--coins-number=**\ ‌\ *HOWMANY_COINS*
    Defaults to 1. Specifies how many coins this benchmark should
    withdraw and spend. After being spent, each coin will be refreshed
@@ -53,7 +63,7 @@ that table are always erased during a single benchmark run.
 See Also
 ========
 
-taler-exchange-dbinit(1), taler-exchange-keyup(1),
+taler-exchange-dbinit(1), taler-exchange-keyup(1), taler-merchant-benchmark(1),
 taler-exchange-httpd(1), taler.conf(5)
 
 Bugs
