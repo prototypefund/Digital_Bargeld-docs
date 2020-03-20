@@ -948,6 +948,8 @@ You can run a first simple benchmark using:
 
 ::
 
+   $ createdb talercheck # if it does not yet exist
+   $ taler-exchange-keyup -c benchmark.conf
    $ taler-exchange-benchmark -c benchmark.conf -p 4 -r 1 -n 10
 
 This will run 4 parallel clients withdrawing 10 coins from 1 reserve and then
