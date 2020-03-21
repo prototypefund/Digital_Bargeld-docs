@@ -1,19 +1,19 @@
-taler-exchange-dbinit(1)
-########################
+taler-auditor-dbinit(1)
+#######################
 
 .. only:: html
 
    Name
    ====
 
-   **taler-exchange-dbinit** - initialize Taler exchange database
+   **taler-auditor-dbinit** - initialize Taler auditor database
 
 
 Synopsis
 ========
 
-**taler-exchange-dbinit**
-[**-h** | **–help**] [**-g** | **–gc**] [**-r** | **–reset**]
+**taler-auditor-dbinit**
+[**-h** | **–help**] [**-g** | **–gc**] [**-R** | **–reset**] [**-r** | **–restart**]
 [**-v** | **–version**]
 
 Description
@@ -36,9 +36,12 @@ Its options are as follows:
    Garbage collect database. Deletes all unnecessary data in the
    database.
 
-**-r** \| **–reset**
-   Drop tables. Dangerous, will delete all existing data in the database
-   before creating the tables.
+**-R** \| **–reset**
+   Drop tables. Dangerous, will delete all existing data in the database.
+
+**-r** \| **--restart**
+   Restart all auditors from the beginning. Useful for
+   testing.
 
 **-v** \| **–version**
    Print version information.
@@ -46,8 +49,7 @@ Its options are as follows:
 See Also
 ========
 
-taler-exchange-httpd(1), taler-exchange-keyup(1),
-taler-exchange-reservemod(1), taler.conf(5).
+taler-auditor-httpd(1), taler-auditor(1), taler.conf(5).
 
 Bugs
 ====

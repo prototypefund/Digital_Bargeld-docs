@@ -1,5 +1,5 @@
 taler-exchange-closer(1)
-############################
+#########################
 
 .. only:: html
 
@@ -12,7 +12,6 @@ Synopsis
 ========
 
 **taler-exchange-closer**
-[**-d** *DIRNAME* | **--exchange-dir=**\ ‌\ *DIRNAME*]
 [**-h** | **--help**] [**-t** | **--test**] [**-v** | **--version**]
 
 Description
@@ -22,9 +21,10 @@ Description
 reserves that have been idle for too long, causing transfers
 to the originating bank account to be scheduled.
 
-**-d** *DIRNAME* \| **--exchange-dir=**\ ‌\ *DIRNAME*
+
+**-c** *FILENAME* \| **–config=**\ ‌\ *FILENAME*
    Use the configuration and other resources for the exchange to operate
-   from *DIRNAME*.
+   from *FILENAME*.
 
 **-h** \| **--help**
    Print short help on options.

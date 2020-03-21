@@ -12,7 +12,6 @@ Synopsis
 ========
 
 **taler-exchange-aggregator**
-[**-d** *DIRNAME* | **--exchange-dir=**\ ‌\ *DIRNAME*]
 [**-h** | **--help**] [**-t** | **--test**] [**-v** | **--version**]
 
 Description
@@ -22,9 +21,9 @@ Description
 to the same merchant into larger wire transfers. The actual transfers are then
 done by **taler-exchange-transfer**.
 
-**-d** *DIRNAME* \| **--exchange-dir=**\ ‌\ *DIRNAME*
+**-c** *FILENAME* \| **–config=**\ ‌\ *FILENAME*
    Use the configuration and other resources for the exchange to operate
-   from *DIRNAME*.
+   from *FILENAME*.
 
 **-h** \| **--help**
    Print short help on options.

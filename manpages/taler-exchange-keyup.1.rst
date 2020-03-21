@@ -13,7 +13,6 @@ Synopsis
 ========
 
 **taler-exchange-keyup**
-[**-d** *DIRNAME* | **–exchange-dir=**\ ‌\ *DIRNAME*]
 [**-h** | **–help**] [**-m** *FILE* | **–master-key=**\ ‌\ *FILE*]
 [**-o** *FILE* | **–output=**\ ‌\ *FILE*]
 [**-r** *DKH* | **–revoke=**\ ‌\ *DKH*]

@@ -13,7 +13,6 @@ Synopsis
 ========
 
 **taler-exchange-keycheck**
-[**-d** *DIRNAME* | **–exchange-dir=**\ ‌\ *DIRNAME*]
 [**-h** | **–help**] [**-v** | **–version**]
 
 Description
@@ -27,7 +26,7 @@ that the files are correct.
 Its options are as follows:
 
 **-c** *FILENAME* \| **–config=**\ ‌\ *FILENAME*
-   Use the configuration and other resources for the merchant to operate
+   Use the configuration and other resources for the exchange to operate
    from *FILENAME*.
 
 **-h** \| **–help**

@@ -12,7 +12,6 @@ Synopsis
 ========
 
 **taler-exchange-transfer**
-[**-d** *DIRNAME* | **--exchange-dir=**\ ‌\ *DIRNAME*]
 [**-h** | **--help**] [**-t** | **--test**] [**-v** | **--version**]
 
 Description
@@ -21,9 +20,9 @@ Description
 **taler-exchange-transfer** is a command line tool to actually execute scheduled wire transfers (using the bank/wire gateway).
 The transfers are prepared by the **taler-exchange-aggregator** and **taler-exchange-closer** tools.
 
-**-d** *DIRNAME* \| **--exchange-dir=**\ ‌\ *DIRNAME*
+**-c** *FILENAME* \| **–config=**\ ‌\ *FILENAME*
    Use the configuration and other resources for the exchange to operate
-   from *DIRNAME*.
+   from *FILENAME*.
 
 **-h** \| **--help**
    Print short help on options.

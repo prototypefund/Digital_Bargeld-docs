@@ -272,6 +272,8 @@ man_pages = [
      1),
     ("manpages/taler-auditor-sign.1", "taler-auditor-sign",
      "sign exchange denomination as auditor", "GNU Taler contributors", 1),
+    ("manpages/taler-auditor-dbinit.1", "taler-auditor-dbinit",
+     "setup auditor database", "GNU Taler contributors", 1),
     ("manpages/taler-auditor.1", "taler-auditor", "audit exchange",
      "GNU Taler contributors", 1),
     ("manpages/taler-bank-transfer.1", "taler-bank-transfer",

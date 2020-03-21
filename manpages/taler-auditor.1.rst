@@ -13,7 +13,7 @@ Synopsis
 
 **taler-auditor** [**-h** | **--help**]
 [**-m** *MASTER_KEY* | **--exchange-key=**\ ‌\ *MASTER_KEY*]
-[**-r** | **--reset**]
+
 
 Description
 ===========
@@ -37,16 +37,12 @@ matches the exchange’s database. Its options are as follows.
    taler-auditor will use the MASTER_PUBLIC_KEY value from the
    “exchange” section of the configuration.
 
-**-r** \| **--reset**
-   Reset the audit, starts everything from the beginning. Useful for
-   testing and required for the first audit to setup auditor’s tables.
-   Note that if (just) the exchange key changes, the **-r** option
-   should not be used again.
+
 
 See Also
 ========
 
-gnunet-ecc(1), taler-auditor-sign(1), taler.conf(5)
+gnunet-ecc(1), taler-auditor-sign(1), taler.conf(5), taler-auditor-dbinit(1)
 
 Bugs
 ====
