@@ -140,28 +140,32 @@ components:
 
    The main binary of this component is the ``taler-auditor-httpd``.
 
--  The wire-auditor
-   The wire auditor verifies that the bank transactions performed by the exchange
-   were done properly.  This component must have access to the bank account
-   of the exchange, as well as to a copy of the exchange's database.
-   The main binary of this component is the ``taler-wire-auditor``.
-
 -  The (main) auditor
    The main auditor logic checks the various signatures, totals up the
    amounts and checks for arithmetic inconsistencies. It also
    computes the expected bank balance, revenue and risk exposure of the
-   exchange operator. The main binary of this component is the ``taler-auditor``.
+   exchange operator. The main script of this component is the ``taler-auditor``.
+   This script invokes several helper binaries sequentially. Production
+   users may want to modify the script to run those binaries in parallel,
+   possibly using different privileges (as only the ``taler-helper-auditor-wire``
+   needs access to the wire gateway).
 
--  The renderer
-   A rendering script uses the JSON output of ``taler-wire-auditor``
-   and ``taler-auditor`` and combines it with a LaTeX template into
-   a human-readable audit report.  The resulting report includes performance
-   data, reports on hard violations (resulting in financial losses)
-   and reports on soft violations (such
-   as the exchange not performing certain operations in a timely fashion).
-   The report also includes figures on the losses of violations. Careful
-   reading of the report is required, as not every detail in the report
-   is necessarily indicative of a problem.
+   The ``taler-helper-auditor-wire`` auditor verifies that the bank
+   transactions performed by the exchange
+   were done properly.  This component must have access to the bank account
+   of the exchange, as well as to a copy of the exchange's database.
+
+   The ``taler-auditor`` script invokes the various helpers, each generating
+   a JSON report. It then invokes the ``taler-helper-auditor-render.py``
+   script to combine those JSON files with a Jinja2 template into a
+   LaTeX report.  Finally, ``pdflatex`` is used to generate a PDF report.
+
+   The resulting report includes performance data, reports on hard violations
+   (resulting in financial losses) and reports on soft violations (such as the
+   exchange not performing certain operations in a timely fashion).  The
+   report also includes figures on the losses of violations. Careful reading
+   of the report is required, as not every detail in the report is necessarily
+   indicative of a problem.
 
 
 Installation
@@ -461,25 +465,21 @@ script into the TeX report.
 
 ::
 
-   $ taler-audit > audit.json
-   $ taler-wire-audit > wire.json
-   $ contrib/render.py audit.json wire.json \
-     < contrib/auditor-report.tex.j2 \
-     > auditor-report.tex
-   $ pdflatex auditor-report.tex
-   $ pdflatex auditor-report.tex # run twice to resolve references
+   $ taler-audit
 
-This generates a file ``auditor-report.pdf`` with all of the
-issues found and the financial assessment of the exchange.
+This generates a file ``auditor-report.pdf`` (in a temporary directory created
+for this purpose) with all of the issues found and the financial assessment of
+the exchange.  The exact filename will be output to the console upon
+completion.
 
-We note that ``taler-audit`` and ``taler-wire-audit`` by default
-run in incremental mode. As a result, running the commands again
-will only check the database entries that have been added since
-the last run.  The ``-r`` option can be used to force a full
-check since the beginning of time. However, as this may require
-excessive time and interactions with the bank (which may not even
-have the wire transfer records anymore), this is not recommended
-in a production setup.
+We note that ``taler-audit`` by default run in incremental mode. As a result,
+running the commands again will only check the database entries that have been
+added since the last run.
+
+You can use ``taler-auditor-dbinit -r`` to force a full check since the
+beginning of time. However, as this may require excessive time and
+interactions with the bank (which may not even have the wire transfer records
+anymore), this is not recommended in a production setup.
 
 
 
@@ -495,7 +495,7 @@ The auditor database can be re-initialized using:
 
 ::
 
-   $ taler-auditor-dbinit -r
+   $ taler-auditor-dbinit -R
 
 However, running this command will result in all data in the database being
 lost, which may result in significant commputation (and bandwidth consumption
@@ -528,13 +528,14 @@ the compromised private key but obtained via a legitimate withdraw operation.
 Auditor implementation guide
 ============================
 
-The auditor implementation is split into two main processes, taler-auditor and
-taler-wire-auditor.  The split was done to realize the principle of least
-priviledge, as the taler-wire-auditor must have (read-only) access to the
-exchange's bank account, while the taler-auditor only needs access to the
+The auditor implementation is split into five main processes, called
+``taler-helper-auditor-XXX``.  The split was done to realize the principle of
+least priviledge and to enable independent logic to be possibly run in
+parallel.  Only the taler-wire-auditor must have (read-only) access to the
+exchange's bank account, the other components only need access to the
 database.
 
-Both programs basically start their audit from a certain transaction
+All auditor subsystems basically start their audit from a certain transaction
 index (BIG SERIAL) in the auditor database which identifies where the
 last audit concluded. They then check that the transactions claimed in
 the exchange's database match up internally, including the cryptographic
@@ -543,8 +544,9 @@ calculates the exchange's profits and expected bank balances.  Once all
 existing transactions are processed, the auditor processes store the current
 checkpoint in its database and generate a JSON report.
 
-A separate script and Jinja2-TeX template are used to convert JSON reports
-into latex and then PDF.
+The taler-auditor shell script calls the five helpers and then
+uses Jinja2 with a TeX template to convert the five individual
+JSON reports into LaTeX and then into PDF.
 
 
 The auditor's database
