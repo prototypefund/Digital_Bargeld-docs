@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "TALER-EXCHANGE-WIRE" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
+.TH "TALER-EXCHANGE-TRANSFER" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
 .SH NAME
-taler-exchange-wire \- create the master-key signed responses to /wire
+taler-exchange-transfer \- execute wire transfers
 .
 .nr rst2man-indent-level 0
 .
@@ -32,29 +32,30 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .SH SYNOPSIS
 .sp
-\fBtaler\-exchange\-wire\fP [\fB\-h\fP\ |\ \fB–help\fP]
-[\fB\-m\fP\ \fIMASTERKEYFILE\fP\ |\ \fB–master=\fP‌\fIMASTERKEYFILE\fP]
-[\fB\-v\fP\ |\ \fB–version\fP]
+\fBtaler\-exchange\-transfer\fP
+[\fB\-h\fP\ |\ \fB\-\-help\fP] [\fB\-t\fP\ |\ \fB\-\-test\fP] [\fB\-v\fP\ |\ \fB\-\-version\fP]
 .SH DESCRIPTION
 .sp
-\fBtaler\-exchange\-wire\fP is used to create the exchange’s reply to a
-/wire request. It converts the bank details into the appropriate signed
-response. This needs to be done using the long\-term offline master key.
-.sp
-Its options are as follows:
+\fBtaler\-exchange\-transfer\fP is a command line tool to actually execute scheduled wire transfers (using the bank/wire gateway).
+The transfers are prepared by the \fBtaler\-exchange\-aggregator\fP and \fBtaler\-exchange\-closer\fP tools.
 .INDENT 0.0
 .TP
-\fB\-h\fP | \fB–help\fP
+\fB\-c\fP \fIFILENAME\fP | \fB–config=\fP‌\fIFILENAME\fP
+Use the configuration and other resources for the exchange to operate
+from \fIFILENAME\fP\&.
+.TP
+\fB\-h\fP | \fB\-\-help\fP
 Print short help on options.
 .TP
-\fB\-m\fP \fIMASTERKEYFILE\fP | \fB–master=\fP‌\fIMASTERKEYFILE\fP
-Specifies the name of the file containing the exchange’s master key.
+\fB\-t\fP | \fB\-\-test\fP
+Run in test mode and exit when idle.
 .TP
-\fB\-v\fP | \fB–version\fP
+\fB\-v\fP | \fB\-\-version\fP
 Print version information.
 .UNINDENT
 .SH SEE ALSO
 .sp
+taler\-exchange\-aggregator(1), taler\-exchange\-closer(1),
 taler\-exchange\-httpd(1), taler.conf(5).
 .SH BUGS
 .sp

@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "TALER-EXCHANGE-WIRE" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
+.TH "TALER-EXCHANGE-CLOSER" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
 .SH NAME
-taler-exchange-wire \- create the master-key signed responses to /wire
+taler-exchange-closer \- close idle reserves
 .
 .nr rst2man-indent-level 0
 .
@@ -32,30 +32,31 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .SH SYNOPSIS
 .sp
-\fBtaler\-exchange\-wire\fP [\fB\-h\fP\ |\ \fB–help\fP]
-[\fB\-m\fP\ \fIMASTERKEYFILE\fP\ |\ \fB–master=\fP‌\fIMASTERKEYFILE\fP]
-[\fB\-v\fP\ |\ \fB–version\fP]
+\fBtaler\-exchange\-closer\fP
+[\fB\-h\fP\ |\ \fB\-\-help\fP] [\fB\-t\fP\ |\ \fB\-\-test\fP] [\fB\-v\fP\ |\ \fB\-\-version\fP]
 .SH DESCRIPTION
 .sp
-\fBtaler\-exchange\-wire\fP is used to create the exchange’s reply to a
-/wire request. It converts the bank details into the appropriate signed
-response. This needs to be done using the long\-term offline master key.
-.sp
-Its options are as follows:
+\fBtaler\-exchange\-closer\fP is a command line tool to run close
+reserves that have been idle for too long, causing transfers
+to the originating bank account to be scheduled.
 .INDENT 0.0
 .TP
-\fB\-h\fP | \fB–help\fP
+\fB\-c\fP \fIFILENAME\fP | \fB–config=\fP‌\fIFILENAME\fP
+Use the configuration and other resources for the exchange to operate
+from \fIFILENAME\fP\&.
+.TP
+\fB\-h\fP | \fB\-\-help\fP
 Print short help on options.
 .TP
-\fB\-m\fP \fIMASTERKEYFILE\fP | \fB–master=\fP‌\fIMASTERKEYFILE\fP
-Specifies the name of the file containing the exchange’s master key.
+\fB\-t\fP | \fB\-\-test\fP
+Run in test mode and exit when idle.
 .TP
-\fB\-v\fP | \fB–version\fP
+\fB\-v\fP | \fB\-\-version\fP
 Print version information.
 .UNINDENT
 .SH SEE ALSO
 .sp
-taler\-exchange\-httpd(1), taler.conf(5).
+taler\-exchange\-transfer(1), taler\-exchange\-httpd(1), taler.conf(5).
 .SH BUGS
 .sp
 Report bugs by using \fI\%https://gnunet.org/bugs/\fP or by sending electronic

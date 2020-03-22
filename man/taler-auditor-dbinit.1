@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "TALER-EXCHANGE-WIRE" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
+.TH "TALER-AUDITOR-DBINIT" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
 .SH NAME
-taler-exchange-wire \- create the master-key signed responses to /wire
+taler-auditor-dbinit \- setup auditor database
 .
 .nr rst2man-indent-level 0
 .
@@ -32,33 +32,45 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 ..
 .SH SYNOPSIS
 .sp
-\fBtaler\-exchange\-wire\fP [\fB\-h\fP\ |\ \fB–help\fP]
-[\fB\-m\fP\ \fIMASTERKEYFILE\fP\ |\ \fB–master=\fP‌\fIMASTERKEYFILE\fP]
+\fBtaler\-auditor\-dbinit\fP
+[\fB\-h\fP\ |\ \fB–help\fP] [\fB\-g\fP\ |\ \fB–gc\fP] [\fB\-R\fP\ |\ \fB–reset\fP] [\fB\-r\fP\ |\ \fB–restart\fP]
 [\fB\-v\fP\ |\ \fB–version\fP]
 .SH DESCRIPTION
 .sp
-\fBtaler\-exchange\-wire\fP is used to create the exchange’s reply to a
-/wire request. It converts the bank details into the appropriate signed
-response. This needs to be done using the long\-term offline master key.
+\fBtaler\-exchange\-dbinit\fP is a command line tool to initialize the Taler
+exchange database. It creates the necessary tables and indices for the
+Taler exchange to operate.
 .sp
 Its options are as follows:
 .INDENT 0.0
 .TP
+\fB\-c\fP \fIFILENAME\fP | \fB–config=\fP‌\fIFILENAME\fP
+Use the configuration and other resources for the exchange to operate
+from \fIFILENAME\fP\&.
+.TP
 \fB\-h\fP | \fB–help\fP
 Print short help on options.
 .TP
-\fB\-m\fP \fIMASTERKEYFILE\fP | \fB–master=\fP‌\fIMASTERKEYFILE\fP
-Specifies the name of the file containing the exchange’s master key.
+\fB\-g\fP | \fB–gc\fP
+Garbage collect database. Deletes all unnecessary data in the
+database.
+.TP
+\fB\-R\fP | \fB–reset\fP
+Drop tables. Dangerous, will delete all existing data in the database.
+.TP
+\fB\-r\fP | \fB\-\-restart\fP
+Restart all auditors from the beginning. Useful for
+testing.
 .TP
 \fB\-v\fP | \fB–version\fP
 Print version information.
 .UNINDENT
 .SH SEE ALSO
 .sp
-taler\-exchange\-httpd(1), taler.conf(5).
+taler\-auditor\-httpd(1), taler\-auditor(1), taler.conf(5).
 .SH BUGS
 .sp
-Report bugs by using \fI\%https://gnunet.org/bugs/\fP or by sending electronic
+Report bugs by using \fI\%https://bugs.gnunet.org\fP or by sending electronic
 mail to <\fI\%taler@gnu.org\fP>.
 .SH AUTHOR
 GNU Taler contributors

@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "TALER-AUDITOR-EXCHANGE" "1" "Sep 18, 2019" "0.6pre1" "GNU Taler"
+.TH "TALER-AUDITOR-EXCHANGE" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
 .SH NAME
 taler-auditor-exchange \- add or remove exchange from auditor’s list
 .
@@ -61,6 +61,9 @@ Instead of adding the exchange, remove it. Note that this will drop
 ALL data associated with that exchange, including existing auditing
 information. So use with extreme care!
 .UNINDENT
+.SH DIAGNOSTICS
+.sp
+\fBtaler\-auditor\-exchange\fP will return 0 on success, 1 on usage errors, 3 on problems interacting with the database backend, 4 if exchange entry to be added is already in the database (or already missing when used with \fB\-r\fP).
 .SH SEE ALSO
 .sp
 gnunet\-ecc(1), taler\-auditor\-sign(1), taler.conf(5)

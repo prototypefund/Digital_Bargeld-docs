@@ -1,8 +1,8 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "TALER-EXCHANGE-AGGREGATOR" "1" "Sep 18, 2019" "0.6pre1" "GNU Taler"
+.TH "TALER-EXCHANGE-AGGREGATOR" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
 .SH NAME
-taler-exchange-aggregator \- aggregate and execute exchange transactions
+taler-exchange-aggregator \- aggregate deposits into wire transfers
 .
 .nr rst2man-indent-level 0
 .
@@ -33,30 +33,30 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH SYNOPSIS
 .sp
 \fBtaler\-exchange\-aggregator\fP
-[\fB\-d\fP\ \fIDIRNAME\fP\ |\ \fB–exchange\-dir=\fP‌\fIDIRNAME\fP]
-[\fB\-h\fP\ |\ \fB–help\fP] [\fB\-t\fP\ |\ \fB–test\fP] [\fB\-v\fP\ |\ \fB–version\fP]
+[\fB\-h\fP\ |\ \fB\-\-help\fP] [\fB\-t\fP\ |\ \fB\-\-test\fP] [\fB\-v\fP\ |\ \fB\-\-version\fP]
 .SH DESCRIPTION
 .sp
-\fBtaler\-exchange\-aggregator\fP is a command line tool to run pending
-transactions from the Taler exchange.
+\fBtaler\-exchange\-aggregator\fP is a command line tool to run aggregate deposits
+to the same merchant into larger wire transfers. The actual transfers are then
+done by \fBtaler\-exchange\-transfer\fP\&.
 .INDENT 0.0
 .TP
-\fB\-d\fP \fIDIRNAME\fP | \fB–exchange\-dir=\fP‌\fIDIRNAME\fP
+\fB\-c\fP \fIFILENAME\fP | \fB–config=\fP‌\fIFILENAME\fP
 Use the configuration and other resources for the exchange to operate
-from \fIDIRNAME\fP\&.
+from \fIFILENAME\fP\&.
 .TP
-\fB\-h\fP | \fB–help\fP
+\fB\-h\fP | \fB\-\-help\fP
 Print short help on options.
 .TP
-\fB\-t\fP | \fB–test\fP
+\fB\-t\fP | \fB\-\-test\fP
 Run in test mode and exit when idle.
 .TP
-\fB\-v\fP | \fB–version\fP
+\fB\-v\fP | \fB\-\-version\fP
 Print version information.
 .UNINDENT
 .SH SEE ALSO
 .sp
-taler\-exchange\-dbinit(1), taler\-exchange\-keyup(1),
+taler\-exchange\-transfer(1), taler\-exchange\-closer(1),
 taler\-exchange\-httpd(1), taler.conf(5).
 .SH BUGS
 .sp

@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "TALER.CONF" "5" "Sep 18, 2019" "0.6pre1" "GNU Taler"
+.TH "TALER.CONF" "5" "Mar 21, 2020" "0.6pre1" "GNU Taler"
 .SH NAME
 taler.conf \- Taler configuration file
 .
@@ -98,6 +98,10 @@ can be run offline (as the master key is for offline signing).
 Specifies the base URL under which the exchange can be reached. Added
 to wire transfers to enable tracking by merchants.
 .TP
+.B AGGREGATOR_IDLE_SLEEP_INTERVAL
+For how long should the aggregator sleep when it is idle before trying
+to look for more work? Default is 60 seconds.
+.TP
 .B SIGNKEY_DURATION
 For how long is a signing key valid?
 .TP
@@ -110,6 +114,42 @@ How long do we generate denomination and signing keys ahead of time?
 .B LOOKAHEAD_PROVIDE
 How long into the future do we provide signing and denomination keys
 to clients?
+.TP
+.B TERMS_DIR
+Directory where the terms of service of the exchange operator can be fund. The directory must contain sub\-directories for every supported language, using the two\-character language code in lower case, i.e. "en/" or "fr/".  Each subdirectory must then contain files with the terms of service in various formats.  The basename of the file of the current policy must be specified under TERMS_ETAG.  The extension defines the mime type. Supported extensions include "html", "htm", "txt", "pdf", "jpg", "jpeg", "png" and "gif".  For example, using a TERMS_ETAG of "0", the structure could be the following:
+\- $TERMS_DIR/en/0.pdf
+\- $TERMS_DIR/en/0.html
+\- $TERMS_DIR/en/0.txt
+\- $TERMS_DIR/fr/0.pdf
+\- $TERMS_DIR/fr/0.html
+\- $TERMS_DIR/de/0.txt
+.TP
+.B TERMS_ETAG
+Basename of the file(s) in the TERMS_DIR with the current terms of service.  The value is also used for the "Etag" in the HTTP request to control caching. Whenever the terms of service change, the TERMS_ETAG MUST also change, and old values MUST NOT be repeated.  For example, the date or version number of the terms of service SHOULD be used for the Etag.  If there are minor (i.e. spelling) fixes to the terms of service, the TERMS_ETAG probably SHOULD NOT be changed. However, whenever users must approve the new terms, the TERMS_ETAG MUST change.
+.TP
+.B PRIVACY_DIR
+Works the same as TERMS_DIR, just for the privacy policy.
+.TP
+.B PRIVACY_ETAG
+Works the same as TERMS_ETAG, just for the privacy policy.
+.UNINDENT
+.SS EXCHANGE DATABASE OPTIONS
+.sp
+The following options must be in the section "[exchangedb]".
+.INDENT 0.0
+.TP
+.B DURATION_OVERLAP
+How much should validity periods for coins overlap?
+Should be long enough to avoid problems with
+wallets picking one key and then due to network latency
+another key being valid.  The DURATION_WITHDRAW period
+must be longer than this value.
+.TP
+.B IDLE_RESERVE_EXPIRATION_TIME
+After which time period should reserves be closed if they are idle?
+.TP
+.B LEGAL_RESERVE_EXPIRATION_TIME
+After what time do we forget about (drained) reserves during garbage collection?
 .UNINDENT
 .SS EXCHANGE POSTGRES BACKEND DATABASE OPTIONS
 .sp
@@ -220,31 +260,58 @@ Crockford Base32 encoded auditor public key.
 .B CURRENCY
 Name of the currency for which this auditor is trusted, i.e.\ “KUDOS”
 .UNINDENT
-.SS ACCOUNT OPTIONS (for exchanges and merchants)
+.SS MERCHANT ACCOUNT OPTIONS
+.INDENT 0.0
+.TP
+.B PAYTO_URI
+Specifies the payto://\-URL of the account. The general format is
+payto://METHOD/DETAILS.
+.TP
+.B WIRE_RESPONSE (exchange and merchant)
+Specifies the name of the file in which the wire details for this merchant
+account should be located. Used by the Taler exchange service and the
+taler\-merchant\-httpd (to generate and then use the file).
+.TP
+.B HONOR_instance
+Must be set to YES for the instances (where "instance" is the section
+name of the instance) of the merchant backend that should allow
+incoming wire transfers for this bank account.
+.TP
+.B ACTIVE_instance
+Must be set to YES for the instances (where “instance” is the section
+name of the instance) of the merchant backend that should use this
+bank account in new offers/contracts. Setting ACTIVE_instance to YES
+requires also setting HONOR_instance to YES.
+.UNINDENT
+.SS EXCHANGE ACCOUNT OPTIONS
 .sp
 An exchange (or merchant) can have multiple bank accounts. The following
 options are for sections named “[account\-SOMETHING]”. The SOMETHING is
 arbitrary and should be chosen to uniquely identify the bank account for
-the operator. Additional authentication options may need to be specified
-in the account section depending on the PLUGIN used.
+the operator.
 .INDENT 0.0
 .TP
-.B URL
+.B PAYTO_URI
 Specifies the payto://\-URL of the account. The general format is
-payto://METHOD/DETAILS. This option is used for exchanges and
-merchants.
+payto://METHOD/DETAILS.
+.TP
+.B WIRE_GATEWAY_URL
+URL of the wire gateway
+.TP
+.B WIRE_GATEWAY_AUTH_METHOD
+This option determines how the exchange (auditor/wirewatch/aggregator)
+authenticates with the wire gateway.  Choices are \fBbasic\fP and \fBnone\fP\&.
+.TP
+.B USERNAME
+User name for \fBbasic\fP authentication with the wire gateway.
+.TP
+.B PASSWORD
+Password for \fBbasic\fP authentication with the wire gateway.
 .TP
 .B WIRE_RESPONSE
 Specifies the name of the file in which the /wire response for this
 account should be located. Used by the Taler exchange service and the
-taler\-exchange\-wire tool and the taler\-merchant\-httpd (to generate
-the files).
-.TP
-.B PLUGIN
-Name of the plugin can be used to access the account
-(i.e.\ “taler\-bank” or “ebics”). Used by the merchant backend for back
-office operations (i.e.\ to identify incoming wire transfers) and by
-the exchange.
+taler\-exchange\-wire tool.
 .TP
 .B ENABLE_DEBIT
 Must be set to YES for the accounts that the
@@ -254,17 +321,6 @@ taler\-exchange\-aggregator should debit. Not used by merchants.
 Must be set to YES for the accounts that the taler\-exchange\-wirewatch
 should check for credits. It is yet uncertain if the merchant
 implementation may check this flag as well.
-.TP
-.B HONOR_instance
-Must be set to YES for the instances (where “instance” is the section
-name of the instance) of the merchant backend that should allow
-incoming wire transfers for this bank account.
-.TP
-.B ACTIVE_instance
-Must be set to YES for the instances (where “instance” is the section
-name of the instance) of the merchant backend that should use this
-bank account in new offers/contracts. Setting ACTIVE_instance to YES
-requires also setting ENABLE_instance to YES.
 .UNINDENT
 .SS TALER\-BANK AUTHENTICATION OPTIONS (for accounts)
 .sp
@@ -284,17 +340,6 @@ authentication method.
 .B PASSWORD
 Password to use for authentication. Used with the “basic”
 authentication method.
-.UNINDENT
-.SS EBICS AUTHENTICATION OPTIONS
-.sp
-The following authentication options are supported by the “ebics” wire
-plugin. They must be specified in the “[account\-]” section that uses the
-“ebics” plugin.
-.INDENT 0.0
-.TP
-.B NONE
-Currently the “ebics” implementation is incomplete and does not
-support authentication.
 .UNINDENT
 .SS EXCHANGE WIRE FEE OPTIONS
 .sp
@@ -325,9 +370,6 @@ are used by taler\-exchange\-keyup to create denomination keys.
 .B VALUE
 Value of the coin, i.e.\ “EUR:1.50” for 1 Euro and 50 Cents (per
 coin).
-.TP
-.B DURATION_OVERLAP
-How much should validity periods for these coins overlap?
 .TP
 .B DURATION_WITHDRAW
 How long should the same key be used for clients to withdraw coins of
@@ -371,8 +413,8 @@ The following options must be in section “[auditordb\-postgres]” if the
 .INDENT 0.0
 .TP
 .B CONFIG
-How to access the database, i.e.\ “postgres:///taler” to use the
-“taler” database. Testcases use “talercheck”.
+How to access the database, i.e.\ "postgres:///taler" to use the
+"taler" database. Testcases use “talercheck”.
 .UNINDENT
 .SH SEE ALSO
 .sp

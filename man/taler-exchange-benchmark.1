@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "TALER-EXCHANGE-BENCHMARK" "1" "Sep 18, 2019" "0.6pre1" "GNU Taler"
+.TH "TALER-EXCHANGE-BENCHMARK" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
 .SH NAME
 taler-exchange-benchmark \- measure exchange performance
 .
@@ -33,11 +33,11 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH SYNOPSIS
 .sp
 \fBtaler\-exchange\-benchmark\fP
-[\fB\-c\fP\ \fICONFIG_FILENAME\fP\ |\ \fB–config=\fP‌\fICONFIG_FILENAME\fP]
-[\fB\-b\fP\ \fIBANK_URL\fP\ |\ \fB—bank\-url=\fP‌\fIBANK_URL\fP]
-[\fB\-n\fP\ \fIHOWMANY_COINS\fP\ |\ \fB–coins\-number=\fP‌\fIHOWMANY_COINS\fP]
-[\fB\-l\fP\ \fILOGLEVEL\fP\ |\ \fB–log\-level=\fP‌\fILOGLEVEL\fP]
-[\fB\-h\fP\ |\ \fB–help\fP]
+[\fB\-c\fP\ \fICONFIG_FILENAME\fP\ |\ \fB\-\-config=\fP‌\fICONFIG_FILENAME\fP]
+[\fB\-b\fP\ \fIBANK_URL\fP\ |\ \fB—bank\-url=\fP‌\fIBANK_URL\fP] [\-f] [\-K]
+[\fB\-n\fP\ \fIHOWMANY_COINS\fP\ |\ \fB\-\-coins\-number=\fP‌\fIHOWMANY_COINS\fP]
+[\fB\-l\fP\ \fILOGLEVEL\fP\ |\ \fB\-\-log\-level=\fP‌\fILOGLEVEL\fP]
+[\fB\-h\fP\ |\ \fB\-\-help\fP]
 .SH DESCRIPTION
 .sp
 \fBtaler\-exchange\-benchmark\fP is a command line tool to measure the time
@@ -48,29 +48,39 @@ Nginx. Moreover, the benchmark runs on a “volatile” database, that means
 that table are always erased during a single benchmark run.
 .INDENT 0.0
 .TP
-\fB\-c\fP \fICONFIG_FILENAME\fP | \fB–config=\fP‌\fICONFIG_FILENAME\fP
+\fB\-c\fP \fICONFIG_FILENAME\fP | \fB\-\-config=\fP‌\fICONFIG_FILENAME\fP
 (Mandatory) Use CONFIG_FILENAME.
 .TP
 \fB\-b\fP \fIBANK_URL\fP | \fB—bank\-url=\fP‌\fIBANK_URL\fP
 (Mandatory) The URL where the fakebank listens at. Must match the
 host component in the exchange’s escrow account “payto” URL.
 .TP
-\fB\-n\fP \fIHOWMANY_COINS\fP | \fB–coins\-number=\fP‌\fIHOWMANY_COINS\fP
+\fB\-f\fP | \fB\-\-fakebank\fP
+Launch a fakebank instead of the Python bank. Only meaningful if the
+mode is to launch more than just a client.  Note that using the
+fakebank will cause the benchmark application to reset all databases
+as the fakebank is stateless and thus previous database state would
+inherently cause trouble.
+.TP
+\fB\-K\fP | \fB\-\-linger\fP
+Linger around until keypress after the benchmark is done.
+.TP
+\fB\-n\fP \fIHOWMANY_COINS\fP | \fB\-\-coins\-number=\fP‌\fIHOWMANY_COINS\fP
 Defaults to 1. Specifies how many coins this benchmark should
 withdraw and spend. After being spent, each coin will be refreshed
 with a REFRESH_PROBABILITY probability, which is (hardcoded as) 0.1;
 future versions of this tool should offer this parameter as a CLI
 option.
 .TP
-\fB\-l\fP \fILOGLEVEL\fP | \fB–log\-level=\fP‌\fILOGLEVEL\fP
+\fB\-l\fP \fILOGLEVEL\fP | \fB\-\-log\-level=\fP‌\fILOGLEVEL\fP
 GNUnet\-compatible log level, takes values “ERROR/WARNING/INFO/DEBUG”
 .TP
-\fB\-h\fP | \fB–help\fP
+\fB\-h\fP | \fB\-\-help\fP
 Prints a compiled\-in help text.
 .UNINDENT
 .SH SEE ALSO
 .sp
-taler\-exchange\-dbinit(1), taler\-exchange\-keyup(1),
+taler\-exchange\-dbinit(1), taler\-exchange\-keyup(1), taler\-merchant\-benchmark(1),
 taler\-exchange\-httpd(1), taler.conf(5)
 .SH BUGS
 .sp

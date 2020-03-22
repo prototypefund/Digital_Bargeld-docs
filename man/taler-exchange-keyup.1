@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "TALER-EXCHANGE-KEYUP" "1" "Sep 18, 2019" "0.6pre1" "GNU Taler"
+.TH "TALER-EXCHANGE-KEYUP" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
 .SH NAME
 taler-exchange-keyup \- set up Taler exchange denomination and signing
 .
@@ -33,7 +33,6 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH SYNOPSIS
 .sp
 \fBtaler\-exchange\-keyup\fP
-[\fB\-d\fP\ \fIDIRNAME\fP\ |\ \fB–exchange\-dir=\fP‌\fIDIRNAME\fP]
 [\fB\-h\fP\ |\ \fB–help\fP] [\fB\-m\fP\ \fIFILE\fP\ |\ \fB–master\-key=\fP‌\fIFILE\fP]
 [\fB\-o\fP\ \fIFILE\fP\ |\ \fB–output=\fP‌\fIFILE\fP]
 [\fB\-r\fP\ \fIDKH\fP\ |\ \fB–revoke=\fP‌\fIDKH\fP]
@@ -51,15 +50,28 @@ operates.
 Its options are as follows:
 .INDENT 0.0
 .TP
-\fB\-d\fP \fIDIRNAME\fP | \fB–exchange\-dir=\fP‌\fIDIRNAME\fP
-Use the configuration and other resources for the exchange to operate
-from \fIDIRNAME\fP\&.
+\fB\-c\fP \fIFILENAME\fP | \fB–config=\fP‌\fIFILENAME\fP
+Use the configuration and other resources for the merchant to operate
+from FILENAME.
+.TP
+\fB\-f\fP \fIDIRNAME\fP | \fB–feedir=\fP‌\fIDIRNAME\fP
+Directory where to write the wire transfer fee structure. If not given,
+the one from the main configuration will be used.
 .TP
 \fB\-h\fP | \fB–help\fP
 Print short help on options.
 .TP
+\fB\-L\fP \fILOGLEVEL\fP | \fB–loglevel=\fP‌\fILOGLEVEL\fP
+Specifies the log level to use. Accepted values are: DEBUG, INFO,
+WARNING, ERROR.
+.TP
+\fB\-k\fP \fIBITS\fP | \fB–replacement\-keysize=\fP‌\fIBITS\fP
+When revoke an active denomination key (see \fB\-\-r\fP option), use
+\fIBITS\fP bit for the replacement denomination key. Default is 2048 (bits).
+.TP
 \fB\-m\fP \fIFILE\fP | \fB–master\-key=\fP‌\fIFILE\fP
-Location of the private EdDSA offline master key of the exchange.
+Location of the private EdDSA offline master key of the exchange. If not
+given, the location given in the configuration file will be used.
 .TP
 \fB\-o\fP \fIFILE\fP | \fB–output=\fP‌\fIFILE\fP
 Where to write a denomination key signing request file to be given to
@@ -68,6 +80,9 @@ the auditor.
 \fB\-r\fP \fIDKH\fP | \fB–revoke=\fP‌\fIDKH\fP
 Revoke the denomination key where the denomination public key’s hash
 is DKH.
+.TP
+\fB\-T\fP \fI[+/\-]MICROSECONDS\fP | \fB–timetravel=\fP‌\fI[+/\-]MICROSECONDS\fP
+Modify system time (as seen by this process) by the given offset (for debugging/testing).
 .TP
 \fB\-t\fP \fITIMESTAMP\fP | \fB–time=\fP‌\fITIMESTAMP\fP
 Operate as if the current time was \fITIMESTAMP\fP\&.

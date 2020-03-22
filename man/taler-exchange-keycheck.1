@@ -1,6 +1,6 @@
 .\" Man page generated from reStructuredText.
 .
-.TH "TALER-EXCHANGE-KEYCHECK" "1" "Sep 18, 2019" "0.6pre1" "GNU Taler"
+.TH "TALER-EXCHANGE-KEYCHECK" "1" "Mar 22, 2020" "0.6pre1" "GNU Taler"
 .SH NAME
 taler-exchange-keycheck \- check validity of Taler signing and denomination keys
 .
@@ -33,7 +33,6 @@ level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
 .SH SYNOPSIS
 .sp
 \fBtaler\-exchange\-keycheck\fP
-[\fB\-d\fP\ \fIDIRNAME\fP\ |\ \fB–exchange\-dir=\fP‌\fIDIRNAME\fP]
 [\fB\-h\fP\ |\ \fB–help\fP] [\fB\-v\fP\ |\ \fB–version\fP]
 .SH DESCRIPTION
 .sp
@@ -45,12 +44,19 @@ that the files are correct.
 Its options are as follows:
 .INDENT 0.0
 .TP
-\fB\-d\fP \fIDIRNAME\fP | \fB–exchange\-dir=\fP‌\fIDIRNAME\fP
+\fB\-c\fP \fIFILENAME\fP | \fB–config=\fP‌\fIFILENAME\fP
 Use the configuration and other resources for the exchange to operate
-from \fIDIRNAME\fP\&.
+from \fIFILENAME\fP\&.
 .TP
 \fB\-h\fP | \fB–help\fP
 Print short help on options.
+.TP
+\fB\-i\fP \fIAMOUNT\fP | \fB–denomination\-info\-hash=\fP‌\fIAMOUNT\fP
+Output the full denomination key hashes and the validity starting times of all denomination keys for the given \fIAMOUNT\fP\&.  Useful to identify hashes when revoking keys.
+.TP
+\fB\-L\fP \fILOGLEVEL\fP | \fB–loglevel=\fP‌\fILOGLEVEL\fP
+Specifies the log level to use. Accepted values are: DEBUG, INFO,
+WARNING, ERROR.
 .TP
 \fB\-v\fP | \fB–version\fP
 Print version information.
