@@ -87,6 +87,10 @@ Integration Test Example
 Integration tests can be done with the low-level wallet commands.  To select which coins and denominations
 to use, the wallet can dump the coins in an easy-to-process format (`CoinDumpJson <https://git.taler.net/wallet-core.git/tree/src/types/talerTypes.ts#n734>`__).
 
+The database file for the wallet can be selected with the ``--wallet-db``
+option.  This option must be passed to the ``taler-wallet-cli`` command and not
+the subcommands.  If the database file doesn't exist, it will be created.
+
 The following example does a simple withdrawal recoup:
 
 .. code-block:: sh
@@ -132,7 +136,8 @@ To test refreshing, force a refresh:
   $ taler-wallet-cli --wallet-db=mydb.json advanced force-refresh "$coin_pub"
 
 
-To test zombie coins, use the timetravel option, it **must** be passed to the top-level command and not the subcommand:
+To test zombie coins, use the timetravel option. It **must** be passed to the
+top-level command and not the subcommand:
 
 .. code-block:: sh
 
