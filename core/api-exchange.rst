@@ -1028,9 +1028,9 @@ the API during normal operation.
     }
 
 
--------------------
-Emergency Cash-Back
--------------------
+------
+Recoup
+------
 
 This API is only used if the exchange is either about to go out of
 business or has had its private signing keys compromised (so in
