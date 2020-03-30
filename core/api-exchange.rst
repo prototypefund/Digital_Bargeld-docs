@@ -440,8 +440,9 @@ exchange.
       // Sender account payto://-URL
       sender_account_url: string;
 
-      // Transfer details uniquely identifying the transfer.
-      wire_reference: string;
+      // Opaque identifier internal to the exchange that
+      // uniquely identifies the wire transfer that credited the reserve.
+      wire_reference: Base32;
 
       // Timestamp of the incoming wire transfer.
       timestamp: Timestamp;
