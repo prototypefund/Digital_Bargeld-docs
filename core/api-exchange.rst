@@ -402,7 +402,7 @@ exchange.
     // Union discriminated by the "type" field.
     type ReserveTransaction =
       | ReserveWithdrawTransaction
-      | ReserveDepositTransaction
+      | ReserveCreditTransaction
       | ReserveClosingTransaction
       | ReserveRecoupTransaction;
 
@@ -429,10 +429,10 @@ exchange.
      }
 
 
-  .. ts:def:: ReserveDepositTransaction
+  .. ts:def:: ReserveCreditTransaction
 
-    interface ReserveDepositTransaction {
-      type: "DEPOSIT";
+    interface ReserveCreditTransaction {
+      type: "CREDIT";
 
       // Amount deposited.
       amount: Amount;
@@ -446,7 +446,7 @@ exchange.
       // Timestamp of the incoming wire transfer.
       timestamp: Timestamp;
     }
-    
+
 
   .. ts:def:: ReserveClosingTransaction
 
@@ -462,8 +462,8 @@ exchange.
       // Wire transfer subject.
       wtid: string;
 
-      // Hash of the wire account into which the funds were returned to.
-      h_wire: string;
+      // payto:// URI of the the wire account into which the funds were returned to.
+      receiver_account_details: string;
 
       // This is a signature over a
       // struct TALER_ReserveCloseConfirmationPS with purpose
@@ -477,7 +477,7 @@ exchange.
       timestamp: Timestamp;
     }
 
-    
+
   .. ts:def:: ReserveRecoupTransaction
 
     interface ReserveRecoupTransaction {
