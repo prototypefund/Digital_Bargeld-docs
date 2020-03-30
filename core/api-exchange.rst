@@ -414,7 +414,7 @@ exchange.
       // Amount withdrawn.
       amount: Amount;
 
-      //Hash of the denomination public key of the coin.
+      // Hash of the denomination public key of the coin.
       h_denom_pub: HashCode;
 
       // Hash of the blinded coin to be signed
