@@ -133,9 +133,11 @@ version range they support.  These version ranges are written down in the
 A protocol version is a positive, non-zero integer.  A protocol version range consists of three components:
 
 1. The ``current`` version.  This is the latest version of the protocol supported by the client or service.
-2. The ``revision`` number.  This value is not to be interpreted by the client/server, but serves
+2. The ``revision`` number.  This value should usually not be interpreted by the client/server, but serves
    purely as a comment.  Each time a service/client for a protocol is updated while supporting the same
    set of protocol versions, the revision should be increased.
+   In rare cases, the revision number can be used to work around unintended breakage in deployed
+   versions of a service.  This is discouraged and should only be used in exceptional situations.
 3. The ``age`` number.  This non-zero integer identifies with how many previous protocol versions this
    implementation is compatible.  An ``age`` of 0 implies that the implementation only supports
    the ``current`` protocol version.  The ``age`` must be less or equal than the ``current`` protocol version.
