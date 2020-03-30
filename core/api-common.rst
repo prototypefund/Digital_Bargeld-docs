@@ -121,6 +121,59 @@ handle the error as if an internal error (500) had been returned.
       type_actual?: string;
     }
 
+-----------------------
+Protocol Version Ranges
+-----------------------
+
+Some of the Taler services (e.g. exchange, merchant, bank integration API)
+expose the range of API versions they support.  Clients in turn have an API
+version range they support.  These version ranges are written down in the
+`libtool version format <https://www.gnu.org/software/libtool/manual/html_node/Libtool-versioning.html>`__.
+
+A protocol version is a positive, non-zero integer.  A protocol version range consists of three components:
+
+1. The ``current`` version.  This is the latest version of the protocol supported by the client or service.
+2. The ``revision`` number.  This value is not to be interpreted by the client/server, but serves
+   purely as a comment.  Each time a service/client for a protocol is updated while supporting the same
+   set of protocol versions, the revision should be increased.
+3. The ``age`` number.  This non-zero integer identifies with how many previous protocol versions this
+   implementation is compatible.  An ``age`` of 0 implies that the implementation only supports
+   the ``current`` protocol version.  The ``age`` must be less or equal than the ``current`` protocol version.
+
+To avoid confusion with semantic versions, the protocol version range is written down in the following format:
+
+.. code:: none
+
+  current[:revision[:age]]
+
+The angle brackets mark optional components. If either ``revision`` or ``age`` are omitted, they default to 0.
+
+Examples:
+
+* "1" and "1" are compatible
+* "1" and "2" are **incompatible**
+* "2:0:1" and "1:0:0" are compatible
+* "2:5:1" and "1:10:0" are compatible
+* "4:0:1" and "2:0:0" are **incompatible**
+* "4:0:1" and "3:0:0" are compatible
+
+.. note::
+
+  `Semantic versions <https://semver.org/>`__ are not a good tool for this job, as we concisely want to express
+  that the client/server supports the last ``n`` versions of the protocol.
+  Semantic versions don't support this, and semantic version ranges are too complex for this.
+
+.. warning::
+
+  A client doesn't have one single protocol version range.  Instead, it has
+  a protocol version range for each type of service it talks to.
+
+.. warning::
+
+  For privacy reasons, the protocol version range of a client should not be
+  sent to the service.  Instead, the client should just use the two version ranges
+  to decide whether it will talk to the service.
+
 
 .. _encodings-ref:
 
