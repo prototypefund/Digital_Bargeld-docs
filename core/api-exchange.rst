@@ -399,70 +399,107 @@ exchange.
 
   .. ts:def:: TransactionHistoryItem
 
-    interface TransactionHistoryItem {
-      // Either "WITHDRAW", "DEPOSIT", "RECOUP", or "CLOSING"
-      type: string;
+    // Union discriminated by the "type" field.
+    type ReserveTransaction =
+      | ReserveWithdrawTransaction
+      | ReserveDepositTransaction
+      | ReserveClosingTransaction
+      | ReserveRecoupTransaction;
 
-      // The amount that was withdrawn or deposited (incl. fee)
-      // or paid back, or the closing amount.
+  .. ts:def:: ReserveWithdrawTransaction
+
+    interface ReserveWithdrawTransaction {
+      type: "WITHDRAW";
+
+      // Amount withdrawn.
       amount: Amount;
 
-      // Hash of the denomination public key of the coin, if
-      // type is "WITHDRAW".
-      h_denom_pub?: Base32;
+      //Hash of the denomination public key of the coin.
+      h_denom_pub: HashCode;
 
-      // Hash of the blinded coin to be signed, if
-      // type is "WITHDRAW".
-      h_coin_envelope?: Base32;
+      // Hash of the blinded coin to be signed
+      h_coin_envelope: HashCode;
 
-      // Signature of 'TALER_WithdrawRequestPS' created with the `reserves's
-      // private key <reserve-priv>`. Only present if type is "WITHDRAW".
-      reserve_sig?: EddsaSignature;
+      // Signature of 'TALER_WithdrawRequestPS' created with the reserves's
+      // private key.
+      reserve_sig: EddsaSignature;
 
-      // The fee that was charged for "WITHDRAW".
-      withdraw_fee?: Amount;
+      // Fee that is charged for withdraw.
+      withdraw_fee: Amount;
+     }
 
-      // The fee that was charged for "CLOSING".
-      closing_fee?: Amount;
 
-      // Sender account payto://-URL, only present if type is "DEPOSIT".
-      sender_account_url?: string;
+  .. ts:def:: ReserveDepositTransaction
 
-      // Receiver account details, only present if type is "CLOSING".
-      receiver_account_details?: any;
+    interface ReserveDepositTransaction {
+      type: "DEPOSIT";
 
-      // Transfer details uniquely identifying the transfer, only present if type is "DEPOSIT".
-      wire_reference?: any;
+      // Amount deposited.
+      amount: Amount;
 
-      // Wire transfer subject, only present if type is "CLOSING".
-      wtid?: any;
+      // Sender account payto://-URL
+      sender_account_url: string;
 
-      // Hash of the wire account into which the funds were
-      // returned to, present if type is "CLOSING".
-      h_wire?: Base32;
+      // Transfer details uniquely identifying the transfer.
+      wire_reference: string;
 
-      // If ``type`` is "RECOUP", this is a signature over
-      // a struct `TALER_RecoupConfirmationPS` with purpose
-      // TALER_SIGNATURE_EXCHANGE_CONFIRM_RECOUP.
-      // If ``type`` is "CLOSING", this is a signature over a
-      // struct `TALER_ReserveCloseConfirmationPS` with purpose
+      // Timestamp of the incoming wire transfer.
+      timestamp: Timestamp;
+    }
+    
+
+  .. ts:def:: ReserveClosingTransaction
+
+    interface ReserveClosingTransaction {
+      type: "CLOSING";
+
+      // Closing balance.
+      amount: Amount;
+
+      // Closing fee charged by the exchange.
+      closing_fee: Amount;
+
+      // Wire transfer subject.
+      wtid: string;
+
+      // Hash of the wire account into which the funds were returned to.
+      h_wire: string;
+
+      // This is a signature over a
+      // struct TALER_ReserveCloseConfirmationPS with purpose
       // TALER_SIGNATURE_EXCHANGE_RESERVE_CLOSED.
-      // Not present for other values of ``type``.
-      exchange_sig?: EddsaSignature;
+      exchange_sig: EddsaSignature;
 
-      // Public key used to create ``exchange_sig``, only present if
-      // ``exchange_sig`` is present.
-      exchange_pub?: EddsaPublicKey;
+      // Public key used to create exchange_sig.
+      exchange_pub: EddsaPublicKey;
 
-      // Public key of the coin that was paid back; only present if type is "RECOUP".
-      coin_pub?: CoinPublicKey;
+      // Time when the reserve was closed.
+      timestamp: Timestamp;
+    }
 
-      // Timestamp when the exchange received the /recoup or executed the
-      // wire transfer. Only present if ``type`` is "DEPOSIT", "RECOUP" or
-      // "CLOSING".
-      timestamp?: Timestamp;
-   }
+    
+  .. ts:def:: ReserveRecoupTransaction
 
+    interface ReserveRecoupTransaction {
+      type: "RECOUP";
+
+      // Amount paid back.
+      amount: Amount;
+
+      // This is a signature over
+      // a struct TALER_PaybackConfirmationPS with purpose
+      // TALER_SIGNATURE_EXCHANGE_CONFIRM_PAYBACK.
+      exchange_sig: EddsaSignature;
+
+      // Public key used to create exchange_sig.
+      exchange_pub: EddsaPublicKey;
+
+      // Time when the funds were paid back into the reserve.
+      timestamp: Timestamp;
+
+      // Public key of the coin that was paid back.
+      coin_pub: CoinPublicKey;
+    }
 
 .. http:post:: /reserves/$RESERVE_PUB/withdraw
 
@@ -1232,7 +1269,7 @@ typically also view the balance.)
 
   **Request:**
 
-  :query merchant_sig: EdDSA signature of the merchant made with purpose `TALER_SIGNATURE_MERCHANT_TRACK_TRANSACTION` , affirming that it is really the merchant who requires obtaining the wire transfer identifier.
+  :query merchant_sig: EdDSA signature of the merchant made with purpose ``TALER_SIGNATURE_MERCHANT_TRACK_TRANSACTION`` , affirming that it is really the merchant who requires obtaining the wire transfer identifier.
 
   **Response:**
 
