@@ -77,8 +77,24 @@ Android Wallet
 APIs and Data Formats
 =====================
 
-*TBD.*
+Refunds
+-------
 
+:name: ``"applyRefund"``
+:description: Process a refund from a ``taler://refund`` URI.
+:request:
+  .. ts:def:: WalletApplyRefundRequest
+
+    interface WalletApplyRefundRequest {
+      talerRefundUri: string;
+    }
+:response:
+  .. ts:def:: WalletApplyRefundResponse
+
+    interface WalletApplyRefundResponse {
+      // Identifier for the purchase that was refunded
+      contractTermsHash: string;
+    }
 
 
 Integration Test Example
