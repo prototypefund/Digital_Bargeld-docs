@@ -148,7 +148,7 @@ components:
    Postgres
    The exchange requires a DBMS to stores the transaction history for
    the Taler exchange and aggregator, and a (typically separate) DBMS
-   for the Taler auditor. For now, the GNU Taler reference implemenation
+   for the Taler auditor. For now, the GNU Taler reference implementation
    only supports Postgres, but the code could be easily extended to
    support another DBMS.
 
@@ -698,7 +698,7 @@ the following command
 Those arguments are all mandatory.
 
 -  ``EXCHANGE_MASTER_PUB`` the base32 Crockford-encoded exchange’s
-   master public key. Tipically, this value lies in the configuration
+   master public key. Typically, this value lies in the configuration
    option ``[exchange]/master_public_key``.
 
 -  ``BLOB`` the blob generated in the previous step.

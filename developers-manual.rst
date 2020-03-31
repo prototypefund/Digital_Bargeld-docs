@@ -892,7 +892,7 @@ from implementing new CMDs and traits within other codebases.
 
 ::
 
-   /* Withouth loss of generality, let's consider the
+   /* Without loss of generality, let's consider the
     * following logic to exist inside the run() method of CMD1 */
    ..
 

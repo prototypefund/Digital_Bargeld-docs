@@ -58,7 +58,7 @@ Bugs
 
 We should optionally verify the correctness of this exchange’s base URL
 and that it matches the master public key (note that the exchange may
-still be offline, so it should be possible to bypass such a verfication
+still be offline, so it should be possible to bypass such a verification
 step). Furthermore, if we do verification, as a (less secure)
 convenience option, we should make **-** m optional and obtain it from
 the base URL.

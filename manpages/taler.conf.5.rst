@@ -330,7 +330,7 @@ named “[fees-METHOD]” state the (aggregate) wire transfer fee and the
 reserve closing fees charged by the exchange. Note that fees are
 specified using the name of the wire method, not by the plugin name. You
 need to replace “YEAR” in the option name by the calendar year for which
-the fee should apply. Usually, fees should be given for serveral years
+the fee should apply. Usually, fees should be given for several years
 in advance.
 
 WIRE-FEE-YEAR
@@ -360,7 +360,7 @@ DURATION_SPEND
    How long do clients have to spend these coins?
 
 FEE_WITHDRAW
-   What fee is charged for withdrawl?
+   What fee is charged for withdrawal?
 
 FEE_DEPOSIT
    What fee is charged for depositing?
