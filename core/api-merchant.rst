@@ -231,14 +231,23 @@ Giving Customer Tips
   :status 200 OK:
     A tip has been created. The backend responds with a `TipCreateConfirmation`
   :status 404 Not Found:
-    The instance is unknown to the backend, expired or was never enabled or
-    the reserve is unknown to the exchange or expired (see detailed status
-    either being TALER_EC_RESERVE_STATUS_UNKNOWN or
-    TALER_EC_TIP_AUTHORIZE_INSTANCE_UNKNOWN or
-    TALER_EC_TIP_AUTHORIZE_INSTANCE_DOES_NOT_TIP or
-    TALER_EC_TIP_AUTHORIZE_RESERVE_EXPIRED.
+    The instance is unknown to the backend.
   :status 412 Precondition Failed:
-    The tip amount requested exceeds the available reserve balance for tipping.
+    The tip amount requested exceeds the available reserve balance for tipping, or
+    the instance was never configured for tipping.
+  :status 424 Failed Dependency:
+    We are unable to process the request because of a problem with the exchange.
+    Likely returned with an "exchange-code" in addition to a "code" and
+    an "exchange-http-status" in addition to our own HTTP status. Also may
+    include the full exchange reply to our request under "exchange-reply".
+    Naturally, those diagnostics may be omitted if the exchange did not reply
+    at all, or send a completely malformed response.
+  :status 503 Service Unavailable:
+    We are unable to process the request, possibly due to misconfiguration or
+    disagreement with the exchange (it is unclear which party is to blame).
+    Likely returned with an "exchange-code" in addition to a "code" and
+    an "exchange-http-status" in addition to our own HTTP status. Also may
+    include the full exchange reply to our request under "exchange-reply".
 
   .. ts:def:: TipCreateRequest
 
@@ -276,8 +285,23 @@ Giving Customer Tips
 
   :status 200 OK:
     A tip has been created. The backend responds with a `TipQueryResponse`
+  :status 404 Not Found:
+    The instance is unknown to the backend.
   :status 412 Precondition Failed:
     The merchant backend instance does not have a tipping reserve configured.
+  :status 424 Failed Dependency:
+    We are unable to process the request because of a problem with the exchange.
+    Likely returned with an "exchange-code" in addition to a "code" and
+    an "exchange-http-status" in addition to our own HTTP status. Also may
+    include the full exchange reply to our request under "exchange-reply".
+    Naturally, those diagnostics may be omitted if the exchange did not reply
+    at all, or send a completely malformed response.
+  :status 503 Service Unavailable:
+    We are unable to process the request, possibly due to misconfiguration or
+    disagreement with the exchange (it is unclear which party is to blame).
+    Likely returned with an "exchange-code" in addition to a "code" and
+    an "exchange-http-status" in addition to our own HTTP status. Also may
+    include the full exchange reply to our request under "exchange-reply".
 
   .. ts:def:: TipQueryResponse
 
@@ -295,7 +319,7 @@ Giving Customer Tips
       expiration: Timestamp;
 
       // Reserve public key of the tipping reserve
-      reserve_pub: string;
+      reserve_pub: EddsaPublicKey;
     }
 
 
@@ -966,15 +990,27 @@ both by the user's browser and their wallet.
     the request used the mode "pay", or a `MerchantRefundResponse` if the
     request used was the mode "abort-refund".
     The ``frontend`` should now fullfill the contract.
-  :status 412 Precondition Failed:
-    The given exchange is not acceptable for this merchant, as it is not in the
-    list of accepted exchanges and not audited by an approved auditor.
+  :status 400 Bad request:
+    Either the client request is malformed or some specific processing error
+    happened that may be the fault of the client as detailed in the JSON body
+    of the response.
   :status 401 Unauthorized:
     One of the coin signatures was not valid.
   :status 403 Forbidden:
     The exchange rejected the payment because a coin was already spent before.
     The response will include the 'coin_pub' for which the payment failed,
     in addition to the response from the exchange to the ``/deposit`` request.
+  :status 404 Not found:
+    The merchant backend could not find the proposal or the instance
+    and thus cannot process the payment.
+  :status 412 Precondition Failed:
+    The given exchange is not acceptable for this merchant, as it is not in the
+    list of accepted exchanges and not audited by an approved auditor.
+  :status 424 Failed Dependency:
+    The merchant's interaction with the exchange failed in some way.
+    The client might want to try later again.
+    This includes failures like the denomination key of a coin not being
+    known to the exchange as far as the merchant can tell.
 
   The backend will return verbatim the error codes received from the exchange's
   :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
