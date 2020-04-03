@@ -635,7 +635,7 @@ In the following, UUID is always defined and used according to `RFC 4122`_.
       policy_salt: [32]; //bytearray
 
       // Master key, AES-encrypted with key derived from
-      // salt and secrets revealed by the following list of
+      // salt and keyshares revealed by the following list of
       // escrow methods identified by UUID.
       encrypted_master_key: [32]; //bytearray
 
