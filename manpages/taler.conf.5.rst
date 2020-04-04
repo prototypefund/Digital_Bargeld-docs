@@ -201,35 +201,43 @@ TIP_EXCHANGE_PRIV_FILENAME
    Filename with the private key granting access to the reserve,
    i.e. “${TALER_CONFIG_HOME}/merchant/reserve/tip.priv”
 
-KNOWN EXCHANGES (for merchants and wallets)
--------------------------------------------
+KNOWN EXCHANGES (for merchants)
+-------------------------------
 
 The merchant configuration can include a list of known exchanges if the
 merchant wants to specify that certain exchanges are explicitly trusted.
-For each trusted exchange, a section [exchange-NAME] must exist, where
-NAME is a merchant-given name for the exchange. The following options
-must be given in each “[exchange-NAME]” section.
+For each trusted exchange, a section [merchant-exchange-$NAME] must exist, where
+$NAME is a merchant-given name for the exchange. The following options
+must be given in each “[exchange-$NAME]” section.
 
-BASE_URL
+EXCHANGE_BASE_URL
    Base URL of the exchange, i.e. “https://exchange.demo.taler.net/”
 
 MASTER_KEY
    Crockford Base32 encoded master public key, public version of the
-   exchange´s long-time offline signing key
+   exchange´s long-time offline signing key.  Can be omitted, in that
+   case the exchange will NOT be trusted unless it is audited by
+   a known auditor.
+   Omitting the MASTER_KEY can be useful if we do not trust the exchange
+   without an auditor, but should pre-load the keys of this
+   particular exchange on startup instead of waiting for it to be
+   required by a client.
 
 CURRENCY
-   Name of the currency for which this exchange is trusted, i.e. “KUDOS”
+   Name of the currency for which this exchange is used, i.e. “KUDOS”.
+   The entire section is ignored if the currency does not match the currency
+   we use, which must be given in the [taler] section.
 
-KNOWN AUDITORS (for merchants and wallets)
-------------------------------------------
+KNOWN AUDITORS (for merchants)
+------------------------------
 
 The merchant configuration can include a list of known exchanges if the
 merchant wants to specify that certain auditors are explicitly trusted.
-For each trusted exchange, a section [auditor-NAME] must exist, where
-NAME is a merchant-given name for the exchange. The following options
-must be given in each “[auditor-NAME]” section.
+For each trusted exchange, a section [merchant-auditor-$NAME] must exist, where
+$NAME is a merchant-given name for the auditor. The following options
+must be given in each “[merchant-auditor-$NAME]” section.
 
-BASE_URL
+AUDITOR_BASE_URL
    Base URL of the auditor, i.e. “https://auditor.demo.taler.net/”
 
 AUDITOR_KEY
@@ -237,13 +245,16 @@ AUDITOR_KEY
 
 CURRENCY
    Name of the currency for which this auditor is trusted, i.e. “KUDOS”
+   The entire section is ignored if the currency does not match the currency
+   we use, which must be given in the [taler] section.
+
 
 MERCHANT ACCOUNT OPTIONS
 ------------------------
 
 PAYTO_URI
    Specifies the payto://-URL of the account. The general format is
-   payto://METHOD/DETAILS.
+   payto://$METHOD/$DETAILS.
 
 WIRE_RESPONSE (exchange and merchant)
    Specifies the name of the file in which the wire details for this merchant
