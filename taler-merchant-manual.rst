@@ -52,6 +52,7 @@ Architecture overview
 
 :keywords: crypto-currency
 :keywords: KUDOS
+
 Taler is a pure payment system, not a new crypto-currency. As such, it
 operates in a traditional banking context. In particular, this means
 that in order to receive funds via Taler, the merchant must have a
@@ -225,6 +226,7 @@ Installing libgnunetutil
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 :keywords: GNUnet
+
 Before you install libgnunetutil, you must download and install the
 dependencies mentioned in the previous section, otherwise the build may
 succeed but fail to export some of the tooling required by Taler.
@@ -251,6 +253,7 @@ Installing the GNU Taler exchange
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :keywords: exchange
+
 After installing GNUnet, you can download and install the exchange as
 follows:
 
@@ -277,6 +280,7 @@ Installing the GNU Taler merchant backend
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 :keywords: backend
+
 The following steps assume all dependencies are installed.
 
 Use the following commands to download and install the merchant backend:
@@ -305,6 +309,7 @@ Installing Taler on Debian GNU/Linux
 
 :keywords: Wheezy
 :keywords: Debian
+
 Debian wheezy is too old and lacks most of the packages required.
 
 On Debian jessie, only GNU libmicrohttpd needs to be compiled from
@@ -361,6 +366,7 @@ How to configure the merchant’s backend
 
 :keywords: taler-config
 :keywords: taler.conf
+
 The installation already provides reasonable defaults for most of the
 configuration options. However, some must be provided, in particular the
 database account and bank account that the backend should use. By
@@ -386,6 +392,7 @@ Service address
 
 :keywords: UNIX domain socket
 :keywords: TCP
+
    ::
 
       [MERCHANT]/SERVE = TCP | UNIX
@@ -418,6 +425,7 @@ Currency
 
 :keywords: currency
 :keywords: KUDOS
+
    ::
 
       [TALER]/CURRENCY
@@ -432,6 +440,7 @@ Currency
 
 Database
 :keywords: DBMS
+
    In principle is possible for the backend to support different DBMSs.
    The option
 
@@ -452,6 +461,7 @@ Database
       [merchantdb-postgres]/config
 
 :keywords: Postgres
+
    This option specifies a postgres access path using the format
    ``postgres:///$DBNAME``, where ``$DBNAME`` is the name of the
    Postgres database you want to use. Suppose ``$USER`` is the name of
@@ -482,6 +492,7 @@ Database
 
 Exchange
 :keywords: exchange
+
    To add an exchange to the list of trusted payment service providers,
    you create a section with a name that starts with “exchange-”. In
    that section, the following options need to be configured:
@@ -511,6 +522,7 @@ Exchange
 
 Instances
 :keywords: instance
+
    The backend allows the user to run multiple instances of shops with
    distinct business entities against a single backend. Each instance
    uses its own bank accounts and key for signing contracts. It is
@@ -537,6 +549,7 @@ Instances
 
 Accounts
 :keywords: wire format
+
    In order to receive payments, the merchant backend needs to
    communicate bank account details to the exchange. For this, the
    configuration must include one or more sections named “ACCOUNT-name”
@@ -587,6 +600,7 @@ Sample backend configuration
 ----------------------------
 
 :keywords: configuration
+
 The following is an example for a complete backend configuration:
 
 ::
@@ -637,7 +651,8 @@ Launching the backend
 ---------------------
 
 :keywords: backend
-taler-merchant-httpd
+:keywords: taler-merchant-httpd
+
 Assuming you have configured everything correctly, you can launch the
 merchant backend using:
 
@@ -777,6 +792,7 @@ Configuration format
 --------------------
 
 :keywords: configuration
+
 In Taler realm, any component obeys to the same pattern to get
 configuration values. According to this pattern, once the component has
 been installed, the installation deploys default values in
@@ -850,6 +866,7 @@ Using taler-config
 ------------------
 
 :keywords: taler-config
+
 The tool ``taler-config`` can be used to extract or manipulate
 configuration values; however, the configuration use the well-known INI
 file format and can also be edited by hand.
@@ -905,6 +922,7 @@ Merchant key management
 
 :keywords: merchant key
 :keywords: KEYFILE
+
 The option “KEYFILE” in the section “INSTANCE-default” specifies the
 path to the instance’s private key. You do not need to create a key
 manually, the backend will generate it automatically if it is missing.
@@ -923,6 +941,7 @@ Tipping visitors
 ----------------
 
 :keywords: tipping
+
 Taler can also be used to tip Web site visitors. For example, you may be
 running an online survey, and you want to reward those people that have
 dutifully completed the survey. If they have installed a Taler wallet,
@@ -938,6 +957,7 @@ Configure a reserve and exchange for tipping
 
 :keywords: gnunet-ecc
 :keywords: reserve key
+
 To tip users, you first need to create a reserve. A reserve is a pool of
 money held in escrow at the Taler exchange. This is the source of the
 funds for the tips. Tipping will fail (resulting in disappointed
@@ -994,6 +1014,7 @@ Fund the reserve
 
 :keywords: reserve
 :keywords: close
+
 To fund the reserve, you must first extract the public key from
 “tip.priv”:
 

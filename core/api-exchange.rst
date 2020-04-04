@@ -96,7 +96,7 @@ possibly by using HTTPS.
   .. ts:def:: ExchangeKeysResponse
 
     interface ExchangeKeysResponse {
-      // libtool-style representation of the Taler protocol version, see
+      // libtool-style representation of the Exchange protocol version, see
       // https://www.gnu.org/software/libtool/manual/html_node/Versioning.html#Versioning
       // The format is "current:revision:age".
       version: string;

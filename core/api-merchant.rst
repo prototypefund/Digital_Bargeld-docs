@@ -25,6 +25,22 @@ Merchant Backend API
 
 .. contents:: Table of Contents
 
+
+--------------------
+Compatibility Checks
+--------------------
+
+.. http:get:: /config
+
+  Return the protocol version and currency supported by this merchant backend.
+  This endpoint is deprecated, clients should migrate to the (identical)
+  /public/version API.
+
+  **Response:**
+
+  :status 200 OK:
+    The exchange accepted all of the coins. The body is a `VersionResponse`.
+
 ------------------
 Receiving Payments
 ------------------
@@ -972,6 +988,27 @@ Customer-facing API
 The ``/public/*`` endpoints are publicly exposed on the internet and accessed
 both by the user's browser and their wallet.
 
+
+.. http:get:: /public/config
+
+  Return the protocol version and currency supported by this merchant backend.
+
+  **Response:**
+
+  :status 200 OK:
+    The exchange accepted all of the coins. The body is a `VersionResponse`.
+
+  .. ts:def:: VersionResponse
+
+    interface VersionResponse {
+      // libtool-style representation of the Merchant protocol version, see
+      // https://www.gnu.org/software/libtool/manual/html_node/Versioning.html#Versioning
+      // The format is "current:revision:age".
+      version: string;
+
+      // Currency supported by this backend.
+      currency: string;
+    }
 
 .. http:post:: /public/pay
 
