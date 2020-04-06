@@ -114,7 +114,7 @@ Querying the transaction history
   Return a list of transactions made from or to the exchange.
 
   Incoming transactions must contain a valid reserve public key.  If a bank
-  transaction does not confirm to the right syntax, the wire gatway must not
+  transaction does not conform to the right syntax, the wire gatway must not
   report it to the exchange, and sent funds back to the sender if possible.
 
   The bank account of the exchange is determined via the base URL and/or the
