@@ -95,7 +95,7 @@ Making Transactions
       exchange_base_url: string;
 
       // Wire transfer identifier chosen by the exchange,
-      // used by the merchant to identify the Taler order
+      // used by the merchant to identify the Taler order(s)
       // associated with this wire transfer.
       wtid: ShortHashCode;
 
