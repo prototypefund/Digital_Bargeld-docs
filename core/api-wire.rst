@@ -29,7 +29,7 @@ LibEuFin (work in progress).
 Authentication
 --------------
 
-The bank library authenticates requests to the wire gatway via
+The bank library authenticates requests to the wire gateway via
 `HTTP basic auth <https://tools.ietf.org/html/rfc7617>`_.
 
 -------------------
@@ -114,7 +114,7 @@ Querying the transaction history
   Return a list of transactions made from or to the exchange.
 
   Incoming transactions must contain a valid reserve public key.  If a bank
-  transaction does not conform to the right syntax, the wire gatway must not
+  transaction does not conform to the right syntax, the wire gateway must not
   report it to the exchange, and send funds back to the sender if possible.
 
   The bank account of the exchange is determined via the base URL and/or the
