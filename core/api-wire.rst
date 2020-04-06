@@ -115,7 +115,7 @@ Querying the transaction history
 
   Incoming transactions must contain a valid reserve public key.  If a bank
   transaction does not conform to the right syntax, the wire gatway must not
-  report it to the exchange, and sent funds back to the sender if possible.
+  report it to the exchange, and send funds back to the sender if possible.
 
   The bank account of the exchange is determined via the base URL and/or the
   user name in the ``Authorization`` header.  In fact the transaction history
