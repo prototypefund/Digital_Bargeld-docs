@@ -45,7 +45,7 @@ Making Transactions
   To make the API idempotent, the client must include a nonce.  Requests with the same nonce
   are rejected unless the request is the same.
 
-  **Request:** The body of this request must have the format of a `TransactionRequest`.
+  **Request:** The body of this request must have the format of a `TransferRequest`.
 
   **Response:**
 
@@ -79,9 +79,9 @@ Making Transactions
     }
 
 
-  .. ts:def:: TransactionRequest
+  .. ts:def:: TransferRequest
 
-    interface TransactionRequest {
+    interface TransferRequest {
       // Nonce to make the request idempotent.  Requests with the same
       // transaction_uid that differ in any of the other fields
       // are rejected.
