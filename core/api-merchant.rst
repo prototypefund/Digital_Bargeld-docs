@@ -26,20 +26,6 @@ Merchant Backend API
 .. contents:: Table of Contents
 
 
---------------------
-Compatibility Checks
---------------------
-
-.. http:get:: /config
-
-  Return the protocol version and currency supported by this merchant backend.
-  This endpoint is deprecated, clients should migrate to the (identical)
-  /public/version API.
-
-  **Response:**
-
-  :status 200 OK:
-    The exchange accepted all of the coins. The body is a `VersionResponse`.
 
 ------------------
 Receiving Payments
@@ -161,7 +147,7 @@ Giving Refunds
 .. http:post:: /refund
 
   Increase the refund amount associated with a given order.  The user should be
-  redirected to the ``refund_redirect_url`` to trigger refund processing in the wallet.
+  redirected to the ``taler_refund_url`` to trigger refund processing in the wallet.
 
   **Request**
 
@@ -171,8 +157,10 @@ Giving Refunds
 
   :status 200 OK:
     The refund amount has been increased, the backend responds with a `MerchantRefundResponse`
-  :status 400 Bad request:
-    The refund amount is not consistent: it is not bigger than the previous one.
+  :status 404 Not found:
+    The order is unknown to the merchant
+  :status 409 Conflict:
+    The refund amount exceeds the amount originally paid
 
   .. ts:def:: RefundRequest
 
@@ -190,39 +178,13 @@ Giving Refunds
   .. ts:def:: MerchantRefundResponse
 
     interface MerchantRefundResponse {
-      // Public key of the merchant
-      merchant_pub: string;
 
+      // Hash of the contract terms of the contract that is being refunded.
+      h_contract_terms: HashCode;
 
-      // Contract terms hash of the contract that
-      // is being refunded.
-      h_contract_terms: string;
-
-      // The signed refund permissions, to be sent to the exchange.
-      refund_permissions: MerchantRefundPermission[];
-
-      // URL (handled by the backend) that will
-      // trigger refund processing in the browser/wallet
-      refund_redirect_url: string;
-    }
-
-  .. ts:def:: MerchantRefundPermission
-
-    interface MerchantRefundPermission {
-      // Amount to be refunded.
-      refund_amount: Amount;
-
-      // Fee for the refund.
-      refund_fee: Amount;
-
-      // Public key of the coin being refunded.
-      coin_pub: string;
-
-      // Refund transaction ID between merchant and exchange.
-      rtransaction_id: number;
-
-      // Signature made by the merchant over the refund permission.
-      merchant_sig: string;
+      // URL (handled by the backend) that the wallet should access to
+      // trigger refund processing.
+      taler_refund_url: string;
     }
 
 
@@ -1008,7 +970,31 @@ both by the user's browser and their wallet.
 
       // Currency supported by this backend.
       currency: string;
+
+      // optional array with information about the instances running at this backend
+      instances: InstanceInformation[];
     }
+
+  .. ts:def:: InstanceInformation
+
+    interface InstanceInformation {
+
+      // Human-readable legal business name served by this instance
+      name: string;
+
+      // Base URL of the instance. Can be of the form "/PizzaShop/" or
+      // a fully qualified URL (i.e. "https://backend.example.com/PizzaShop/").
+      instance_baseurl: string;
+
+      // Public key of the merchant/instance, in Crockford Base32 encoding.
+      merchant_pub: EddsaPublicKey;
+
+      // Base URL of the exchange this instance uses for tipping.
+      // Optional, only present if the instance supports tipping.
+      tipping_exchange_baseurl?: string;
+
+    }
+
 
 .. http:post:: /public/pay
 
