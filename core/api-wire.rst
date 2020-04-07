@@ -29,7 +29,7 @@ LibEuFin (work in progress).
 Authentication
 --------------
 
-The bank library authenticates requests to the wire gatway via
+The bank library authenticates requests to the wire gateway via
 `HTTP basic auth <https://tools.ietf.org/html/rfc7617>`_.
 
 -------------------
@@ -45,7 +45,7 @@ Making Transactions
   To make the API idempotent, the client must include a nonce.  Requests with the same nonce
   are rejected unless the request is the same.
 
-  **Request:** The body of this request must have the format of a `TransactionRequest`.
+  **Request:** The body of this request must have the format of a `TransferRequest`.
 
   **Response:**
 
@@ -79,9 +79,9 @@ Making Transactions
     }
 
 
-  .. ts:def:: TransactionRequest
+  .. ts:def:: TransferRequest
 
-    interface TransactionRequest {
+    interface TransferRequest {
       // Nonce to make the request idempotent.  Requests with the same
       // transaction_uid that differ in any of the other fields
       // are rejected.
@@ -95,7 +95,7 @@ Making Transactions
       exchange_base_url: string;
 
       // Wire transfer identifier chosen by the exchange,
-      // used by the merchant to identify the Taler order
+      // used by the merchant to identify the Taler order(s)
       // associated with this wire transfer.
       wtid: ShortHashCode;
 
@@ -114,8 +114,8 @@ Querying the transaction history
   Return a list of transactions made from or to the exchange.
 
   Incoming transactions must contain a valid reserve public key.  If a bank
-  transaction does not confirm to the right syntax, the wire gatway must not
-  report it to the exchange, and sent funds back to the sender if possible.
+  transaction does not conform to the right syntax, the wire gateway must not
+  report it to the exchange, and send funds back to the sender if possible.
 
   The bank account of the exchange is determined via the base URL and/or the
   user name in the ``Authorization`` header.  In fact the transaction history
