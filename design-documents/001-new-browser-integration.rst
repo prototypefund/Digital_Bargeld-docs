@@ -180,6 +180,8 @@ Alternatives
 * convince Google and/or Mozilla to implement a general mechanism
   where extensions can offer a "service" that websites can then
   connect to without knowing some particular extension ID.
+* convince Google and/or Mozilla to add better support for
+  registering URI schemes from a WebExtension
 
 Drawbacks
 =========
