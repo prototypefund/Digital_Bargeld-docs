@@ -165,6 +165,9 @@ of the ``taler://check-presence`` fragment to allow a placeholder for the extens
   can open a new tab/window and communicate the updated extension ID back to
   original SPA page.
 
+Once the Website has obtained the extension ID, it can use the ``runtime.connect()`` function
+to establish a communication channel to the extension.
+
 
 Alternatives
 ============
@@ -177,3 +180,10 @@ Alternatives
 * convince Google and/or Mozilla to implement a general mechanism
   where extensions can offer a "service" that websites can then
   connect to without knowing some particular extension ID.
+
+Drawbacks
+=========
+
+* Firefox currently does not support messages from a website to an extension, and currently
+  cannot support the asynchronous wallet API.
+  There is a bug open for this issue: https://bugzilla.mozilla.org/show_bug.cgi?id=1319168
