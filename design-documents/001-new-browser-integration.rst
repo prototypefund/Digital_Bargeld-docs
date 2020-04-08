@@ -172,16 +172,19 @@ to establish a communication channel to the extension.
 Alternatives
 ============
 
-* manual copy&paste of ``taler://`` URIs :-)
-* integration of GNU Taler into all major browsers :-)
-* convincing Google and/or Mozilla to provide better support
+* Manual copy&paste of ``taler://`` URIs :-)
+* Integration of GNU Taler into all major browsers :-)
+* Convincing Google and/or Mozilla to provide better support
   for reacting to a limited subset of request headers in
   a declarative way
-* convince Google and/or Mozilla to implement a general mechanism
+* Convince Google and/or Mozilla to implement a general mechanism
   where extensions can offer a "service" that websites can then
   connect to without knowing some particular extension ID.
-* convince Google and/or Mozilla to add better support for
-  registering URI schemes from a WebExtension
+* Convince Google and/or Mozilla to add better support for
+  registering URI schemes from a WebExtension, so that
+  we can register a handler for ``taler://``.  For a better user experience,
+  there should also be some way to check whether some particular URI scheme
+  has a handler.
 
 Drawbacks
 =========
