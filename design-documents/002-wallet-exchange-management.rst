@@ -166,6 +166,9 @@ Response:
     currentTosVersion: string;
     acceptedTosVersion: string;
 
+    // When (if so) was this exchange last used for withdrawal?
+    lastUsedForWithdrawal: Timestamp | undefined;
+
     withdrawalRelatedInfo?: {
       // Can the user accept the withdrawal directly?
       // This field is redundant and derivable from other fields.
@@ -302,6 +305,9 @@ Response:
 
       // Did the user accept the current version of the exchange's ToS?
       currentTosAccepted: boolean;
+
+      // When (if so) was this exchange last used for withdrawal?
+      lastUsedForWithdrawal: Timestamp | undefined;
 
       withdrawalRelatedInfo?: {
         // Can the user accept the withdrawal directly?
