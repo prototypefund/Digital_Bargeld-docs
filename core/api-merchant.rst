@@ -215,17 +215,17 @@ Giving Customer Tips
     the instance was never configured for tipping.
   :status 424 Failed Dependency:
     We are unable to process the request because of a problem with the exchange.
-    Likely returned with an "exchange-code" in addition to a "code" and
-    an "exchange-http-status" in addition to our own HTTP status. Also may
-    include the full exchange reply to our request under "exchange-reply".
+    Likely returned with an "exchange_code" in addition to a "code" and
+    an "exchange_http_status" in addition to our own HTTP status. Also may
+    include the full exchange reply to our request under "exchange_reply".
     Naturally, those diagnostics may be omitted if the exchange did not reply
     at all, or send a completely malformed response.
   :status 503 Service Unavailable:
     We are unable to process the request, possibly due to misconfiguration or
     disagreement with the exchange (it is unclear which party is to blame).
-    Likely returned with an "exchange-code" in addition to a "code" and
-    an "exchange-http-status" in addition to our own HTTP status. Also may
-    include the full exchange reply to our request under "exchange-reply".
+    Likely returned with an "exchange_code" in addition to a "code" and
+    an "exchange_http_status" in addition to our own HTTP status. Also may
+    include the full exchange reply to our request under "exchange_reply".
 
   .. ts:def:: TipCreateRequest
 
@@ -269,17 +269,17 @@ Giving Customer Tips
     The merchant backend instance does not have a tipping reserve configured.
   :status 424 Failed Dependency:
     We are unable to process the request because of a problem with the exchange.
-    Likely returned with an "exchange-code" in addition to a "code" and
-    an "exchange-http-status" in addition to our own HTTP status. Also may
-    include the full exchange reply to our request under "exchange-reply".
+    Likely returned with an "exchange_code" in addition to a "code" and
+    an "exchange_http_status" in addition to our own HTTP status. Also may
+    include the full exchange reply to our request under "exchange_reply".
     Naturally, those diagnostics may be omitted if the exchange did not reply
     at all, or send a completely malformed response.
   :status 503 Service Unavailable:
     We are unable to process the request, possibly due to misconfiguration or
     disagreement with the exchange (it is unclear which party is to blame).
-    Likely returned with an "exchange-code" in addition to a "code" and
-    an "exchange-http-status" in addition to our own HTTP status. Also may
-    include the full exchange reply to our request under "exchange-reply".
+    Likely returned with an "exchange_code" in addition to a "code" and
+    an "exchange_http_status" in addition to our own HTTP status. Also may
+    include the full exchange reply to our request under "exchange_reply".
 
   .. ts:def:: TipQueryResponse
 
@@ -1161,6 +1161,77 @@ both by the user's browser and their wallet.
 
   :status 403 Forbidden:
     The frontend used the same order ID with different content in the order.
+
+
+.. http:get:: /public/[$INSTANCE]/$ORDER/refund
+
+  Obtain a refund issued by the merchant.
+
+  **Response:**
+
+  :status 200 OK:
+    The merchant processed the approved refund. The body is a `RefundResponse`.
+    Note that a successful response from the merchant does not imply that the
+    exchange successfully processed the refund. Clients must inspect the
+    body to check which coins were successfully refunded. It is possible for
+    only a subset of the refund request to have been processed successfully.
+    Re-issuing the request will cause the merchant to re-try such unsuccessful
+    sub-requests.
+
+  .. ts:def:: RefundResponse
+
+    interface RefundResponse {
+      // hash of the contract terms
+      h_contract_terms: HashCode;
+
+      // merchant's public key
+      merchant_pub: EddsaPublicKey;
+
+      // array with information about the refunds obtained
+      refunds: RefundDetail[];
+    }
+
+  .. ts:def:: RefundDetail
+
+    interface RefundDetail {
+
+      // public key of the coin to be refunded
+      coin_pub: EddsaPublicKey;
+
+      // Amount approved for refund for this coin
+      refund_amount: Amount;
+
+      // Refund fee the exchange will charge for the refund
+      refund_fee: Amount;
+
+      // HTTP status from the exchange. 200 if successful.
+      exchange_http_status: integer;
+
+      // Refund transaction ID.
+      rtransaction_id: integer;
+
+      // Taler error code from the exchange. Only given if the
+      // exchange_http_status is not 200.
+      exchange_code?: integer;
+
+      // Full exchange response. Only given if the
+      // exchange_http_status is not 200 and the exchange
+      // did return JSON.
+      exchange_reply?: integer;
+
+      // Public key of the exchange used for the exchange_sig.
+      // Only given if the exchange_http_status is 200.
+      exchange_pub?: EddsaPublicKey;
+
+      // Signature the exchange confirming the refund.
+      // Only given if the exchange_http_status is 200.
+      exchange_sig?: EddsaSignature;
+
+    }
+
+  :status 404 Not found:
+    The merchant is unaware of having granted a refund, or even of
+    the order specified.
 
 
 .. http:post:: /public/tip-pickup
