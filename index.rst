@@ -61,6 +61,7 @@ Documentation Overview
   taler-backoffice-manual
   taler-auditor-manual
   developers-manual.rst
+  design-documents/index
   anastasis
   libeufin/index
   global-licensing
