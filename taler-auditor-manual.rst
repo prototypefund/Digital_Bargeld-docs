@@ -509,7 +509,7 @@ historic transactions.  Hence this should not be done in a production system.
 .. _Revocations:
 
 Revocations
-~~~~~~~~~~~
+-----------
 
 When an auditor detects that the private key of a denomination key pair has
 been compromised, one important step is to revoke the denomination key.  The
@@ -522,6 +522,36 @@ originate.  If some denominations remain operational, wallets will generally
 exchange old coins of revoked denominations for new coins -- while providing
 additional information to demonstrate that these coins were not forged from
 the compromised private key but obtained via a legitimate withdraw operation.
+
+
+Failures
+--------
+
+Most audit failures are handled by the auditor's regular reporting functionality,
+creating a (hopefully descriptive) PDF report detailing the problems found.
+
+However, there is one category of errors where this is not possible, which evolves
+around arithmetic overflows for amounts. Taler's specification limits amount
+values to at most 2^52. If, during the auditor's calculations, amounts are
+encountered that exceed this threshold, the auditor will not generate a regular
+report, but instead write a log statement explaining where the problem happened
+and exit with a status code of *42*.
+
+The most common expected case when this happens is a corrupted database. This
+could be because the exchange is actively malicious, or more likely due to
+some data corruption.  The audit cannot continue until the corruption has been
+addressed. If it is not possible to restore a fully 'correct' version of the
+database, the suggestion is to replace the corrupted (and likely very large)
+amounts with zero (Note: this does not apply to the value of denominations or
+fees, here it is crucial that the correct amounts are restored). While an
+amount of zero would be incorrect, the auditing logic should be able to do its
+calculations with zero instead. After patching the database, the audit can
+be restarted. A full reset is not required, as the audit transaction is aborted
+when the auditor exits with code *42*.  After restarting, the resulting audit
+report is likely to indicates errors relating to the corrupted fields (such as
+invalid signatures, arithmetic errors by the exchange, etc.), but at least the
+loss/gain calculations will be meaningful and actually indicative of the scope
+of the error created by the corrupted data.
 
 
 
