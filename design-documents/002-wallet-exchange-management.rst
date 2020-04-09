@@ -176,9 +176,10 @@ Response:
       // Is this exchange the default exchange for this withdrawal?
       isDefault: boolean;
 
-      // The "reasonable-ness" of the exchange's fees, in context
-      // of the withdrawn amount.
-      feeStructureSummaryForAmount: FeeStructureSummaryForAmount;
+      withdrawalWithdrawnAmount: Amount;
+      withdrawalCreditAmount: Amount;
+      withdrawalFeeAmount: Amount;
+      withdrawalOverheadAmount: Amount;
     };
   }
 
@@ -312,11 +313,10 @@ Response:
         // Is this exchange the default exchange for this withdrawal?
         isDefault: boolean;
 
-        // The "reasonable-ness" of the exchange's fees, in context
-        // of the withdrawn amount.
-        // Only provided if available (if we've already queried
-        // and checked this exchange before).
-        feeStructureSummaryForAmount: FeeStructureSummaryForAmount | undefined;
+        withdrawalWithdrawnAmount: Amount;
+        withdrawalCreditAmount: Amount;
+        withdrawalFeeAmount: Amount;
+        withdrawalOverheadAmount: Amount;
       };
     }[];
   }
