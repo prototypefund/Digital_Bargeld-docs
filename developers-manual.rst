@@ -286,10 +286,6 @@ Bootstrapping an Environment
   $ taler-deployment-start
   $ taler-deployment-arm -I # check everything works
 
-  Caution: there is currently a known bug in the part that sets up the bank
-  account password of the exchange might either not exist or be broken.
-  Thus, that must currently still be done manually! (#6099).
-
 
 Upgrading an Existing Environment
 ---------------------------------
