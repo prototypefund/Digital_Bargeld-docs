@@ -1297,6 +1297,7 @@ both by the user's browser and their wallet.
   :query h_contract: hash of the contract (used to authenticate customer)
   :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
   :query timeout: *Optional*. Timeout in seconds to wait for a payment if the answer would otherwise be negative (long polling).
+  :query refund=AMOUNT: *Optional*. Indicates that we are polling for a refund above the given AMOUNT. Only useful in combination with timeout.
 
   **Response:**
 
