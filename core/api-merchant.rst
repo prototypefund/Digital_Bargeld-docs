@@ -50,6 +50,8 @@ Receiving Payments
 
   The request must be a `PostOrderRequest`.
 
+  :query payment_target: optional query that specifies the payment target preferred by the client. Can be used to select among the various (active) wire methods supported by the instance.
+
   **Response**
 
   :status 200 OK:
