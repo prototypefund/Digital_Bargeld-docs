@@ -991,6 +991,11 @@ both by the user's browser and their wallet.
       // Public key of the merchant/instance, in Crockford Base32 encoding.
       merchant_pub: EddsaPublicKey;
 
+      // List of the payment targets supported by this instance. Clients can
+      // specify the desired payment target in /order requests.  Note that
+      // front-ends do not have to support wallets selecting payment targets.
+      payment_targets: string[];
+
       // Base URL of the exchange this instance uses for tipping.
       // Optional, only present if the instance supports tipping.
       tipping_exchange_baseurl?: string;
