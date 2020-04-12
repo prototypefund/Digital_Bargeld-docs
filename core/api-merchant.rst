@@ -1,6 +1,6 @@
 ..
   This file is part of GNU TALER.
-  Copyright (C) 2014, 2015, 2016, 2017 Taler Systems SA
+  Copyright (C) 2014-2020 Taler Systems SA
 
   TALER is free software; you can redistribute it and/or modify it under the
   terms of the GNU General Public License as published by the Free Software
@@ -1286,11 +1286,16 @@ both by the user's browser and their wallet.
   .. ts:def:: TipResponse
 
     interface TipResponse {
-      // Public key of the reserve
-      reserve_pub: EddsaPublicKey;
 
+      // Blind RSA signatures over the planchets.
       // The order of the signatures matches the planchets list.
-      reserve_sigs: EddsaSignature[];
+      blind_sigs: BlindSignature[];
+    }
+
+    interface BlindSignature {
+
+      // The (blind) RSA signature. Still needs to be unblinded.
+      blind_sig: RsaSignature;
     }
 
 
