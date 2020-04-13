@@ -23,8 +23,73 @@
 Merchant Backend API
 ====================
 
+WARNING: This document describes the version 1 of the merchant backend
+API, which is NOT yet implemented at all!
+
+The ``*/public/*`` endpoints are publicly exposed on the Internet and accessed
+both by the user's browser and their wallet.
+
+Most endpoints given here can be prefixed by a base URL that includes the
+specific instance selected (BASE_URL/instances/$INSTANCE/).  If
+``/instances/`` is missing, the default instance is to be used.
+
 .. contents:: Table of Contents
 
+
+-------------------------
+Getting the configuration
+-------------------------
+
+.. http:get:: /public/config
+
+  Return the protocol version and currency supported by this merchant backend.
+
+  **Response:**
+
+  :status 200 OK:
+    The exchange accepted all of the coins. The body is a `VersionResponse`.
+
+  .. ts:def:: VersionResponse
+
+    interface VersionResponse {
+      // libtool-style representation of the Merchant protocol version, see
+      // https://www.gnu.org/software/libtool/manual/html_node/Versioning.html#Versioning
+      // The format is "current:revision:age".
+      version: string;
+
+      // Currency supported by this backend.
+      currency: string;
+
+      // optional array with information about the instances running at this backend
+      // FIXME: remove, use/provide http:get:: /instances instead!
+      instances: InstanceInformation[];
+    }
+
+  .. ts:def:: InstanceInformation
+
+    interface InstanceInformation {
+
+      // Human-readable legal business name served by this instance
+      name: string;
+
+      // Base URL of the instance. Can be of the form "/PizzaShop/" or
+      // a fully qualified URL (i.e. "https://backend.example.com/PizzaShop/").
+      instance_baseurl: string;
+
+      // Public key of the merchant/instance, in Crockford Base32 encoding.
+      merchant_pub: EddsaPublicKey;
+
+      // List of the payment targets supported by this instance. Clients can
+      // specify the desired payment target in /order requests.  Note that
+      // front-ends do not have to support wallets selecting payment targets.
+      payment_targets: string[];
+
+      // Base URL of the exchange this instance uses for tipping.
+      // Optional, only present if the instance supports tipping.
+      // FIXME: obsolete with current tipping API!
+      tipping_exchange_baseurl?: string;
+
+    }
 
 
 ------------------
@@ -33,7 +98,7 @@ Receiving Payments
 
 .. _post-order:
 
-.. http:post:: /order
+.. http:post:: /create-order
 
   Create a new order that a customer can pay for.
 
@@ -41,10 +106,10 @@ Receiving Payments
 
   .. note::
 
-    This endpoint does not return a URL to redirect your user to confirm the payment.
-    In order to get this URL use :http:get:`/check-payment`.  The API is structured this way
-    since the payment redirect URL is not unique for every order, there might be varying parameters
-    such as the session id.
+    This endpoint does not return a URL to redirect your user to confirm the
+    payment.  In order to get this URL use :http:get:`/orders/$ORDER_ID`.  The
+    API is structured this way since the payment redirect URL is not unique
+    for every order, there might be varying parameters such as the session id.
 
   **Request:**
 
@@ -79,8 +144,8 @@ Receiving Payments
       summary: string;
 
       // URL that will show that the order was successful after
-      // it has been paid for.  The wallet will always automatically append
-      // the order_id as a query parameter.
+      // it has been paid for.  The wallet must always automatically append
+      // the order_id as a query parameter to this URL when using it.
       fulfillment_url: string;
     }
 
@@ -92,25 +157,257 @@ Receiving Payments
     }
 
 
-.. http:get:: /check-payment
 
-  Check the payment status of an order.  If the order exists but is not payed yet,
-  the response provides a redirect URL.
-  When the user goes to this URL, they will be prompted for payment.
+.. http:get:: /orders
+
+  Returns known orders up to some point in the past
+
+  **Request**
+
+  :query paid: *Optional*. If set to yes, only return paid orders, if no only unpaid orders. Do not give (or use "all") to see all orders regardless of payment status.
+  :query aborted: *Optional*. If set to yes, only return aborted orders, if no only unaborted orders. Do not give (or use "all")  to see all orders regardless of abort status.
+  :query refunded: *Optional*. If set to yes, only return refunded orders, if no only unrefunded orders. Do not give (or use "all") to see all orders regardless of refund status.
+  :query wired: *Optional*. If set to yes, only return wired orders, if no only orders with missing wire transfers. Do not give (or use "all") to see all orders regardless of wire transfer status.
+  :query date: *Optional.* Time threshold, see ``delta`` for its interpretation.  Defaults to the oldest or most recent entry, depending on ``delta``.
+  :query start: *Optional*. Row number threshold, see ``delta`` for its interpretation.  Defaults to ``UINT64_MAX``, namely the biggest row id possible in the database.
+  :query delta: *Optional*. takes value of the form ``N (-N)``, so that at most ``N`` values strictly younger (older) than ``start`` and ``date`` are returned.  Defaults to ``-20``.
+  :query timeout_ms: *Optional*. Timeout in milli-seconds to wait for additional orders if the answer would otherwise be negative (long polling). Only useful if delta is positive. Note that the merchant MAY still return a response that contains fewer than delta orders.
+
+  **Response**
+
+  :status 200 OK:
+    The response is a JSON ``array`` of  `OrderHistory`.  The array is
+    sorted such that entry ``i`` is younger than entry ``i+1``.
+
+  .. ts:def:: OrderHistory
+
+    interface OrderHistory {
+      // The serial number this entry has in the merchant's DB.
+      row_id: number;
+
+      // order ID of the transaction related to this entry.
+      order_id: string;
+
+      // Transaction's timestamp
+      timestamp: Timestamp;
+
+      // Total amount the customer should pay for this order.
+      total: Amount;
+
+      // Total amount the customer did pay for this order.
+      paid: Amount;
+
+      // Total amount the customer was refunded for this order.
+      // (includes abort-refund and refunds, boolean flag
+      // below can help determine which case it is).
+      refunded: Amount;
+
+      // Was the order ever fully paid?
+      is_paid: boolean;
+
+    }
+
+
+
+
+.. http:post:: /public/orders/$ORDER_ID/claim
+
+  Wallet claims ownership (via nonce) over an order.  By claiming
+  an order, the wallet obtains the full contract terms, and thereby
+  implicitly also the hash of the contract terms it needs for the
+  other ``/public/`` APIs to authenticate itself as the wallet that
+  is indeed eligible to inspect this particular order's status.
+
+  **Request**
+
+  The request must be a `ClaimRequest`
+
+  .. ts:def:: ClaimRequest
+
+    interface ClaimRequest {
+      // Nonce to identify the wallet that claimed the order.
+      nonce: string;
+    }
+
+  **Response**
+
+  :status 200 OK:
+    The client has successfully claimed the order.
+    The response contains the :ref:`contract terms <ContractTerms>`.
+  :status 404 Not found:
+    The backend is unaware of the instance or order.
+  :status 409 Conflict:
+    The someone else claimed the same order ID with different nonce before.
+
+
+.. http:post:: /public/orders/$ORDER_ID/pay
+
+  Pay for an order by giving a deposit permission for coins.  Typically used by
+  the customer's wallet.  Note that this request does not include the
+  usual ``h_contract`` argument to authenticate the wallet, as the hash of
+  the contract is implied by the signatures of the coins.  Furthermore, this
+  API doesn't really return useful information about the order.
 
   **Request:**
 
-  :query order_id: order id that should be used for the payment
-  :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
-  :query timeout: *Optional*. Timeout in seconds to wait for a payment if the answer would otherwise be negative (long polling).
+  The request must be a `pay request <PayRequest>`.
 
   **Response:**
 
-  Returns a `CheckPaymentResponse`, whose format can differ based on the status of the payment.
+  :status 200 OK:
+    The exchange accepted all of the coins.
+    The body is a `payment response <PaymentResponse>`.
+    The ``frontend`` should now fullfill the contract.
+  :status 400 Bad request:
+    Either the client request is malformed or some specific processing error
+    happened that may be the fault of the client as detailed in the JSON body
+    of the response.
+  :status 403 Forbidden:
+    One of the coin signatures was not valid.
+  :status 404 Not found:
+    The merchant backend could not find the order or the instance
+    and thus cannot process the payment.
+  :status 409 Conflict:
+    The exchange rejected the payment because a coin was already spent before.
+    The response will include the ``coin_pub`` for which the payment failed,
+    in addition to the response from the exchange to the ``/deposit`` request.
+  :status 412 Precondition Failed:
+    The given exchange is not acceptable for this merchant, as it is not in the
+    list of accepted exchanges and not audited by an approved auditor.
+  :status 424 Failed Dependency:
+    The merchant's interaction with the exchange failed in some way.
+    The client might want to try later again.
+    This includes failures like the denomination key of a coin not being
+    known to the exchange as far as the merchant can tell.
 
-  .. ts:def:: CheckPaymentResponse
+  The backend will return verbatim the error codes received from the exchange's
+  :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
+  double-spending for example, the frontend should pass the reply verbatim to
+  the browser/wallet.  If the payment was successful, the frontend MAY use
+  this to trigger some business logic.
 
-    type CheckPaymentResponse = CheckPaymentPaidResponse | CheckPaymentUnpaidResponse
+  .. ts:def:: PaymentResponse
+
+    interface PaymentResponse {
+      // Signature on ``TALER_PaymentResponsePS`` with the public
+      // key of the merchant instance.
+      sig: EddsaSignature;
+
+    }
+
+  .. ts:def:: PayRequest
+
+    interface PayRequest {
+      coins: CoinPaySig[];
+    }
+
+  .. ts:def:: CoinPaySig
+
+    export interface CoinPaySig {
+      // Signature by the coin.
+      coin_sig: string;
+
+      // Public key of the coin being spend.
+      coin_pub: string;
+
+      // Signature made by the denomination public key.
+      ub_sig: string;
+
+      // The denomination public key associated with this coin.
+      denom_pub: string;
+
+      // The amount that is subtracted from this coin with this payment.
+      contribution: Amount;
+
+      // URL of the exchange this coin was withdrawn from.
+      exchange_url: string;
+    }
+
+
+.. http:post:: /public/orders/$ORDER_ID/abort
+
+  Abort paying for an order and obtain a refund for coins that
+  were already deposited as part of a failed payment.
+
+  **Request:**
+
+  The request must be an `abort request <AbortRequest>`.
+
+  :query h_contract: hash of the order's contract terms (this is used to authenticate the wallet/customer in case $ORDER_ID is guessable). *Mandatory!*
+
+  **Response:**
+
+  :status 200 OK:
+    The exchange accepted all of the coins. The body is a
+    a `merchant refund response <MerchantRefundResponse>`.
+  :status 400 Bad request:
+    Either the client request is malformed or some specific processing error
+    happened that may be the fault of the client as detailed in the JSON body
+    of the response.
+  :status 403 Forbidden:
+    The ``h_contract`` does not match the order.
+  :status 404 Not found:
+    The merchant backend could not find the order or the instance
+    and thus cannot process the abort request.
+  :status 412 Precondition Failed:
+    Aborting the payment is not allowed, as the original payment did succeed.
+  :status 424 Failed Dependency:
+    The merchant's interaction with the exchange failed in some way.
+    The error from the exchange is included.
+
+  The backend will return verbatim the error codes received from the exchange's
+  :ref:`refund <refund>` API.  The frontend should pass the replies verbatim to
+  the browser/wallet.
+
+  .. ts:def:: AbortRequest
+
+    interface AbortRequest {
+      // List of coins the wallet would like to see refunds for.
+      // (Should be limited to the coins for which the original
+      // payment succeeded, as far as the wallet knows.)
+      coins: AbortedCoin[];
+    }
+
+    interface AbortedCoin {
+      // Public key of a coin for which the wallet is requesting an abort-related refund.
+      coin_pub: EddsaPublicKey;
+    }
+
+
+
+.. http:get:: /orders/$ORDER_ID/
+
+  Merchant checks the payment status of an order.  If the order exists but is not payed
+  yet, the response provides a redirect URL.  When the user goes to this URL,
+  they will be prompted for payment.  Differs from the ``/public/`` API both
+  in terms of what information is returned and in that the wallet must provide
+  the contract hash to authenticate, while for this API we assume that the
+  merchant is authenticated (as the endpoint is not ``/public/``).
+
+  **Request:**
+
+  :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
+  :query transfer: *Optional*. If set to "YES", try to obtain the wire transfer status for this order from the exchange. Otherwise, the wire transfer status MAY be returned if it is available.
+  :query timeout_ms: *Optional*. Timeout in milli-seconds to wait for a payment if the answer would otherwise be negative (long polling).
+
+  **Response:**
+
+  :status 200 OK:
+    Returns a `MerchantOrderStatusResponse`, whose format can differ based on the status of the payment.
+  :status 404 Not Found:
+    The order or instance is unknown to the backend.
+  :status 409 Conflict:
+    The exchange previously claimed that a deposit was not included in a wire
+    transfer, and now claims that it is.  This means that the exchange is
+    dishonest.  The response contains the cryptographic proof that the exchange
+    is misbehaving in the form of a `TransactionConflictProof`.
+  :status 424 Failed dependency:
+    We failed to obtain a response from the exchange about the
+    wire transfer status.
+
+  .. ts:def:: MerchantOrderStatusResponse
+
+    type MerchantOrderStatusResponse = CheckPaymentPaidResponse | CheckPaymentUnpaidResponse
 
   .. ts:def:: CheckPaymentPaidResponse
 
@@ -125,6 +422,9 @@ Receiving Payments
 
       // Contract terms
       contract_terms: ContractTerms;
+
+      // If available, the wire transfer status from the exchange for this order
+      wire_details?: TransactionWireTransfer;
     }
 
   .. ts:def:: CheckPaymentUnpaidResponse
@@ -138,7 +438,126 @@ Receiving Payments
       // Alternative order ID which was paid for already in the same session.
       // Only given if the same product was purchased before in the same session.
       already_paid_order_id?: string;
+
+      // FIXME: why do we NOT return the contract terms here?
     }
+
+  .. ts:def:: TransactionWireTransfer
+
+    interface TransactionWireTransfer {
+
+      // Responsible exchange
+      exchange_uri: string;
+
+      // 32-byte wire transfer identifier
+      wtid: Base32;
+
+      // execution time of the wire transfer
+      execution_time: Timestamp;
+
+      // Total amount that has been wire transfered
+      // to the merchant
+      amount: Amount;
+    }
+
+  .. ts:def:: TransactionConflictProof
+
+    interface TransactionConflictProof {
+      // Numerical `error code <error-codes>`
+      code: number;
+
+      // Human-readable error description
+      hint: string;
+
+      // A claim by the exchange about the transactions associated
+      // with a given wire transfer; it does not list the
+      // transaction that ``transaction_tracking_claim`` says is part
+      // of the aggregate.  This is
+      // a ``/track/transfer`` response from the exchange.
+      wtid_tracking_claim: TrackTransferResponse;
+
+      // The current claim by the exchange that the given
+      // transaction is included in the above WTID.
+      // (A response from ``/track/order``).
+      transaction_tracking_claim: TrackTransactionResponse;
+
+      // Public key of the coin for which we got conflicting information.
+      coin_pub: CoinPublicKey;
+
+    }
+
+
+.. http:get:: /public/orders/$ORDER_ID/
+
+  Query the payment status of an order. This endpoint is for the wallet.
+  When the wallet goes to this URL and it is unpaid,
+  they will be prompted for payment.
+
+  // FIXME: note that this combines the previous APIs
+  // to check-payment and to obtain refunds.
+
+  **Request**
+
+  :query h_contract: hash of the order's contract terms (this is used to authenticate the wallet/customer in case $ORDER_ID is guessable). *Mandatory!*
+  :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
+  :query timeout_ms: *Optional.*  If specified, the merchant backend will
+    wait up to ``timeout_ms`` milliseconds for completion of the payment before
+    sending the HTTP response.  A client must never rely on this behavior, as the
+    merchant backend may return a response immediately.
+  :query refund=AMOUNT: *Optional*. Indicates that we are polling for a refund above the given AMOUNT. Only useful in combination with timeout.
+
+  **Response**
+
+  :status 200 OK:
+    The response is a `PublicPayStatusResponse`, with ``paid`` true.
+    FIXME: what about refunded?
+  :status 402 Payment required:
+    The response is a `PublicPayStatusResponse`, with ``paid`` false.
+    FIXME: what about refunded?
+  :status 403 Forbidden:
+    The ``h_contract`` does not match the order.
+  :status 404 Not found:
+    The merchant backend is unaware of the order.
+
+  .. ts:def:: PublicPayStatusResponse
+
+    interface PublicPayStatusResponse {
+      // Has the payment for this order (ever) been completed?
+      paid: boolean;
+
+      // Was the payment refunded (even partially, via refund or abort)?
+      refunded: boolean;
+
+      // Amount that was refunded in total.
+      refund_amount: Amount;
+
+      // Refunds for this payment, empty array for none.
+      refunds: RefundDetail[];
+
+      // URI that the wallet must process to complete the payment.
+      taler_pay_uri: string;
+
+      // Alternative order ID which was paid for already in the same session.
+      // Only given if the same product was purchased before in the same session.
+      already_paid_order_id?: string;
+
+    }
+
+
+.. http:delete:: /orders/$ORDER_ID
+
+  Delete information about an order.  Fails if the order was paid in the
+  last 10 years (or whatever TAX_RECORD_EXPIRATION is set to) or was
+  claimed but is unpaid and thus still a valid offer.
+
+  **Response**
+
+  :status 204 No content:
+    The backend has successfully deleted the order.
+  :status 404 Not found:
+    The backend does not know the instance or the order.
+  :status 409 Conflict:
+    The backend refuses to delete the order.
 
 
 --------------
@@ -146,7 +565,7 @@ Giving Refunds
 --------------
 
 
-.. http:post:: /refund
+.. http:post:: /orders/$ORDER_ID/refund
 
   Increase the refund amount associated with a given order.  The user should be
   redirected to the ``taler_refund_url`` to trigger refund processing in the wallet.
@@ -167,9 +586,6 @@ Giving Refunds
   .. ts:def:: RefundRequest
 
     interface RefundRequest {
-      // Order id of the transaction to be refunded
-      order_id: string;
-
       // Amount to be refunded
       refund: Amount;
 
@@ -182,140 +598,29 @@ Giving Refunds
     interface MerchantRefundResponse {
 
       // Hash of the contract terms of the contract that is being refunded.
+      // FIXME: why do we return this?
       h_contract_terms: HashCode;
 
       // URL (handled by the backend) that the wallet should access to
       // trigger refund processing.
+      // FIXME: isn't this basically now always ``/public/orders/$ORDER_ID/``?
+      // If so, why return this?
       taler_refund_url: string;
     }
 
-
---------------------
-Giving Customer Tips
---------------------
-
-
-.. http:post:: /tip-authorize
-
-  Authorize a tip that can be picked up by the customer's wallet by POSTing to
-  ``/tip-pickup``.  Note that this is simply the authorization step the back
-  office has to trigger first.  The user should be navigated to the ``tip_redirect_url``
-  to trigger tip processing in the wallet.
-
-  **Request**
-
-  The request body is a `TipCreateRequest` object.
-
-  **Response**
-
-  :status 200 OK:
-    A tip has been created. The backend responds with a `TipCreateConfirmation`
-  :status 404 Not Found:
-    The instance is unknown to the backend.
-  :status 412 Precondition Failed:
-    The tip amount requested exceeds the available reserve balance for tipping, or
-    the instance was never configured for tipping.
-  :status 424 Failed Dependency:
-    We are unable to process the request because of a problem with the exchange.
-    Likely returned with an "exchange_code" in addition to a "code" and
-    an "exchange_http_status" in addition to our own HTTP status. Also may
-    include the full exchange reply to our request under "exchange_reply".
-    Naturally, those diagnostics may be omitted if the exchange did not reply
-    at all, or send a completely malformed response.
-  :status 503 Service Unavailable:
-    We are unable to process the request, possibly due to misconfiguration or
-    disagreement with the exchange (it is unclear which party is to blame).
-    Likely returned with an "exchange_code" in addition to a "code" and
-    an "exchange_http_status" in addition to our own HTTP status. Also may
-    include the full exchange reply to our request under "exchange_reply".
-
-  .. ts:def:: TipCreateRequest
-
-    interface TipCreateRequest {
-      // Amount that the customer should be tipped
-      amount: Amount;
-
-      // Justification for giving the tip
-      justification: string;
-
-      // URL that the user should be directed to after tipping,
-      // will be included in the tip_token.
-      next_url: string;
-    }
-
-  .. ts:def:: TipCreateConfirmation
-
-    interface TipCreateConfirmation {
-      // Token that will be handed to the wallet,
-      // contains all relevant information to accept
-      // a tip.
-      tip_token: string;
-
-      // URL that will directly trigger procesing
-      // the tip when the browser is redirected to it
-      tip_redirect_url: string;
-    }
-
-
-.. http:post:: /tip-query
-
-  Query the status of a tipping reserve.
-
-  **Response**
-
-  :status 200 OK:
-    A tip has been created. The backend responds with a `TipQueryResponse`
-  :status 404 Not Found:
-    The instance is unknown to the backend.
-  :status 412 Precondition Failed:
-    The merchant backend instance does not have a tipping reserve configured.
-  :status 424 Failed Dependency:
-    We are unable to process the request because of a problem with the exchange.
-    Likely returned with an "exchange_code" in addition to a "code" and
-    an "exchange_http_status" in addition to our own HTTP status. Also may
-    include the full exchange reply to our request under "exchange_reply".
-    Naturally, those diagnostics may be omitted if the exchange did not reply
-    at all, or send a completely malformed response.
-  :status 503 Service Unavailable:
-    We are unable to process the request, possibly due to misconfiguration or
-    disagreement with the exchange (it is unclear which party is to blame).
-    Likely returned with an "exchange_code" in addition to a "code" and
-    an "exchange_http_status" in addition to our own HTTP status. Also may
-    include the full exchange reply to our request under "exchange_reply".
-
-  .. ts:def:: TipQueryResponse
-
-    interface TipQueryResponse {
-      // Amount still available
-      amount_available: Amount;
-
-      // Amount that we authorized for tips
-      amount_authorized: Amount;
-
-      // Amount that was picked up by users already
-      amount_picked_up: Amount;
-
-      // Timestamp indicating when the tipping reserve will expire
-      expiration: Timestamp;
-
-      // Reserve public key of the tipping reserve
-      reserve_pub: EddsaPublicKey;
-    }
 
 
 ------------------------
 Tracking Wire Transfers
 ------------------------
 
-.. http:get:: /track/transfer
+.. http:post:: /check-transfer
 
-  Provides deposits associated with a given wire transfer.
+  Inform the backend over an incoming wire transfer. The backend should inquire about the details with the exchange and mark the respective orders as wired.
 
-  **Request**
+  **Request:**
 
-  :query wtid: raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
-  :query wire_method: name of the wire transfer method used for the wire transfer
-  :query exchange: base URL of the exchange that made the wire transfer
+   The request must provide `transfer information <TransferInformation>`.
 
   **Response:**
 
@@ -333,6 +638,23 @@ Tracking Wire Transfers
     details don't match the details stored in merchant's database about the same keyed coin.
     The response body contains the `TrackTransferConflictDetails`.
 
+  .. ts:def:: TransferInformation
+
+    interface TransferInformation {
+      // how much was wired to the merchant (minus fees)
+      credit_amount: Amount;
+
+      // raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
+      wtid: FIXME;
+
+      // name of the wire transfer method used for the wire transfer
+      // FIXME: why not a payto URI?
+      wire_method;
+
+      // base URL of the exchange that made the wire transfer
+      exchange: string;
+    }
+
   .. ts:def:: TrackTransferResponse
 
     interface TrackTransferResponse {
@@ -343,12 +665,14 @@ Tracking Wire Transfers
       wire_fee: Amount;
 
       // public key of the merchant (identical for all deposits)
+      // FIXME: why return this?
       merchant_pub: EddsaPublicKey;
 
       // hash of the wire details (identical for all deposits)
+      // FIXME: why return this? Isn't this the WTID!?
       h_wire: HashCode;
 
-      // Time of the execution of the wire transfer by the exchange
+      // Time of the execution of the wire transfer by the exchange, according to the exchange
       execution_time: Timestamp;
 
       // details about the deposits
@@ -356,12 +680,14 @@ Tracking Wire Transfers
 
       // signature from the exchange made with purpose
       // ``TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT``
+      // FIXME: why return this?
       exchange_sig: EddsaSignature;
 
       // public EdDSA key of the exchange that was used to generate the signature.
       // Should match one of the exchange's signing keys from /keys.  Again given
       // explicitly as the client might otherwise be confused by clock skew as to
       // which signing key was used.
+      // FIXME: why return this?
       exchange_pub: EddsaSignature;
     }
 
@@ -420,131 +746,366 @@ Tracking Wire Transfers
     }
 
 
-.. http:get:: /track/transaction
+.. http:get:: /transfers
 
-  Provide the wire transfer identifier associated with an (existing) deposit operation.
+  Obtain a list of all wire transfers the backend has checked.
 
   **Request:**
 
-  :query id: ID of the transaction we want to trace (an integer)
+   :query filter: FIXME: should have a way to filter, maybe even long-poll?
+
+  **Response:**
+
+  FIXME: to be specified.
+
+
+
+--------------------
+Giving Customer Tips
+--------------------
+
+
+.. http:post:: /create-reserve
+
+  Create a reserve for tipping.
+
+  **Request:**
+
+  The request body is a `ReserveCreateRequest` object.
 
   **Response:**
 
   :status 200 OK:
-    The deposit has been executed by the exchange and we have a wire transfer identifier.
-    The response body is a JSON array of `TransactionWireTransfer` objects.
-  :status 202 Accepted:
-    The deposit request has been accepted for processing, but was not yet
-    executed.  Hence the exchange does not yet have a wire transfer identifier.
-    The merchant should come back later and ask again.
-    The response body is a `TrackTransactionAcceptedResponse <TrackTransactionAcceptedResponse>`.  Note that
-    the similarity to the response given by the exchange for a /track/order
-    is completely intended.
-  :status 404 Not Found: The transaction is unknown to the backend.
+    The backend is waiting for the reserve to be established. The merchant
+    must now perform the wire transfer indicated in the `ReserveCreateConfirmation`.
+  :status 424 Failed Depencency:
+    We could not obtain /wire details from the specified exchange base URL.
+
+  .. ts:def:: ReserveCreateRequest
+
+    interface ReserveCreateRequest {
+      // Amount that the merchant promises to put into the reserve
+      initial_amount: Amount;
+
+      // Exchange the merchant intends to use for tipping
+      exchange_base_url: string;
+
+    }
+
+  .. ts:def:: ReserveCreateConfirmation
+
+    interface ReserveCreateConfirmation {
+      // Public key identifying the reserve
+      reserve_pub: EddsaPublicKey;
+
+      // Wire account of the exchange where to transfer the funds
+      payto_url: string;
+
+    }
+
+.. http:get:: /reserves
+
+   Obtain list of reserves that have been created for tipping.
+
+   **Request:**
+
+   :query after: *Optional*.  Only return reserves created after the given timestamp [FIXME: unit?]
+
+   **Response:**
+
+  :status 200 OK:
+    Returns a list of known tipping reserves.
+    The body is a `TippingReserveStatus`.
+
+  .. ts:def:: TippingReserveStatus
+
+    interface TippingReserveStatus {
+
+      // Array of all known reserves (possibly empty!)
+      reserves: ReserveStatusEntry[];
+
+    }
+
+  .. ts:def:: ReserveStatusEntry
+
+     interface ReserveStatusEntry {
+
+      // Public key of the reserve
+      reserve_pub: EddsaPublicKey;
+
+      // Timestamp when it was established
+      creation_time: Timestamp;
+
+      // Timestamp when it expires
+      expiration_time: Timestamp;
+
+      // Initial amount as per reserve creation call
+      merchant_initial_amount: Amount;
+
+      // Initial amount as per exchange, 0 if exchange did
+      // not confirm reserve creation yet.
+      exchange_initial_amount: Amount;
+
+      // Amount picked up so far.
+      pickup_amount: Amount;
+
+      // Amount approved for tips that exceeds the pickup_amount.
+      committed_amount: Amount;
+
+    }
+
+
+.. http:get:: /reserves/$RESERVE_PUB
+
+   Obtain information about a specific reserve that have been created for tipping.
+
+   **Request:**
+
+   :query tips: *Optional*. If set to "yes", returns also information about all of the tips created
+
+   **Response:**
+
+  :status 200 OK:
+    Returns the `ReserveDetail`.
+  :status 404 Not found:
+    The tipping reserve is not known.
   :status 424 Failed Dependency:
-    The exchange previously claimed that a deposit was not included in a wire
-    transfer, and now claims that it is.  This means that the exchange is
-    dishonest.  The response contains the cryptographic proof that the exchange
-    is misbehaving in the form of a `TransactionConflictProof`.
+    We are having trouble with the request because of a problem with the exchange.
+    Likely returned with an "exchange_code" in addition to a "code" and
+    an "exchange_http_status" in addition to our own HTTP status. Also usually
+    includes the full exchange reply to our request under "exchange_reply".
+    This is only returned if there was actual trouble with the exchange, not
+    if the exchange merely did not respond yet or if it responded that the
+    reserve was not yet filled.
 
-  **Details:**
+  .. ts:def:: ReserveDetail
 
-  .. ts:def:: TransactionWireTransfer
+    interface ReserveDetail {
 
-    interface TransactionWireTransfer {
+      // Timestamp when it was established
+      creation_time: Timestamp;
 
-      // Responsible exchange
-      exchange_uri: string;
+      // Timestamp when it expires
+      expiration_time: Timestamp;
 
-      // 32-byte wire transfer identifier
-      wtid: Base32;
+      // Initial amount as per reserve creation call
+      merchant_initial_amount: Amount;
 
-      // execution time of the wire transfer
-      execution_time: Timestamp;
+      // Initial amount as per exchange, 0 if exchange did
+      // not confirm reserve creation yet.
+      exchange_initial_amount: Amount;
 
-      // Total amount that has been wire transfered
-      // to the merchant
-      amount: Amount;
+      // Amount picked up so far.
+      pickup_amount: Amount;
+
+      // Amount approved for tips that exceeds the pickup_amount.
+      committed_amount: Amount;
+
+      // Array of all tips created by this reserves (possibly empty!).
+      // Only present if asked for explicitly.
+      tips?: TipStatusEntry[];
+
     }
 
-  .. ts:def:: CoinWireTransfer
+  .. ts:def:: TipStatusEntry
 
-    interface CoinWireTransfer {
-      // public key of the coin that was deposited
-      coin_pub: EddsaPublicKey;
+    interface TipStatusEntry {
 
-      // Amount the coin was worth (including deposit fee)
-      amount_with_fee: Amount;
+      // Unique identifier for the tip
+      tip_id: HashCode;
 
-      // Deposit fee retained by the exchange for the coin
-      deposit_fee: Amount;
-    }
+      // Total amount of the tip that can be withdrawn.
+      total_amount: Amount;
 
-  .. ts:def:: TransactionConflictProof
-
-    interface TransactionConflictProof {
-      // Numerical `error code <error-codes>`
-      code: number;
-
-      // Human-readable error description
-      hint: string;
-
-      // A claim by the exchange about the transactions associated
-      // with a given wire transfer; it does not list the
-      // transaction that ``transaction_tracking_claim`` says is part
-      // of the aggregate.  This is
-      // a ``/track/transfer`` response from the exchange.
-      wtid_tracking_claim: TrackTransferResponse;
-
-      // The current claim by the exchange that the given
-      // transaction is included in the above WTID.
-      // (A response from ``/track/order``).
-      transaction_tracking_claim: TrackTransactionResponse;
-
-      // Public key of the coin for which we got conflicting information.
-      coin_pub: CoinPublicKey;
+      // Human-readable reason for why the tip was granted.
+      reason: String;
 
     }
 
 
--------------------
-Transaction history
--------------------
+.. http:post:: /reserves/$RESERVE_PUB/authorize-tip
 
-.. http:get:: /history
+  Authorize creation of a tip from the given reserve.
 
-  Returns transactions up to some point in the past
+  **Request:**
 
-  **Request**
-
-  :query date: time threshold, see ``delta`` for its interpretation.
-  :query start: row number threshold, see ``delta`` for its interpretation.  Defaults to ``UINT64_MAX``, namely the biggest row id possible in the database.
-  :query delta: takes value of the form ``N (-N)``, so that at most ``N`` values strictly younger (older) than ``start`` and ``date`` are returned.  Defaults to ``-20``.
-  :query ordering: takes value ``"descending"`` or ``"ascending"`` according to the results wanted from younger to older or vice versa.  Defaults to ``"descending"``.
+  The request body is a `TipCreateRequest` object.
 
   **Response**
 
   :status 200 OK:
-    The response is a JSON ``array`` of  `TransactionHistory`.  The array is
-    sorted such that entry ``i`` is younger than entry ``i+1``.
+    A tip has been created. The backend responds with a `TipCreateConfirmation`
+  :status 404 Not Found:
+    The instance or the reserve is unknown to the backend.
+  :status 412 Precondition Failed:
+    The tip amount requested exceeds the available reserve balance for tipping.
 
-  .. ts:def:: TransactionHistory
+  .. ts:def:: TipCreateRequest
 
-    interface TransactionHistory {
-      // The serial number this entry has in the merchant's DB.
-      row_id: number;
-
-      // order ID of the transaction related to this entry.
-      order_id: string;
-
-      // Transaction's timestamp
-      timestamp: Timestamp;
-
-      // Total amount associated to this transaction.
+    interface TipCreateRequest {
+      // Amount that the customer should be tipped
       amount: Amount;
+
+      // Justification for giving the tip
+      justification: string;
+
+      // URL that the user should be directed to after tipping,
+      // will be included in the tip_token.
+      next_url: string;
     }
 
-.. _proposal:
+  .. ts:def:: TipCreateConfirmation
+
+    interface TipCreateConfirmation {
+      // Unique tip identifier for the tip that was created.
+      tip_id: HashCode;
+
+      // Token that will be handed to the wallet,
+      // contains all relevant information to accept
+      // a tip.
+      tip_token: string;
+
+      // URL that will directly trigger processing
+      // the tip when the browser is redirected to it
+      tip_redirect_url: string;
+
+    }
+
+
+.. http:delete:: /reserves/$RESERVE_PUB
+
+  Delete information about a reserve.  Fails if the reserve still has
+  committed to tips that were not yet picked up and that have not yet
+  expired.
+
+  **Response**
+
+  :status 204 No content:
+    The backend has successfully deleted the reserve.
+  :status 404 Not found:
+    The backend does not know the instance or the reserve.
+  :status 409 Conflict:
+    The backend refuses to delete the reserve (committed tips).
+
+
+
+.. http:get:: /tips/$TIP_ID
+
+  Obtain information about a particular tip.
+
+   **Request:**
+
+   :query pickups: if set to "yes", returns also information about all of the pickups
+
+  **Response**
+
+  :status 200 OK:
+    The tip is known. The backend responds with a `TipDetails` message
+  :status 404 Not Found:
+    The tip is unknown to the backend.
+
+  .. ts:def:: TipDetails
+
+    interface TipDetails {
+
+      // Amount that we authorized for this tip.
+      total_authorized: Amount;
+
+      // Amount that was picked up by the user already.
+      total_picked_up: Amount;
+
+      // Human-readable reason given when authorizing the tip.
+      reason: String;
+
+      // Timestamp indicating when the tip is set to expire (may be in the past).
+      expiration: Timestamp;
+
+      // Reserve public key from which the tip is funded
+      reserve_pub: EddsaPublicKey;
+
+      // Array showing the pickup operations of the wallet (possibly empty!).
+      // Only present if asked for explicitly.
+      pickups?: PickupDetail[];
+    }
+
+  .. ts:def:: PickupDetail
+
+    interface PickupDetail {
+
+      // Unique identifier for the pickup operation.
+      pickup_id: HashCode;
+
+      // Number of planchets involved.
+      num_planchets: integer;
+
+      // Total amount requested for this pickup_id.
+      requested_amount: Amount;
+
+      // Total amount processed by the exchange for this pickup.
+      exchange_amount: Amount;
+
+    }
+
+
+.. http:post:: /public/tips/$TIP_ID/pickup
+
+  Handle request from wallet to pick up a tip.
+
+  **Request**
+
+  The request body is a `TipPickupRequest` object.
+
+  **Response**
+
+  :status 200 OK:
+    A tip is being returned. The backend responds with a `TipResponse`
+  :status 401 Unauthorized:
+    The tip amount requested exceeds the tip.
+  :status 404 Not Found:
+    The tip identifier is unknown.
+  :status 409 Conflict:
+    Some of the denomination key hashes of the request do not match those currently available from the exchange (hence there is a conflict between what the wallet requests and what the merchant believes the exchange can provide).
+
+  .. ts:def:: TipPickupRequest
+
+    interface TipPickupRequest {
+
+      // Identifier of the tip.
+      tip_id: HashCode;
+
+      // List of planches the wallet wants to use for the tip
+      planchets: PlanchetDetail[];
+    }
+
+  .. ts:def:: PlanchetDetail
+
+    interface PlanchetDetail {
+      // Hash of the denomination's public key (hashed to reduce
+      // bandwidth consumption)
+      denom_pub_hash: HashCode;
+
+      // coin's blinded public key
+      coin_ev: CoinEnvelope;
+
+    }
+
+  .. ts:def:: TipResponse
+
+    interface TipResponse {
+
+      // Blind RSA signatures over the planchets.
+      // The order of the signatures matches the planchets list.
+      blind_sigs: BlindSignature[];
+    }
+
+    interface BlindSignature {
+
+      // The (blind) RSA signature. Still needs to be unblinded.
+      blind_sig: RsaSignature;
+    }
+
+
+
 
 
 -------------------------
@@ -554,7 +1115,7 @@ Dynamic Merchant Instance
 .. note::
 
     The endpoints to dynamically manage merchant instances has not been
-    implemented yet. The bug id for this refernce is 5349.
+    implemented yet. The bug id for this reference is #5349.
 
 .. http:get:: /instances
 
@@ -592,7 +1153,7 @@ Dynamic Merchant Instance
     }
 
 
-.. http:put:: /instances/
+.. http:put:: /instances/$INSTANCE
 
   This request will be used to create a new merchant instance in the backend.
 
@@ -611,11 +1172,14 @@ Dynamic Merchant Instance
     interface CreateInstanceRequest {
       // The URL where the wallet has to send coins.
       // payto://-URL of the merchant's bank account. Required.
+      // FIXME: need an array, and to distinguish between
+      // supported and active (see taler.conf options on accounts!)
       payto: string;
 
       // Merchant instance of the response to create
       // This field is optional. If it is not specified
       // then it will automatically be created.
+      // FIXME: I do not understand this argument. -CG
       instance?: string;
 
       // Merchant name corresponding to this instance.
@@ -627,9 +1191,11 @@ Dynamic Merchant Instance
 
     interface CreateInstanceResponse {
       // Merchant instance of the response that was created
+      // FIXME: I do not understand this value, isn't it implied?
       instance: string;
 
       //unique key for each merchant
+      // FIXME: I do not understand this value.
       merchant_id: string;
     }
 
@@ -662,6 +1228,14 @@ Dynamic Merchant Instance
 
       // Merchant name corresponding to this instance.
       name: string;
+
+      // Public key of the merchant/instance, in Crockford Base32 encoding.
+      merchant_pub: EddsaPublicKey;
+
+      // List of the payment targets supported by this instance. Clients can
+      // specify the desired payment target in /order requests.  Note that
+      // front-ends do not have to support wallets selecting payment targets.
+      payment_targets: string[];
 
     }
 
@@ -942,408 +1516,4 @@ The contract terms must have the following structure:
 
       // master public key of the exchange
       master_pub: EddsaPublicKey;
-    }
-
-
--------------------
-Customer-facing API
--------------------
-
-The ``/public/*`` endpoints are publicly exposed on the internet and accessed
-both by the user's browser and their wallet.
-
-
-.. http:get:: /public/config
-
-  Return the protocol version and currency supported by this merchant backend.
-
-  **Response:**
-
-  :status 200 OK:
-    The exchange accepted all of the coins. The body is a `VersionResponse`.
-
-  .. ts:def:: VersionResponse
-
-    interface VersionResponse {
-      // libtool-style representation of the Merchant protocol version, see
-      // https://www.gnu.org/software/libtool/manual/html_node/Versioning.html#Versioning
-      // The format is "current:revision:age".
-      version: string;
-
-      // Currency supported by this backend.
-      currency: string;
-
-      // optional array with information about the instances running at this backend
-      instances: InstanceInformation[];
-    }
-
-  .. ts:def:: InstanceInformation
-
-    interface InstanceInformation {
-
-      // Human-readable legal business name served by this instance
-      name: string;
-
-      // Base URL of the instance. Can be of the form "/PizzaShop/" or
-      // a fully qualified URL (i.e. "https://backend.example.com/PizzaShop/").
-      instance_baseurl: string;
-
-      // Public key of the merchant/instance, in Crockford Base32 encoding.
-      merchant_pub: EddsaPublicKey;
-
-      // List of the payment targets supported by this instance. Clients can
-      // specify the desired payment target in /order requests.  Note that
-      // front-ends do not have to support wallets selecting payment targets.
-      payment_targets: string[];
-
-      // Base URL of the exchange this instance uses for tipping.
-      // Optional, only present if the instance supports tipping.
-      tipping_exchange_baseurl?: string;
-
-    }
-
-
-.. http:post:: /public/pay
-
-  Pay for a proposal by giving a deposit permission for coins.  Typically used by
-  the customer's wallet.  Can also be used in ``abort-refund`` mode to refund coins
-  that were already deposited as part of a failed payment.
-
-  **Request:**
-
-  The request must be a `pay request <PayRequest>`.
-
-  **Response:**
-
-  :status 200 OK:
-    The exchange accepted all of the coins. The body is a `PaymentResponse` if
-    the request used the mode "pay", or a `MerchantRefundResponse` if the
-    request used was the mode "abort-refund".
-    The ``frontend`` should now fullfill the contract.
-  :status 400 Bad request:
-    Either the client request is malformed or some specific processing error
-    happened that may be the fault of the client as detailed in the JSON body
-    of the response.
-  :status 401 Unauthorized:
-    One of the coin signatures was not valid.
-  :status 403 Forbidden:
-    The exchange rejected the payment because a coin was already spent before.
-    The response will include the 'coin_pub' for which the payment failed,
-    in addition to the response from the exchange to the ``/deposit`` request.
-  :status 404 Not found:
-    The merchant backend could not find the proposal or the instance
-    and thus cannot process the payment.
-  :status 412 Precondition Failed:
-    The given exchange is not acceptable for this merchant, as it is not in the
-    list of accepted exchanges and not audited by an approved auditor.
-  :status 424 Failed Dependency:
-    The merchant's interaction with the exchange failed in some way.
-    The client might want to try later again.
-    This includes failures like the denomination key of a coin not being
-    known to the exchange as far as the merchant can tell.
-
-  The backend will return verbatim the error codes received from the exchange's
-  :ref:`deposit <deposit>` API.  If the wallet made a mistake, like by
-  double-spending for example, the frontend should pass the reply verbatim to
-  the browser/wallet. This should be the expected case, as the ``frontend``
-  cannot really make mistakes; the only reasonable exception is if the
-  ``backend`` is unavailable, in which case the customer might appreciate some
-  reassurance that the merchant is working on getting his systems back online.
-
-  .. ts:def:: PaymentResponse
-
-    interface PaymentResponse {
-      // Signature on `TALER_PaymentResponsePS` with the public
-      // key of the merchant instance.
-      sig: EddsaSignature;
-
-      // Contract terms hash being signed over.
-      h_contract_terms: HashCode;
-    }
-
-  .. ts:def:: PayRequest
-
-    interface PayRequest {
-      coins: CoinPaySig[];
-
-      // The merchant public key, used to uniquely
-      // identify the merchant instance.
-      merchant_pub: string;
-
-      // Order ID that's being payed for.
-      order_id: string;
-
-      // Mode for /pay ("pay" or "abort-refund")
-      mode: "pay" | "abort-refund";
-    }
-
-  .. ts:def:: CoinPaySig
-
-    export interface CoinPaySig {
-      // Signature by the coin.
-      coin_sig: string;
-
-      // Public key of the coin being spend.
-      coin_pub: string;
-
-      // Signature made by the denomination public key.
-      ub_sig: string;
-
-      // The denomination public key associated with this coin.
-      denom_pub: string;
-
-      // The amount that is subtracted from this coin with this payment.
-      contribution: Amount;
-
-      // URL of the exchange this coin was withdrawn from.
-      exchange_url: string;
-    }
-
-
-.. http:get:: /public/pay
-
-  Query the payment status of an order.
-
-  **Request**
-
-  :query hc: hash of the order's contract terms
-  :query long_poll_ms: *Optional.*  If specified, the merchant backend will
-    wait up to ``long_poll_ms`` milliseconds for completion of the payment before
-    sending the HTTP response.  A client must never rely on this behavior, as the
-    merchant backend may return a response immediately.
-
-  **Response**
-
-  :status 200 OK:
-    The response is a `PublicPayStatusResponse`.
-
-  .. ts:def:: PublicPayStatusResponse
-
-    interface PublicPayStatusResponse {
-      // Has the payment for this order been completed?
-      paid: boolean;
-
-      // Refunds for this payment, if any.
-      refunds: RefundInfo[];
-    }
-
-
-  .. ts:def:: RefundInfo
-
-    interface RefundInfo {
-
-      // Coin from which the refund is going to be taken
-      coin_pub: EddsaPublicKey;
-
-      // Refund amount taken from coin_pub
-      refund_amount: Amount;
-
-      // Refund fee
-      refund_fee: Amount;
-
-      // Identificator of the refund
-      rtransaction_id: number;
-
-      // Merchant public key
-      merchant_pub: EddsaPublicKey
-
-      // Merchant signature of a TALER_RefundRequestPS object
-      merchant_sig: EddsaSignature;
-    }
-
-
-.. http:get:: /public/proposal
-
-  Retrieve and take ownership (via nonce) over a proposal.
-
-  **Request**
-
-  :query order_id: the order id whose refund situation is being queried
-  :query nonce: the nonce for the proposal
-
-  **Response**
-
-  :status 200 OK:
-    The backend has successfully retrieved the proposal.  It responds with a :ref:`proposal <proposal>`.
-
-  :status 403 Forbidden:
-    The frontend used the same order ID with different content in the order.
-
-
-.. http:get:: /public/[$INSTANCE]/$ORDER/refund
-
-  Obtain a refund issued by the merchant.
-
-  **Response:**
-
-  :status 200 OK:
-    The merchant processed the approved refund. The body is a `RefundResponse`.
-    Note that a successful response from the merchant does not imply that the
-    exchange successfully processed the refund. Clients must inspect the
-    body to check which coins were successfully refunded. It is possible for
-    only a subset of the refund request to have been processed successfully.
-    Re-issuing the request will cause the merchant to re-try such unsuccessful
-    sub-requests.
-
-  .. ts:def:: RefundResponse
-
-    interface RefundResponse {
-      // hash of the contract terms
-      h_contract_terms: HashCode;
-
-      // merchant's public key
-      merchant_pub: EddsaPublicKey;
-
-      // array with information about the refunds obtained
-      refunds: RefundDetail[];
-    }
-
-  .. ts:def:: RefundDetail
-
-    interface RefundDetail {
-
-      // public key of the coin to be refunded
-      coin_pub: EddsaPublicKey;
-
-      // Amount approved for refund for this coin
-      refund_amount: Amount;
-
-      // Refund fee the exchange will charge for the refund
-      refund_fee: Amount;
-
-      // HTTP status from the exchange. 200 if successful.
-      exchange_http_status: integer;
-
-      // Refund transaction ID.
-      rtransaction_id: integer;
-
-      // Taler error code from the exchange. Only given if the
-      // exchange_http_status is not 200.
-      exchange_code?: integer;
-
-      // Full exchange response. Only given if the
-      // exchange_http_status is not 200 and the exchange
-      // did return JSON.
-      exchange_reply?: integer;
-
-      // Public key of the exchange used for the exchange_sig.
-      // Only given if the exchange_http_status is 200.
-      exchange_pub?: EddsaPublicKey;
-
-      // Signature the exchange confirming the refund.
-      // Only given if the exchange_http_status is 200.
-      exchange_sig?: EddsaSignature;
-
-    }
-
-  :status 404 Not found:
-    The merchant is unaware of having granted a refund, or even of
-    the order specified.
-
-
-.. http:post:: /public/tip-pickup
-
-  Handle request from wallet to pick up a tip.
-
-  **Request**
-
-  The request body is a `TipPickupRequest` object.
-
-  **Response**
-
-  :status 200 OK:
-    A tip is being returned. The backend responds with a `TipResponse`
-  :status 401 Unauthorized:
-    The tip amount requested exceeds the tip.
-  :status 404 Not Found:
-    The tip identifier is unknown.
-  :status 409 Conflict:
-    Some of the denomination key hashes of the request do not match those currently available from the exchange (hence there is a conflict between what the wallet requests and what the merchant believes the exchange can provide).
-
-  .. ts:def:: TipPickupRequest
-
-    interface TipPickupRequest {
-
-      // Identifier of the tip.
-      tip_id: HashCode;
-
-      // List of planches the wallet wants to use for the tip
-      planchets: PlanchetDetail[];
-    }
-
-  .. ts:def:: PlanchetDetail
-
-    interface PlanchetDetail {
-      // Hash of the denomination's public key (hashed to reduce
-      // bandwidth consumption)
-      denom_pub_hash: HashCode;
-
-      // coin's blinded public key
-      coin_ev: CoinEnvelope;
-
-    }
-
-  .. ts:def:: TipResponse
-
-    interface TipResponse {
-
-      // Blind RSA signatures over the planchets.
-      // The order of the signatures matches the planchets list.
-      blind_sigs: BlindSignature[];
-    }
-
-    interface BlindSignature {
-
-      // The (blind) RSA signature. Still needs to be unblinded.
-      blind_sig: RsaSignature;
-    }
-
-
-.. http:get:: /public/poll-payment
-
-  Check the payment status of an order.
-
-  **Request:**
-
-  :query order_id: order id that should be used for the payment
-  :query h_contract: hash of the contract (used to authenticate customer)
-  :query session_id: *Optional*. Session ID that the payment must be bound to.  If not specified, the payment is not session-bound.
-  :query timeout: *Optional*. Timeout in seconds to wait for a payment if the answer would otherwise be negative (long polling).
-  :query refund=AMOUNT: *Optional*. Indicates that we are polling for a refund above the given AMOUNT. Only useful in combination with timeout.
-
-  **Response:**
-
-  Returns a `PollPaymentResponse`, whose format can differ based on the status of the payment.
-
-  .. ts:def:: PollPaymentResponse
-
-    type CheckPaymentResponse = PollPaymentPaidResponse | PollPaymentUnpaidResponse
-
-  .. ts:def:: PollPaymentPaidResponse
-
-    interface PollPaymentPaidResponse {
-      // value is always true;
-      paid: boolean;
-
-      // Was the payment refunded (even partially)
-      refunded: boolean;
-
-      // Amount that was refunded, only present if refunded is true.
-      refund_amount?: Amount;
-
-    }
-
-  .. ts:def:: PollPaymentUnpaidResponse
-
-    interface PollPaymentUnpaidResponse {
-      // value is always false;
-      paid: boolean;
-
-      // URI that the wallet must process to complete the payment.
-      taler_pay_uri: string;
-
-      // Alternative order ID which was paid for already in the same session.
-      // Only given if the same product was purchased before in the same session.
-      already_paid_order_id?: string;
-
     }
