@@ -691,7 +691,7 @@ charge per truth operation using GNU Taler.
     interface TruthUploadRequest {
       // Contains the information of an interface `EncryptedKeyShare`, but simply
       // as one binary block (in Crockford Base32 encoding for JSON).
-      key_share_data: []; //bytearray of undefined length
+      key_share_data: []; //bytearray
     
       // Key share method, i.e. "security question", "SMS", "e-mail", ...
       method: string;
@@ -710,7 +710,7 @@ charge per truth operation using GNU Taler.
       //
       // The nonce of the HKDF for this encryption must include the
       // string "ECT".
-      encrypted_truth: []; //bytearray of undefined length
+      encrypted_truth: [80]; //bytearray
 
       // mime type of truth, i.e. text/ascii, image/jpeg, etc.
       truth_mime: string;
@@ -772,7 +772,7 @@ charge per truth operation using GNU Taler.
       // the HKDF may additionally include
       // bits from the response (i.e. some hash over the
       // answer to the security question)
-      encrypted_key_share_i: []; //bytearray of undefined length
+      encrypted_key_share_i: [32]; //bytearray
 
     }
 
