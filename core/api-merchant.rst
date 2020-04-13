@@ -26,6 +26,8 @@ Merchant Backend API
 WARNING: This document describes the version 1 of the merchant backend
 API, which is NOT yet implemented at all!
 
+TODO: #5210 is not addressed by this specification!
+
 The ``*/public/*`` endpoints are publicly exposed on the Internet and accessed
 both by the user's browser and their wallet.
 
@@ -1084,6 +1086,28 @@ Giving Customer Tips
       tip_redirect_url: string;
 
     }
+
+
+.. http:post:: /tips
+
+  Authorize creation of a tip from the given reserve, except with
+  automatic selection of a working reserve of the instance by the
+  backend. Intentionally otherwise identical to the /authorize-tip
+  endpoint given above.
+
+  **Request:**
+
+  The request body is a `TipCreateRequest` object.
+
+  **Response:**
+
+  :status 200 OK:
+    A tip has been created. The backend responds with a `TipCreateConfirmation`
+  :status 404 Not Found:
+    The instance is unknown to the backend.
+  :status 412 Precondition Failed:
+    The tip amount requested exceeds the available reserve balance for tipping
+    in all of the reserves of the instance.
 
 
 .. http:delete:: /reserves/$RESERVE_PUB
