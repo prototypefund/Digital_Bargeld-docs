@@ -968,6 +968,8 @@ Giving Customer Tips
       // Amount approved for tips that exceeds the pickup_amount.
       committed_amount: Amount;
 
+      // Is this reserve active (false if it was deleted but not purged)
+      active: boolean;
     }
 
 
@@ -1116,6 +1118,12 @@ Giving Customer Tips
   committed to tips that were not yet picked up and that have not yet
   expired.
 
+  **Request:**
+
+  :query purge: *Optional*. If set to YES, the reserve and all information
+      about tips it issued will be fully deleted.
+      Otherwise only the private key would be deleted.
+
   **Response:**
 
   :status 204 No content:
@@ -1123,7 +1131,7 @@ Giving Customer Tips
   :status 404 Not found:
     The backend does not know the instance or the reserve.
   :status 409 Conflict:
-    The backend refuses to delete the reserve (committed tips).
+    The backend refuses to delete the reserve (committed tips awaiting pickup).
 
 
 
@@ -1575,17 +1583,19 @@ in contracts (such that the frontends have to do less work).
 
 .. http:patch:: /products/$PRODUCT_ID
 
-  This is used to update product details in the inventory. Note that
-  the ``total_stocked`` and ``total_lost`` numbers
-  MUST be greater or equal than previous values (this design ensures idempotency).
-  In case stocks were lost but not sold, increment the ``total_lost`` number.
-  All fields in the request are optional, those that are not given are
-  simply preserved (not modified).  Note that the ``description_i18n`` and ``taxes``
-  can only be modified in bulk: if it is given, all translations must be provided, not
-  only those that changed.  Limitations: you cannot remove a ``location`` from
-  a product that used to have a location.  "never" should be used for the ``next_restock``
-  timestamp to indicate "unknown" (this conflates the cases of truly unknown and actually
-  no intention/possibility of restocking).
+  This is used to update product details in the inventory. Note that the
+  ``total_stocked`` and ``total_lost`` numbers MUST be greater or equal than
+  previous values (this design ensures idempotency).  In case stocks were lost
+  but not sold, increment the ``total_lost`` number.  All fields in the
+  request are optional, those that are not given are simply preserved (not
+  modified).  Note that the ``description_i18n`` and ``taxes`` can only be
+  modified in bulk: if it is given, all translations must be provided, not
+  only those that changed.  "never" should be used for the ``next_restock``
+  timestamp to indicate no intention/possibility of restocking, while a time
+  of zero is used to indicate "unknown".
+
+  Limitations: you cannot remove a ``location`` from a product that used to
+  have a location.
 
   **Request:**
 
