@@ -26,7 +26,8 @@ Merchant Backend API
 WARNING: This document describes the version 1 of the merchant backend
 API, which is NOT yet implemented at all!
 
-TODO: #5210 is not addressed by this specification!
+TODO: https://bugs.gnunet.org/view.php?id=5987#c15127
+      is not yet addressed by this specification!
 
 The ``*/public/*`` endpoints are publicly exposed on the Internet and accessed
 both by the user's browser and their wallet.
@@ -62,21 +63,43 @@ Getting the configuration
       // Currency supported by this backend.
       currency: string;
 
-      // optional array with information about the instances running at this backend
-      // FIXME: remove, use/provide http:get:: /instances instead!
-      instances: InstanceInformation[];
     }
 
-  .. ts:def:: InstanceInformation
 
-    interface InstanceInformation {
+--------------------------
+Dynamic Merchant Instances
+--------------------------
 
-      // Human-readable legal business name served by this instance
+.. _instances:
+.. http:get:: /instances
+
+  This is used to return the list of all the merchant instances
+
+  **Response:**
+
+  :status 200 OK:
+    The backend has successfully returned the list of instances stored. Returns
+    a `InstancesResponse`.
+
+  .. ts:def:: InstancesResponse
+
+    interface InstancesResponse {
+      // List of instances that are present in the backend (see `Instance`)
+      instances: Instance[];
+    }
+
+  The `Instance` object describes the instance registered with the backend.
+  It does not include the full details, only those that usually concern the frontend.
+  It has the following structure:
+
+  .. ts:def:: Instance
+
+    interface Instance {
+      // Merchant name corresponding to this instance.
       name: string;
 
-      // Base URL of the instance. Can be of the form "/PizzaShop/" or
-      // a fully qualified URL (i.e. "https://backend.example.com/PizzaShop/").
-      instance_baseurl: string;
+      // Merchant instance of the response to create
+      instance: string;
 
       // Public key of the merchant/instance, in Crockford Base32 encoding.
       merchant_pub: EddsaPublicKey;
@@ -86,12 +109,448 @@ Getting the configuration
       // front-ends do not have to support wallets selecting payment targets.
       payment_targets: string[];
 
-      // Base URL of the exchange this instance uses for tipping.
-      // Optional, only present if the instance supports tipping.
-      // FIXME: obsolete with current tipping API!
-      tipping_exchange_baseurl?: string;
+   }
+
+
+.. http:post:: /instances
+
+  This request will be used to create a new merchant instance in the backend.
+
+  **Request:**
+
+  The request must be a `InstanceConfigurationMessage`.
+
+  **Response:**
+
+  :status 204 No content:
+    The backend has successfully created the instance.
+  :status 409 Conflict:
+    This instance already exists, but with other configuration options.
+    Use "PATCH" to update an instance configuration.
+
+  .. ts:def:: InstanceConfigurationMessage
+
+    interface InstanceConfigurationMessage {
+      // The URI where the wallet will send coins.  A merchant may have
+      // multiple accounts, thus this is an array.  Note that by
+      // removing URIs from this list
+      payto_uris: string[];
+
+      // Name of the merchant instance to create (will become $INSTANCE).
+      instance: string;
+
+      // Merchant name corresponding to this instance.
+      name: string;
+
+      // The merchant's physical address (to be put into contracts).
+      address: Location;
+
+      // The jurisdiction under which the merchant conducts its business
+      // (to be put into contracts).
+      jurisdiction: Location;
+    }
+
+
+.. http:patch:: /instances/$INSTANCE
+
+  Update the configuration of a merchant instance.
+
+  **Request**
+
+  The request must be a `InstanceUpdateMessage`.  Fields that are not
+  provided are not modified.  Removing an existing payto_uri deactivates
+  the account (it will no longer be used for future contracts).
+
+  **Response:**
+
+  :status 204 No content:
+    The backend has successfully created the instance.
+  :status 404 Not found:
+    This instance is unknown and thus cannot be reconfigured.
+
+  .. ts:def:: InstanceUpdateMessage
+
+    interface InstanceUpdateMessage {
+      // The URI where the wallet will send coins.  A merchant may have
+      // multiple accounts, thus this is an array.  Note that by
+      // removing URIs from this list
+      payto_uris?: string[];
+
+      // Merchant name corresponding to this instance.
+      name?: string;
+
+      // The merchant's physical address (to be put into contracts).
+      address?: Location;
+
+      // The jurisdiction under which the merchant conducts its business
+      // (to be put into contracts).
+      jurisdiction?: Location;
+    }
+
+.. http:get:: /instances/$INSTANCE
+
+  This is used to query a specific merchant instance.
+
+  **Response:**
+
+  :status 200 OK:
+    The backend has successfully returned the list of instances stored. Returns
+    a `QueryInstancesResponse`.
+
+  .. ts:def:: QueryInstancesResponse
+
+    interface QueryInstancesResponse {
+      // The URI where the wallet will send coins.  A merchant may have
+      // multiple accounts, thus this is an array.
+      accounts: MerchantAccount[];
+
+      // Merchant name corresponding to this instance.
+      name: string;
+
+      // Public key of the merchant/instance, in Crockford Base32 encoding.
+      merchant_pub: EddsaPublicKey;
+
+      // The merchant's physical address (to be put into contracts).
+      address: Location;
+
+      // The jurisdiction under which the merchant conducts its business
+      // (to be put into contracts).
+      jurisdiction: Location;
 
     }
+
+  .. ts:def:: MerchantAccount
+
+    interface MerchantAccount {
+
+      // payto:// URI of the account.
+      payto_uri: string;
+
+      // Hash over the wire details (including over the salt)
+      h_wire: HashCode;
+
+      // salt used to compute h_wire
+      salt: string;
+
+      // true if this account is active,
+      // false if it is historic.
+      active: boolean;
+    }
+
+
+
+.. http:delete:: /instances/$INSTANCE
+
+  This request will be used to delete (permanently disable)
+  or purge merchant instance in the backend. Purging will
+  delete all offers and payments associated with the instance,
+  while disabling (the default) only deletes the private key
+  and makes the instance unusuable for new orders or payments.
+
+  **Request:**
+
+  :query purge: *Optional*. If set to YES, the instance will be fully
+      deleted. Otherwise only the private key would be deleted.
+
+  **Response**
+
+  :status 204 NoContent:
+    The backend has successfully removed the instance.  The response is a
+    `PostInstanceRemoveResponse`.
+  :status 404 Not found:
+    The instance is unknown to the backend.
+  :status 409 Conflict:
+    The instance cannot be deleted because it has pending offers, or
+    the instance cannot be purged because it has successfully processed
+    payments that have not passed the TAX_RECORD_EXPIRATION time.
+    The latter case only applies if ``purge`` was set.
+
+
+--------------------
+Inventory management
+--------------------
+
+.. _inventory:
+
+Inventory management is an *optional* backend feature that can be used to
+manage limited stocks of products and to auto-complete product descriptions in
+contracts (such that the frontends have to do less work).  You can use the
+Taler merchant backend to process payments *without* using its inventory
+management.
+
+
+.. http:get:: /products
+
+  This is used to return the list of all items in the inventory.
+
+  **Response:**
+
+  :status 200 OK:
+    The backend has successfully returned the inventory. Returns
+    a `InventorySummaryResponse`.
+
+  .. ts:def:: InventorySummaryResponse
+
+    interface InventorySummaryResponse {
+      // List of items that are present in the inventory
+      items: InventoryEntry[];
+    }
+
+  The `InventoryEntry` object describes an item in the inventory. It has the following structure:
+
+  .. ts:def:: InventoryEntry
+
+    interface InventoryEntry {
+      // Product identifier, as found in the product.
+      product_id: string;
+
+      // Amount of the product in stock. Given in product-specific units.
+      // Set to -1 for "infinite" (i.e. for "electronic" books).
+      stock: integer;
+
+      // unit in which the product is metered (liters, kilograms, packages, etc.)
+      unit: string;
+    }
+
+
+.. http:get:: /products/$PRODUCT_ID
+
+  This is used to obtain detailed information about a product in the inventory.
+
+  **Response:**
+
+  :status 200 OK:
+    The backend has successfully returned the inventory. Returns
+    a `ProductDetail`.
+
+  .. ts:def:: ProductDetail
+
+    interface ProductDetail {
+
+      // Human-readable product description.
+      description: string;
+
+      // Map from IETF BCP 47 language tags to localized descriptions
+      description_i18n?: { [lang_tag: string]: string };
+
+      // unit in which the product is measured (liters, kilograms, packages, etc.)
+      unit: string;
+
+      // The price for one ``unit`` of the product. Zero is used
+      // to imply that this product is not sold separately, or
+      // that the price is not fixed, and must be supplied by the
+      // front-end.  If non-zero, this price MUST include applicable
+      // taxes.
+      price: Amount;
+
+      // An optional base64-encoded product image
+      image?: ImageDataUrl;
+
+      // a list of taxes paid by the merchant for one unit of this product
+      taxes: Tax[];
+
+      // Number of units of the product in stock in sum in total,
+      // including all existing sales ever. Given in product-specific
+      // units.
+      // A value of -1 indicates "infinite" (i.e. for "electronic" books).
+      total_stocked: integer;
+
+      // Number of units of the product that have already been sold.
+      total_sold: integer;
+
+      // Number of units of the product that were lost (spoiled, stolen, etc.)
+      total_lost: integer;
+
+      // Number of units of the product that are currently locked by some
+      // shopping cart.
+      total_locked: integer;
+
+      // Identifies where the product is in stock.
+      location?: Location;
+
+      // Identifies when we expect the next restocking to happen.
+      next_restock?: timestamp;
+
+    }
+
+
+.. http:post:: /products
+
+  This is used to add a product to the inventory.
+
+  **Request:**
+
+  The request must be a `ProductAddDetail`.
+
+  **Response:**
+
+  :status 204 No content:
+    The backend has successfully expanded the inventory.
+  :status 409 Conflict:
+    The backend already knows a product with this product ID, but with different details.
+
+
+  .. ts:def:: ProductAddDetail
+
+    interface ProductAddDetail {
+
+      // product ID to use.
+      product_id: string;
+
+      // Human-readable product description.
+      description: string;
+
+      // Map from IETF BCP 47 language tags to localized descriptions
+      description_i18n?: { [lang_tag: string]: string };
+
+      // unit in which the product is measured (liters, kilograms, packages, etc.)
+      unit: string;
+
+      // The price for one ``unit`` of the product. Zero is used
+      // to imply that this product is not sold separately, or
+      // that the price is not fixed, and must be supplied by the
+      // front-end.  If non-zero, this price MUST include applicable
+      // taxes.
+      price: Amount;
+
+      // An optional base64-encoded product image
+      image?: ImageDataUrl;
+
+      // a list of taxes paid by the merchant for one unit of this product
+      taxes: Tax[];
+
+      // Number of units of the product in stock in sum in total,
+      // including all existing sales ever. Given in product-specific
+      // units.
+      // A value of -1 indicates "infinite" (i.e. for "electronic" books).
+      total_stocked: integer;
+
+      // Identifies where the product is in stock.
+      location?: Location;
+
+      // Identifies when we expect the next restocking to happen.
+      next_restock?: timestamp;
+
+    }
+
+
+
+.. http:patch:: /products/$PRODUCT_ID
+
+  This is used to update product details in the inventory. Note that the
+  ``total_stocked`` and ``total_lost`` numbers MUST be greater or equal than
+  previous values (this design ensures idempotency).  In case stocks were lost
+  but not sold, increment the ``total_lost`` number.  All fields in the
+  request are optional, those that are not given are simply preserved (not
+  modified).  Note that the ``description_i18n`` and ``taxes`` can only be
+  modified in bulk: if it is given, all translations must be provided, not
+  only those that changed.  "never" should be used for the ``next_restock``
+  timestamp to indicate no intention/possibility of restocking, while a time
+  of zero is used to indicate "unknown".
+
+  Limitations: you cannot remove a ``location`` from a product that used to
+  have a location.
+
+  **Request:**
+
+  The request must be a `ProductPatchDetail`.
+
+  **Response:**
+
+  :status 204 No content:
+    The backend has successfully expanded the inventory.
+
+
+    interface ProductPatchDetail {
+
+      // Human-readable product description.
+      description?: string;
+
+      // Map from IETF BCP 47 language tags to localized descriptions
+      description_i18n?: { [lang_tag: string]: string };
+
+      // unit in which the product is measured (liters, kilograms, packages, etc.)
+      unit?: string;
+
+      // The price for one ``unit`` of the product. Zero is used
+      // to imply that this product is not sold separately, or
+      // that the price is not fixed, and must be supplied by the
+      // front-end.  If non-zero, this price MUST include applicable
+      // taxes.
+      price?: Amount;
+
+      // An optional base64-encoded product image
+      image?: ImageDataUrl;
+
+      // a list of taxes paid by the merchant for one unit of this product
+      taxes?: Tax[];
+
+      // Number of units of the product in stock in sum in total,
+      // including all existing sales ever. Given in product-specific
+      // units.
+      // A value of -1 indicates "infinite" (i.e. for "electronic" books).
+      total_stocked?: integer;
+
+      // Number of units of the product that were lost (spoiled, stolen, etc.)
+      total_lost?: integer;
+
+      // Identifies where the product is in stock.
+      location?: Location;
+
+      // Identifies when we expect the next restocking to happen.
+      next_restock?: timestamp;
+
+    }
+
+
+
+.. http:post:: /products/$PRODUCT_ID/lock
+
+  This is used to lock a certain quantity of the product for a limited
+  duration while the customer assembles a complete order.  Note that
+  frontends do not have to "unlock", they may rely on the timeout as
+  given in the ``duration`` field.  Re-posting a lock with a different
+  ``duration`` or ``quantity`` updates the existing lock for the same UUID
+  and does not result in a conflict.
+
+  Unlocking by using a ``quantity`` of zero is is
+  optional but recommended if customers remove products from the
+  shopping cart. Note that actually POSTing to ``/orders`` with set
+  ``manage_inventory`` and using ``lock_uuid`` will **transition** the
+  lock to the newly created order (which may have a different ``duration``
+  and ``quantity`` than what was requested in the lock operation).
+  If an order is for fewer items than originally locked, the difference
+  is automatically unlocked.
+
+  **Request:**
+
+  The request must be a `LockRequest`.
+
+  **Response:**
+
+  :status 204 No content:
+    The backend has successfully locked (or unlocked) the requested ``quantity``.
+  :status 404 Not found:
+    The backend has does not know this product.
+  :status 410 Gone:
+    The backend does not have enough of product in stock.
+
+  .. ts:def:: LockRequest
+
+    interface LockRequest {
+
+      // UUID that identifies the frontend performing the lock
+      lock_uuid: UUID;
+
+      // How long does the frontend intend to hold the lock
+      duration: time;
+
+      // How many units should be locked?
+      quantity: integer;
+
+    }
+
+
 
 
 ------------------
@@ -143,23 +602,13 @@ Receiving Payments
 
       // specifies the payment target preferred by the client. Can be used
       // to select among the various (active) wire methods supported by the instance.
-      payment_target: string;
+      payment_target?: string;
 
-      // specifies that inventory management is desired.  If not given,
-      // the backend does NOT check for the availability of stocks and
-      // ignores the ``product_id`` (except to possibly fill in details
-      // about the product, if ``auto_complete`` is requested).
-      manage_inventory: boolean;
-
-      // specifies that automatically completing fields based on the
-      // inventory data is desired.  If given,
-      // the backend tries to expand the products-list with additional
-      // information and -- if missing -- will also compute the
-      // total amount (as the sum of the product of price times
-      // quantity for all items in the order).  Frontends can still override
-      // individual product prices or the total simply by providing them,
-      // for example to provide discounts.
-      auto_complete: boolean;
+      // specifies that some products are to be included in the
+      // order from the inventory.  For these inventory management
+      // is performed (so the products must be in stock) and
+      // details are completed from the product data of the backend.
+      inventory_products?: MinimalInventoryProduct[];
 
       // Specifies a lock identifier that was used to
       // lock a product in the inventory.  Only useful if
@@ -173,7 +622,7 @@ Receiving Payments
 
     }
 
-    type Order : MinimalOrderDetail | InventoryOrderDetail | ContractTerms;
+    type Order : MinimalOrderDetail | ContractTerms;
 
   The following fields must be specified in the ``order`` field of the request.  Other fields from
   `ContractTerms` are optional, and will override the defaults in the merchant configuration.
@@ -199,15 +648,6 @@ Receiving Payments
   (towards the ContractTerms), this will override those details
   (including total price) that would otherwise computed based on information
   from the inventory.
-
-  .. ts:def:: InventoryOrderDetail
-
-    interface InventoryOrderDetail {
-
-      // List of products that are part of the purchase (see `Product`),
-      // possibly incomplete as details can be filled from the inventory detail.
-      products: ProductSpecification[];
-    }
 
     type ProductSpecification : (MinimalInventoryProduct | Product);
 
@@ -266,7 +706,6 @@ Receiving Payments
   **Request:**
 
   :query paid: *Optional*. If set to yes, only return paid orders, if no only unpaid orders. Do not give (or use "all") to see all orders regardless of payment status.
-  :query aborted: *Optional*. If set to yes, only return aborted orders, if no only unaborted orders. Do not give (or use "all")  to see all orders regardless of abort status.
   :query refunded: *Optional*. If set to yes, only return refunded orders, if no only unrefunded orders. Do not give (or use "all") to see all orders regardless of refund status.
   :query wired: *Optional*. If set to yes, only return wired orders, if no only orders with missing wire transfers. Do not give (or use "all") to see all orders regardless of wire transfer status.
   :query date: *Optional.* Time threshold, see ``delta`` for its interpretation.  Defaults to the oldest or most recent entry, depending on ``delta``.
@@ -303,19 +742,18 @@ Receiving Payments
       // Total amount the customer should pay for this order.
       total: Amount;
 
-      // Total amount the customer did pay for this order.
+      // Total amount the customer did pay for this order.  Payments
+      // that were later aborted (/abort) are NOT included.
       paid: Amount;
 
       // Total amount the customer was refunded for this order.
-      // (includes abort-refund and refunds, boolean flag
-      // below can help determine which case it is).
+      // (excludes refunds from aborts).
       refunded: Amount;
 
-      // Was the order ever fully paid?
+      // Was the order fully paid?
       is_paid: boolean;
 
     }
-
 
 
 
@@ -442,8 +880,6 @@ Receiving Payments
 
   The request must be an `abort request <AbortRequest>`.
 
-  :query h_contract: hash of the order's contract terms (this is used to authenticate the wallet/customer in case $ORDER_ID is guessable). *Mandatory!*
-
   **Response:**
 
   :status 200 OK:
@@ -454,7 +890,7 @@ Receiving Payments
     happened that may be the fault of the client as detailed in the JSON body
     of the response.
   :status 403 Forbidden:
-    The ``h_contract`` does not match the order.
+    The ``h_contract`` does not match the $ORDER_ID.
   :status 404 Not found:
     The merchant backend could not find the order or the instance
     and thus cannot process the abort request.
@@ -465,12 +901,18 @@ Receiving Payments
     The error from the exchange is included.
 
   The backend will return verbatim the error codes received from the exchange's
-  :ref:`refund <refund>` API.  The frontend should pass the replies verbatim to
+  :ref:`refund <_refund>` API.  The frontend should pass the replies verbatim to
   the browser/wallet.
 
   .. ts:def:: AbortRequest
 
     interface AbortRequest {
+
+      // hash of the order's contract terms (this is used to authenticate the
+      // wallet/customer in case $ORDER_ID is guessable).
+      h_contract: HashCode;
+
+
       // List of coins the wallet would like to see refunds for.
       // (Should be limited to the coins for which the original
       // payment succeeded, as far as the wallet knows.)
@@ -548,7 +990,8 @@ Receiving Payments
       // Only given if the same product was purchased before in the same session.
       already_paid_order_id?: string;
 
-      // FIXME: why do we NOT return the contract terms here?
+      // We do we NOT return the contract terms here because they may not
+      // exist in case the wallet did not yet claim them.
     }
 
   .. ts:def:: TransactionWireTransfer
@@ -616,10 +1059,6 @@ Receiving Payments
 
   :status 200 OK:
     The response is a `PublicPayStatusResponse`, with ``paid`` true.
-    FIXME: what about refunded?
-  :status 402 Payment required:
-    The response is a `PublicPayStatusResponse`, with ``paid`` false.
-    FIXME: what about refunded?
   :status 403 Forbidden:
     The ``h_contract`` does not match the order.
   :status 404 Not found:
@@ -670,7 +1109,7 @@ Receiving Payments
 Giving Refunds
 --------------
 
-
+.. _refund:
 .. http:post:: /orders/$ORDER_ID/refund
 
   Increase the refund amount associated with a given order.  The user should be
@@ -703,15 +1142,10 @@ Giving Refunds
 
     interface MerchantRefundResponse {
 
-      // Hash of the contract terms of the contract that is being refunded.
-      // FIXME: why do we return this?
-      h_contract_terms: HashCode;
-
       // URL (handled by the backend) that the wallet should access to
       // trigger refund processing.
-      // FIXME: isn't this basically now always ``/public/orders/$ORDER_ID/``?
-      // If so, why return this?
-      taler_refund_url: string;
+      // taler://refund/[$H_CONTRACT/$AMOUNT????]
+      taler_refund_uri: string;
     }
 
 
@@ -723,6 +1157,9 @@ Tracking Wire Transfers
 .. http:post:: /transfers
 
   Inform the backend over an incoming wire transfer. The backend should inquire about the details with the exchange and mark the respective orders as wired.  Note that the request will fail if the WTID is not unique (which should be guaranteed by a correct exchange).
+  This request is idempotent and should also be used to merely re-fetch the
+  transfer information from the merchant's database (assuming we got a non-error
+  response from the exchange before).
 
   **Request:**
 
@@ -733,20 +1170,30 @@ Tracking Wire Transfers
   :status 200 OK:
     The wire transfer is known to the exchange, details about it follow in the body.
     The body of the response is a `TrackTransferResponse`.  Note that
-    the similarity to the response given by the exchange for a /track/transfer
+    the similarity to the response given by the exchange for a "GET /transfer"
     is completely intended.
-
+  :status 202 Accepted:
+    The exchange provided conflicting information about the transfer. Namely,
+    there is at least one deposit among the deposits aggregated by ``wtid``
+    that accounts for a coin whose
+    details don't match the details stored in merchant's database about the same keyed coin.
+    The response body contains the `TrackTransferConflictDetails`.
+    This is indicative of a malicious exchange that claims one thing, but did
+    something else.  (With respect to the HTTP specficiation, it is not
+    precisely that we did not act upon the request, more that the usual
+    action of filing the transaction as 'finished' does not apply.  In
+    the future, this is a case where the backend actually should report
+    the bad behavior to the auditor -- and then hope for the auditor to
+    resolve it. So in that respect, 202 is the right status code as more
+    work remains to be done for a final resolution.)
   :status 404 Not Found:
-    The wire transfer identifier is unknown to the exchange.
-
+    The instance is unknown to the exchange.
   :status 409 Conflict:
     The wire transfer identifier is already known to us, but for a different amount,
     wire method or exchange.
-
-  :status 424 Failed Dependency: The exchange provided conflicting information about the transfer. Namely,
-    there is at least one deposit among the deposits aggregated by ``wtid`` that accounts for a coin whose
-    details don't match the details stored in merchant's database about the same keyed coin.
-    The response body contains the `TrackTransferConflictDetails`.
+  :status 424 Failed Dependency:
+    The exchange returned an error when we asked it about the "GET /transfer" status
+    for this wire transfer. Details of the exchange error are returned.
 
   .. ts:def:: TransferInformation
 
@@ -755,11 +1202,10 @@ Tracking Wire Transfers
       credit_amount: Amount;
 
       // raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
-      wtid: FIXME;
+      wtid: WireTransferIdentifierRawP;
 
-      // name of the wire transfer method used for the wire transfer
-      // FIXME: why not a payto URI?
-      wire_method;
+      // target account that received the wire transfer
+      payto_uri: string;
 
       // base URL of the exchange that made the wire transfer
       exchange: string;
@@ -774,31 +1220,12 @@ Tracking Wire Transfers
       // Applicable wire fee that was charged
       wire_fee: Amount;
 
-      // public key of the merchant (identical for all deposits)
-      // FIXME: why return this?
-      merchant_pub: EddsaPublicKey;
-
-      // hash of the wire details (identical for all deposits)
-      // FIXME: why return this? Isn't this the WTID!?
-      h_wire: HashCode;
-
       // Time of the execution of the wire transfer by the exchange, according to the exchange
       execution_time: Timestamp;
 
       // details about the deposits
       deposits_sums: TrackTransferDetail[];
 
-      // signature from the exchange made with purpose
-      // ``TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT``
-      // FIXME: why return this?
-      exchange_sig: EddsaSignature;
-
-      // public EdDSA key of the exchange that was used to generate the signature.
-      // Should match one of the exchange's signing keys from /keys.  Again given
-      // explicitly as the client might otherwise be confused by clock skew as to
-      // which signing key was used.
-      // FIXME: why return this?
-      exchange_pub: EddsaSignature;
     }
 
   .. ts:def:: TrackTransferDetail
@@ -831,14 +1258,17 @@ Tracking Wire Transfers
       // exchange accepted ``coin_pub`` for ``amount_with_fee``.
       exchange_deposit_proof: DepositSuccess;
 
-      // Offset in the ``exchange_transfer_proof`` where the
+      // Offset in the ``exchange_transfer`` where the
       // exchange's response fails to match the ``exchange_deposit_proof``.
       conflict_offset: number;
 
       // The response from the exchange which tells us when the
       // coin was returned to us, except that it does not match
       // the expected value of the coin.
-      exchange_transfer_proof: TrackTransferResponse;
+      exchange_transfer: TrackTransferResponse;
+
+      // Proof data we have for the ``exchange_transfer`` data (signatures from exchange)
+      exchange_proof: TrackTransferProof;
 
       // Public key of the coin for which we have conflicting information.
       coin_pub: EddsaPublicKey;
@@ -855,6 +1285,25 @@ Tracking Wire Transfers
 
     }
 
+    .. ts:def:: TrackTransferProof
+
+    interface TrackTransferProof {
+      // signature from the exchange made with purpose
+      // ``TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE_DEPOSIT``
+      exchange_sig: EddsaSignature;
+
+      // public EdDSA key of the exchange that was used to generate the signature.
+      // Should match one of the exchange's signing keys from /keys.  Again given
+      // explicitly as the client might otherwise be confused by clock skew as to
+      // which signing key was used.
+      exchange_pub: EddsaSignature;
+
+      // hash of the wire details (identical for all deposits)
+      // Needed to check the ``exchange_sig``
+      h_wire: HashCode;
+    }
+
+
 
 .. http:get:: /transfers
 
@@ -862,11 +1311,52 @@ Tracking Wire Transfers
 
   **Request:**
 
-   :query filter: FIXME: should have a way to filter, maybe even long-poll?
+   :query payto_uri: *Optional*. Filter for transfers to the given bank account (subject and amount MUST NOT be given in the payto URI)
+   :query before: *Optional*. Filter for transfers executed before the given timestamp
+   :query after: *Optional*. Filter for transfers executed after the given timestamp
+   :query limit: *Optional*. At most return the given number of results. Negative for descending in execution time, positive for ascending in execution time.
+   :query offset: *Optional*. Starting transfer_serial_id for an iteration.
+   :query verified: *Optional*. Filter transfers by verification status.
 
   **Response:**
 
-  FIXME: to be specified.
+  :status 200 OK:
+    The body of the response is a `TransferList`.
+
+  .. ts:def:: TransferList
+
+    interface TransferList {
+       // list of all the transfers that fit the filter that we know
+       transfers : TransferDetails[];
+    }
+
+    interface TransferDetails {
+      // how much was wired to the merchant (minus fees)
+      credit_amount: Amount;
+
+      // raw wire transfer identifier identifying the wire transfer (a base32-encoded value)
+      wtid: WireTransferIdentifierRawP;
+
+      // target account that received the wire transfer
+      payto_uri: string;
+
+      // base URL of the exchange that made the wire transfer
+      exchange: string;
+
+      // Serial number identifying the transfer in the merchant backend.
+      // Used for filgering via ``offset``.
+      transfer_serial_id: number;
+
+      // Time of the execution of the wire transfer by the exchange, according to the exchange
+      // Only provided if we did get an answer from the exchange.
+      execution_time?: Timestamp;
+
+      // True if we checked the exchange's answer and are happy with it.
+      // False if we have an answer and are unhappy, missing if we
+      // do not have an answer from the exchange.
+      verified?: boolean;
+    }
+
 
 
 
@@ -874,7 +1364,7 @@ Tracking Wire Transfers
 Giving Customer Tips
 --------------------
 
-
+.. _tips:
 .. http:post:: /reserves
 
   Create a reserve for tipping.
@@ -925,7 +1415,9 @@ Giving Customer Tips
 
    **Request:**
 
-   :query after: *Optional*.  Only return reserves created after the given timestamp [FIXME: unit?]
+   :query after: *Optional*.  Only return reserves created after the given timestamp in milliseconds
+   :query active: *Optional*.  Only return active/inactive reserves depending on the boolean given
+   :query failures: *Optional*.  Only return reserves where we disagree with the exchange about the initial balance.
 
    **Response:**
 
@@ -1252,454 +1744,13 @@ Giving Customer Tips
 
 
 
---------------------------
-Dynamic Merchant Instances
---------------------------
-
-.. note::
-
-    The endpoints to dynamically manage merchant instances has not been
-    implemented yet. The bug id for this reference is #5349.
-
-.. http:get:: /instances
-
-  This is used to return the list of all the merchant instances
-
-  **Response:**
-
-  :status 200 OK:
-    The backend has successfully returned the list of instances stored. Returns
-    a `InstancesResponse`.
-
-  .. ts:def:: InstancesResponse
-
-    interface InstancesResponse {
-      // List of instances that are present in the backend (see `Instance`)
-      instances: Instance[];
-    }
-
-  The `Instance` object describes the instance registered with the backend. It has the following structure:
-
-  .. ts:def:: Instance
-
-    interface Instance {
-      // Merchant name corresponding to this instance.
-      name: string;
-
-      // The URL where the wallet will send coins.
-      // FIXME: add multi-account support here!
-      payto: string;
-
-      // Merchant instance of the response to create
-      instance: string;
-
-      //unique key for each merchant
-      merchant_id: string;
-
-      // FIXME: add locations (merchant address, jurisdiction)
-   }
-
-
-.. http:post:: /instances
-
-  This request will be used to create a new merchant instance in the backend.
-
-  **Request:**
-
-  The request must be a `InstanceConfigurationMessage`.
-
-  **Response:**
-
-  :status 204 No content:
-    The backend has successfully created the instance.
-  :status 409 Conflict:
-    This instance already exists, but with other configuration options.
-    Use "PATCH" to update an instance configuration.
-
-  .. ts:def:: InstanceConfigurationMessage
-
-    interface InstanceConfigurationMessage {
-      // The URL where the wallet has to send coins.
-      // payto://-URL of the merchant's bank account. Required.
-      // FIXME: need an array, and to distinguish between
-      // supported and active (see taler.conf options on accounts!)
-      payto: string;
-
-      // Name of the merchant instance to create (will become $INSTANCE).
-      instance: string;
-
-      // Merchant name corresponding to this instance.
-      name: string;
-
-      // FIXME: add locations (merchant address, jurisdiction)
-    }
-
-
-.. http:patch:: /instances/$INSTANCE
-
-  Update the configuration of a merchant instance.
-
-  **Request**
-
-  The request must be a `InstanceConfigurationMessage`.
-
-  **Response:**
-
-  :status 204 No content:
-    The backend has successfully created the instance.
-  :status 404 Not found:
-    This instance is unknown and thus cannot be reconfigured.
-
-
-.. http:get:: /instances/$INSTANCE
-
-  This is used to query a specific merchant instance.
-
-  **Response:**
-
-  :status 200 OK:
-    The backend has successfully returned the list of instances stored. Returns
-    a `QueryInstancesResponse`.
-
-  .. ts:def:: QueryInstancesResponse
-
-    interface QueryInstancesResponse {
-      // The URL where the wallet has to send coins.
-      // payto://-URL of the merchant's bank account. Required.
-      payto: string;
-
-      // Merchant instance of the response to create
-      // This field is optional. If it is not specified
-      // then it will automatically be created.
-      instance?: string;
-
-      // Merchant name corresponding to this instance.
-      name: string;
-
-      // Public key of the merchant/instance, in Crockford Base32 encoding.
-      merchant_pub: EddsaPublicKey;
-
-      // List of the payment targets supported by this instance. Clients can
-      // specify the desired payment target in /order requests.  Note that
-      // front-ends do not have to support wallets selecting payment targets.
-      payment_targets: string[];
-
-      // FIXME: add locations (merchant address, jurisdiction)
-
-    }
-
-
-.. http:delete:: /instances/$INSTANCE
-
-  This request will be used to delete (permanently disable)
-  or purge merchant instance in the backend. Purging will
-  delete all offers and payments associated with the instance,
-  while disabling (the default) only deletes the private key
-  and makes the instance unusuable for new orders or payments.
-
-  **Request:**
-
-  :query purge: *Optional*. If set to YES, the instance will be fully
-      deleted. Otherwise only the private key would be deleted.
-
-  **Response**
-
-  :status 204 NoContent:
-    The backend has successfully removed the instance.  The response is a
-    `PostInstanceRemoveResponse`.
-  :status 404 Not found:
-    The instance is unknown to the backend.
-  :status 409 Conflict:
-    The instance cannot be deleted because it has pending offers, or
-    the instance cannot be purged because it has successfully processed
-    payments that have not passed the TAX_RECORD_EXPIRATION time.
-    The latter case only applies if ``purge`` was set.
-
-
-
---------------------
-Inventory management
---------------------
-
-Inventory management is an *optional* backend feature that can be used to
-manage limited stocks of products and to auto-complete product descriptions
-in contracts (such that the frontends have to do less work).
-
-.. http:get:: /products
-
-  This is used to return the list of all items in the inventory.
-
-  **Response:**
-
-  :status 200 OK:
-    The backend has successfully returned the inventory. Returns
-    a `InventorySummaryResponse`.
-
-  .. ts:def:: InventorySummaryResponse
-
-    interface InventorySummaryResponse {
-      // List of items that are present in the inventory
-      items: InventoryEntry[];
-    }
-
-  The `InventoryEntry` object describes an item in the inventory. It has the following structure:
-
-  .. ts:def:: InventoryEntry
-
-    interface InventoryEntry {
-      // Product identifier, as found in the product.
-      product_id: string;
-
-      // Amount of the product in stock. Given in product-specific units.
-      // Set to -1 for "infinite" (i.e. for "electronic" books).
-      stock: integer;
-
-      // unit in which the product is metered (liters, kilograms, packages, etc.)
-      unit: string;
-    }
-
-
-.. http:get:: /products/$PRODUCT_ID
-
-  This is used to obtain detailed information about a product in the inventory.
-
-  **Response:**
-
-  :status 200 OK:
-    The backend has successfully returned the inventory. Returns
-    a `ProductDetail`.
-
-  .. ts:def:: ProductDetail
-
-    interface ProductDetail {
-
-      // Human-readable product description.
-      description: string;
-
-      // Map from IETF BCP 47 language tags to localized descriptions
-      description_i18n?: { [lang_tag: string]: string };
-
-      // unit in which the product is measured (liters, kilograms, packages, etc.)
-      unit: string;
-
-      // The price for one ``unit`` of the product. Zero is used
-      // to imply that this product is not sold separately, or
-      // that the price is not fixed, and must be supplied by the
-      // front-end.  If non-zero, this price MUST include applicable
-      // taxes.
-      price: Amount;
-
-      // An optional base64-encoded product image
-      image?: ImageDataUrl;
-
-      // a list of taxes paid by the merchant for one unit of this product
-      taxes: Tax[];
-
-      // Number of units of the product in stock in sum in total,
-      // including all existing sales ever. Given in product-specific
-      // units.
-      // A value of -1 indicates "infinite" (i.e. for "electronic" books).
-      total_stocked: integer;
-
-      // Number of units of the product that have already been sold.
-      total_sold: integer;
-
-      // Number of units of the product that were lost (spoiled, stolen, etc.)
-      total_lost: integer;
-
-      // Number of units of the product that are currently locked by some
-      // shopping cart.
-      total_locked: integer;
-
-      // Identifies where the product is in stock.
-      location?: Location;
-
-      // Identifies when we expect the next restocking to happen.
-      next_restock?: timestamp;
-
-    }
-
-
-.. http:post:: /products
-
-  This is used to add a product to the inventory.
-
-  **Request:**
-
-  The request must be a `ProductAddDetail`.
-
-  **Response:**
-
-  :status 204 No content:
-    The backend has successfully expanded the inventory.
-  :status 409 Conflict:
-    The backend already knows a product with this product ID, but with different details.
-
-
-  .. ts:def:: ProductAddDetail
-
-    interface ProductAddDetail {
-
-      // product ID to use.
-      product_id: string;
-
-      // Human-readable product description.
-      description: string;
-
-      // Map from IETF BCP 47 language tags to localized descriptions
-      description_i18n?: { [lang_tag: string]: string };
-
-      // unit in which the product is measured (liters, kilograms, packages, etc.)
-      unit: string;
-
-      // The price for one ``unit`` of the product. Zero is used
-      // to imply that this product is not sold separately, or
-      // that the price is not fixed, and must be supplied by the
-      // front-end.  If non-zero, this price MUST include applicable
-      // taxes.
-      price: Amount;
-
-      // An optional base64-encoded product image
-      image?: ImageDataUrl;
-
-      // a list of taxes paid by the merchant for one unit of this product
-      taxes: Tax[];
-
-      // Number of units of the product in stock in sum in total,
-      // including all existing sales ever. Given in product-specific
-      // units.
-      // A value of -1 indicates "infinite" (i.e. for "electronic" books).
-      total_stocked: integer;
-
-      // Identifies where the product is in stock.
-      location?: Location;
-
-      // Identifies when we expect the next restocking to happen.
-      next_restock?: timestamp;
-
-    }
-
-
-
-.. http:patch:: /products/$PRODUCT_ID
-
-  This is used to update product details in the inventory. Note that the
-  ``total_stocked`` and ``total_lost`` numbers MUST be greater or equal than
-  previous values (this design ensures idempotency).  In case stocks were lost
-  but not sold, increment the ``total_lost`` number.  All fields in the
-  request are optional, those that are not given are simply preserved (not
-  modified).  Note that the ``description_i18n`` and ``taxes`` can only be
-  modified in bulk: if it is given, all translations must be provided, not
-  only those that changed.  "never" should be used for the ``next_restock``
-  timestamp to indicate no intention/possibility of restocking, while a time
-  of zero is used to indicate "unknown".
-
-  Limitations: you cannot remove a ``location`` from a product that used to
-  have a location.
-
-  **Request:**
-
-  The request must be a `ProductPatchDetail`.
-
-  **Response:**
-
-  :status 204 No content:
-    The backend has successfully expanded the inventory.
-
-
-    interface ProductPatchDetail {
-
-      // Human-readable product description.
-      description?: string;
-
-      // Map from IETF BCP 47 language tags to localized descriptions
-      description_i18n?: { [lang_tag: string]: string };
-
-      // unit in which the product is measured (liters, kilograms, packages, etc.)
-      unit?: string;
-
-      // The price for one ``unit`` of the product. Zero is used
-      // to imply that this product is not sold separately, or
-      // that the price is not fixed, and must be supplied by the
-      // front-end.  If non-zero, this price MUST include applicable
-      // taxes.
-      price?: Amount;
-
-      // An optional base64-encoded product image
-      image?: ImageDataUrl;
-
-      // a list of taxes paid by the merchant for one unit of this product
-      taxes?: Tax[];
-
-      // Number of units of the product in stock in sum in total,
-      // including all existing sales ever. Given in product-specific
-      // units.
-      // A value of -1 indicates "infinite" (i.e. for "electronic" books).
-      total_stocked?: integer;
-
-      // Number of units of the product that were lost (spoiled, stolen, etc.)
-      total_lost?: integer;
-
-      // Identifies where the product is in stock.
-      location?: Location;
-
-      // Identifies when we expect the next restocking to happen.
-      next_restock?: timestamp;
-
-    }
-
-
-
-.. http:post:: /products/$PRODUCT_ID/lock
-
-  This is used to lock a certain quantity of the product for a limited
-  duration while the customer assembles a complete order.  Note that
-  frontends do not have to "unlock", they may rely on the timeout as
-  given in the ``duration`` field.  Re-posting a lock with a different
-  ``duration`` or ``quantity`` updates the existing lock for the same UUID
-  and does not result in a conflict.
-
-  Unlocking by using a ``quantity`` of zero is is
-  optional but recommended if customers remove products from the
-  shopping cart. Note that actually POSTing to ``/orders`` with set
-  ``manage_inventory`` and using ``lock_uuid`` will **transition** the
-  lock to the newly created order (which may have a different ``duration``
-  and ``quantity`` than what was requested in the lock operation).
-  If an order is for fewer items than originally locked, the difference
-  is automatically unlocked.
-
-  **Request:**
-
-  The request must be a `LockRequest`.
-
-  **Response:**
-
-  :status 204 No content:
-    The backend has successfully locked (or unlocked) the requested ``quantity``.
-  :status 404 Not found:
-    The backend has does not know this product.
-  :status 410 Gone:
-    The backend does not have enough of product in stock.
-
-  .. ts:def::LockRequest
-
-    interface LockRequest {
-
-      // UUID that identifies the frontend performing the lock
-      lock_uuid: UUID;
-
-      // How long does the frontend intend to hold the lock
-      duration: time;
-
-      // How many units should be locked?
-      quantity: integer;
-
-    }
 
 
 ------------------
 The Contract Terms
 ------------------
+
+.. _contract_terms::
 
 The contract terms must have the following structure:
 
@@ -1832,7 +1883,6 @@ The contract terms must have the following structure:
 
     interface Product {
       // merchant-internal identifier for the product.
-      // FIXME: do we require the use of the /inventory API if this is present?
       product_id?: string;
 
       // Human-readable product description.

@@ -83,8 +83,8 @@ endpoints are prefixed with ``/public/``.
 Public Sandbox Backend and Authentication
 -----------------------------------------
 
-sandbox
-authorization
+:keywords: sandbox
+:keywords: authorization
 How the frontend authenticates to the Taler backend depends on the
 configuration. See Taler Merchant Operating Manual.
 
@@ -110,7 +110,7 @@ https://bank.demo.taler.net/.
 Merchant Instances
 ------------------
 
-instance
+:keywords: instance
 The same Taler merchant backend server can be used by multiple separate
 merchants that are separate business entities. Each of these separate
 business entities is called a *merchant instance*, and is identified by
@@ -139,7 +139,7 @@ Accepting a Simple Payment
 Creating an Order for a Payment
 -------------------------------
 
-order
+:keywords: order
 Payments in Taler revolve around an *order*, which is a machine-readable
 description of the business transaction for which the payment is to be
 made. Before accepting a Taler payment as a merchant you must create
@@ -229,7 +229,7 @@ the merchant’s obligations under the contract.
 Giving Refunds
 ==============
 
-refunds
+:keywords: refunds
 A refund in GNU Taler is a way to “undo” a payment. It needs to be
 authorized by the merchant. Refunds can be for any fraction of the
 original amount paid, but they cannot exceed the original payment.
@@ -274,12 +274,50 @@ This code snipped illustrates giving a refund:
    ...              headers={"Authorization": "ApiKey sandbox"})
    <Response [200]>
 
+
+Repurchase detection and fulfillment URLs
+=========================================
+
+:keywords: repurchase
+A possible problem for merchants selling access to digital articles
+is that a customer may have paid for an article on one device, but
+may then want to read it on a different device, possibly one that
+does not even have a Taler wallet installed.
+
+Naturally, at this point the customer would at first still be prompted to pay
+for the article again. If the customer then opens the taler://-link in the
+wallet that did previously pay for the article (for example by scanning the QR
+code on the desktop with the Android App), the wallet will claim the contract,
+detect that the fulfillment URL is identical to one that it already has made a
+payment for in the past, and initiate **repurchase redirection**: Here, the
+wallet will contact the merchant and replay the previous payment, except this
+time using the (current) session ID of the browser (it learns the session ID
+from the QR code).
+
+The merchant backend then updates the session ID of the existing order to
+the current session ID of the browser.  When the payment status for the
+"new" unpaid order is checked (or already in long-polling), the backend
+detects that for the browser's *session ID* and *fulfillment URL* there is an
+existing paid contract. It then tells the browser to immediately redirect to
+the fulfillment URL where the already paid article is available.
+
+To ensure this mechanism works as designed, merchants must make sure to not
+use the same fulfillment URL for different products or for physical products
+where customers may be expected to buy the article repeatedly.  Similarly,
+it is crucial that merchants consistently use the same fulfillment URL for
+the same digital product where repurchase detection is desired.
+
+Note that changing the session ID to a different device requires the
+involvement of the wallet that made the payment, thus reasonably limiting the
+possibility of broadly sharing the digital purchases.
+
+
 .. _Giving-Customers-Tips:
 
 Giving Customers Tips
 =====================
 
-tips
+:keywords: tips
 GNU Taler allows Web sites to grant small amounts directly to the
 visitor. The idea is that some sites may want incentivize actions such
 as filling out a survey or trying a new feature. It is important to note
@@ -692,4 +730,3 @@ locations
 
 
 .. |image0| image:: arch-api.png
-
