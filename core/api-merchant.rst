@@ -98,8 +98,8 @@ Dynamic Merchant Instances
       // Merchant name corresponding to this instance.
       name: string;
 
-      // Merchant instance of the response to create
-      instance: string;
+      // Merchant instance this response is about ($INSTANCE)
+      id: string;
 
       // Public key of the merchant/instance, in Crockford Base32 encoding.
       merchant_pub: EddsaPublicKey;
@@ -137,7 +137,7 @@ Dynamic Merchant Instances
       payto_uris: string[];
 
       // Name of the merchant instance to create (will become $INSTANCE).
-      instance: string;
+      id: string;
 
       // Merchant name corresponding to this instance.
       name: string;
@@ -148,6 +148,29 @@ Dynamic Merchant Instances
       // The jurisdiction under which the merchant conducts its business
       // (to be put into contracts).
       jurisdiction: Location;
+
+      // Maximum wire fee this instance is willing to pay.
+      // Can be overridden by the frontend on a per-order basis.
+      default_max_wire_fee: Amount;
+
+      // Default factor for wire fee amortization calculations.
+      // Can be overriden by the frontend on a per-order basis.
+      default_wire_fee_amortization: integer;
+
+      // Maximum deposit fee (sum over all coins) this instance is willing to pay.
+      // Can be overridden by the frontend on a per-order basis.
+      default_max_deposit_fee: Amount;
+
+      //  If the frontend does NOT specify an execution date, how long should
+      // we tell the exchange to wait to aggregate transactions before
+      // executing the wire transfer?  This delay is added to the current
+      // time when we generate the advisory execution time for the exchange.
+      default_wire_transfer_delay: RelativeTime;
+
+      // If the frontend does NOT specify a payment deadline, how long should
+      // offers we make be valid by default?
+      default_pay_deadline: RelativeTime;
+
     }
 
 
@@ -157,8 +180,8 @@ Dynamic Merchant Instances
 
   **Request**
 
-  The request must be a `InstanceUpdateMessage`.  Fields that are not
-  provided are not modified.  Removing an existing payto_uri deactivates
+  The request must be a `InstanceConfigurationMessage`.
+  Removing an existing payto_uri deactivates
   the account (it will no longer be used for future contracts).
 
   **Response:**
@@ -168,24 +191,6 @@ Dynamic Merchant Instances
   :status 404 Not found:
     This instance is unknown and thus cannot be reconfigured.
 
-  .. ts:def:: InstanceUpdateMessage
-
-    interface InstanceUpdateMessage {
-      // The URI where the wallet will send coins.  A merchant may have
-      // multiple accounts, thus this is an array.  Note that by
-      // removing URIs from this list
-      payto_uris?: string[];
-
-      // Merchant name corresponding to this instance.
-      name?: string;
-
-      // The merchant's physical address (to be put into contracts).
-      address?: Location;
-
-      // The jurisdiction under which the merchant conducts its business
-      // (to be put into contracts).
-      jurisdiction?: Location;
-    }
 
 .. http:get:: /instances/$INSTANCE
 
@@ -216,6 +221,28 @@ Dynamic Merchant Instances
       // The jurisdiction under which the merchant conducts its business
       // (to be put into contracts).
       jurisdiction: Location;
+
+      // Maximum wire fee this instance is willing to pay.
+      // Can be overridden by the frontend on a per-order basis.
+      default_max_wire_fee: Amount;
+
+      // Default factor for wire fee amortization calculations.
+      // Can be overriden by the frontend on a per-order basis.
+      default_wire_fee_amortization: integer;
+
+      // Maximum deposit fee (sum over all coins) this instance is willing to pay.
+      // Can be overridden by the frontend on a per-order basis.
+      default_max_deposit_fee: Amount;
+
+      //  If the frontend does NOT specify an execution date, how long should
+      // we tell the exchange to wait to aggregate transactions before
+      // executing the wire transfer?  This delay is added to the current
+      // time when we generate the advisory execution time for the exchange.
+      default_wire_transfer_delay: RelativeTime;
+
+      // If the frontend does NOT specify a payment deadline, how long should
+      // offers we make be valid by default?
+      default_pay_deadline: RelativeTime;
 
     }
 
