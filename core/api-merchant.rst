@@ -361,8 +361,8 @@ management.
   .. ts:def:: InventorySummaryResponse
 
     interface InventorySummaryResponse {
-      // List of items that are present in the inventory
-      items: InventoryEntry[];
+      // List of products that are present in the inventory
+      products: InventoryEntry[];
     }
 
   The `InventoryEntry` object describes an item in the inventory. It has the following structure:
@@ -400,7 +400,7 @@ management.
       description: string;
 
       // Map from IETF BCP 47 language tags to localized descriptions
-      description_i18n?: { [lang_tag: string]: string };
+      description_i18n: { [lang_tag: string]: string };
 
       // unit in which the product is measured (liters, kilograms, packages, etc.)
       unit: string;
@@ -413,7 +413,7 @@ management.
       price: Amount;
 
       // An optional base64-encoded product image
-      image?: ImageDataUrl;
+      image: ImageDataUrl;
 
       // a list of taxes paid by the merchant for one unit of this product
       taxes: Tax[];
@@ -430,12 +430,8 @@ management.
       // Number of units of the product that were lost (spoiled, stolen, etc.)
       total_lost: integer;
 
-      // Number of units of the product that are currently locked by some
-      // shopping cart.
-      total_locked: integer;
-
       // Identifies where the product is in stock.
-      location?: Location;
+      location: Location;
 
       // Identifies when we expect the next restocking to happen.
       next_restock?: timestamp;
@@ -470,7 +466,7 @@ management.
       description: string;
 
       // Map from IETF BCP 47 language tags to localized descriptions
-      description_i18n?: { [lang_tag: string]: string };
+      description_i18n: { [lang_tag: string]: string };
 
       // unit in which the product is measured (liters, kilograms, packages, etc.)
       unit: string;
@@ -483,7 +479,7 @@ management.
       price: Amount;
 
       // An optional base64-encoded product image
-      image?: ImageDataUrl;
+      image: ImageDataUrl;
 
       // a list of taxes paid by the merchant for one unit of this product
       taxes: Tax[];
@@ -495,7 +491,7 @@ management.
       total_stocked: integer;
 
       // Identifies where the product is in stock.
-      location?: Location;
+      location: Location;
 
       // Identifies when we expect the next restocking to happen.
       next_restock?: timestamp;
@@ -517,9 +513,6 @@ management.
   timestamp to indicate no intention/possibility of restocking, while a time
   of zero is used to indicate "unknown".
 
-  Limitations: you cannot remove a ``location`` from a product that used to
-  have a location.
-
   **Request:**
 
   The request must be a `ProductPatchDetail`.
@@ -534,38 +527,38 @@ management.
     interface ProductPatchDetail {
 
       // Human-readable product description.
-      description?: string;
+      description: string;
 
       // Map from IETF BCP 47 language tags to localized descriptions
-      description_i18n?: { [lang_tag: string]: string };
+      description_i18n: { [lang_tag: string]: string };
 
       // unit in which the product is measured (liters, kilograms, packages, etc.)
-      unit?: string;
+      unit: string;
 
       // The price for one ``unit`` of the product. Zero is used
       // to imply that this product is not sold separately, or
       // that the price is not fixed, and must be supplied by the
       // front-end.  If non-zero, this price MUST include applicable
       // taxes.
-      price?: Amount;
+      price: Amount;
 
       // An optional base64-encoded product image
-      image?: ImageDataUrl;
+      image: ImageDataUrl;
 
       // a list of taxes paid by the merchant for one unit of this product
-      taxes?: Tax[];
+      taxes: Tax[];
 
       // Number of units of the product in stock in sum in total,
       // including all existing sales ever. Given in product-specific
       // units.
       // A value of -1 indicates "infinite" (i.e. for "electronic" books).
-      total_stocked?: integer;
+      total_stocked: integer;
 
       // Number of units of the product that were lost (spoiled, stolen, etc.)
-      total_lost?: integer;
+      total_lost: integer;
 
       // Identifies where the product is in stock.
-      location?: Location;
+      location: Location;
 
       // Identifies when we expect the next restocking to happen.
       next_restock?: timestamp;
