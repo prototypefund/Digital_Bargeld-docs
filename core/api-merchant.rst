@@ -29,8 +29,9 @@ API, which is NOT yet implemented at all!
 TODO: https://bugs.gnunet.org/view.php?id=5987#c15127
       is not yet addressed by this specification!
 
-The ``*/public/*`` endpoints are publicly exposed on the Internet and accessed
-both by the user's browser and their wallet.
+The ``*/private/*`` endpoints are only supposed to be exposed
+to the merchant internally, and must not be exposed on the
+Internet.
 
 Most endpoints given here can be prefixed by a base URL that includes the
 specific instance selected (BASE_URL/instances/$INSTANCE/).  If
@@ -43,7 +44,7 @@ specific instance selected (BASE_URL/instances/$INSTANCE/).  If
 Getting the configuration
 -------------------------
 
-.. http:get:: /public/config
+.. http:get:: /config
 
   Return the protocol version and currency supported by this merchant backend.
 
@@ -71,7 +72,7 @@ Dynamic Merchant Instances
 --------------------------
 
 .. _instances:
-.. http:get:: /instances
+.. http:get:: /private/instances
 
   This is used to return the list of all the merchant instances
 
@@ -112,7 +113,7 @@ Dynamic Merchant Instances
    }
 
 
-.. http:post:: /instances
+.. http:post:: /private/instances
 
   This request will be used to create a new merchant instance in the backend.
 
@@ -155,7 +156,7 @@ Dynamic Merchant Instances
 
       // Default factor for wire fee amortization calculations.
       // Can be overriden by the frontend on a per-order basis.
-      default_wire_fee_amortization: integer;
+      default_wire_fee_amortization: Integer;
 
       // Maximum deposit fee (sum over all coins) this instance is willing to pay.
       // Can be overridden by the frontend on a per-order basis.
@@ -174,7 +175,7 @@ Dynamic Merchant Instances
     }
 
 
-.. http:patch:: /instances/$INSTANCE
+.. http:patch:: /private/instances/$INSTANCE
 
   Update the configuration of a merchant instance.
 
@@ -215,7 +216,7 @@ Dynamic Merchant Instances
 
       // Default factor for wire fee amortization calculations.
       // Can be overriden by the frontend on a per-order basis.
-      default_wire_fee_amortization: integer;
+      default_wire_fee_amortization: Integer;
 
       // Maximum deposit fee (sum over all coins) this instance is willing to pay.
       // Can be overridden by the frontend on a per-order basis.
@@ -234,7 +235,7 @@ Dynamic Merchant Instances
     }
 
 
-.. http:get:: /instances/$INSTANCE
+.. http:get:: /private/instances/$INSTANCE
 
   This is used to query a specific merchant instance.
 
@@ -270,7 +271,7 @@ Dynamic Merchant Instances
 
       // Default factor for wire fee amortization calculations.
       // Can be overriden by the frontend on a per-order basis.
-      default_wire_fee_amortization: integer;
+      default_wire_fee_amortization: Integer;
 
       // Maximum deposit fee (sum over all coins) this instance is willing to pay.
       // Can be overridden by the frontend on a per-order basis.
@@ -308,7 +309,7 @@ Dynamic Merchant Instances
 
 
 
-.. http:delete:: /instances/$INSTANCE
+.. http:delete:: /private/instances/$INSTANCE
 
   This request will be used to delete (permanently disable)
   or purge merchant instance in the backend. Purging will
@@ -323,7 +324,7 @@ Dynamic Merchant Instances
 
   **Response**
 
-  :status 204 NoContent:
+  :status 204 No content:
     The backend has successfully removed the instance.  The response is a
     `PostInstanceRemoveResponse`.
   :status 404 Not found:
@@ -348,7 +349,7 @@ Taler merchant backend to process payments *without* using its inventory
 management.
 
 
-.. http:get:: /products
+.. http:get:: /private/products
 
   This is used to return the list of all items in the inventory.
 
@@ -373,16 +374,10 @@ management.
       // Product identifier, as found in the product.
       product_id: string;
 
-      // Amount of the product in stock. Given in product-specific units.
-      // Set to -1 for "infinite" (i.e. for "electronic" books).
-      stock: integer;
-
-      // unit in which the product is metered (liters, kilograms, packages, etc.)
-      unit: string;
     }
 
 
-.. http:get:: /products/$PRODUCT_ID
+.. http:get:: /private/products/$PRODUCT_ID
 
   This is used to obtain detailed information about a product in the inventory.
 
@@ -422,24 +417,24 @@ management.
       // including all existing sales ever. Given in product-specific
       // units.
       // A value of -1 indicates "infinite" (i.e. for "electronic" books).
-      total_stocked: integer;
+      total_stocked: Integer;
 
       // Number of units of the product that have already been sold.
-      total_sold: integer;
+      total_sold: Integer;
 
       // Number of units of the product that were lost (spoiled, stolen, etc.)
-      total_lost: integer;
+      total_lost: Integer;
 
       // Identifies where the product is in stock.
       address: Location;
 
       // Identifies when we expect the next restocking to happen.
-      next_restock?: timestamp;
+      next_restock?: Timestamp;
 
     }
 
 
-.. http:post:: /products
+.. http:post:: /private/products
 
   This is used to add a product to the inventory.
 
@@ -488,19 +483,19 @@ management.
       // including all existing sales ever. Given in product-specific
       // units.
       // A value of -1 indicates "infinite" (i.e. for "electronic" books).
-      total_stocked: integer;
+      total_stocked: Integer;
 
       // Identifies where the product is in stock.
       address: Location;
 
       // Identifies when we expect the next restocking to happen.
-      next_restock?: timestamp;
+      next_restock?: Timestamp;
 
     }
 
 
 
-.. http:patch:: /products/$PRODUCT_ID
+.. http:patch:: /private/products/$PRODUCT_ID
 
   This is used to update product details in the inventory. Note that the
   ``total_stocked`` and ``total_lost`` numbers MUST be greater or equal than
@@ -521,6 +516,7 @@ management.
 
   :status 204 No content:
     The backend has successfully expanded the inventory.
+
 
   .. ts:def:: ProductPatchDetail
 
@@ -552,22 +548,22 @@ management.
       // including all existing sales ever. Given in product-specific
       // units.
       // A value of -1 indicates "infinite" (i.e. for "electronic" books).
-      total_stocked: integer;
+      total_stocked: Integer;
 
       // Number of units of the product that were lost (spoiled, stolen, etc.)
-      total_lost: integer;
+      total_lost: Integer;
 
       // Identifies where the product is in stock.
       address: Location;
 
       // Identifies when we expect the next restocking to happen.
-      next_restock?: timestamp;
+      next_restock?: Timestamp;
 
     }
 
 
 
-.. http:post:: /products/$PRODUCT_ID/lock
+.. http:post:: /private/products/$PRODUCT_ID/lock
 
   This is used to lock a certain quantity of the product for a limited
   duration while the customer assembles a complete order.  Note that
@@ -606,15 +602,15 @@ management.
       lock_uuid: UUID;
 
       // How long does the frontend intend to hold the lock
-      duration: time;
+      duration: RelativeTime;
 
       // How many units should be locked?
-      quantity: integer;
+      quantity: Integer;
 
     }
 
 
-.. http:delete:: /products/$PRODUCT_ID
+.. http:delete:: /private/products/$PRODUCT_ID
 
   Delete information about a product.  Fails if the product is locked by
   anyone.
@@ -635,7 +631,7 @@ Receiving Payments
 
 .. _post-order:
 
-.. http:post:: /orders
+.. http:post:: /private/orders
 
   Create a new order that a customer can pay for.
 
@@ -646,7 +642,7 @@ Receiving Payments
   .. note::
 
     This endpoint does not return a URL to redirect your user to confirm the
-    payment.  In order to get this URL use :http:get:`/orders/$ORDER_ID`.  The
+    payment.  In order to get this URL use :http:get:/orders/$ORDER_ID.  The
     API is structured this way since the payment redirect URL is not unique
     for every order, there might be varying parameters such as the session id.
 
@@ -698,6 +694,8 @@ Receiving Payments
 
     }
 
+  .. ts:def:: Order
+
     type Order : MinimalOrderDetail | ContractTerms;
 
   The following fields must be specified in the ``order`` field of the request.  Other fields from
@@ -739,7 +737,7 @@ Receiving Payments
       product_id: string;
 
       // How many units of the product are requested
-      quantity: integer;
+      quantity: Integer;
     }
 
 
@@ -758,24 +756,26 @@ Receiving Payments
       missing_products: OutOfStockEntry;
     }
 
+  .. ts:def:: OutOfStockEntry
+
     interface OutOfStockEntry {
       // Product ID of an out-of-stock item
       product_id: string;
 
       // Requested quantity
-      requested_quantity: integer;
+      requested_quantity: Integer;
 
       // Available quantity (must be below ``requested_quanitity``)
-      available_quantity: integer;
+      available_quantity: Integer;
 
       // When do we expect the product to be again in stock?
       // Optional, not given if unknown.
-      restock_expected?: timestamp;
+      restock_expected?: Timestamp;
     }
 
 
 
-.. http:get:: /orders
+.. http:get:: /private/orders
 
   Returns known orders up to some point in the past.
 
@@ -833,7 +833,7 @@ Receiving Payments
 
 
 
-.. http:post:: /public/orders/$ORDER_ID/claim
+.. http:post:: /orders/$ORDER_ID/claim
 
   Wallet claims ownership (via nonce) over an order.  By claiming
   an order, the wallet obtains the full contract terms, and thereby
@@ -856,14 +856,14 @@ Receiving Payments
 
   :status 200 OK:
     The client has successfully claimed the order.
-    The response contains the :ref:`contract terms <ContractTerms>`.
+    The response contains the :ref:`contract terms <contract-terms>`.
   :status 404 Not found:
     The backend is unaware of the instance or order.
   :status 409 Conflict:
     The someone else claimed the same order ID with different nonce before.
 
 
-.. http:post:: /public/orders/$ORDER_ID/pay
+.. http:post:: /orders/$ORDER_ID/pay
 
   Pay for an order by giving a deposit permission for coins.  Typically used by
   the customer's wallet.  Note that this request does not include the
@@ -947,7 +947,7 @@ Receiving Payments
     }
 
 
-.. http:post:: /public/orders/$ORDER_ID/abort
+.. http:post:: /orders/$ORDER_ID/abort
 
   Abort paying for an order and obtain a refund for coins that
   were already deposited as part of a failed payment.
@@ -995,6 +995,8 @@ Receiving Payments
       coins: AbortedCoin[];
     }
 
+  .. ts:def:: AbortedCoin
+
     interface AbortedCoin {
       // Public key of a coin for which the wallet is requesting an abort-related refund.
       coin_pub: EddsaPublicKey;
@@ -1002,7 +1004,7 @@ Receiving Payments
 
 
 
-.. http:get:: /orders/$ORDER_ID/
+.. http:get:: /private/orders/$ORDER_ID/
 
   Merchant checks the payment status of an order.  If the order exists but is not payed
   yet, the response provides a redirect URL.  When the user goes to this URL,
@@ -1115,7 +1117,7 @@ Receiving Payments
     }
 
 
-.. http:get:: /public/orders/$ORDER_ID/
+.. http:get:: /orders/$ORDER_ID/
 
   Query the payment status of an order. This endpoint is for the wallet.
   When the wallet goes to this URL and it is unpaid,
@@ -1165,7 +1167,7 @@ Receiving Payments
     }
 
 
-.. http:delete:: /orders/$ORDER_ID
+.. http:delete:: /private/orders/$ORDER_ID
 
   Delete information about an order.  Fails if the order was paid in the
   last 10 years (or whatever TAX_RECORD_EXPIRATION is set to) or was
@@ -1181,12 +1183,13 @@ Receiving Payments
     The backend refuses to delete the order.
 
 
+.. _refund:
+
 --------------
 Giving Refunds
 --------------
 
-.. _refund:
-.. http:post:: /orders/$ORDER_ID/refund
+.. http:post:: /private/orders/$ORDER_ID/refund
 
   Increase the refund amount associated with a given order.  The user should be
   redirected to the ``taler_refund_url`` to trigger refund processing in the wallet.
@@ -1230,7 +1233,7 @@ Giving Refunds
 Tracking Wire Transfers
 ------------------------
 
-.. http:post:: /transfers
+.. http:post:: /private/transfers
 
   Inform the backend over an incoming wire transfer. The backend should inquire about the details with the exchange and mark the respective orders as wired.  Note that the request will fail if the WTID is not unique (which should be guaranteed by a correct exchange).
   This request is idempotent and should also be used to merely re-fetch the
@@ -1361,7 +1364,7 @@ Tracking Wire Transfers
 
     }
 
-    .. ts:def:: TrackTransferProof
+  .. ts:def:: TrackTransferProof
 
     interface TrackTransferProof {
       // signature from the exchange made with purpose
@@ -1381,7 +1384,7 @@ Tracking Wire Transfers
 
 
 
-.. http:get:: /transfers
+.. http:get:: /private/transfers
 
   Obtain a list of all wire transfers the backend has checked.
 
@@ -1405,6 +1408,8 @@ Tracking Wire Transfers
        // list of all the transfers that fit the filter that we know
        transfers : TransferDetails[];
     }
+
+  .. ts:def:: TransferDetails
 
     interface TransferDetails {
       // how much was wired to the merchant (minus fees)
@@ -1441,7 +1446,7 @@ Giving Customer Tips
 --------------------
 
 .. _tips:
-.. http:post:: /reserves
+.. http:post:: /private/reserves
 
   Create a reserve for tipping.
 
@@ -1460,7 +1465,7 @@ Giving Customer Tips
   :status 200 OK:
     The backend is waiting for the reserve to be established. The merchant
     must now perform the wire transfer indicated in the `ReserveCreateConfirmation`.
-  :status 424 Failed Depencency:
+  :status 424 Failed Dependency:
     We could not obtain /wire details from the specified exchange base URL.
 
   .. ts:def:: ReserveCreateRequest
@@ -1485,7 +1490,7 @@ Giving Customer Tips
 
     }
 
-.. http:get:: /reserves
+.. http:get:: /private/reserves
 
    Obtain list of reserves that have been created for tipping.
 
@@ -1541,7 +1546,7 @@ Giving Customer Tips
     }
 
 
-.. http:get:: /reserves/$RESERVE_PUB
+.. http:get:: /private/reserves/$RESERVE_PUB
 
    Obtain information about a specific reserve that have been created for tipping.
 
@@ -1604,12 +1609,12 @@ Giving Customer Tips
       total_amount: Amount;
 
       // Human-readable reason for why the tip was granted.
-      reason: String;
+      reason: string;
 
     }
 
 
-.. http:post:: /reserves/$RESERVE_PUB/authorize-tip
+.. http:post:: /private/reserves/$RESERVE_PUB/authorize-tip
 
   Authorize creation of a tip from the given reserve.
 
@@ -1658,7 +1663,7 @@ Giving Customer Tips
     }
 
 
-.. http:post:: /tips
+.. http:post:: /private/tips
 
   Authorize creation of a tip from the given reserve, except with
   automatic selection of a working reserve of the instance by the
@@ -1680,7 +1685,7 @@ Giving Customer Tips
     in all of the reserves of the instance.
 
 
-.. http:delete:: /reserves/$RESERVE_PUB
+.. http:delete:: /private/reserves/$RESERVE_PUB
 
   Delete information about a reserve.  Fails if the reserve still has
   committed to tips that were not yet picked up and that have not yet
@@ -1703,7 +1708,7 @@ Giving Customer Tips
 
 
 
-.. http:get:: /tips/$TIP_ID
+.. http:get:: /private/tips/$TIP_ID
 
   Obtain information about a particular tip.
 
@@ -1729,7 +1734,7 @@ Giving Customer Tips
       total_picked_up: Amount;
 
       // Human-readable reason given when authorizing the tip.
-      reason: String;
+      reason: string;
 
       // Timestamp indicating when the tip is set to expire (may be in the past).
       expiration: Timestamp;
@@ -1750,7 +1755,7 @@ Giving Customer Tips
       pickup_id: HashCode;
 
       // Number of planchets involved.
-      num_planchets: integer;
+      num_planchets: Integer;
 
       // Total amount requested for this pickup_id.
       requested_amount: Amount;
@@ -1761,7 +1766,7 @@ Giving Customer Tips
     }
 
 
-.. http:post:: /public/tips/$TIP_ID/pickup
+.. http:post:: /tips/$TIP_ID/pickup
 
   Handle request from wallet to pick up a tip.
 
@@ -1812,10 +1817,12 @@ Giving Customer Tips
       blind_sigs: BlindSignature[];
     }
 
+  .. ts:def:: BlindSignature
+
     interface BlindSignature {
 
       // The (blind) RSA signature. Still needs to be unblinded.
-      blind_sig: RsaSignature;
+      blind_sig: BlindedRsaSignature;
     }
 
 
@@ -1826,7 +1833,7 @@ Giving Customer Tips
 The Contract Terms
 ------------------
 
-.. _contract_terms::
+.. _contract-terms:
 
 The contract terms must have the following structure:
 
@@ -1968,7 +1975,7 @@ The contract terms must have the following structure:
       description_i18n?: { [lang_tag: string]: string };
 
       // The number of units of the product to deliver to the customer.
-      quantity: integer;
+      quantity: Integer;
 
       // The unit in which the product is measured (liters, kilograms, packages, etc.)
       unit: string;

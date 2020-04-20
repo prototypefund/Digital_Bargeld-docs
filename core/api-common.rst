@@ -549,8 +549,20 @@ uses 512-bit hash codes (64 bytes).
      uint8_t eddsa_priv[32];
    };
 
-   struct TALER_MasterSignatureP {
+    struct TALER_MasterSignatureP {
      uint8_t eddsa_signature[64];
+   };
+
+.. _WireTransferIdentifierRawP:
+
+   struct WireTransferIdentifierRawP {
+     uint8_t raw[32];
+   };
+
+.. _UUID:
+
+   struct UUID {
+     uint32_t value[4];
    };
 
 .. _eddsa-coin-pub:
