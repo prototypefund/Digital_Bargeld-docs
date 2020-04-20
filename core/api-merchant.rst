@@ -170,7 +170,7 @@ Dynamic Merchant Instances
 
       // If the frontend does NOT specify a payment deadline, how long should
       // offers we make be valid by default?
-      default_pay_deadline: RelativeTime;
+      default_pay_delay: RelativeTime;
 
     }
 
@@ -230,7 +230,7 @@ Dynamic Merchant Instances
 
       // If the frontend does NOT specify a payment deadline, how long should
       // offers we make be valid by default?
-      default_pay_deadline: RelativeTime;
+      default_pay_delay: RelativeTime;
 
     }
 
@@ -300,7 +300,7 @@ Dynamic Merchant Instances
       h_wire: HashCode;
 
       // salt used to compute h_wire
-      salt: string;
+      salt: HashCode;
 
       // true if this account is active,
       // false if it is historic.
