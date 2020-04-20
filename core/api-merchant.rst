@@ -431,7 +431,7 @@ management.
       total_lost: integer;
 
       // Identifies where the product is in stock.
-      location: Location;
+      address: Location;
 
       // Identifies when we expect the next restocking to happen.
       next_restock?: timestamp;
@@ -491,7 +491,7 @@ management.
       total_stocked: integer;
 
       // Identifies where the product is in stock.
-      location: Location;
+      address: Location;
 
       // Identifies when we expect the next restocking to happen.
       next_restock?: timestamp;
@@ -558,7 +558,7 @@ management.
       total_lost: integer;
 
       // Identifies where the product is in stock.
-      location: Location;
+      address: Location;
 
       // Identifies when we expect the next restocking to happen.
       next_restock?: timestamp;
