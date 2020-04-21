@@ -309,7 +309,11 @@ the same digital product where repurchase detection is desired.
 
 Note that changing the session ID to a different device requires the
 involvement of the wallet that made the payment, thus reasonably limiting the
-possibility of broadly sharing the digital purchases.
+possibility of broadly sharing the digital purchases.  Repurchase detection is
+also *only* done for HTTP(S) fulfillment URLs. In particular, this means
+fulfillment URIs like "taler://fulfillment-success/$MESSAGE" are not
+considered to identify a resource you can pay for and thus do not have to be
+unique.
 
 
 .. _Giving-Customers-Tips:
