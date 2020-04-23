@@ -12,3 +12,4 @@ and protocol.
   000-template
   001-new-browser-integration  
   002-wallet-exchange-management
+  003-tos-rendering
