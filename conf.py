@@ -57,6 +57,7 @@ extensions = [
     'sphinx.ext.imgmath',
     'httpdomain.httpdomain',
     'recommonmark',
+    'sphinx.ext.graphviz',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -350,3 +351,7 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+# The output format for Graphviz when building HTML files.
+# This must be either 'png' or 'svg'; the default is 'png'.
+graphviz_output_format = 'svg'
