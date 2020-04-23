@@ -24,7 +24,7 @@ Proposed Solution
 
 The service providers can output legal agreements in various formats,
 determined via the ``"Accept: "`` request header.  The format provider **must**
-support the ``text/plain`` mime type.  The format provider **should** support
+support the ``text/plain`` mime type.  The format provider **must** support
 the ``text/markdown`` mime type.  Except for styling and navigation, the
 content of each format of the same legal agreement document **should** be the
 same.
