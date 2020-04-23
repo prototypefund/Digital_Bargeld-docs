@@ -554,12 +554,14 @@ uses 512-bit hash codes (64 bytes).
    };
 
 .. _WireTransferIdentifierRawP:
+.. sourcecode:: c
 
    struct WireTransferIdentifierRawP {
      uint8_t raw[32];
    };
 
 .. _UUID:
+.. sourcecode:: c
 
    struct UUID {
      uint32_t value[4];
