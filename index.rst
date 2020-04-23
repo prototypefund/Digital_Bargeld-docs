@@ -66,6 +66,7 @@ Documentation Overview
   libeufin/index
   global-licensing
   manindex
+  genindex
 
 .. toctree::
   :hidden:
