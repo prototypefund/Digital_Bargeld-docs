@@ -499,6 +499,7 @@ class MyHtmlBuilder(StandaloneHTMLBuilder):
         self.highlighter = MyPygmentsBridge(
             self, self.config.trim_doctest_flags
         )
+        self.dark_highlighter = None
 
 
 def get_annotation(tok, key):
