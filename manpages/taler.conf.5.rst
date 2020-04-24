@@ -262,9 +262,9 @@ WIRE_RESPONSE (exchange and merchant)
    taler-merchant-httpd (to generate and then use the file).
 
 HONOR_instance
-   Must be set to YES for the instances (where "instance" is the section
-   name of the instance) of the merchant backend that should allow
-   incoming wire transfers for this bank account.
+   Must be set to YES for the instances (where "instance" is the section name
+   of the instance) of the merchant backend that should accept payments (i.e.
+   Taler deposit operations) with the corresponding payto URI.
 
 ACTIVE_instance
    Must be set to YES for the instances (where “instance” is the section
