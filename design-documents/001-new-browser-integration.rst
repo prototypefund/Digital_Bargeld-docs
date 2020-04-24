@@ -1,10 +1,30 @@
 Design Doc 001: New Browser Integration
 #######################################
 
-.. note::
+.. warning::
 
-  This design document is currently a draft, it
-  does not reflect any implementation decisions yet.
+  We have decided not to follow through with the proposed solution in this
+  design doc.  We care a lot about a nice upgrade path for when better
+  browser integration becomes available.  Encouraging the ``#taler://`` fragment
+  based integration might lead merchant frontends to **only** support this type
+  of integration.
+
+  Instead, the following path will be taken:
+
+  1. CSS-based presence detection will be removed from the wallet,
+     as there is no satisfactory upgrade path to better mechanisms
+  2. Manual triggering will be implemented as described in this design doc.
+  3. The ``webRequest`` permission that allows ``"Taler: "`` header based
+     browser integration will become opt-in.
+  4. The interactive API will be put on hold.  Instead, SPAs should
+     ask the user to open the wallet popup (and/or render a QR code for mobile wallets).
+  5. To enable easier integration for merchants, the reference merchant backend
+     might include a page to trigger payments, which displays the QR code
+     correctly, does long-polling via JS and serves the ``"Taler: "`` header.
+  6. The presence detection ``taler://`` URI described in this document
+     will **not** be supported, as allowing presence detection might
+     encourage merchants to treat mobile / detached wallets as 2nd class
+     citizens.
 
 Summary
 =======
