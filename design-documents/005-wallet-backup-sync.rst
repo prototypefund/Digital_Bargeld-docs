@@ -106,6 +106,19 @@ purchase entity from the wallet that initiated the spending.
 Ghost entities are not added to the sync state.
 
 
+Multiple sync servers
+---------------------
+
+When a wallet is connected to multiple sync servers, it automatically
+propagates changes it received from one sync server to the others.  Local
+changes made by the wallet are propoagated to all sync servers.  The goal of
+this is to make the state of the sync servers converge.
+
+The different sync servers one wallet is enrolled with do not necessarily
+have the same set of other wallet enrolled.  Each sync server has a separate Lamport clock
+and contains a separate CRDT.
+
+
 References
 ==========
 
