@@ -34,14 +34,14 @@ operations are resolved in favor of "delete".
 
 The managed entities are:
 
- * set of exchanges with the data from /keys, /wire
- * set of directly trusted exchange public keys
- * set of trusted auditors for currencies
- * set of reserves together with reserve history
- * set of accepted bank withdrawal operations
- * set of coins together with coin history and blinding secret (both for normal withdrawal and refresh)
-   and coin source info (refresh operation, tip, reserve)
- * set of purchases (contract terms, applied refunds, ...)
+* set of exchanges with the data from /keys, /wire
+* set of directly trusted exchange public keys
+* set of trusted auditors for currencies
+* set of reserves together with reserve history
+* set of accepted bank withdrawal operations
+* set of coins together with coin history and blinding secret (both for normal withdrawal and refresh)
+  and coin source info (refresh operation, tip, reserve)
+* set of purchases (contract terms, applied refunds, ...)
 
 (Some of these might be further split up to allow more efficient updates.)
 
