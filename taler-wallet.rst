@@ -77,6 +77,160 @@ Android Wallet
 APIs and Data Formats
 =====================
 
+.. warning::
+
+  These APIs are still a work in progress and *not* final.
+
+Transactions
+------------
+
+Transactions are all operations or events that are affecting the balance.
+
+:name: ``"transactions"``
+:description: Get a list of past and pending transactions.
+:request:
+  .. ts:def:: TransactionsRequest
+
+    interface TransactionsRequest {
+      // return only transactions in the given currency
+      currency: string;
+
+      // if present, results will be limited to transactions related to the given search string
+      search?: string;
+    }
+:response:
+  .. ts:def:: TransactionsResponse
+
+    interface TransactionsResponse {
+      // a list of past and pending transactions
+      transactions: Transaction[];
+    }
+
+  .. ts:def:: Transaction
+
+    interface Transaction {
+      // opaque unique ID for the transaction, used as a starting point for paginating queries
+      // and for invoking actions on the transaction (e.g. deleting/hiding it from the history)
+      transactionId: string;
+
+      // the type of the transaction; different types might provide additional information
+      type: TransactionType;
+
+      // main timestamp of the transaction
+      timestamp: Timestamp;
+
+      // true if the transaction is still pending, false otherwise
+      pending: boolean;
+    }
+
+  .. ts:def:: TransactionType
+
+    type TransactionType = (
+      TransactionWithdrawal |
+      TransactionPayment |
+      TransactionRefund |
+      TransactionTip
+    )
+
+  .. ts:def:: TransactionWithdrawal
+
+    // This should only be used for actual withdrawals
+    // and not for tips that have their own transactions type.
+    interface TransactionWithdrawal extends Transaction {
+      type: string = "withdrawal",
+
+      // Exchange that was withdrawn from.
+      exchangeBaseUrl: string;
+
+      // If the withdrawal is pending, this can include a Url for extra user confirmation.
+      bankWithdrawConfirmUrl?: string;
+
+      // Amount that has been subtracted from the reserve's balance for this withdrawal.
+      amountRaw: Amount;
+
+      // Amount that actually was (or will be) added to the wallet's balance.
+      amountEffective: Amount;
+    }
+
+  .. ts:def:: TransactionPayment
+
+    interface TransactionPayment extends Transaction {
+      type: string = "payment",
+
+      // Additional information about the payment.
+      info: TransactionInfo;
+
+      // Amount that was paid, including deposit, wire and refresh fees.
+      amountEffective: Amount;
+    }
+
+  .. ts:def:: TransactionInfo
+
+    interface TransactionInfo {
+      // Order ID, uniquely identifies the order within a merchant instance
+      orderId: string;
+
+      // More information about the merchant
+      merchant: Merchant;
+
+      // Amount that must be paid for the contract
+      amount: Amount;
+
+      // Summary of the order, given by the merchant
+      summary: string;
+
+      // Map from IETF BCP 47 language tags to localized summaries
+      summary_i18n?: { [lang_tag: string]: string };
+
+      // List of products that are part of the order
+      products: Product[];
+
+      // URL of the fulfillment, given by the merchant
+      fulfillmentUrl: string;
+    }
+
+  .. ts:def:: TransactionRefund
+
+    interface TransactionRefund extends Transaction {
+      type: string = "refund",
+
+      // Additional information about the refunded payment
+      info: TransactionInfo;
+
+      // Part of the refund that couldn't be applied because the refund permissions were expired
+      amountInvalid: Amount;
+
+      // Amount that has been refunded by the merchant
+      amountRaw: Amount;
+
+      // Amount will be added to the wallet's balance after fees and refreshing
+      amountEffective: Amount;
+    }
+
+  .. ts:def:: TransactionTip
+
+    interface TransactionTip extends Transaction {
+      type: string = "tip",
+
+      // true if the user still needs to accept/decline this tip
+      waiting: boolean;
+
+      // true if the user has accepted this top, false otherwise
+      accepted: boolean;
+
+      // Exchange that the tip will be (or was) withdrawn from
+      exchangeBaseUrl: string;
+
+      // More information about the merchant that sent the tip
+      merchant: Merchant;
+
+      // Raw amount of the tip, without extra fees that apply
+      amountRaw: Amount;
+
+      // Amount will be (or was) added to the wallet's balance after fees and refreshing
+      amountEffective: Amount;
+    }
+
 Refunds
 -------
 
