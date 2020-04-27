@@ -14,3 +14,4 @@ and protocol.
   002-wallet-exchange-management
   003-tos-rendering
   004-wallet-withdrawal-flow
+  005-wallet-backup-sync
