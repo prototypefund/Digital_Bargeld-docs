@@ -42,6 +42,7 @@ The managed entities are:
 * set of coins together with coin history and blinding secret (both for normal withdrawal and refresh)
   and coin source info (refresh operation, tip, reserve)
 * set of purchases (contract terms, applied refunds, ...)
+* assignment of coins to their "primary wallet"
 
 (Some of these might be further split up to allow more efficient updates.)
 
