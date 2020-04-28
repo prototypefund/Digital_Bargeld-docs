@@ -71,7 +71,7 @@ Building from source
 Android Wallet
 ==============
 
-*TBD.*
+Please see :ref:`Build-apps-from-source` in the :doc:`developers-manual`.
 
 
 APIs and Data Formats

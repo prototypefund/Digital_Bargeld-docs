@@ -596,22 +596,18 @@ Android Apps
 Android App Nightly Builds
 --------------------------
 
-There are currently three Android apps:
+There are currently three Android apps in
+`the official Git repository <https://git.taler.net/taler-android.git>`__:
 
 * Wallet
-  [`Git Repo <https://git.taler.net/wallet-android.git>`__]
-  [`Git Mirror <https://gitlab.com/gnu-taler/wallet-android>`__]
-  [`CI <https://git.taler.net/wallet-android.git/tree/.gitlab-ci.yml>`__]
+  [`CI <https://git.taler.net/taler-android.git/tree/wallet/.gitlab-ci.yml>`__]
 * Merchant PoS Terminal
-  [`Git Repo <https://git.taler.net/merchant-terminal-android.git/>`__]
-  [`Git Mirror <https://gitlab.com/gnu-taler/merchant-terminal-android>`__]
-  [`CI <https://git.taler.net/merchant-terminal-android.git/tree/.gitlab-ci.yml>`__]
+  [`CI <https://git.taler.net/taler-android.git/tree/merchant-terminal/.gitlab-ci.yml>`__]
 * Cashier
-  [`Git Repo <https://git.taler.net/cashier-terminal-android.git/>`__]
-  [`Git Mirror <https://gitlab.com/gnu-taler/cashier-terminal-android>`__]
-  [`CI <https://git.taler.net/cashier-terminal-android.git/tree/.gitlab-ci.yml>`__]
+  [`CI <https://git.taler.net/taler-android.git/tree/cashier/.gitlab-ci.yml>`__]
 
-Their git repositories are mirrored at Gitlab to utilize their CI
+Their git repositories are `mirrored at Gitlab <https://gitlab.com/gnu-taler/taler-android>`__
+to utilize their CI
 and `F-Droid <https://f-droid.org>`_'s Gitlab integration
 to `publish automatic nightly builds <https://f-droid.org/docs/Publishing_Nightly_Builds/>`_
 for each change on the ``master`` branch.
@@ -638,7 +634,8 @@ Building apps from source
 
 Note that this guide is different from other guides for building Android apps,
 because it does not require you to run non-free software.
-It uses the Merchant PoS Terminal as an example, but works as well for the other apps.
+It uses the Merchant PoS Terminal as an example, but works as well for the other apps
+if you replace ``merchant-terminal`` with ``wallet`` or ``cashier``.
 
 First, ensure that you have the required dependencies installed:
 
@@ -650,20 +647,20 @@ Then you can get the app's source code using git:
 
 .. code-block:: shell
 
-  # Start by cloning the git repository
-  git clone https://git.taler.net/merchant-terminal-android.git
+  # Start by cloning the Android git repository
+  git clone https://git.taler.net/taler-android.git
 
-  # Change into the directory of the cloned app
-  cd merchant-terminal-android
+  # Change into the directory of the cloned repository
+  cd taler-android
 
   # Find out which Android SDK version you will need
-  grep -i compileSdkVersion app/build.gradle
+  grep -i compileSdkVersion merchant-terminal/build.gradle
 
 The last command will return something like ``compileSdkVersion 29``.
 So visit the `Android Rebuilds <http://android-rebuilds.beuc.net/>`_ project
 and look for that version of the Android SDK there.
 If the SDK version is not yet available as a free rebuild,
-you can try to lower the ``compileSdkVersion`` in the app's ``app/build.gradle`` file.
+you can try to lower the ``compileSdkVersion`` in the app's ``merchant-terminal/build.gradle`` file.
 Note that this might break things
 or require you to also lower other versions such as ``targetSdkVersion``.
 
@@ -682,21 +679,22 @@ and unpack it:
   # Tell the build system where to find the SDK
   export ANDROID_SDK_ROOT="$HOME/android-sdk_eng.10.0.0_r14_linux-x86"
 
-  # Change into the directory of the cloned app
-  cd merchant-terminal-android
+  # Change into the directory of the cloned repository
+  cd taler-android
 
-  # Build the app
-  ./gradlew assembleRelease
+  # Build the merchant-terminal app
+  ./gradlew :merchant-terminal:assembleRelease
 
 If you get an error message complaining about build-tools
 
     > Failed to install the following Android SDK packages as some licences have not been accepted.
          build-tools;29.0.3 Android SDK Build-Tools 29.0.3
 
-you can try changing the ``buildToolsVersion`` in the app's ``app/build.gradle`` file
+you can try changing the ``buildToolsVersion`` in the app's ``merchant-terminal/build.gradle`` file
 to the latest "Android SDK build tools" version supported by the Android Rebuilds project.
 
-After the build finished successfully, you find your APK in ``app/build/outputs/apk/release/``.
+After the build finished successfully,
+you will find your APK in ``merchant-terminal/build/outputs/apk/release/``.
 
 .. _Code-coverage:
 
