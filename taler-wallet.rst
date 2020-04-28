@@ -142,8 +142,13 @@ Transactions are all operations or events that are affecting the balance.
       // Exchange that was withdrawn from.
       exchangeBaseUrl: string;
 
-      // If the withdrawal is pending, this can include a Url for extra user confirmation.
-      bankWithdrawConfirmUrl?: string;
+      // true if the bank has confirmed the withdrawal, false if not.
+      // An unconfirmed withdrawal usually requires user-input and should be highlighted in the UI.
+      // See also bankConfirmationUrl below.
+      confirmed: boolean;
+
+      // If the withdrawal is unconfirmed, this can include a URL for user initiated confirmation.
+      bankConfirmationUrl?: string;
 
       // Amount that has been subtracted from the reserve's balance for this withdrawal.
       amountRaw: Amount;
